@@ -21,9 +21,10 @@ export const useCreatePlayer = () => {
 
     return useMutation({
         mutationFn: (username: string) => createPlayer(username),
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
+            console.log("Player created successfully:", data);
             setSession(data);
-            const player = getPlayer(data.player_token);
+            const player = await getPlayer(data.player_token);
             queryClient.setQueryData(playerQueryKey, player);
         },
         onError: (error) => {

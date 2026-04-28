@@ -30,15 +30,15 @@ function CreatePlayer() {
 		}
 
 		createPlayer(username, {
-			onSuccess: () => {
-				toast.success(`Welcome ${username}!`, {
+			onSuccess: (data) => {
+				toast.success(`Welcome ${data.username}!`, {
 					position: "top-center",
 				});
 				navigate("/");
 			},
 			onError: (error) => {
 				toast.error("Failed to create player.", {
-					description: (error as Error).message,
+					description: error.message,
 					position: "top-center",
 				});
 			},

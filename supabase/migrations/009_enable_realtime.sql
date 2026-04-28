@@ -1,0 +1,25 @@
+-- Enable realtime for application tables
+
+do $$
+begin
+  alter publication supabase_realtime add table public.bets;
+exception when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.predictions;
+exception when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.room_members;
+exception when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.rooms;
+exception when duplicate_object then null;
+end $$;

@@ -1,0 +1,360 @@
+import { Player, Prediction, PredictionStatus, Room } from '@/types'
+import { supabase } from './supabase'
+
+// ============================================================
+// API — thin wrappers around Supabase RPC functions
+// All functions throw on error so callers can catch uniformly.
+// ============================================================
+
+function assertOk<T>(data: T | null, error: unknown): T {
+  if (error) throw error
+  if (data === null) throw new Error('No data returned')
+  return data
+}
+
+// #region Players & Session
+// -------------------------------------------------------
+export async function createPlayer(username: string) {
+  const { data, error } = await supabase.rpc('register_player', {
+    p_username: username,
+  })
+  return assertOk(data, error) as {
+    player_id: string
+    player_token: string
+    username: string
+  }
+}
+
+export async function getPlayer(playerToken: string): Promise<Player> {
+  const { data, error } = await supabase.rpc('get_player', {
+    p_player_token: playerToken,
+  })
+  return assertOk(data, error) as {
+    id: string
+    username: string
+    points_in_escrow: number
+    points_balance: number
+    total_won: number
+    current_streak: number
+    longest_streak: number
+    last_claim_at: string | null
+  }
+}
+
+// #endregion Players & Session
+
+// #region Rooms
+// -------------------------------------------------------
+
+export async function createRoom(player_token: string, room_name: string): Promise<Room> {
+  const { data, error } = await supabase.rpc('create_room', {
+    p_player_token: player_token,
+    p_room_name: room_name,
+  })
+  const room = assertOk(data, error) as {
+    id: string
+    code: string
+    name: string
+    status: string
+    player_id: string
+    username: string
+    created_at: string
+  }
+  const members = await getRoomMembers(room.id)
+
+  return {
+    ...room,
+    members: members,
+  }
+}
+
+export async function getRoomMembers(roomId: string) {
+  const { data, error } = await supabase
+    .from("room_members")
+    .select(`
+      id,
+      room_id,
+      player_id,
+      is_organizer,
+      joined_at,
+      total_won_in_room,
+      player:players (
+        id,
+        username
+      )
+    `)
+    .eq("room_id", roomId)
+
+  if (error) throw error
+  return data ?? []
+}
+
+export async function spectateRoom(roomCode: string): Promise<Room> {
+  const { data, error } = await supabase
+    .from('rooms')
+    .select('*')
+    .eq('room_code', roomCode.toUpperCase())
+    .single()
+
+  if (error) throw error
+  const members = await getRoomMembers(data.id)
+
+  return {
+    ...data,
+    code: data.room_code,
+    members,
+  }
+}
+
+export async function joinRoom(roomCode: string, playerToken: string): Promise<Room> {
+  const { data, error } = await supabase.rpc('join_room', {
+    p_room_code: roomCode,
+    p_player_token: playerToken,
+  })
+  const room = assertOk(data, error) as {
+    id: string
+    code: string
+    name: string
+    status: string
+    player_id: string
+    username: string
+    created_at: string
+  }
+  const members = await getRoomMembers(room.id)
+  
+  return {
+    ...room,
+    members: members,
+  }
+}
+
+export async function getPlayerRooms(player_id: string): Promise<Room[]> {
+  const { data, error } = await supabase
+    .from('room_members')
+    .select(`room:rooms(*)`)
+    .eq('player_id', player_id)
+
+  if (error) throw error
+  return (data as any[]).map((room) => ({
+    ...room.room,
+    code: room.room.room_code,
+  }))
+}
+
+// #endregion Rooms
+
+// #region Weekly Points
+// -------------------------------------------------------
+
+export async function claimWeeklyPoints(playerToken: string, autoClaimed = true) {
+  const { data, error } = await supabase.rpc('claim_weekly_points', {
+    p_player_token: playerToken,
+    p_auto_claimed: autoClaimed,
+  })
+  return assertOk(data, error) as {
+    claimed: boolean
+    already_claimed: boolean
+    week_key: string
+    points_added: number
+    points_balance: number
+    current_streak: number
+    longest_streak: number
+    auto_claimed: boolean
+  }
+}
+
+// #endregion Weekly Points
+
+// #region Predictions
+// -------------------------------------------------------
+
+export async function createPrediction(
+  playerToken: string,
+  roomId: string,
+  title: string,
+  options: string[],
+  deadline: Date,
+): Promise<Prediction> {
+  const { data, error } = await supabase.rpc('create_prediction', {
+    p_player_token: playerToken,
+    p_room_id: roomId,
+    p_title: title,
+    p_options: options,
+    p_deadline: deadline.toISOString(),
+  })
+  const prediction = assertOk(data, error) as {
+    prediction_id: string
+    title: string
+    status: string
+    deadline: string
+    option_ids: string[]
+    winning_option_id: string | null
+    resolved_at: string | null
+  }
+
+  const predictionOptions = prediction.option_ids.map((optionId, index) => ({
+    id: optionId,
+    prediction_id: prediction.prediction_id,
+    label: options[index],
+    display_order: index,
+    total_bet: 0,
+  }))
+
+  const bets = await getBetsForPrediction(prediction.prediction_id)
+
+  for (const bet of bets) {
+    const option = predictionOptions.find((opt) => opt.id === bet.option_id)
+    if (option) {
+      option.total_bet += bet.amount
+    }
+  }
+
+  return {
+    ...prediction,
+    id: prediction.prediction_id,
+    room_id: roomId,
+    winning_option_id: prediction.winning_option_id ?? null,
+    resolved_at: prediction.resolved_at ?? null,
+    status: prediction.status as PredictionStatus,
+    prediction_options: predictionOptions,
+  }
+}
+
+export async function getActivePrediction(roomId: string) {
+  const { data, error } = await supabase
+    .from('predictions')
+    .select(`*`)
+    .eq('room_id', roomId)
+    // .in('status', ['draft', 'locked'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) throw error
+  if (!data) return null
+
+  const { data: predictionOptions, error: optionsError } = await supabase
+    .from('prediction_options')
+    .select('*')
+    .eq('prediction_id', data.id)
+    .order('display_order', { ascending: true })
+
+  if (optionsError) throw optionsError
+
+  return {
+    ...data,
+    status: data.status as PredictionStatus,
+    prediction_options: predictionOptions ?? [],
+  }
+}
+
+export async function getPredictionHistory(roomId: string) {
+  const { data, error } = await supabase
+    .from('predictions')
+    .select(`*`)
+    .eq('room_id', roomId)
+    .in('status', ['revealed', 'cancelled', 'no_result'])
+    .order('resolved_at', { ascending: false })
+
+  if (error) throw error
+  return data ?? []
+}
+
+export async function resolvePrediction(
+  organizerToken: string,
+  predictionId: string,
+  roomId: string,
+  outcome: 'win' | 'no_result' | 'cancel',
+  winningOptionId?: string,
+) {  
+  const { data, error } = await supabase.rpc('resolve_prediction_v2', {
+    p_player_token: organizerToken,
+    p_prediction_id: predictionId,
+    p_room_id: roomId,
+    p_outcome: outcome,
+    p_winning_option_id: winningOptionId ?? undefined,
+  })
+  return assertOk(data, error)
+}
+
+// #endregion Predictions
+
+// #region Bets
+// -------------------------------------------------------
+export async function getBetsForPrediction(predictionId: string) {
+  const { data, error } = await supabase
+    .from('bets')
+    .select(`
+      id,
+      prediction_id,
+      option_id,
+      player_id,
+      amount,
+      updated_at,
+      payout,
+      option:prediction_options (
+        id,
+        label
+      )  
+    `)
+    .eq('prediction_id', predictionId)
+
+  if (error) throw error
+  return data ?? []
+}
+
+export async function placeBet(
+  playerToken: string,
+  predictionId: string,
+  optionId: string,
+  amount: number,
+) {
+  const { data, error } = await supabase.rpc('place_bet', {
+    p_player_token: playerToken,
+    p_prediction_id: predictionId,
+    p_option_id: optionId,
+    p_amount: amount,
+  })
+  return assertOk(data, error) as {
+    bet_placed: boolean
+    prediction_id: string
+    option_id: string
+    amount: number
+    points_available: number
+  }
+}
+
+export async function cancelBet(playerToken: string, predictionId: string) {
+  const { data, error } = await supabase.rpc('cancel_bet', {
+    p_player_token: playerToken,
+    p_prediction_id: predictionId,
+  })
+  return assertOk(data, error)
+}
+
+export async function getMyBet(predictionId: string, playerId: string) {
+  const { data, error } = await supabase
+    .from('bets')
+    .select('*')
+    .eq('prediction_id', predictionId)
+    .eq('player_id', playerId)
+    .maybeSingle()
+
+  if (error) throw error
+  return data
+}
+// #endregion Bets
+
+// #region Leaderboard
+export async function getLeaderboard(roomId: string) {
+  const { data, error } = await supabase
+    .from('players')
+    .select('*')
+    .eq('room_id', roomId)
+    .order('total_won', { ascending: false })
+
+  if (error) throw error
+  return data ?? []
+}
+
+// #endregion Leaderboard

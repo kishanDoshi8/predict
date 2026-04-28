@@ -1,0 +1,537 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.1"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  public: {
+    Tables: {
+      bets: {
+        Row: {
+          amount: number
+          id: string
+          option_id: string
+          payout: number | null
+          placed_at: string
+          player_id: string
+          prediction_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          id?: string
+          option_id: string
+          payout?: number | null
+          placed_at?: string
+          player_id: string
+          prediction_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          id?: string
+          option_id?: string
+          payout?: number | null
+          placed_at?: string
+          player_id?: string
+          prediction_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bets_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "prediction_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bets_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bets_prediction_id_fkey"
+            columns: ["prediction_id"]
+            isOneToOne: false
+            referencedRelation: "predictions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      players: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_claim_at: string | null
+          longest_streak: number
+          player_token: string
+          points_balance: number
+          points_in_escrow: number
+          total_won: number
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_claim_at?: string | null
+          longest_streak?: number
+          player_token: string
+          points_balance?: number
+          points_in_escrow?: number
+          total_won?: number
+          username: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_claim_at?: string | null
+          longest_streak?: number
+          player_token?: string
+          points_balance?: number
+          points_in_escrow?: number
+          total_won?: number
+          username?: string
+        }
+        Relationships: []
+      }
+      prediction_options: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          label: string
+          prediction_id: string
+          total_bet: number
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          label: string
+          prediction_id: string
+          total_bet?: number
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          label?: string
+          prediction_id?: string
+          total_bet?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_options_prediction_id_fkey"
+            columns: ["prediction_id"]
+            isOneToOne: false
+            referencedRelation: "predictions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      predictions: {
+        Row: {
+          created_at: string
+          created_by: string
+          deadline: string
+          id: string
+          resolved_at: string | null
+          room_id: string
+          status: string
+          title: string
+          winning_option_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deadline: string
+          id?: string
+          resolved_at?: string | null
+          room_id: string
+          status?: string
+          title: string
+          winning_option_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deadline?: string
+          id?: string
+          resolved_at?: string | null
+          room_id?: string
+          status?: string
+          title?: string
+          winning_option_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_predictions_winning_option"
+            columns: ["winning_option_id"]
+            isOneToOne: false
+            referencedRelation: "prediction_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predictions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predictions_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      room_members: {
+        Row: {
+          id: string
+          is_organizer: boolean
+          joined_at: string
+          player_id: string
+          room_id: string
+          total_won_in_room: number
+        }
+        Insert: {
+          id?: string
+          is_organizer?: boolean
+          joined_at?: string
+          player_id: string
+          room_id: string
+          total_won_in_room?: number
+        }
+        Update: {
+          id?: string
+          is_organizer?: boolean
+          joined_at?: string
+          player_id?: string
+          room_id?: string
+          total_won_in_room?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_members_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_members_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          room_code: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          room_code: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          room_code?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      weekly_claims: {
+        Row: {
+          auto_claimed: boolean
+          claimed_at: string
+          id: string
+          player_id: string
+          week_key: string
+        }
+        Insert: {
+          auto_claimed?: boolean
+          claimed_at?: string
+          id?: string
+          player_id: string
+          week_key: string
+        }
+        Update: {
+          auto_claimed?: boolean
+          claimed_at?: string
+          id?: string
+          player_id?: string
+          week_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_claims_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      cancel_bet: {
+        Args: { p_player_token: string; p_prediction_id: string }
+        Returns: Json
+      }
+      claim_weekly_points: {
+        Args: { p_auto_claimed?: boolean; p_player_token: string }
+        Returns: Json
+      }
+      create_prediction: {
+        Args: {
+          p_deadline: string
+          p_options: string[]
+          p_player_token: string
+          p_room_id: string
+          p_title: string
+        }
+        Returns: Json
+      }
+      create_room: {
+        Args: { p_player_token: string; p_room_name: string }
+        Returns: Json
+      }
+      get_player: { Args: { p_player_token: string }; Returns: Json }
+      join_room: {
+        Args: { p_player_token: string; p_room_code: string }
+        Returns: Json
+      }
+      lock_prediction: {
+        Args: { p_player_token: string; p_prediction_id: string }
+        Returns: Json
+      }
+      place_bet: {
+        Args: {
+          p_amount: number
+          p_option_id: string
+          p_player_token: string
+          p_prediction_id: string
+        }
+        Returns: Json
+      }
+      register_player: { Args: { p_username: string }; Returns: Json }
+      resolve_prediction: {
+        Args: {
+          p_organizer_token: string
+          p_outcome: string
+          p_prediction_id: string
+          p_winning_option_id?: string
+        }
+        Returns: Json
+      }
+      resolve_prediction_v2:
+        | {
+            Args: {
+              p_outcome: string
+              p_player_token: string
+              p_prediction_id: string
+              p_room_id: string
+              p_winning_option_id?: string
+            }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_outcome: string
+              p_player_token: string
+              p_prediction_id: string
+              p_room_id: string
+              p_winning_option_id?: string
+            }
+            Returns: Json
+          }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {},
+  },
+} as const

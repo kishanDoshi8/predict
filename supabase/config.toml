@@ -1,0 +1,22 @@
+project_id = "kizogptkryjjxzlixtqp"   # replace with your Supabase project ref
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+
+[studio]
+port = 54323
+
+[inbucket]
+port = 54324
+
+[storage]
+enabled = false   # not needed for this app
+
+[auth]
+enabled = false   # we handle identity via tokens, no Supabase Auth needed
+
+[realtime]
+enabled = true

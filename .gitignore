@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.env.local
+.env.*.local
+*.local
+
+# Supabase local dev
+supabase/.branches
+supabase/.temp
+
+# Vite
+apps/web/.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db

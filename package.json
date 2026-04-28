@@ -1,0 +1,23 @@
+{
+	"name": "predikt",
+	"version": "0.1.0",
+	"private": true,
+	"workspaces": [
+		"apps/*"
+	],
+	"scripts": {
+		"dev": "npm run dev --workspace=apps/web",
+		"host": "npm run dev --workspace=apps/web -- --host",
+		"build": "npm run build --workspace=apps/web",
+		"lint": "npm run lint --workspace=apps/web",
+		"db:migrate": "supabase db push",
+		"db:reset": "supabase db reset",
+		"db:types": "supabase gen types typescript --linked > apps/web/src/types/supabase.ts"
+	},
+	"devDependencies": {
+		"supabase": "^1.226.4"
+	},
+	"dependencies": {
+		"@tanstack/react-query": "^5.90.21"
+	}
+}

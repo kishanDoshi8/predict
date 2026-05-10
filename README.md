@@ -88,7 +88,7 @@ supabase secrets set NOTIFICATION_FUNCTION_SECRET=YOUR_STRONG_RANDOM_SECRET
 4. Deploy the function:
 
 ```bash
-supabase functions deploy send-push-notifications
+supabase functions deploy send-push-notifications --no-verify-jwt
 ```
 
 5. Frontend test trigger example:

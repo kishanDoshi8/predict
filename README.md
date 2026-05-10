@@ -62,6 +62,51 @@ npm run db:types
 
 This generates `apps/web/src/types/supabase.ts` from your live DB schema.
 
+### 6. Browser push notifications
+
+1. Generate VAPID keys:
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+2. Add the public key in `apps/web/.env.local`:
+
+```bash
+VITE_WEB_PUSH_PUBLIC_KEY=YOUR_PUBLIC_VAPID_KEY
+```
+
+3. Set Edge Function secrets:
+
+```bash
+supabase secrets set WEB_PUSH_PUBLIC_KEY=YOUR_PUBLIC_VAPID_KEY
+supabase secrets set WEB_PUSH_PRIVATE_KEY=YOUR_PRIVATE_VAPID_KEY
+supabase secrets set WEB_PUSH_SUBJECT=mailto:you@example.com
+supabase secrets set NOTIFICATION_FUNCTION_SECRET=YOUR_STRONG_RANDOM_SECRET
+```
+
+4. Deploy the function:
+
+```bash
+supabase functions deploy send-push-notifications
+```
+
+5. Frontend test trigger example:
+
+```ts
+import { sendPushNotificationTrigger } from "@/lib/api";
+
+await sendPushNotificationTrigger({
+  event_type: "prediction_live",
+  payload: {
+    title: "Predikt test notification",
+    body: "Push notifications are working.",
+    url: window.location.pathname,
+  },
+  target_player_token: localStorage.getItem("predikt") ?? "",
+});
+```
+
 ---
 
 ## Project Structure

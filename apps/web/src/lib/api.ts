@@ -28,6 +28,13 @@ export type PreferenceResponse = {
   effective: PreferenceSettings
 }
 
+export type NotificationEventType =
+  | 'prediction_live'
+  | 'prediction_locked'
+  | 'deadline_1h'
+  | 'result_revealed'
+  | 'weekly_points_claim'
+
 // ============================================================
 // API — thin wrappers around Supabase RPC functions
 // All functions throw on error so callers can catch uniformly.
@@ -248,6 +255,38 @@ export async function resetRoomPreferences(playerToken: string, roomId: string) 
   })
 
   return assertOk(data, error) as PreferenceResponse
+}
+
+export async function upsertPushSubscription(
+  playerToken: string,
+  subscription: PushSubscriptionJSON,
+) {
+  const { data, error } = await supabase.rpc('upsert_user_push_subscription', {
+    p_player_token: playerToken,
+    p_subscription: subscription,
+  })
+
+  return assertOk(data, error) as string
+}
+
+export async function sendPushNotificationTrigger(args: {
+  event_type: NotificationEventType
+  payload?: Record<string, unknown>
+  target_player_token?: string
+}) {
+  const { data, error } = await supabase.functions.invoke(
+    'send-push-notifications',
+    {
+      body: args,
+    },
+  )
+
+  return assertOk(data, error) as {
+    sent_count: number
+    failed_count: number
+    pruned_count: number
+    target_count: number
+  }
 }
 
 // #endregion Preferences

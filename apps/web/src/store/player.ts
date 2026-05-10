@@ -1,5 +1,6 @@
 import { getPlayer, createPlayer } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { registerForPushNotifications } from "@/lib/pushNotifications";
 
 export const playerQueryKey = ["player"];
 export const playerToken = localStorage.getItem("predikt") ?? "";
@@ -24,6 +25,7 @@ export const useCreatePlayer = () => {
         onSuccess: async (data) => {
             console.log("Player created successfully:", data);
             setSession(data);
+            await registerForPushNotifications(data.player_token);
             const player = await getPlayer(data.player_token);
             queryClient.setQueryData(playerQueryKey, player);
         },

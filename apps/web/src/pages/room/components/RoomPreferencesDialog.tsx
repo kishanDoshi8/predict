@@ -9,7 +9,11 @@ import {
 	DialogTrigger,
 	Spinner,
 } from "@/components";
-import { PreferenceSettings, RoomPreferenceOverrides } from "@/lib/api";
+import {
+	PreferenceSettings,
+	RoomPreferenceOverrides,
+	sendPushNotificationTrigger,
+} from "@/lib/api";
 import {
 	usePreferences,
 	useResetRoomPreferences,
@@ -18,6 +22,7 @@ import {
 } from "@/store/preferences";
 import { Settings2 } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
 
 type Props = {
 	roomId: string;
@@ -68,6 +73,7 @@ const getErrorMessage = (error: unknown) =>
 	error instanceof Error ? error.message : "Unexpected error";
 
 export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
+	const [isSendingTestPush, setIsSendingTestPush] = useState(false);
 	const { data: preferences, isPending: isPreferencesPending } =
 		usePreferences(roomId);
 	const { mutate: updateGlobal, isPending: isUpdatingGlobal } =
@@ -133,6 +139,39 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 		isUpdatingGlobal ||
 		isUpdatingRoom ||
 		isResettingRoom;
+
+	const handleSendTestPush = async () => {
+		const playerToken = localStorage.getItem("predikt") ?? "";
+		if (!playerToken) {
+			toast.error("Missing player session.");
+			return;
+		}
+
+		try {
+			setIsSendingTestPush(true);
+			const response = await sendPushNotificationTrigger({
+				event_type: "prediction_live",
+				payload: {
+					title: "Predikt test notification",
+					body: "Push notifications are configured for your account.",
+					url: window.location.pathname,
+				},
+				target_player_token: playerToken,
+			});
+
+			toast.success("Test notification request sent.", {
+				description: `Delivered: ${response.sent_count}, failed: ${response.failed_count}`,
+				position: "top-center",
+			});
+		} catch (error) {
+			toast.error("Failed to send test notification.", {
+				description: getErrorMessage(error),
+				position: "top-center",
+			});
+		} finally {
+			setIsSendingTestPush(false);
+		}
+	};
 
 	return (
 		<Dialog>
@@ -237,6 +276,13 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 				)}
 
 				<DialogFooter className='gap-2'>
+					<Button
+						variant='secondary'
+						onClick={() => void handleSendTestPush()}
+						disabled={isBusy || isSendingTestPush}
+					>
+						{isSendingTestPush ? "Sending..." : "Send test push"}
+					</Button>
 					<Button
 						variant='outline'
 						onClick={handleResetRoom}

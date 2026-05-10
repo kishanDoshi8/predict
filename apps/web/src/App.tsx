@@ -8,10 +8,17 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import RoomLayout from "./pages/room/RoomLayout";
 import CreatePlayer from "./pages/home/components/CreatePlayer";
+import { useEffect } from "react";
+import { registerForPushNotifications } from "@/lib/pushNotifications";
 
 const queryClient = new QueryClient();
 
 export default function App() {
+	useEffect(() => {
+		const playerToken = localStorage.getItem("predikt") ?? "";
+		void registerForPushNotifications(playerToken);
+	}, []);
+
 	return (
 		<QueryClientProvider client={queryClient}>
 			<BrowserRouter>

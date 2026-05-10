@@ -57,10 +57,15 @@ Deno.serve(async (req) => {
 	const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 	const vapidPublicKey = Deno.env.get("WEB_PUSH_PUBLIC_KEY");
 	const vapidPrivateKey = Deno.env.get("WEB_PUSH_PRIVATE_KEY");
-	const vapidSubject =
-		Deno.env.get("WEB_PUSH_SUBJECT") ?? "mailto:notifications@example.com";
+	const vapidSubject = Deno.env.get("WEB_PUSH_SUBJECT");
 
-	if (!supabaseUrl || !serviceRoleKey || !vapidPublicKey || !vapidPrivateKey) {
+	if (
+		!supabaseUrl ||
+		!serviceRoleKey ||
+		!vapidPublicKey ||
+		!vapidPrivateKey ||
+		!vapidSubject
+	) {
 		return jsonResponse(
 			{ error: "Missing required environment variables." },
 			500,

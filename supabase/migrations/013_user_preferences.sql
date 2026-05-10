@@ -186,7 +186,7 @@ begin
     ) into v_is_member;
 
     if not v_is_member then
-      raise exception 'You are not a member of this room' using errcode = 'P0011';
+      raise exception 'Access denied: you are not a member of this room' using errcode = 'P0011';
     end if;
   end if;
 
@@ -261,7 +261,7 @@ declare
   v_player_id uuid;
 begin
   if p_dark_mode is distinct from true then
-    raise exception 'Dark mode is always enabled' using errcode = 'P0001';
+    raise exception 'Dark mode cannot be disabled' using errcode = 'P0001';
   end if;
 
   select id into v_player_id
@@ -333,7 +333,7 @@ declare
   v_is_member boolean;
 begin
   if p_dark_mode is false then
-    raise exception 'Dark mode is always enabled' using errcode = 'P0001';
+    raise exception 'Dark mode cannot be disabled' using errcode = 'P0001';
   end if;
 
   select id into v_player_id
@@ -351,7 +351,7 @@ begin
   ) into v_is_member;
 
   if not v_is_member then
-    raise exception 'You are not a member of this room' using errcode = 'P0011';
+    raise exception 'Access denied: you are not a member of this room' using errcode = 'P0011';
   end if;
 
   if p_prediction_live is null
@@ -438,7 +438,7 @@ begin
   ) into v_is_member;
 
   if not v_is_member then
-    raise exception 'You are not a member of this room' using errcode = 'P0011';
+    raise exception 'Access denied: you are not a member of this room' using errcode = 'P0011';
   end if;
 
   delete from public.room_preferences

@@ -1,4 +1,5 @@
 import { Player, Prediction, PredictionStatus, Room } from '@/types'
+import type { Json } from '@/types/supabase'
 import { supabase } from './supabase'
 
 export type PreferenceSettings = {
@@ -263,7 +264,7 @@ export async function upsertPushSubscription(
 ) {
   const { data, error } = await supabase.rpc('upsert_user_push_subscription', {
     p_player_token: playerToken,
-    p_subscription: subscription,
+    p_subscription: subscription as unknown as Json,
   })
 
   return assertOk(data, error) as string

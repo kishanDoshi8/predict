@@ -194,7 +194,7 @@ export async function claimWeeklyPoints(playerToken: string, autoClaimed = true)
 
 // #region Preferences
 // -------------------------------------------------------
-export async function getPreferences(playerToken: string, roomId?: string | null) {
+export async function getPreferences(playerToken: string, roomId?: string) {
   const { data, error } = await supabase.rpc('get_preferences', {
     p_player_token: playerToken,
     p_room_id: roomId ?? null,

@@ -19,7 +19,7 @@ create table if not exists public.player_preferences (
   sounds_enabled        boolean not null default false,
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now(),
-  -- Product decision: dark theme only for now.
+  -- Product decision: only dark theme is supported.
   check (dark_mode = true)
 );
 
@@ -40,7 +40,7 @@ create table if not exists public.room_preferences (
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now(),
   unique (room_id, player_id),
-  -- Product decision: room override may inherit (null) or force dark (true).
+  -- Product decision: room override may inherit (null) or force dark (true) only.
   check (dark_mode is null or dark_mode = true)
 );
 

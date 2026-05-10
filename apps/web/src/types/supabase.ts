@@ -531,6 +531,10 @@ export type Database = {
         }
         Returns: Json
       }
+      upsert_user_push_subscription: {
+        Args: { p_player_token: string; p_subscription: Json }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

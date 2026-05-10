@@ -3,6 +3,7 @@ import { usePlayer } from "@/store/player";
 import { Room } from "@/types";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { RoomPreferencesDialog } from "./RoomPreferencesDialog";
 
 type Props = {
 	room: Room;
@@ -40,6 +41,7 @@ function RoomHeader({ room }: Readonly<Props>) {
 				<Badge variant={"secondary"}>
 					<p>{player?.points_balance ?? 0} PTS</p>
 				</Badge>
+				<RoomPreferencesDialog roomId={room.id} />
 			</div>
 		</header>
 	);

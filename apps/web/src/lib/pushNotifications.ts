@@ -9,17 +9,17 @@ const PUSH_OPT_IN_KEY = "predikt_push_opt_in_attempted";
 function base64UrlToUint8Array(base64Url: string) {
 	const padding = "=".repeat((4 - (base64Url.length % 4)) % 4);
 	const base64 = (base64Url + padding).replace(/-/g, "+").replace(/_/g, "/");
-	const rawData = window.atob(base64);
-	return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+	const rawData = globalThis.window.atob(base64);
+	return Uint8Array.from([...rawData].map((char) => char.codePointAt(0)!));
 }
 
 function canUsePushNotifications() {
 	return (
-		typeof window !== "undefined" &&
-		"Notification" in window &&
+		globalThis.window !== undefined &&
+		"Notification" in globalThis.window &&
 		"serviceWorker" in navigator &&
-		"PushManager" in window &&
-		(window.isSecureContext || window.location.hostname === "localhost")
+		"PushManager" in globalThis.window &&
+		(globalThis.window.isSecureContext || globalThis.window.location.hostname === "localhost")
 	);
 }
 

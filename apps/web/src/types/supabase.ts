@@ -399,6 +399,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_push_subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          subscription: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          subscription: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          subscription?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weekly_claims: {
         Row: {
           auto_claimed: boolean

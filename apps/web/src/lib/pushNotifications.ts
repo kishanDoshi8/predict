@@ -42,8 +42,10 @@ async function ensureNotificationPermission() {
 export async function registerForPushNotifications(playerToken: string) {
 	if (!playerToken) return;
 	if (!canUsePushNotifications()) return;
-	if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === "PASTE_YOUR_PUBLIC_VAPID_KEY_HERE")
+	if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === "PASTE_YOUR_PUBLIC_VAPID_KEY_HERE") {
+		console.warn("Push notifications skipped: missing VAPID public key.");
 		return;
+	}
 
 	const registration = await navigator.serviceWorker.register("/sw.js", {
 		scope: "/",

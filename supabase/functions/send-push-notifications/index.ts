@@ -21,6 +21,7 @@ const corsHeaders = {
 	"Access-Control-Allow-Headers":
 		"authorization, x-client-info, apikey, content-type, x-notification-secret",
 };
+const PUSH_TTL_SECONDS = 60;
 
 type RequestBody = {
 	event_type: NotificationEventType;
@@ -194,7 +195,7 @@ Deno.serve(async (req) => {
 					row.subscription as unknown as Record<string, unknown>,
 					JSON.stringify(payload),
 					{
-						TTL: 60,
+						TTL: PUSH_TTL_SECONDS,
 						urgency: "normal",
 					},
 				);

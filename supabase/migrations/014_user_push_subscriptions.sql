@@ -73,8 +73,7 @@ begin
   on conflict ((subscription->>'endpoint')) do update
   set
     user_id = excluded.user_id,
-    subscription = excluded.subscription,
-    created_at = now()
+    subscription = excluded.subscription
   returning id into v_subscription_id;
 
   return v_subscription_id;

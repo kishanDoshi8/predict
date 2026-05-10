@@ -40,6 +40,14 @@ function jsonResponse(body: unknown, status = 200) {
 	});
 }
 
+function getStatusCode(error: unknown) {
+	if (typeof error !== "object" || error === null) return undefined;
+	if (!("statusCode" in error)) return undefined;
+
+	const value = (error as { statusCode?: number }).statusCode;
+	return typeof value === "number" ? value : undefined;
+}
+
 Deno.serve(async (req) => {
 	if (req.method === "OPTIONS") {
 		return new Response("ok", { headers: corsHeaders });
@@ -188,10 +196,7 @@ Deno.serve(async (req) => {
 				sentCount += 1;
 			} catch (error) {
 				failedCount += 1;
-				const statusCode =
-					typeof error === "object" && error !== null && "statusCode" in error
-						? Number((error as { statusCode?: number }).statusCode)
-						: undefined;
+				const statusCode = getStatusCode(error);
 
 				if (statusCode === 404 || statusCode === 410) {
 					staleSubscriptionIds.push(row.id);

@@ -100,10 +100,10 @@ export default function DraftControls({
 			<div className={`flex flex-col gap-6`}>
 				<div className={`flex justify-between items-center`}>
 					<div>
+						<p>{availableBalance} pts</p>
 						<p className={`text-xs text-muted-foreground`}>
 							Your Balance
 						</p>
-						<p>{availableBalance} pts</p>
 					</div>
 					{selectedOption && (
 						<Button

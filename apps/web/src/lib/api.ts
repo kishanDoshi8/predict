@@ -197,7 +197,7 @@ export async function claimWeeklyPoints(playerToken: string, autoClaimed = true)
 export async function getPreferences(playerToken: string, roomId?: string) {
   const { data, error } = await supabase.rpc('get_preferences', {
     p_player_token: playerToken,
-    p_room_id: roomId ?? null,
+    p_room_id: roomId ?? undefined,
   })
 
   return assertOk(data, error) as PreferenceResponse
@@ -229,13 +229,13 @@ export async function updateRoomPreferences(
   const { data, error } = await supabase.rpc('update_room_preferences', {
     p_player_token: playerToken,
     p_room_id: roomId,
-    p_prediction_live: preferences.prediction_live,
-    p_prediction_locked: preferences.prediction_locked,
-    p_deadline_1h: preferences.deadline_1h,
-    p_result_revealed: preferences.result_revealed,
-    p_weekly_points_claim: preferences.weekly_points_claim,
-    p_dark_mode: preferences.dark_mode,
-    p_sounds_enabled: preferences.sounds_enabled,
+    p_prediction_live: preferences.prediction_live ?? undefined,
+    p_prediction_locked: preferences.prediction_locked ?? undefined,
+    p_deadline_1h: preferences.deadline_1h ?? undefined,
+    p_result_revealed: preferences.result_revealed ?? undefined,
+    p_weekly_points_claim: preferences.weekly_points_claim ?? undefined,
+    p_dark_mode: preferences.dark_mode ?? undefined,
+    p_sounds_enabled: preferences.sounds_enabled ?? undefined,
   })
 
   return assertOk(data, error) as PreferenceResponse

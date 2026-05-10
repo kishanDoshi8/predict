@@ -99,24 +99,16 @@ export default function DraftControls({
 		<div className={`p-4 border rounded-md bg-background`}>
 			<div className={`flex flex-col gap-6`}>
 				<div className={`flex justify-between items-center`}>
-					<div>
-						<p>{availableBalance} pts</p>
-						<p className={`text-xs text-muted-foreground`}>
-							Your Balance
-						</p>
-					</div>
 					{selectedOption && (
 						<Button
 							className={`flex-col gap-1 items-end p-2`}
 							variant={"ghost"}
 							onClick={handleResetBetAmount}
 						>
-							<p
-								className={`text-xs text-muted-foreground text-right`}
-							>
+							<p className={`text-xs text-muted-foreground`}>
 								Bet Amount
 							</p>
-							<p className={`text-primary`}>
+							<p className={`text-primary w-full text-left`}>
 								{myBet && myBet?.amount !== betAmount && (
 									<span
 										className={`text-xs text-muted-foreground`}
@@ -129,6 +121,12 @@ export default function DraftControls({
 							</p>
 						</Button>
 					)}
+					<div>
+						<p className={`text-xs text-muted-foreground`}>
+							Your Balance
+						</p>
+						<p className={`text-right`}>{availableBalance} pts</p>
+					</div>
 				</div>
 				{selectedOption && (
 					<Slider

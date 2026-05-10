@@ -94,6 +94,53 @@ export type Database = {
           },
         ]
       }
+      player_preferences: {
+        Row: {
+          created_at: string
+          dark_mode: boolean
+          deadline_1h: boolean
+          player_id: string
+          prediction_live: boolean
+          prediction_locked: boolean
+          result_revealed: boolean
+          sounds_enabled: boolean
+          updated_at: string
+          weekly_points_claim: boolean
+        }
+        Insert: {
+          created_at?: string
+          dark_mode?: boolean
+          deadline_1h?: boolean
+          player_id: string
+          prediction_live?: boolean
+          prediction_locked?: boolean
+          result_revealed?: boolean
+          sounds_enabled?: boolean
+          updated_at?: string
+          weekly_points_claim?: boolean
+        }
+        Update: {
+          created_at?: string
+          dark_mode?: boolean
+          deadline_1h?: boolean
+          player_id?: string
+          prediction_live?: boolean
+          prediction_locked?: boolean
+          result_revealed?: boolean
+          sounds_enabled?: boolean
+          updated_at?: string
+          weekly_points_claim?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_preferences_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: true
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       players: {
         Row: {
           created_at: string
@@ -268,6 +315,66 @@ export type Database = {
           },
         ]
       }
+      room_preferences: {
+        Row: {
+          created_at: string
+          dark_mode: boolean | null
+          deadline_1h: boolean | null
+          id: string
+          player_id: string
+          prediction_live: boolean | null
+          prediction_locked: boolean | null
+          result_revealed: boolean | null
+          room_id: string
+          sounds_enabled: boolean | null
+          updated_at: string
+          weekly_points_claim: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          dark_mode?: boolean | null
+          deadline_1h?: boolean | null
+          id?: string
+          player_id: string
+          prediction_live?: boolean | null
+          prediction_locked?: boolean | null
+          result_revealed?: boolean | null
+          room_id: string
+          sounds_enabled?: boolean | null
+          updated_at?: string
+          weekly_points_claim?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          dark_mode?: boolean | null
+          deadline_1h?: boolean | null
+          id?: string
+          player_id?: string
+          prediction_live?: boolean | null
+          prediction_locked?: boolean | null
+          result_revealed?: boolean | null
+          room_id?: string
+          sounds_enabled?: boolean | null
+          updated_at?: string
+          weekly_points_claim?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_preferences_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_preferences_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rooms: {
         Row: {
           created_at: string
@@ -352,6 +459,10 @@ export type Database = {
         Returns: Json
       }
       get_player: { Args: { p_player_token: string }; Returns: Json }
+      get_preferences: {
+        Args: { p_player_token: string; p_room_id?: string }
+        Returns: Json
+      }
       join_room: {
         Args: { p_player_token: string; p_room_code: string }
         Returns: Json
@@ -370,6 +481,10 @@ export type Database = {
         Returns: Json
       }
       register_player: { Args: { p_username: string }; Returns: Json }
+      reset_room_preferences: {
+        Args: { p_player_token: string; p_room_id: string }
+        Returns: Json
+      }
       resolve_prediction: {
         Args: {
           p_organizer_token: string
@@ -400,6 +515,33 @@ export type Database = {
             }
             Returns: Json
           }
+      update_global_preferences: {
+        Args: {
+          p_dark_mode: boolean
+          p_deadline_1h: boolean
+          p_player_token: string
+          p_prediction_live: boolean
+          p_prediction_locked: boolean
+          p_result_revealed: boolean
+          p_sounds_enabled: boolean
+          p_weekly_points_claim: boolean
+        }
+        Returns: Json
+      }
+      update_room_preferences: {
+        Args: {
+          p_dark_mode?: boolean
+          p_deadline_1h?: boolean
+          p_player_token: string
+          p_prediction_live?: boolean
+          p_prediction_locked?: boolean
+          p_result_revealed?: boolean
+          p_room_id: string
+          p_sounds_enabled?: boolean
+          p_weekly_points_claim?: boolean
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

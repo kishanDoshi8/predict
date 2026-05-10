@@ -24,4 +24,7 @@ export const roomKeys = {
 
   myBet: (roomId: string, predictionId: string, playerId: string) =>
     [...roomKeys.detail(roomId), "predictions", predictionId, "myBet", playerId] as const,
+
+  preferences: (roomId: string) =>
+    [...roomKeys.detail(roomId), "preferences"] as const,
 };

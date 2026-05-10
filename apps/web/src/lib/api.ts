@@ -1,6 +1,33 @@
 import { Player, Prediction, PredictionStatus, Room } from '@/types'
 import { supabase } from './supabase'
 
+export type PreferenceSettings = {
+  prediction_live: boolean
+  prediction_locked: boolean
+  deadline_1h: boolean
+  result_revealed: boolean
+  weekly_points_claim: boolean
+  dark_mode: boolean
+  sounds_enabled: boolean
+}
+
+export type RoomPreferenceOverrides = {
+  prediction_live: boolean | null
+  prediction_locked: boolean | null
+  deadline_1h: boolean | null
+  result_revealed: boolean | null
+  weekly_points_claim: boolean | null
+  dark_mode: boolean | null
+  sounds_enabled: boolean | null
+}
+
+export type PreferenceResponse = {
+  room_id: string | null
+  global: PreferenceSettings
+  room_overrides: RoomPreferenceOverrides
+  effective: PreferenceSettings
+}
+
 // ============================================================
 // API — thin wrappers around Supabase RPC functions
 // All functions throw on error so callers can catch uniformly.
@@ -164,6 +191,66 @@ export async function claimWeeklyPoints(playerToken: string, autoClaimed = true)
 }
 
 // #endregion Weekly Points
+
+// #region Preferences
+// -------------------------------------------------------
+export async function getPreferences(playerToken: string, roomId?: string | null) {
+  const { data, error } = await supabase.rpc('get_preferences', {
+    p_player_token: playerToken,
+    p_room_id: roomId ?? null,
+  })
+
+  return assertOk(data, error) as PreferenceResponse
+}
+
+export async function updateGlobalPreferences(
+  playerToken: string,
+  preferences: PreferenceSettings,
+) {
+  const { data, error } = await supabase.rpc('update_global_preferences', {
+    p_player_token: playerToken,
+    p_prediction_live: preferences.prediction_live,
+    p_prediction_locked: preferences.prediction_locked,
+    p_deadline_1h: preferences.deadline_1h,
+    p_result_revealed: preferences.result_revealed,
+    p_weekly_points_claim: preferences.weekly_points_claim,
+    p_dark_mode: preferences.dark_mode,
+    p_sounds_enabled: preferences.sounds_enabled,
+  })
+
+  return assertOk(data, error) as PreferenceResponse
+}
+
+export async function updateRoomPreferences(
+  playerToken: string,
+  roomId: string,
+  preferences: RoomPreferenceOverrides,
+) {
+  const { data, error } = await supabase.rpc('update_room_preferences', {
+    p_player_token: playerToken,
+    p_room_id: roomId,
+    p_prediction_live: preferences.prediction_live,
+    p_prediction_locked: preferences.prediction_locked,
+    p_deadline_1h: preferences.deadline_1h,
+    p_result_revealed: preferences.result_revealed,
+    p_weekly_points_claim: preferences.weekly_points_claim,
+    p_dark_mode: preferences.dark_mode,
+    p_sounds_enabled: preferences.sounds_enabled,
+  })
+
+  return assertOk(data, error) as PreferenceResponse
+}
+
+export async function resetRoomPreferences(playerToken: string, roomId: string) {
+  const { data, error } = await supabase.rpc('reset_room_preferences', {
+    p_player_token: playerToken,
+    p_room_id: roomId,
+  })
+
+  return assertOk(data, error) as PreferenceResponse
+}
+
+// #endregion Preferences
 
 // #region Predictions
 // -------------------------------------------------------

@@ -160,7 +160,7 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 			});
 
 			toast.success("Test notification request sent.", {
-				description: `Delivered: ${response.sent_count}, failed: ${response.failed_count}`,
+				description: `Sent: ${response.sent_count}, failed: ${response.failed_count}`,
 				position: "top-center",
 			});
 		} catch (error) {

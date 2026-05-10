@@ -1,7 +1,8 @@
 import { upsertPushSubscription } from "@/lib/api";
 
+const VAPID_PUBLIC_KEY_PLACEHOLDER = "PASTE_YOUR_PUBLIC_VAPID_KEY_HERE";
 const VAPID_PUBLIC_KEY =
-	import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY ?? "PASTE_YOUR_PUBLIC_VAPID_KEY_HERE";
+	import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY ?? VAPID_PUBLIC_KEY_PLACEHOLDER;
 
 const PUSH_OPT_IN_KEY = "predikt_push_opt_in_attempted";
 
@@ -42,9 +43,21 @@ async function ensureNotificationPermission() {
 export async function registerForPushNotifications(playerToken: string) {
 	if (!playerToken) return;
 	if (!canUsePushNotifications()) return;
-	if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === "PASTE_YOUR_PUBLIC_VAPID_KEY_HERE") {
+	if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === VAPID_PUBLIC_KEY_PLACEHOLDER) {
 		console.warn("Push notifications skipped: missing VAPID public key.");
 		return;
+	}
+
+	const existingRegistrations = await navigator.serviceWorker.getRegistrations();
+	for (const existingRegistration of existingRegistrations) {
+		const scriptUrl =
+			existingRegistration.active?.scriptURL ??
+			existingRegistration.installing?.scriptURL ??
+			existingRegistration.waiting?.scriptURL ??
+			"";
+		if (scriptUrl.endsWith("/pwa-sw.js")) {
+			await existingRegistration.unregister();
+		}
 	}
 
 	const registration = await navigator.serviceWorker.register("/sw.js", {

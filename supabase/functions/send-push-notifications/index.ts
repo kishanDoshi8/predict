@@ -219,7 +219,7 @@ Deno.serve(async (req) => {
 			.in("id", staleSubscriptionIds);
 
 		if (!deleteError) {
-			prunedCount = count ?? staleSubscriptionIds.length;
+			prunedCount = count ?? 0;
 		}
 	}
 

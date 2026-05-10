@@ -9,7 +9,6 @@ import {
 } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "./_keys";
-import { playerToken } from "./player";
 
 const mergeEffective = (
   global: PreferenceSettings,
@@ -25,11 +24,21 @@ const mergeEffective = (
   sounds_enabled: roomOverrides.sounds_enabled ?? global.sounds_enabled,
 });
 
+const getCurrentPlayerToken = () => localStorage.getItem("predikt") ?? "";
+
+const requirePlayerToken = () => {
+  const token = getCurrentPlayerToken();
+  if (!token) {
+    throw new Error("Missing player session.");
+  }
+  return token;
+};
+
 export const usePreferences = (roomId: string) => {
   return useQuery({
     queryKey: roomKeys.preferences(roomId),
-    queryFn: () => getPreferences(playerToken, roomId),
-    enabled: !!roomId && !!playerToken,
+    queryFn: () => getPreferences(requirePlayerToken(), roomId),
+    enabled: !!roomId,
   });
 };
 
@@ -39,7 +48,7 @@ export const useUpdateGlobalPreferences = (roomId: string) => {
 
   return useMutation({
     mutationFn: (preferences: PreferenceSettings) =>
-      updateGlobalPreferences(playerToken, preferences),
+      updateGlobalPreferences(requirePlayerToken(), preferences),
     onMutate: async (preferences) => {
       await queryClient.cancelQueries({ queryKey });
 
@@ -71,7 +80,7 @@ export const useUpdateRoomPreferences = (roomId: string) => {
 
   return useMutation({
     mutationFn: (preferences: RoomPreferenceOverrides) =>
-      updateRoomPreferences(playerToken, roomId, preferences),
+      updateRoomPreferences(requirePlayerToken(), roomId, preferences),
     onMutate: async (preferences) => {
       await queryClient.cancelQueries({ queryKey });
 
@@ -102,7 +111,7 @@ export const useResetRoomPreferences = (roomId: string) => {
   const queryKey = roomKeys.preferences(roomId);
 
   return useMutation({
-    mutationFn: () => resetRoomPreferences(playerToken, roomId),
+    mutationFn: () => resetRoomPreferences(requirePlayerToken(), roomId),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey });
 

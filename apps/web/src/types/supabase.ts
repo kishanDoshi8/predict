@@ -494,27 +494,16 @@ export type Database = {
         }
         Returns: Json
       }
-      resolve_prediction_v2:
-        | {
-            Args: {
-              p_outcome: string
-              p_player_token: string
-              p_prediction_id: string
-              p_room_id: string
-              p_winning_option_id?: string
-            }
-            Returns: Json
-          }
-        | {
-            Args: {
-              p_outcome: string
-              p_player_token: string
-              p_prediction_id: string
-              p_room_id: string
-              p_winning_option_id?: string
-            }
-            Returns: Json
-          }
+      resolve_prediction_v2: {
+        Args: {
+          p_outcome: string
+          p_player_token: string
+          p_prediction_id: string
+          p_room_id: string
+          p_winning_option_id?: string
+        }
+        Returns: Json
+      }
       update_global_preferences: {
         Args: {
           p_dark_mode: boolean

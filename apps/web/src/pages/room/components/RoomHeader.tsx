@@ -38,10 +38,10 @@ function RoomHeader({ room }: Readonly<Props>) {
 					<ArrowLeft />
 				</Button>
 				<h1 className={`flex-1`}>{room.name}</h1>
-				<RoomPreferencesDialog roomId={room.id} />
 				<Badge variant={"secondary"}>
 					<p>{player?.points_balance ?? 0} PTS</p>
 				</Badge>
+				<RoomPreferencesDialog roomId={room.id} />
 			</div>
 		</header>
 	);

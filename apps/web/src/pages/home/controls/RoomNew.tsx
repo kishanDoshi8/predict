@@ -2,7 +2,6 @@ import React from "react";
 import { useNavigate } from "react-router";
 import { TriangleAlert } from "lucide-react";
 import { useCreateRoom } from "@/store/room";
-import { playerToken } from "@/store/player";
 import {
 	Button,
 	Dialog,
@@ -37,14 +36,9 @@ export default function RoomNew({ isOpen, setIsOpen }: Readonly<Props>) {
 	const [error, setError] = React.useState<string | null>(null);
 
 	const handleCreateRoom = async () => {
-		if (!playerToken) {
-			setError("You must be logged in to create a room.");
-			return;
-		}
-
 		setError(null);
 		createRoom(
-			{ playerToken, roomName },
+			{ roomName },
 			{
 				onSuccess: (newRoom) => {
 					navigate(`/rooms/${newRoom.code}`);

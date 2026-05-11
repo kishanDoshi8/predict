@@ -39,6 +39,7 @@ export type NotificationEventType =
 // ============================================================
 // API — thin wrappers around Supabase RPC functions
 // All functions throw on error so callers can catch uniformly.
+// Auth context is automatically attached from the Supabase session.
 // ============================================================
 
 function assertOk<T>(data: T | null, error: unknown): T {
@@ -55,15 +56,12 @@ export async function createPlayer(username: string) {
   })
   return assertOk(data, error) as {
     player_id: string
-    player_token: string
     username: string
   }
 }
 
-export async function getPlayer(playerToken: string): Promise<Player> {
-  const { data, error } = await supabase.rpc('get_player', {
-    p_player_token: playerToken,
-  })
+export async function getPlayer(): Promise<Player> {
+  const { data, error } = await supabase.rpc('get_player')
   return assertOk(data, error) as {
     id: string
     username: string
@@ -81,9 +79,8 @@ export async function getPlayer(playerToken: string): Promise<Player> {
 // #region Rooms
 // -------------------------------------------------------
 
-export async function createRoom(player_token: string, room_name: string): Promise<Room> {
+export async function createRoom(room_name: string): Promise<Room> {
   const { data, error } = await supabase.rpc('create_room', {
-    p_player_token: player_token,
     p_room_name: room_name,
   })
   const room = assertOk(data, error) as {
@@ -141,10 +138,9 @@ export async function spectateRoom(roomCode: string): Promise<Room> {
   }
 }
 
-export async function joinRoom(roomCode: string, playerToken: string): Promise<Room> {
+export async function joinRoom(roomCode: string): Promise<Room> {
   const { data, error } = await supabase.rpc('join_room', {
     p_room_code: roomCode,
-    p_player_token: playerToken,
   })
   const room = assertOk(data, error) as {
     id: string
@@ -181,9 +177,8 @@ export async function getPlayerRooms(player_id: string): Promise<Room[]> {
 // #region Weekly Points
 // -------------------------------------------------------
 
-export async function claimWeeklyPoints(playerToken: string, autoClaimed = true) {
+export async function claimWeeklyPoints(autoClaimed = true) {
   const { data, error } = await supabase.rpc('claim_weekly_points', {
-    p_player_token: playerToken,
     p_auto_claimed: autoClaimed,
   })
   return assertOk(data, error) as {
@@ -202,9 +197,8 @@ export async function claimWeeklyPoints(playerToken: string, autoClaimed = true)
 
 // #region Preferences
 // -------------------------------------------------------
-export async function getPreferences(playerToken: string, roomId?: string) {
+export async function getPreferences(roomId?: string) {
   const { data, error } = await supabase.rpc('get_preferences', {
-    p_player_token: playerToken,
     p_room_id: roomId ?? undefined,
   })
 
@@ -212,11 +206,9 @@ export async function getPreferences(playerToken: string, roomId?: string) {
 }
 
 export async function updateGlobalPreferences(
-  playerToken: string,
   preferences: PreferenceSettings,
 ) {
   const { data, error } = await supabase.rpc('update_global_preferences', {
-    p_player_token: playerToken,
     p_prediction_live: preferences.prediction_live,
     p_prediction_locked: preferences.prediction_locked,
     p_deadline_1h: preferences.deadline_1h,
@@ -230,12 +222,10 @@ export async function updateGlobalPreferences(
 }
 
 export async function updateRoomPreferences(
-  playerToken: string,
   roomId: string,
   preferences: RoomPreferenceOverrides,
 ) {
   const { data, error } = await supabase.rpc('update_room_preferences', {
-    p_player_token: playerToken,
     p_room_id: roomId,
     p_prediction_live: preferences.prediction_live ?? undefined,
     p_prediction_locked: preferences.prediction_locked ?? undefined,
@@ -249,9 +239,8 @@ export async function updateRoomPreferences(
   return assertOk(data, error) as PreferenceResponse
 }
 
-export async function resetRoomPreferences(playerToken: string, roomId: string) {
+export async function resetRoomPreferences(roomId: string) {
   const { data, error } = await supabase.rpc('reset_room_preferences', {
-    p_player_token: playerToken,
     p_room_id: roomId,
   })
 
@@ -259,11 +248,9 @@ export async function resetRoomPreferences(playerToken: string, roomId: string) 
 }
 
 export async function upsertPushSubscription(
-  playerToken: string,
   subscription: PushSubscriptionJSON,
 ) {
   const { data, error } = await supabase.rpc('upsert_user_push_subscription', {
-    p_player_token: playerToken,
     p_subscription: subscription as unknown as Json,
   })
 
@@ -273,7 +260,6 @@ export async function upsertPushSubscription(
 export async function sendPushNotificationTrigger(args: {
   event_type: NotificationEventType
   payload?: Record<string, unknown>
-  target_player_token?: string
 }) {
   const { data, error } = await supabase.functions.invoke(
     'send-push-notifications',
@@ -296,14 +282,12 @@ export async function sendPushNotificationTrigger(args: {
 // -------------------------------------------------------
 
 export async function createPrediction(
-  playerToken: string,
   roomId: string,
   title: string,
   options: string[],
   deadline: Date,
 ): Promise<Prediction> {
   const { data, error } = await supabase.rpc('create_prediction', {
-    p_player_token: playerToken,
     p_room_id: roomId,
     p_title: title,
     p_options: options,
@@ -388,14 +372,12 @@ export async function getPredictionHistory(roomId: string) {
 }
 
 export async function resolvePrediction(
-  organizerToken: string,
   predictionId: string,
   roomId: string,
   outcome: 'win' | 'no_result' | 'cancel',
   winningOptionId?: string,
 ) {  
   const { data, error } = await supabase.rpc('resolve_prediction_v2', {
-    p_player_token: organizerToken,
     p_prediction_id: predictionId,
     p_room_id: roomId,
     p_outcome: outcome,
@@ -431,13 +413,11 @@ export async function getBetsForPrediction(predictionId: string) {
 }
 
 export async function placeBet(
-  playerToken: string,
   predictionId: string,
   optionId: string,
   amount: number,
 ) {
   const { data, error } = await supabase.rpc('place_bet', {
-    p_player_token: playerToken,
     p_prediction_id: predictionId,
     p_option_id: optionId,
     p_amount: amount,
@@ -451,9 +431,8 @@ export async function placeBet(
   }
 }
 
-export async function cancelBet(playerToken: string, predictionId: string) {
+export async function cancelBet(predictionId: string) {
   const { data, error } = await supabase.rpc('cancel_bet', {
-    p_player_token: playerToken,
     p_prediction_id: predictionId,
   })
   return assertOk(data, error)

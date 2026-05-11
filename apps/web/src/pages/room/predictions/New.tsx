@@ -31,7 +31,6 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Spinner } from "../../../components/ui/spinner";
-import { playerToken } from "@/store/player";
 import { useCreatePrediction } from "@/store/prediction";
 import { useRoomContext } from "@/pages/room/RoomLayout";
 
@@ -110,7 +109,6 @@ export default function PredictionNew() {
 		if (newErrors.length === 0) {
 			createPrediction(
 				{
-					playerToken,
 					roomId: room?.id || "",
 					title: question,
 					options: options.map((opt) => opt.text),

@@ -51,11 +51,10 @@ export default function PlayerNew({
 	const handleRegisterUser = async () => {
 		setError(null);
 		createPlayer(username, {
-			onSuccess: (data) => {
+			onSuccess: (_data) => {
 				if (joinRoomCode) {
 					joinRoom({
 						roomCode: joinRoomCode,
-						playerToken: data.player_token,
 					});
 				}
 

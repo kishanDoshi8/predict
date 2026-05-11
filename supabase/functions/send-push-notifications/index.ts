@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
 		if (playerError) {
 			return jsonResponse(
 				{
-					error: "Failed to resolve authenticated user.",
+					error: "Failed to retrieve player profile.",
 					detail: playerError.message,
 				},
 				500,
@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
 		}
 
 		if (!player) {
-			return jsonResponse({ error: "Player profile not found." }, 401);
+			return jsonResponse({ error: "Player profile not found." }, 404);
 		}
 
 		targetPlayerId = player.id;

@@ -103,7 +103,6 @@ await sendPushNotificationTrigger({
     body: "Push notifications are working.",
     url: window.location.pathname,
   },
-  target_player_token: localStorage.getItem("predikt") ?? "",
 });
 ```
 

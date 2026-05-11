@@ -63,7 +63,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string) => {
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) {
-      throw new Error(getAuthErrorMessage(error));
+      const mappedError = new Error(getAuthErrorMessage(error)) as Error & {
+        cause?: unknown;
+      };
+      mappedError.cause = error;
+      throw mappedError;
     }
   };
 

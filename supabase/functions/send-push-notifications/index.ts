@@ -49,9 +49,21 @@ function getStatusCode(error: unknown) {
 	return typeof value === "number" ? value : undefined;
 }
 
+function getBearerToken(req: Request) {
+	const authorization = req.headers.get("authorization")?.trim();
+	if (!authorization) return null;
+
+	const match = authorization.match(/^Bearer\s+(.+)$/i);
+	const token = match?.[1]?.trim();
+	return token || null;
+}
+
 Deno.serve(async (req) => {
 	if (req.method === "OPTIONS") {
 		return new Response("ok", { headers: corsHeaders });
+	}
+	if (req.method !== "POST") {
+		return jsonResponse({ error: "Method not allowed." }, 405);
 	}
 
 	const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -118,13 +130,50 @@ Deno.serve(async (req) => {
 	}
 
 	if (!isPrivilegedRequest && !targetPlayerId) {
-		return jsonResponse(
-			{
-				error:
-					"Unauthorized. Use x-notification-secret for broadcast calls or provide target_player_token for self-test.",
-			},
-			401,
-		);
+		const bearerToken = getBearerToken(req);
+		if (!bearerToken) {
+			return jsonResponse(
+				{
+					error:
+						"Unauthorized. Use x-notification-secret for broadcast calls or authenticate for self-test.",
+				},
+				401,
+			);
+		}
+
+		const {
+			data: { user },
+			error: authError,
+		} = await supabase.auth.getUser(bearerToken);
+		if (authError) {
+			return jsonResponse({ error: "Unauthorized. Invalid auth token." }, 401);
+		}
+
+		if (!user) {
+			return jsonResponse({ error: "Unauthorized. User not found." }, 401);
+		}
+
+		const { data: player, error: playerError } = await supabase
+			.from("players")
+			.select("id")
+			.eq("user_id", user.id)
+			.maybeSingle();
+
+		if (playerError) {
+			return jsonResponse(
+				{
+					error: "Failed to retrieve player profile.",
+					detail: playerError.message,
+				},
+				500,
+			);
+		}
+
+		if (!player) {
+			return jsonResponse({ error: "Player profile not found." }, 404);
+		}
+
+		targetPlayerId = player.id;
 	}
 
 	let playerPreferencesQuery = supabase

@@ -1,8 +1,6 @@
 import { upsertPushSubscription } from "@/lib/api";
 
-const VAPID_PUBLIC_KEY_PLACEHOLDER = "PASTE_YOUR_PUBLIC_VAPID_KEY_HERE";
-const VAPID_PUBLIC_KEY =
-	import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY ?? VAPID_PUBLIC_KEY_PLACEHOLDER;
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY;
 
 const PUSH_OPT_IN_KEY = "predikt_push_opt_in_attempted";
 
@@ -42,7 +40,8 @@ async function ensureNotificationPermission() {
 
 export async function registerForPushNotifications() {
 	if (!canUsePushNotifications()) return;
-	if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === VAPID_PUBLIC_KEY_PLACEHOLDER) {
+	const vapidPublicKey = VAPID_PUBLIC_KEY?.trim();
+	if (!vapidPublicKey) {
 		console.warn("Push notifications skipped: missing VAPID public key.");
 		return;
 	}
@@ -71,7 +70,7 @@ export async function registerForPushNotifications() {
 		existing ??
 		(await registration.pushManager.subscribe({
 			userVisibleOnly: true,
-			applicationServerKey: base64UrlToUint8Array(VAPID_PUBLIC_KEY),
+			applicationServerKey: base64UrlToUint8Array(vapidPublicKey),
 		}));
 
 	await upsertPushSubscription(subscription.toJSON());

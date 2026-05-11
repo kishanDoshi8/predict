@@ -50,13 +50,12 @@ function getStatusCode(error: unknown) {
 }
 
 function getBearerToken(req: Request) {
-	const authorization = req.headers.get("authorization");
+	const authorization = req.headers.get("authorization")?.trim();
 	if (!authorization) return null;
 
-	const [scheme, token] = authorization.split(" ");
-	if (scheme?.toLowerCase() !== "bearer" || !token) return null;
-
-	return token;
+	const match = authorization.match(/^Bearer\s+(.+)$/i);
+	const token = match?.[1]?.trim();
+	return token || null;
 }
 
 Deno.serve(async (req) => {

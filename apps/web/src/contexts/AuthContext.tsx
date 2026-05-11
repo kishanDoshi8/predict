@@ -21,9 +21,22 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+type SupabaseAuthError = Error & {
+  code?: string;
+  status?: number;
+};
+
 const getAuthErrorMessage = (error: unknown) => {
-  const message = error instanceof Error ? error.message.toLowerCase() : "";
-  if (message.includes("email rate limit exceeded")) {
+  const authError = error as SupabaseAuthError;
+  const message = authError?.message?.toLowerCase() ?? "";
+  const code = authError?.code?.toLowerCase() ?? "";
+  const isRateLimited =
+    authError?.status === 429 ||
+    code.includes("rate_limit") ||
+    code.includes("over_email_send_rate_limit") ||
+    message.includes("email rate limit exceeded");
+
+  if (isRateLimited) {
     return "Too many signup attempts right now. Please wait a bit and try again, or sign in if you already created an account.";
   }
   return error instanceof Error ? error.message : "Authentication failed.";

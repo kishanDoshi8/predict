@@ -21,6 +21,14 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+const getAuthErrorMessage = (error: unknown) => {
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  if (message.includes("email rate limit exceeded")) {
+    return "Too many signup attempts right now. Please wait a bit and try again, or sign in if you already created an account.";
+  }
+  return error instanceof Error ? error.message : "Authentication failed.";
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -54,7 +62,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     const { error } = await supabase.auth.signUp({ email, password });
-    if (error) throw error;
+    if (error) {
+      throw new Error(getAuthErrorMessage(error));
+    }
   };
 
   const signOut = async () => {

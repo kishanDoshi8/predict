@@ -11,7 +11,7 @@ function CreatePlayer() {
 		useCreatePlayer();
 	const navigate = useNavigate();
 	const location = useLocation();
-	const from = (location.state as { from?: { pathname?: string } })?.from?.pathname ?? "/";
+	const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? "/";
 
 	const [username, setUsername] = useState("");
 

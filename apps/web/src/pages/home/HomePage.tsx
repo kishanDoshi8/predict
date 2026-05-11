@@ -5,14 +5,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { playerToken, usePlayer } from "@/store/player";
+import { usePlayer } from "@/store/player";
 import { Spinner } from "@/components";
 import { useWeeklyClaim } from "@/hooks/useWeeklyClaim";
 
 export function HomePage() {
 	const navigate = useNavigate();
 	const { data: player, isPending: isPlayerLoading } = usePlayer();
-	const { mutate: claimWeeklyPoints } = useWeeklyClaim(playerToken);
+	const { mutate: claimWeeklyPoints } = useWeeklyClaim();
 	const queryClient = useQueryClient();
 
 	const [roomCode, setRoomCode] = React.useState("");
@@ -23,10 +23,10 @@ export function HomePage() {
 	useEffect(() => {
 		if (!isPlayerLoading && !player) {
 			navigate("/create-player");
-		} else if (playerToken) {
+		} else if (player) {
 			claimWeeklyPoints();
 		}
-	}, [player, isPlayerLoading, playerToken, claimWeeklyPoints, navigate]);
+	}, [player, isPlayerLoading, claimWeeklyPoints, navigate]);
 
 	useEffect(() => {
 		if (roomCode.length === 6) {
@@ -40,7 +40,7 @@ export function HomePage() {
 			try {
 				const room = await queryClient.fetchQuery({
 					queryKey: roomKeys.byCode(roomCode),
-					queryFn: () => joinRoom(roomCode, playerToken ?? ""),
+					queryFn: () => joinRoom(roomCode),
 				});
 				navigate(`/rooms/${room.code}`);
 			} catch (error) {

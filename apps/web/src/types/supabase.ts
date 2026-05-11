@@ -466,52 +466,50 @@ export type Database = {
     }
     Functions: {
       cancel_bet: {
-        Args: { p_player_token: string; p_prediction_id: string }
+        Args: { p_prediction_id: string }
         Returns: Json
       }
       claim_weekly_points: {
-        Args: { p_auto_claimed?: boolean; p_player_token: string }
+        Args: { p_auto_claimed?: boolean }
         Returns: Json
       }
       create_prediction: {
         Args: {
           p_deadline: string
           p_options: string[]
-          p_player_token: string
           p_room_id: string
           p_title: string
         }
         Returns: Json
       }
       create_room: {
-        Args: { p_player_token: string; p_room_name: string }
+        Args: { p_room_name: string }
         Returns: Json
       }
-      get_player: { Args: { p_player_token: string }; Returns: Json }
+      get_player: { Args: Record<PropertyKey, never>; Returns: Json }
       get_preferences: {
-        Args: { p_player_token: string; p_room_id?: string }
+        Args: { p_room_id?: string }
         Returns: Json
       }
       join_room: {
-        Args: { p_player_token: string; p_room_code: string }
+        Args: { p_room_code: string }
         Returns: Json
       }
       lock_prediction: {
-        Args: { p_player_token: string; p_prediction_id: string }
+        Args: { p_prediction_id: string }
         Returns: Json
       }
       place_bet: {
         Args: {
           p_amount: number
           p_option_id: string
-          p_player_token: string
           p_prediction_id: string
         }
         Returns: Json
       }
       register_player: { Args: { p_username: string }; Returns: Json }
       reset_room_preferences: {
-        Args: { p_player_token: string; p_room_id: string }
+        Args: { p_room_id: string }
         Returns: Json
       }
       resolve_prediction: {
@@ -526,7 +524,6 @@ export type Database = {
       resolve_prediction_v2: {
         Args: {
           p_outcome: string
-          p_player_token: string
           p_prediction_id: string
           p_room_id: string
           p_winning_option_id?: string
@@ -537,7 +534,6 @@ export type Database = {
         Args: {
           p_dark_mode: boolean
           p_deadline_1h: boolean
-          p_player_token: string
           p_prediction_live: boolean
           p_prediction_locked: boolean
           p_result_revealed: boolean
@@ -550,7 +546,6 @@ export type Database = {
         Args: {
           p_dark_mode?: boolean
           p_deadline_1h?: boolean
-          p_player_token: string
           p_prediction_live?: boolean
           p_prediction_locked?: boolean
           p_result_revealed?: boolean
@@ -561,7 +556,7 @@ export type Database = {
         Returns: Json
       }
       upsert_user_push_subscription: {
-        Args: { p_player_token: string; p_subscription: Json }
+        Args: { p_subscription: Json }
         Returns: string
       }
     }

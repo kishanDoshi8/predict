@@ -11,7 +11,6 @@ export const useActivePrediction = (roomId?: string) => {
 }
 
 type CreatePredictionParams = {
-    playerToken: string;
     roomId: string;
     title: string;
     options: string[];
@@ -22,7 +21,7 @@ export const useCreatePrediction = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreatePredictionParams) => createPrediction(data.playerToken, data.roomId, data.title, data.options, data.deadline),
+        mutationFn: (data: CreatePredictionParams) => createPrediction(data.roomId, data.title, data.options, data.deadline),
         onSuccess: (data) => {
             queryClient.invalidateQueries({
                 queryKey: roomKeys.activePrediction(data.room_id),
@@ -35,7 +34,6 @@ export const useCreatePrediction = () => {
 }
 
 type ResolvePredictionParams = {
-    organizerToken: string;
     predictionId: string;
     outcome: 'win' | 'no_result' | 'cancel';
     winningOptionId?: string;
@@ -46,7 +44,7 @@ export const useResolvePrediction = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (data: ResolvePredictionParams) =>
-            resolvePrediction(data.organizerToken, data.predictionId, data.roomId, data.outcome,  data.winningOptionId),
+            resolvePrediction(data.predictionId, data.roomId, data.outcome, data.winningOptionId),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
                 queryKey: roomKeys.activePrediction(variables.roomId),

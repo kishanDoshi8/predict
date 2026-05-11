@@ -22,7 +22,6 @@ export const useBets = (roomId: string, predictionId?: string) => {
 
 type PlaceBetParams = {
     roomId: string;
-    playerToken: string;
     playerId: string;
     predictionId: string;
     optionId: string;
@@ -34,7 +33,7 @@ export const usePlaceBet = () => {
 
     return useMutation({
         mutationFn: (data: PlaceBetParams) =>
-        placeBet(data.playerToken, data.predictionId, data.optionId, data.amount),
+        placeBet(data.predictionId, data.optionId, data.amount),
 
         onMutate: async (variables) => {
         await queryClient.cancelQueries({ queryKey: playerQueryKey });
@@ -97,7 +96,6 @@ export const usePlaceBet = () => {
 
 type CancelBetParams = {
     roomId: string;
-    playerToken: string;
     playerId: string;
     predictionId: string;
 }
@@ -106,8 +104,8 @@ export const useCancelBet = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ playerToken, predictionId }: CancelBetParams) =>
-        cancelBet(playerToken, predictionId),
+        mutationFn: ({ predictionId }: CancelBetParams) =>
+        cancelBet(predictionId),
 
         onMutate: async (variables) => {
         await queryClient.cancelQueries({ queryKey: playerQueryKey });

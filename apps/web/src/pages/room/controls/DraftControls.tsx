@@ -4,7 +4,6 @@ import { Button } from "../../../components/ui/button";
 import { Coins, X } from "lucide-react";
 import { Player } from "@/types";
 import { useCancelBet, useMyBet, usePlaceBet } from "@/store/bet";
-import { playerToken } from "@/store/player";
 import { Spinner } from "../../../components/ui/spinner";
 import { toast } from "sonner";
 import { useRoomContext } from "../RoomLayout";
@@ -47,7 +46,6 @@ export default function DraftControls({
 		placeBet(
 			{
 				roomId: room.id,
-				playerToken: playerToken,
 				playerId: player.id,
 				predictionId: predictionId,
 				optionId: selectedOption,
@@ -78,7 +76,6 @@ export default function DraftControls({
 		cancelBet(
 			{
 				roomId: room.id,
-				playerToken: playerToken,
 				playerId: player.id,
 				predictionId: predictionId,
 			},

@@ -9,7 +9,7 @@ import { Room } from "@/types";
 import { Spinner } from "@/components";
 import { RoomHeader } from "./components/RoomHeader";
 import { useEffect } from "react";
-import { playerToken, usePlayer } from "@/store/player";
+import { usePlayer } from "@/store/player";
 import { useWeeklyClaim } from "@/hooks/useWeeklyClaim";
 
 export default function RoomLayout() {
@@ -18,10 +18,10 @@ export default function RoomLayout() {
 	const { roomCode } = useParams<{ roomCode: string }>();
 	const { data: room, isPending, isError } = useRoom(roomCode);
 
-	const { mutate: claimWeeklyReward } = useWeeklyClaim(playerToken);
+	const { mutate: claimWeeklyReward } = useWeeklyClaim();
 
 	useEffect(() => {
-		if (playerToken) {
+		if (player) {
 			claimWeeklyReward();
 		}
 

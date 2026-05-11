@@ -40,8 +40,7 @@ async function ensureNotificationPermission() {
 	return (await Notification.requestPermission()) === "granted";
 }
 
-export async function registerForPushNotifications(playerToken: string) {
-	if (!playerToken) return;
+export async function registerForPushNotifications() {
 	if (!canUsePushNotifications()) return;
 	if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === VAPID_PUBLIC_KEY_PLACEHOLDER) {
 		console.warn("Push notifications skipped: missing VAPID public key.");
@@ -75,5 +74,5 @@ export async function registerForPushNotifications(playerToken: string) {
 			applicationServerKey: base64UrlToUint8Array(VAPID_PUBLIC_KEY),
 		}));
 
-	await upsertPushSubscription(playerToken, subscription.toJSON());
+	await upsertPushSubscription(subscription.toJSON());
 }

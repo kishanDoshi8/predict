@@ -8,24 +8,34 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import RoomLayout from "./pages/room/RoomLayout";
 import CreatePlayer from "./pages/home/components/CreatePlayer";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { LoginPage } from "@/pages/auth/LoginPage";
+import { SignupPage } from "@/pages/auth/SignupPage";
+import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
+import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
 import { useEffect } from "react";
 import { registerForPushNotifications } from "@/lib/pushNotifications";
 
 const queryClient = new QueryClient();
 
-export default function App() {
+function AppRoutes() {
 	useEffect(() => {
-		const playerToken = localStorage.getItem("predikt") ?? "";
-		void registerForPushNotifications(playerToken);
+		void registerForPushNotifications();
 	}, []);
 
 	return (
-		<QueryClientProvider client={queryClient}>
-			<BrowserRouter>
-				<Routes>
-					{/* Home: join a room */}
-					<Route path='/' element={<HomePage />} />
+		<BrowserRouter>
+			<Routes>
+				{/* Public auth routes */}
+				<Route path='/login' element={<LoginPage />} />
+				<Route path='/signup' element={<SignupPage />} />
+				<Route path='/forgot-password' element={<ForgotPasswordPage />} />
+				<Route path='/reset-password' element={<ResetPasswordPage />} />
 
+				{/* Protected routes */}
+				<Route element={<ProtectedRoute />}>
+					<Route path='/' element={<HomePage />} />
 					<Route path='/create-player' element={<CreatePlayer />} />
 
 					<Route path='/rooms/:roomCode' element={<RoomLayout />}>
@@ -44,13 +54,23 @@ export default function App() {
 							element={<LeaderboardPage />}
 						/>
 					</Route>
+				</Route>
 
-					{/* Fallback */}
-					<Route path='/404' element={<NotFoundPage />} />
-					<Route path='*' element={<Navigate to='/404' replace />} />
-				</Routes>
-			</BrowserRouter>
-			<Toaster />
+				{/* Fallback */}
+				<Route path='/404' element={<NotFoundPage />} />
+				<Route path='*' element={<Navigate to='/404' replace />} />
+			</Routes>
+		</BrowserRouter>
+	);
+}
+
+export default function App() {
+	return (
+		<QueryClientProvider client={queryClient}>
+			<AuthProvider>
+				<AppRoutes />
+				<Toaster />
+			</AuthProvider>
 		</QueryClientProvider>
 	);
 }

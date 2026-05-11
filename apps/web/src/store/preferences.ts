@@ -24,20 +24,10 @@ const mergeEffective = (
   sounds_enabled: roomOverrides.sounds_enabled ?? global.sounds_enabled,
 });
 
-const getCurrentPlayerToken = () => localStorage.getItem("predikt") ?? "";
-
-const requirePlayerToken = () => {
-  const token = getCurrentPlayerToken();
-  if (!token) {
-    throw new Error("Missing player session.");
-  }
-  return token;
-};
-
 export const usePreferences = (roomId: string) => {
   return useQuery({
     queryKey: roomKeys.preferences(roomId),
-    queryFn: () => getPreferences(requirePlayerToken(), roomId),
+    queryFn: () => getPreferences(roomId),
     enabled: !!roomId,
   });
 };
@@ -48,7 +38,7 @@ export const useUpdateGlobalPreferences = (roomId: string) => {
 
   return useMutation({
     mutationFn: (preferences: PreferenceSettings) =>
-      updateGlobalPreferences(requirePlayerToken(), preferences),
+      updateGlobalPreferences(preferences),
     onMutate: async (preferences) => {
       await queryClient.cancelQueries({ queryKey });
 
@@ -80,7 +70,7 @@ export const useUpdateRoomPreferences = (roomId: string) => {
 
   return useMutation({
     mutationFn: (preferences: RoomPreferenceOverrides) =>
-      updateRoomPreferences(requirePlayerToken(), roomId, preferences),
+      updateRoomPreferences(roomId, preferences),
     onMutate: async (preferences) => {
       await queryClient.cancelQueries({ queryKey });
 
@@ -111,7 +101,7 @@ export const useResetRoomPreferences = (roomId: string) => {
   const queryKey = roomKeys.preferences(roomId);
 
   return useMutation({
-    mutationFn: () => resetRoomPreferences(requirePlayerToken(), roomId),
+    mutationFn: () => resetRoomPreferences(roomId),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey });
 

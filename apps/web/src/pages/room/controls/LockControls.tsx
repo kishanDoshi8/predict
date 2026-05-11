@@ -1,4 +1,4 @@
-import { playerToken, usePlayer } from "@/store/player";
+import { usePlayer } from "@/store/player";
 import { useRoomContext } from "../RoomLayout";
 import {
 	Alert,
@@ -127,7 +127,6 @@ function NoResult({ prediction }: Readonly<{ prediction: Prediction }>) {
 	const handleOnNoResult = () => {
 		resolvePredictionMutation(
 			{
-				organizerToken: playerToken,
 				predictionId: prediction.id,
 				outcome: "no_result",
 				roomId: room.id,
@@ -221,7 +220,6 @@ function RevealResults({
 		}
 		resolvePredictionMutation(
 			{
-				organizerToken: playerToken,
 				predictionId: prediction.id,
 				outcome: "win",
 				winningOptionId: selectedOption,

@@ -10,11 +10,11 @@ import { toast } from "sonner";
 //
 // ============================================================
 
-export function useWeeklyClaim(playerToken: string | null) {
+export function useWeeklyClaim() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: () => claimWeeklyPoints(playerToken ?? ""),
+        mutationFn: () => claimWeeklyPoints(),
         onSuccess(data) {
             queryClient.setQueryData(["weeklyClaim"], {...data, lastClaimed: new Date()});
             if (!data.already_claimed) {

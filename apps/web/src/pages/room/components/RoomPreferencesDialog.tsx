@@ -141,12 +141,6 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 		isResettingRoom;
 
 	const handleSendTestPush = async () => {
-		const playerToken = localStorage.getItem("predikt") ?? "";
-		if (!playerToken) {
-			toast.error("Missing player session.");
-			return;
-		}
-
 		try {
 			setIsSendingTestPush(true);
 			const response = await sendPushNotificationTrigger({
@@ -156,7 +150,6 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 					body: "Push notifications are configured for your account.",
 					url: window.location.pathname,
 				},
-				target_player_token: playerToken,
 			});
 
 			toast.success("Test notification request sent.", {

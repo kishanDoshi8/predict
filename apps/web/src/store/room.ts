@@ -12,14 +12,13 @@ export const useRoom = (roomCode?: string) => {
 }
 
 type CreateRoomParams = {
-    playerToken: string;
     roomName: string;
 }
 
 export const useCreateRoom = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ playerToken, roomName }: CreateRoomParams) => createRoom(playerToken, roomName),
+        mutationFn: ({ roomName }: CreateRoomParams) => createRoom(roomName),
         onSuccess: (data) => {
             queryClient.setQueryData(roomKeys.byCode(data.code), data);
         },
@@ -29,7 +28,7 @@ export const useCreateRoom = () => {
 export const useJoinRoom = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ roomCode, playerToken }: { roomCode: string; playerToken: string }) => joinRoom(roomCode, playerToken),
+        mutationFn: ({ roomCode }: { roomCode: string }) => joinRoom(roomCode),
         onSuccess: (data) => {
             queryClient.setQueryData(roomKeys.byCode(data.code), data);
         },

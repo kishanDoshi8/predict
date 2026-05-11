@@ -1,6 +1,6 @@
 import { useCreatePlayer, usePlayer } from "@/store/player";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Brand from "./Brand";
 import { Button, Input, Spinner } from "@/components";
 import { toast } from "sonner";
@@ -10,14 +10,16 @@ function CreatePlayer() {
 	const { mutate: createPlayer, isPending: isCreatingPlayer } =
 		useCreatePlayer();
 	const navigate = useNavigate();
+	const location = useLocation();
+	const from = (location.state as { from?: { pathname?: string } })?.from?.pathname ?? "/";
 
 	const [username, setUsername] = useState("");
 
 	useEffect(() => {
 		if (!isPlayerLoading && player) {
-			navigate("/");
+			navigate(from, { replace: true });
 		}
-	}, [player, isPlayerLoading, navigate]);
+	}, [player, isPlayerLoading, navigate, from]);
 
 	const handleCreatePlayer = () => {
 		if (username.trim() === "") {
@@ -34,7 +36,7 @@ function CreatePlayer() {
 				toast.success(`Welcome ${data.username}!`, {
 					position: "top-center",
 				});
-				navigate("/");
+				navigate(from, { replace: true });
 			},
 			onError: (error) => {
 				toast.error("Failed to create player.", {

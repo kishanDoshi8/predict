@@ -145,8 +145,12 @@ Deno.serve(async (req) => {
 			data: { user },
 			error: authError,
 		} = await supabase.auth.getUser(bearerToken);
-		if (authError || !user) {
+		if (authError) {
 			return jsonResponse({ error: "Unauthorized. Invalid auth token." }, 401);
+		}
+
+		if (!user) {
+			return jsonResponse({ error: "Unauthorized. User not found." }, 401);
 		}
 
 		const { data: player, error: playerError } = await supabase

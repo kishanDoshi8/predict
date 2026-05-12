@@ -25,6 +25,11 @@ const PUSH_TTL_SECONDS = 60;
 
 type RequestBody = {
 	event_type: NotificationEventType;
+	/**
+	 * When provided by a privileged backend call, limits the broadcast to
+	 * players who are members of this room (and have the preference enabled).
+	 */
+	room_id?: string;
 	payload?: {
 		title?: string;
 		body?: string;
@@ -183,6 +188,34 @@ Deno.serve(async (req) => {
 
 	if (targetPlayerId) {
 		playerPreferencesQuery = playerPreferencesQuery.eq("player_id", targetPlayerId);
+	} else if (isPrivilegedRequest && body.room_id) {
+		// Scope broadcast to members of the specified room only.
+		const { data: memberRows, error: memberError } = await supabase
+			.from("room_members")
+			.select("player_id")
+			.eq("room_id", body.room_id);
+
+		if (memberError) {
+			return jsonResponse(
+				{
+					error: "Failed to fetch room members.",
+					detail: memberError.message,
+				},
+				500,
+			);
+		}
+
+		const roomPlayerIds = (memberRows ?? []).map((r) => r.player_id);
+		if (roomPlayerIds.length === 0) {
+			return jsonResponse({
+				sent_count: 0,
+				failed_count: 0,
+				pruned_count: 0,
+				target_count: 0,
+			});
+		}
+
+		playerPreferencesQuery = playerPreferencesQuery.in("player_id", roomPlayerIds);
 	}
 
 	const { data: preferenceRows, error: preferenceError } =

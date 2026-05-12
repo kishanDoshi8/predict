@@ -14,6 +14,7 @@ import {
 	RoomPreferenceOverrides,
 	sendPushNotificationTrigger,
 } from "@/lib/api";
+import { registerForPushNotifications } from "@/lib/pushNotifications";
 import {
 	usePreferences,
 	useResetRoomPreferences,
@@ -143,6 +144,7 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 	const handleSendTestPush = async () => {
 		try {
 			setIsSendingTestPush(true);
+			await registerForPushNotifications(true);
 			const response = await sendPushNotificationTrigger({
 				event_type: "prediction_live",
 				payload: {

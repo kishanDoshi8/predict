@@ -21,7 +21,7 @@ function canUsePushNotifications() {
 	);
 }
 
-async function ensureNotificationPermission() {
+async function ensureNotificationPermission(forcePrompt = false) {
 	if (Notification.permission === "granted") {
 		return true;
 	}
@@ -30,7 +30,7 @@ async function ensureNotificationPermission() {
 		return false;
 	}
 
-	if (localStorage.getItem(PUSH_OPT_IN_KEY) === "true") {
+	if (!forcePrompt && localStorage.getItem(PUSH_OPT_IN_KEY) === "true") {
 		return false;
 	}
 
@@ -38,7 +38,7 @@ async function ensureNotificationPermission() {
 	return (await Notification.requestPermission()) === "granted";
 }
 
-export async function registerForPushNotifications() {
+export async function registerForPushNotifications(forcePrompt = false) {
 	if (!canUsePushNotifications()) return;
 	const vapidPublicKey = VAPID_PUBLIC_KEY?.trim();
 	if (!vapidPublicKey) {
@@ -62,7 +62,7 @@ export async function registerForPushNotifications() {
 		scope: "/",
 	});
 
-	const hasPermission = await ensureNotificationPermission();
+	const hasPermission = await ensureNotificationPermission(forcePrompt);
 	if (!hasPermission) return;
 
 	const existing = await registration.pushManager.getSubscription();

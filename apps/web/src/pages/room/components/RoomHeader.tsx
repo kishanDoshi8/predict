@@ -1,7 +1,7 @@
 import { Badge, Button } from "@/components";
 import { usePlayer } from "@/store/player";
 import { Room } from "@/types";
-import { ArrowLeft } from "lucide-react";
+import { HomeIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { RoomPreferencesDialog } from "./RoomPreferencesDialog";
 
@@ -13,15 +13,8 @@ function RoomHeader({ room }: Readonly<Props>) {
 	const navigate = useNavigate();
 	const { data: player } = usePlayer();
 
-	const handleGoBack = () => {
-		// if current page is /room/:id, navigate to home else -1
-		console.log(globalThis.location);
-		if (globalThis.location.pathname === `/room/${room.code}`) {
-			navigate("/");
-			return;
-		}
-
-		navigate(-1);
+	const handleGoHome = () => {
+		navigate("/");
 	};
 
 	return (
@@ -33,9 +26,9 @@ function RoomHeader({ room }: Readonly<Props>) {
 					variant='outline'
 					size='sm'
 					className={`cursor-pointer`}
-					onClick={handleGoBack}
+					onClick={handleGoHome}
 				>
-					<ArrowLeft />
+					<HomeIcon />
 				</Button>
 				<h1 className={`flex-1`}>{room.name}</h1>
 				<Badge variant={"secondary"}>

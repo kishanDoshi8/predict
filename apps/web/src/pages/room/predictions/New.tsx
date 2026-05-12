@@ -389,6 +389,14 @@ export default function PredictionNew() {
 					{isLoading && <Spinner />}
 					Start Draft <Flame fill='black' />
 				</Button>
+				<Button
+					variant={"outline"}
+					className={`w-full`}
+					onClick={() => navigate("/rooms/" + room.code)}
+					disabled={isLoading}
+				>
+					Cancel
+				</Button>
 			</FieldSet>
 		</div>
 	);

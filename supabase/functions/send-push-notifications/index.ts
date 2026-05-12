@@ -205,7 +205,9 @@ Deno.serve(async (req) => {
 			);
 		}
 
-		const roomPlayerIds = (memberRows ?? []).map((r) => r.player_id);
+		const roomPlayerIds = (memberRows ?? [])
+			.map((r) => r.player_id)
+			.filter((id): id is string => id != null);
 		if (roomPlayerIds.length === 0) {
 			return jsonResponse({
 				sent_count: 0,

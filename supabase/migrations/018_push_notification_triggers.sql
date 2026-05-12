@@ -254,6 +254,7 @@ security definer
 set search_path = public, private
 as $$
 declare
+  v_now       timestamptz := now();
   v_rec       record;
   v_room_name text;
 begin
@@ -262,7 +263,7 @@ begin
     from public.predictions
     where status     = 'draft'
       and notified_1h = false
-      and deadline between now() and now() + interval '1 hour'
+      and deadline between v_now and v_now + interval '1 hour'
   loop
     select name into v_room_name from public.rooms where id = v_rec.room_id;
 

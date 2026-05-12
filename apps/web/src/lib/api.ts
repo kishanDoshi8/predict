@@ -261,10 +261,20 @@ export async function sendPushNotificationTrigger(args: {
   event_type: NotificationEventType
   payload?: Record<string, unknown>
 }) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  const headers: Record<string, string> = {}
+  if (session?.access_token) {
+    headers.Authorization = `Bearer ${session.access_token}`
+  }
+
   const { data, error } = await supabase.functions.invoke(
     'send-push-notifications',
     {
       body: args,
+      headers,
     },
   )
 

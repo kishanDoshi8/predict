@@ -91,7 +91,49 @@ supabase secrets set NOTIFICATION_FUNCTION_SECRET=YOUR_STRONG_RANDOM_SECRET
 supabase functions deploy send-push-notifications --no-verify-jwt
 ```
 
-5. Frontend test trigger example:
+5. Populate the notification config table (run once in the Supabase SQL editor):
+
+```sql
+insert into private.notification_config (key, value)
+values
+  ('supabase_url',                'https://YOUR_PROJECT_REF.supabase.co'),
+  ('notification_function_secret', 'YOUR_NOTIFICATION_FUNCTION_SECRET'),
+  ('app_url',                      'https://YOUR_APP_URL')
+on conflict (key) do update set value = excluded.value;
+```
+
+   - `supabase_url` — your project URL (same as `SUPABASE_URL` in the dashboard)
+   - `notification_function_secret` — the same value used for `NOTIFICATION_FUNCTION_SECRET` in step 3
+   - `app_url` — the public URL of your deployed frontend (e.g. `https://predict.vercel.app`)
+
+6. Enable the cron jobs (run once in the SQL editor, requires `pg_cron` extension):
+
+```sql
+-- Poll every minute for predictions whose deadline is within the next hour.
+select cron.schedule(
+  'push-deadline-1h',
+  '* * * * *',
+  $cron$
+    select private.fire_push_notification_for_deadline_1h();
+  $cron$
+);
+
+-- Notify all opted-in players every Monday at 08:00 UTC that weekly points are claimable.
+select cron.schedule(
+  'push-weekly-points-claim',
+  '0 8 * * 1',
+  $cron$
+    select private.fire_push_notification(
+      'weekly_points_claim', null, null,
+      '💰 Weekly Points Available!',
+      'Claim your 100 free points now.',
+      '/'
+    );
+  $cron$
+);
+```
+
+7. Frontend test trigger example:
 
 ```ts
 import { sendPushNotificationTrigger } from "@/lib/api";
@@ -104,6 +146,20 @@ await sendPushNotificationTrigger({
     url: window.location.pathname,
   },
 });
+```
+
+8. Inspect notification delivery:
+
+```sql
+-- Recent dispatch attempts (shows pg_net request IDs)
+select * from private.notification_dispatch_log order by created_at desc limit 20;
+
+-- Cross-reference with actual HTTP responses
+select l.event_type, l.created_at, r.status_code, r.content
+from private.notification_dispatch_log l
+join net._http_response r on r.id = l.http_request_id
+order by l.created_at desc
+limit 20;
 ```
 
 ---

@@ -32,7 +32,6 @@ export function LeaderboardList({ entries, currentPlayerId, isLoading }: Props) 
   }
 
   const top3   = entries.filter((e) => e.rank <= 3)
-  const rest   = entries.filter((e) => e.rank > 3)
 
   return (
     <div className='flex flex-col gap-2'>
@@ -41,7 +40,7 @@ export function LeaderboardList({ entries, currentPlayerId, isLoading }: Props) 
       )}
 
       {/* Divider */}
-      {rest.length > 0 && (
+      {entries.length > 3 && (
         <div className='my-1 border-t border-border/50' />
       )}
 

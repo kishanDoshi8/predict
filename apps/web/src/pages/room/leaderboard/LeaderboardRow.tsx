@@ -25,7 +25,7 @@ function deriveBadges(
     badges.push({ icon: '🔥', label: 'Hot streak' })
   }
 
-  if (entry.longest_streak >= 8 && entry.rank !== 1) {
+  if (entry.longest_streak >= 8) {
     badges.push({ icon: '🐐', label: 'GOAT' })
   }
 
@@ -45,7 +45,7 @@ function deriveBadges(
   // Most bets placed (risk addict) — only if clearly more than average
   const maxBets = Math.max(...all.map((e) => e.total_bets))
   if (maxBets > 0 && entry.total_bets === maxBets && all.length > 1) {
-    badges.push({ icon: '📉', label: 'Risk addict' })
+    badges.push({ icon: '🎲', label: 'Risk addict' })
   }
 
   return badges

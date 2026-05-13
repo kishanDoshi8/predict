@@ -27,4 +27,10 @@ export const roomKeys = {
 
   preferences: (roomId: string) =>
     [...roomKeys.detail(roomId), "preferences"] as const,
+
+  leaderboard: (roomId: string) =>
+    [...roomKeys.detail(roomId), "leaderboard"] as const,
+
+  predictionHistory: (roomId: string) =>
+    [...roomKeys.detail(roomId), "predictionHistory"] as const,
 };

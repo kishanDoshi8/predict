@@ -1,0 +1,146 @@
+import { PredictionHistoryEntry } from '@/types'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
+import { CheckCircle2, XCircle, MinusCircle } from 'lucide-react'
+
+// ─── PredictionHistoryCard ────────────────────────────────────────────────────
+
+function statusMeta(status: PredictionHistoryEntry['status']) {
+  switch (status) {
+    case 'revealed':
+      return { icon: <CheckCircle2 className='size-4 text-primary' />, label: 'Resolved' }
+    case 'cancelled':
+      return { icon: <XCircle className='size-4 text-destructive' />, label: 'Cancelled' }
+    case 'no_result':
+      return { icon: <MinusCircle className='size-4 text-muted-foreground' />, label: 'No result' }
+  }
+}
+
+type CardProps = {
+  entry: PredictionHistoryEntry
+}
+
+function PredictionHistoryCard({ entry }: CardProps) {
+  const meta   = statusMeta(entry.status)
+  const total  = entry.options?.reduce((s, o) => s + o.total_bet, 0) ?? entry.total_pool
+  const winner = entry.options?.find((o) => o.id === entry.winning_option_id)
+
+  const winPct =
+    entry.total_bets > 0
+      ? Math.round((entry.winner_count / entry.total_bets) * 100)
+      : null
+
+  const resolvedLabel = entry.resolved_at
+    ? new Date(entry.resolved_at).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+      })
+    : null
+
+  return (
+    <div className='border border-border rounded-xl p-3 flex flex-col gap-2 hover:bg-accent/30 transition-colors'>
+      {/* Header row */}
+      <div className='flex items-start gap-2'>
+        <div className='mt-0.5 shrink-0'>{meta.icon}</div>
+        <p className='text-sm font-medium flex-1 leading-snug'>{entry.title}</p>
+        {resolvedLabel && (
+          <span className='text-xs text-muted-foreground shrink-0'>{resolvedLabel}</span>
+        )}
+      </div>
+
+      {/* Winner pill */}
+      {entry.status === 'revealed' && winner && (
+        <div className='flex items-center gap-1.5'>
+          <span className='text-xs text-muted-foreground'>Winner:</span>
+          <Badge variant='default' className='text-xs'>
+            {winner.label}
+          </Badge>
+        </div>
+      )}
+
+      {/* Option bars */}
+      {entry.status === 'revealed' && entry.options && total > 0 && (
+        <div className='flex flex-col gap-1'>
+          {entry.options.map((opt) => {
+            const pct = total > 0 ? Math.round((opt.total_bet / total) * 100) : 0
+            const isWinner = opt.id === entry.winning_option_id
+            return (
+              <div key={opt.id} className='flex items-center gap-2'>
+                <div className='flex-1 h-1.5 rounded-full bg-muted overflow-hidden'>
+                  <div
+                    className={cn(
+                      'h-full rounded-full transition-all',
+                      isWinner ? 'bg-primary' : 'bg-muted-foreground/40',
+                    )}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <span
+                  className={cn(
+                    'text-xs tabular-nums w-8 text-right',
+                    isWinner ? 'text-primary font-medium' : 'text-muted-foreground',
+                  )}
+                >
+                  {pct}%
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Footer meta */}
+      <div className='flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground'>
+        {total > 0 && (
+          <span>Pool: {total.toLocaleString()} pts</span>
+        )}
+        {entry.total_bets > 0 && (
+          <span>{entry.total_bets} bet{entry.total_bets !== 1 ? 's' : ''}</span>
+        )}
+        {winPct !== null && entry.status === 'revealed' && (
+          <span>{winPct}% picked right</span>
+        )}
+        <span>by {entry.creator_username}</span>
+      </div>
+    </div>
+  )
+}
+
+// ─── PredictionHistoryFeed ────────────────────────────────────────────────────
+
+type FeedProps = {
+  entries:   PredictionHistoryEntry[]
+  isLoading: boolean
+}
+
+export function PredictionHistoryFeed({ entries, isLoading }: FeedProps) {
+  if (isLoading) {
+    return (
+      <div className='flex flex-col gap-2'>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className='h-24 w-full rounded-xl' />
+        ))}
+      </div>
+    )
+  }
+
+  if (entries.length === 0) {
+    return (
+      <div className='flex flex-col items-center gap-2 py-12 text-center'>
+        <p className='text-4xl'>📭</p>
+        <p className='text-muted-foreground text-sm'>
+          No resolved predictions yet. Check back after the next one wraps up.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className='flex flex-col gap-2'>
+      {entries.map((entry) => (
+        <PredictionHistoryCard key={entry.prediction_id} entry={entry} />
+      ))}
+    </div>
+  )
+}

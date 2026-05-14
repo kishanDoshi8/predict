@@ -122,7 +122,9 @@ export default function DraftControls({
 						<p className={`text-xs text-muted-foreground`}>
 							Your Balance
 						</p>
-						<p className={`text-right`}>{availableBalance} pts</p>
+						<p className={`${selectedOption ? "text-right" : ""}`}>
+							{availableBalance} pts
+						</p>
 					</div>
 				</div>
 				{selectedOption && (

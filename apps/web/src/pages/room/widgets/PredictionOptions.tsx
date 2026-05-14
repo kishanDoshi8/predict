@@ -59,7 +59,7 @@ export default function PredictionOptions({
 					{prediction.prediction_options.map((option) => (
 						<FieldLabel
 							key={option.id}
-							className={`flex items-center gap-2 cursor-pointer ${prediction.winning_option_id === option.id ? "border-primary" : ""} `}
+							className={`flex items-center gap-2 cursor-pointer bg-background ${prediction.winning_option_id === option.id ? "border-primary" : ""} `}
 						>
 							<Field orientation={"horizontal"}>
 								<RadioGroupItem
@@ -78,7 +78,13 @@ export default function PredictionOptions({
 												className={`text-lg text-right ${useOptionColor(option.id)}`}
 											>
 												{totalBetAmount
-													? (((betAmountPerOption[option.id] ?? 0) / totalBetAmount) * 100).toFixed(0)
+													? (
+															((betAmountPerOption[
+																option.id
+															] ?? 0) /
+																totalBetAmount) *
+															100
+														).toFixed(0)
 													: 0}
 												%
 											</span>

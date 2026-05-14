@@ -1,4 +1,4 @@
-import { Player, Prediction, PredictionStatus, Room } from '@/types'
+import { Player, Prediction, PredictionStatus, Room, PredictionHistoryEntry, LeaderboardEntry  } from '@/types'
 import type { Json } from '@/types/supabase'
 import { supabase } from './supabase'
 
@@ -462,15 +462,23 @@ export async function getMyBet(predictionId: string, playerId: string) {
 // #endregion Bets
 
 // #region Leaderboard
-export async function getLeaderboard(roomId: string) {
-  const { data, error } = await supabase
-    .from('players')
-    .select('*')
-    .eq('room_id', roomId)
-    .order('total_won', { ascending: false })
-
-  if (error) throw error
-  return data ?? []
+export async function getRoomLeaderboard(roomId: string) {
+  const { data, error } = await supabase.rpc('get_room_leaderboard', {
+    p_room_id: roomId,
+  })
+  return assertOk(data, error) as LeaderboardEntry[]
 }
 
+export async function getRoomPredictionHistory(
+  roomId: string,
+  limit = 20,
+  offset = 0,
+) {
+  const { data, error } = await supabase.rpc('get_room_prediction_history', {
+    p_room_id: roomId,
+    p_limit:   limit,
+    p_offset:  offset,
+  })
+  return assertOk(data, error) as PredictionHistoryEntry[]
+}
 // #endregion Leaderboard

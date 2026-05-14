@@ -1,17 +1,16 @@
 import { Button } from "@/components";
-import { Copy, CopyCheck } from "lucide-react";
+import { CoinsIcon, Copy, CopyCheck } from "lucide-react";
 import { useRoomContext } from "../RoomLayout";
 import { useEffect, useState } from "react";
 import { useBets } from "@/store/bet";
 import { useActivePrediction } from "@/store/prediction";
+import { usePlayer } from "@/store/player";
 
 export default function PredictionHeader() {
 	const { room } = useRoomContext();
 	const { data: activePrediction } = useActivePrediction(room.id);
-	const { data: bets, refetch: refetchBets } = useBets(
-		room.id,
-		activePrediction?.id,
-	);
+	const { data: player } = usePlayer();
+	const { refetch: refetchBets } = useBets(room.id, activePrediction?.id);
 
 	const [copied, setCopied] = useState(false);
 
@@ -59,14 +58,16 @@ export default function PredictionHeader() {
 				</div>
 			</div>
 			<div className={`flex flex-col`}>
-				<p className={`text-muted-foreground text-sm md:text-base`}>
-					TOTAL POOLED
+				<p
+					className={`text-muted-foreground text-sm text-right md:text-base`}
+				>
+					Your points
 				</p>
 				<p
-					className={`text-2xl md:text-4xl text-muted-foreground text-right`}
+					className={`flex gap-2 text-2xl md:text-4xl text-primary text-right`}
 				>
-					{bets?.reduce((total, bet) => total + bet.amount, 0) ?? 0}
-					<span className={`text-base`}> PTS</span>
+					<CoinsIcon />
+					{player?.points_balance ?? 0} PTS
 				</p>
 			</div>
 		</div>

@@ -5,8 +5,6 @@ import { usePlayer } from "@/store/player";
 import { Skeleton } from "../../../components/ui/skeleton";
 import PredictionOptions from "../widgets/PredictionOptions";
 import DraftControls from "../controls/DraftControls";
-import { Button } from "@/components/ui/button";
-import PlayerNew from "@/pages/home/controls/PlayerNew";
 import { useRoomContext } from "../RoomLayout";
 import { useRoomBetRealtime, useRoomRealtime } from "@/hooks/useRoomRealtime";
 import PredictionTitle from "../components/PredictionTitle";
@@ -31,8 +29,6 @@ export default function DraftPhase({
 	useRoomRealtime(room.id);
 	useRoomBetRealtime(room.id, prediction?.id ?? null);
 
-	const [isOpenCreatePlayer, setIsOpenCreatePlayer] = React.useState(false);
-
 	if (!isLoading && !prediction) {
 		return (
 			<div className={`flex flex-col gap-4 justify-center items-center`}>
@@ -46,30 +42,34 @@ export default function DraftPhase({
 
 	return (
 		<div className={`flex-1 flex flex-col gap-4 items-center pb-4 mt-4`}>
-			{prediction?.status === "draft" ? (
-				<Badge
-					variant='outline'
-					className={`b-4 border-accent text-primary mx-auto`}
-				>
-					In Play
-				</Badge>
-			) : (
-				<Skeleton className={`h-5 w-25 mx-auto`} />
-			)}
+			<div
+				className={`border border-border rounded-xl p-4 flex flex-col gap-2 bg-secondary/30 transition-colors`}
+			>
+				{prediction?.status === "draft" ? (
+					<Badge
+						variant='outline'
+						className={`b-4 border-accent text-primary mx-auto`}
+					>
+						In Play
+					</Badge>
+				) : (
+					<Skeleton className={`h-5 w-25 mx-auto`} />
+				)}
 
-			<PredictionTitle prediction={prediction} />
+				<PredictionTitle prediction={prediction} />
 
-			{prediction?.deadline && prediction.status === "draft" && (
-				<Countdown
-					targetTime={new Date(prediction.deadline).getTime()}
+				{prediction?.deadline && prediction.status === "draft" && (
+					<Countdown
+						targetTime={new Date(prediction.deadline).getTime()}
+					/>
+				)}
+
+				<PredictionOptions
+					prediction={prediction}
+					selectedOption={selectedOption}
+					setSelectedOption={setSelectedOption}
 				/>
-			)}
-
-			<PredictionOptions
-				prediction={prediction}
-				selectedOption={selectedOption}
-				setSelectedOption={setSelectedOption}
-			/>
+			</div>
 
 			<div className={`flex-1`}></div>
 
@@ -79,33 +79,16 @@ export default function DraftPhase({
 				/>
 			) : (
 				<div className={`sticky bottom-2 w-full max-w-md mx-auto`}>
-					{player ? (
-						<>
-							{prediction?.status === "draft" && (
-								<DraftControls
-									player={player}
-									predictionId={prediction.id}
-									selectedOption={selectedOption}
-									setSelectedOption={setSelectedOption}
-								/>
-							)}
-						</>
-					) : (
-						<Button
-							className={`w-full max-w-md mx-auto`}
-							onClick={() => setIsOpenCreatePlayer(true)}
-						>
-							Sign up & Join Room
-						</Button>
+					{prediction?.status === "draft" && player && (
+						<DraftControls
+							player={player}
+							predictionId={prediction.id}
+							selectedOption={selectedOption}
+							setSelectedOption={setSelectedOption}
+						/>
 					)}
 				</div>
 			)}
-
-			<PlayerNew
-				isOpen={isOpenCreatePlayer}
-				setIsOpen={setIsOpenCreatePlayer}
-				joinRoomCode={room.code}
-			/>
 		</div>
 	);
 }

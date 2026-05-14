@@ -56,13 +56,17 @@ export default function LockedPhase({
 				</AlertDescription>
 			</Alert>
 
-			<PredictionTitle prediction={prediction} />
+			<div
+				className={`border border-border rounded-xl p-4 flex flex-col gap-2 bg-secondary/30 w-full transition-colors`}
+			>
+				<PredictionTitle prediction={prediction} />
 
-			<PredictionOptions
-				prediction={prediction}
-				selectedOption={selectedOption}
-				setSelectedOption={() => {}}
-			/>
+				<PredictionOptions
+					prediction={prediction}
+					selectedOption={selectedOption}
+					setSelectedOption={() => {}}
+				/>
+			</div>
 
 			<div
 				className={`max-w-md w-full mx-auto mt-4 p-4 border rounded-lg bg-secondary/50`}

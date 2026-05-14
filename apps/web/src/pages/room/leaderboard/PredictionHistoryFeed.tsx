@@ -31,7 +31,7 @@ type CardProps = {
 	entry: PredictionHistoryEntry;
 };
 
-function PredictionHistoryCard({ entry }: CardProps) {
+function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 	const meta = statusMeta(entry.status);
 	const total =
 		entry.options?.reduce((s, o) => s + o.total_bet, 0) ?? entry.total_pool;
@@ -125,7 +125,7 @@ function PredictionHistoryCard({ entry }: CardProps) {
 				{entry.total_bets > 0 && (
 					<span>
 						{entry.total_bets} bet
-						{entry.total_bets !== 1 ? "s" : ""}
+						{entry.total_bets === 1 ? "" : "s"}
 					</span>
 				)}
 				<Dot />
@@ -145,7 +145,7 @@ type FeedProps = {
 	isLoading: boolean;
 };
 
-export function PredictionHistoryFeed({ entries, isLoading }: FeedProps) {
+export function PredictionHistoryFeed({ entries, isLoading }: Readonly<FeedProps>) {
 	if (isLoading) {
 		return (
 			<div className='flex flex-col gap-2'>

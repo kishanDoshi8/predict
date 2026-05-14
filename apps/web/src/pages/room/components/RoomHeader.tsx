@@ -21,7 +21,7 @@ function RoomHeader({ room }: Readonly<Props>) {
 
 	return (
 		<header
-			className={`p-4 sticky top-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-sm border-b`}
+			className={`p-4 sticky top-0 left-0 right-0 z-10 bg-secondary/30 backdrop-blur-sm border-b`}
 		>
 			<div className={`max-w-280 mx-auto flex gap-4 items-center`}>
 				<Button

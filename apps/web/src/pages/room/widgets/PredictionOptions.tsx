@@ -121,8 +121,8 @@ export default function PredictionOptions({
 				<div
 					className={`max-w-md w-full mx-auto mt-4 flex flex-col gap-4`}
 				>
-					<Skeleton className={`h-16 min-w-lg mx-auto w-full`} />
-					<Skeleton className={`h-16 min-w-lg mx-auto w-full`} />
+					<Skeleton className={`h-16 mx-auto w-full`} />
+					<Skeleton className={`h-16 mx-auto w-full`} />
 				</div>
 			)}
 		</>

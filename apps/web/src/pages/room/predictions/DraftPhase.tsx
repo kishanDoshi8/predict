@@ -43,7 +43,7 @@ export default function DraftPhase({
 	return (
 		<div className={`flex-1 flex flex-col gap-4 items-center pb-4 mt-4`}>
 			<div
-				className={`border border-border rounded-xl p-4 flex flex-col gap-2 bg-secondary/30 transition-colors`}
+				className={`border border-border rounded-xl p-4 flex flex-col gap-2 bg-secondary/30 w-full transition-colors`}
 			>
 				{prediction?.status === "draft" ? (
 					<Badge

@@ -57,16 +57,20 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 				</AlertDescription>
 			</Alert>
 
-			<PredictionTitle prediction={prediction} />
+			<div
+				className={`border border-border rounded-xl p-4 flex flex-col gap-2 bg-secondary/30 w-full transition-colors`}
+			>
+				<PredictionTitle prediction={prediction} />
 
-			<PredictionOptions
-				prediction={prediction}
-				selectedOption={null}
-				setSelectedOption={() => {}}
-			/>
+				<PredictionOptions
+					prediction={prediction}
+					selectedOption={null}
+					setSelectedOption={() => {}}
+				/>
+			</div>
 
-			<div className={`max-w-md w-full mx-auto`}>
-				<div className={`flex mt-4 mb-2`}>
+			<div className={`max-w-md w-full mx-auto mt-4`}>
+				<div className={`flex mb-2`}>
 					<p className={`text-2xl`}>Payout</p>
 				</div>
 				{isBetsLoading ? (

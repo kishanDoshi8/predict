@@ -152,6 +152,7 @@ export type Database = {
           points_balance: number
           points_in_escrow: number
           total_won: number
+          user_id: string | null
           username: string
         }
         Insert: {
@@ -164,6 +165,7 @@ export type Database = {
           points_balance?: number
           points_in_escrow?: number
           total_won?: number
+          user_id?: string | null
           username: string
         }
         Update: {
@@ -176,6 +178,7 @@ export type Database = {
           points_balance?: number
           points_in_escrow?: number
           total_won?: number
+          user_id?: string | null
           username?: string
         }
         Relationships: []
@@ -221,6 +224,7 @@ export type Database = {
           created_by: string
           deadline: string
           id: string
+          notified_1h: boolean
           resolved_at: string | null
           room_id: string
           status: string
@@ -232,6 +236,7 @@ export type Database = {
           created_by: string
           deadline: string
           id?: string
+          notified_1h?: boolean
           resolved_at?: string | null
           room_id: string
           status?: string
@@ -243,6 +248,7 @@ export type Database = {
           created_by?: string
           deadline?: string
           id?: string
+          notified_1h?: boolean
           resolved_at?: string | null
           room_id?: string
           status?: string
@@ -465,14 +471,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cancel_bet: {
-        Args: { p_prediction_id: string }
-        Returns: Json
-      }
-      claim_weekly_points: {
-        Args: { p_auto_claimed?: boolean }
-        Returns: Json
-      }
+      cancel_bet: { Args: { p_prediction_id: string }; Returns: Json }
+      claim_weekly_points: { Args: { p_auto_claimed?: boolean }; Returns: Json }
       create_prediction: {
         Args: {
           p_deadline: string
@@ -482,36 +482,22 @@ export type Database = {
         }
         Returns: Json
       }
-      create_room: {
-        Args: { p_room_name: string }
+      create_room: { Args: { p_room_name: string }; Returns: Json }
+      get_player: { Args: never; Returns: Json }
+      get_preferences: { Args: { p_room_id?: string }; Returns: Json }
+      get_room_leaderboard: { Args: { p_room_id: string }; Returns: Json }
+      get_room_prediction_history: {
+        Args: { p_limit?: number; p_offset?: number; p_room_id: string }
         Returns: Json
       }
-      get_player: { Args: Record<PropertyKey, never>; Returns: Json }
-      get_preferences: {
-        Args: { p_room_id?: string }
-        Returns: Json
-      }
-      join_room: {
-        Args: { p_room_code: string }
-        Returns: Json
-      }
-      lock_prediction: {
-        Args: { p_prediction_id: string }
-        Returns: Json
-      }
+      join_room: { Args: { p_room_code: string }; Returns: Json }
+      lock_prediction: { Args: { p_prediction_id: string }; Returns: Json }
       place_bet: {
-        Args: {
-          p_amount: number
-          p_option_id: string
-          p_prediction_id: string
-        }
+        Args: { p_amount: number; p_option_id: string; p_prediction_id: string }
         Returns: Json
       }
       register_player: { Args: { p_username: string }; Returns: Json }
-      reset_room_preferences: {
-        Args: { p_room_id: string }
-        Returns: Json
-      }
+      reset_room_preferences: { Args: { p_room_id: string }; Returns: Json }
       resolve_prediction: {
         Args: {
           p_organizer_token: string

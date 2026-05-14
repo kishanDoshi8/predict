@@ -1,4 +1,4 @@
-export interface LeaderboardEntry {
+export type LeaderboardEntry = {
   player_id:          string
   username:           string
   total_won_in_room:  number
@@ -16,14 +16,14 @@ export interface LeaderboardEntry {
   rank:               number
 }
 
-export interface PredictionHistoryOption {
+export type PredictionHistoryOption = {
   id:            string
   label:         string
   total_bet:     number
   display_order: number
 }
 
-export interface PredictionHistoryEntry {
+export type PredictionHistoryEntry = {
   prediction_id:        string
   title:                string
   status:               'revealed' | 'cancelled' | 'no_result'

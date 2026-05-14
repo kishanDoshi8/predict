@@ -51,9 +51,6 @@ export function Countdown({ targetTime }: Readonly<CountdownProps>) {
 						<Clock />
 						{timeLeft > 0 ? formatTime(timeLeft) : "00:00:00"}
 					</Badge>
-					<p className={`text-xs text-muted-foreground`}>
-						Betting ends at 0
-					</p>
 				</div>
 			</HoverCardTrigger>
 			<HoverCardContent>

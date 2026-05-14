@@ -1,8 +1,7 @@
-import { Badge, Button } from "@/components";
-import { usePlayer } from "@/store/player";
+import { Button } from "@/components/ui/button";
 import { Room } from "@/types";
 import { HomeIcon, TrophyIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { RoomPreferencesDialog } from "./RoomPreferencesDialog";
 
 type Props = {
@@ -11,7 +10,6 @@ type Props = {
 
 function RoomHeader({ room }: Readonly<Props>) {
 	const navigate = useNavigate();
-	const { data: player } = usePlayer();
 
 	const handleGoHome = () => {
 		navigate("/");
@@ -34,10 +32,9 @@ function RoomHeader({ room }: Readonly<Props>) {
 				>
 					<HomeIcon />
 				</Button>
-				<h1 className={`flex-1`}>{room.name}</h1>
-				<Badge variant={"secondary"}>
-					<p>{player?.points_balance ?? 0} PTS</p>
-				</Badge>
+				<Link to={`/rooms/${room.code}`} className={`flex-1`}>
+					<h1>{room.name}</h1>
+				</Link>
 				<Button
 					variant='outline'
 					size='sm'

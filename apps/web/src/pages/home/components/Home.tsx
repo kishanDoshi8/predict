@@ -177,7 +177,6 @@ export default function Home({
 										</Badge>
 									</div>
 									<Button
-										variant='outline'
 										size='sm'
 										onClick={() => {
 											setRoomCode(room.code);

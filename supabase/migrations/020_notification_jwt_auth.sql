@@ -61,6 +61,26 @@ begin
   from private.notification_config
   where key = 'service_role_key';
 
+  -- With verify_jwt = true on the edge function, every request must carry a
+  -- valid JWT.  The service_role_key is that JWT for database-triggered calls.
+  -- Skip and log a config warning rather than firing a request that will be
+  -- rejected by the gateway with a 401.
+  if v_service_role_key is null then
+    insert into private.notification_dispatch_log
+      (event_type, prediction_id, room_id, http_request_id, payload)
+    values (
+      p_event_type,
+      p_prediction_id,
+      p_room_id,
+      null,
+      jsonb_build_object(
+        'error', 'Missing service_role_key in private.notification_config. '
+                 'Add it to enable JWT-authenticated edge-function calls.'
+      )
+    );
+    return;
+  end if;
+
   v_payload := jsonb_build_object(
     'event_type', p_event_type,
     'room_id',    p_room_id,
@@ -73,16 +93,9 @@ begin
 
   v_headers := jsonb_build_object(
     'Content-Type',          'application/json',
+    'Authorization',         'Bearer ' || v_service_role_key,
     'x-notification-secret', v_secret
   );
-
-  -- Include the service-role JWT so the edge function can be
-  -- deployed with verify_jwt = true (required for JWT auth).
-  if v_service_role_key is not null then
-    v_headers := v_headers || jsonb_build_object(
-      'Authorization', 'Bearer ' || v_service_role_key
-    );
-  end if;
 
   select net.http_post(
     url     := v_supabase_url || '/functions/v1/send-push-notifications',

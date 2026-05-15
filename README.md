@@ -108,6 +108,8 @@ on conflict (key) do update set value = excluded.value;
    - `app_url` — the public URL of your deployed frontend (e.g. `https://predict.vercel.app`)
    - `service_role_key` — the **service_role** JWT from **Settings > API** in the Supabase dashboard; allows database triggers to authenticate when calling the edge function with JWT verification enabled
 
+   > **Security note**: the `service_role_key` grants full admin access to your project. The `private` schema is not exposed through PostgREST, so this value cannot be read by normal API calls. For higher-security deployments, consider using [Supabase Vault](https://supabase.com/docs/guides/database/vault) to store this secret instead of the `notification_config` table.
+
 6. Enable the cron jobs (run once in the SQL editor, requires `pg_cron` extension):
 
 ```sql

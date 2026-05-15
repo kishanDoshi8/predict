@@ -85,10 +85,10 @@ supabase secrets set WEB_PUSH_SUBJECT=mailto:you@example.com
 supabase secrets set NOTIFICATION_FUNCTION_SECRET=YOUR_STRONG_RANDOM_SECRET
 ```
 
-4. Deploy the function:
+4. Deploy the function (JWT verification is now enabled):
 
 ```bash
-supabase functions deploy send-push-notifications --no-verify-jwt
+supabase functions deploy send-push-notifications
 ```
 
 5. Populate the notification config table (run once in the Supabase SQL editor):
@@ -96,15 +96,17 @@ supabase functions deploy send-push-notifications --no-verify-jwt
 ```sql
 insert into private.notification_config (key, value)
 values
-  ('supabase_url',                'https://YOUR_PROJECT_REF.supabase.co'),
+  ('supabase_url',                 'https://YOUR_PROJECT_REF.supabase.co'),
   ('notification_function_secret', 'YOUR_NOTIFICATION_FUNCTION_SECRET'),
-  ('app_url',                      'https://YOUR_APP_URL')
+  ('app_url',                      'https://YOUR_APP_URL'),
+  ('service_role_key',             'YOUR_SERVICE_ROLE_KEY')
 on conflict (key) do update set value = excluded.value;
 ```
 
    - `supabase_url` — your project URL (same as `SUPABASE_URL` in the dashboard)
    - `notification_function_secret` — the same value used for `NOTIFICATION_FUNCTION_SECRET` in step 3
    - `app_url` — the public URL of your deployed frontend (e.g. `https://predict.vercel.app`)
+   - `service_role_key` — the **service_role** JWT from **Settings > API** in the Supabase dashboard; allows database triggers to authenticate when calling the edge function with JWT verification enabled
 
 6. Enable the cron jobs (run once in the SQL editor, requires `pg_cron` extension):
 

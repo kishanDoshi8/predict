@@ -22,4 +22,4 @@ enabled = false   # we handle identity via tokens, no Supabase Auth needed
 enabled = true
 
 [functions.send-push-notifications]
-verify_jwt = false
+verify_jwt = true

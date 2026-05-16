@@ -541,6 +541,7 @@ export type Database = {
         }
         Returns: Json
       }
+      mark_how_to_play_seen: { Args: never; Returns: void }
       upsert_user_push_subscription: {
         Args: { p_subscription: Json }
         Returns: string

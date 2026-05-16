@@ -16,27 +16,27 @@ import { Button } from "@/components/ui/button";
 const SLIDES = [
 	{
 		emoji: "🎯",
-		title: "Make your prediction",
+		title: "Join the room",
 		description:
-			"The room organizer posts a question. Pick the option you think will win and bet your points on it. No pressure — just vibes and gut feelings.",
+			"Enter the 6-digit code your friend sent you. You're in instantly.",
 	},
 	{
-		emoji: "🔒",
-		title: "Betting closes",
+		emoji: "🪙",
+		title: "Claim your points",
 		description:
-			"Once the organizer locks the prediction, no more bets. Cross your fingers, argue with your friends, and wait for the result.",
+			"You get 100 points every week, automatically soon as log on. That's your ammunition - spend it wisely.",
+	},
+	{
+		emoji: "💰",
+		title: "Place your bet",
+		description:
+			"When a prediction is open, pick a side and put points on it. The more you risk, the more you can win.",
 	},
 	{
 		emoji: "🏆",
-		title: "Winner takes the pot",
+		title: "Wait for the verdict",
 		description:
-			"When the result is revealed, winners split the losers' points proportionally to how much they bet. More risk, more reward!",
-	},
-	{
-		emoji: "🚀",
-		title: "Build your streak",
-		description:
-			"Claim free weekly points every week to keep playing. Build a winning streak and climb the leaderboard. Let's go!",
+			"Once the organizer calls it, winners get paid out. Losers cope. Check the leaderboard and do better next week.",
 	},
 ] as const;
 
@@ -72,9 +72,9 @@ export default function HowToPlayModal({ open, onClose }: Readonly<Props>) {
 
 	return (
 		<Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-			<DialogContent className="max-w-sm gap-6" showCloseButton={false}>
+			<DialogContent showCloseButton={false}>
 				<DialogHeader>
-					<DialogTitle className="text-center text-xl">
+					<DialogTitle className='text-center text-xl'>
 						How to Play 🎮
 					</DialogTitle>
 				</DialogHeader>
@@ -82,17 +82,19 @@ export default function HowToPlayModal({ open, onClose }: Readonly<Props>) {
 				<Carousel
 					setApi={setApi}
 					opts={{ loop: false }}
-					className="w-full"
+					className='w-full max-w-xs mx-auto'
 				>
 					<CarouselContent>
 						{SLIDES.map((slide) => (
 							<CarouselItem key={slide.title}>
-								<div className="flex flex-col items-center gap-4 px-2 py-4 text-center">
-									<span className="text-5xl">{slide.emoji}</span>
-									<h3 className="text-lg font-semibold">
+								<div className='flex flex-col items-center gap-4 px-2 py-4 text-center'>
+									<span className='text-5xl'>
+										{slide.emoji}
+									</span>
+									<h3 className='text-lg font-semibold'>
 										{slide.title}
 									</h3>
-									<p className="text-muted-foreground text-sm leading-relaxed">
+									<p className='text-muted-foreground text-sm leading-relaxed'>
 										{slide.description}
 									</p>
 								</div>
@@ -102,7 +104,7 @@ export default function HowToPlayModal({ open, onClose }: Readonly<Props>) {
 				</Carousel>
 
 				{/* Dot indicators */}
-				<div className="flex justify-center gap-2">
+				<div className='flex justify-center gap-2'>
 					{Array.from({ length: count }).map((_, index) => (
 						<button
 							key={index}
@@ -117,18 +119,18 @@ export default function HowToPlayModal({ open, onClose }: Readonly<Props>) {
 					))}
 				</div>
 
-				<div className="flex gap-2">
+				<div className='flex gap-2'>
 					{!isLastSlide && (
 						<Button
-							variant="ghost"
-							className="flex-1 text-muted-foreground"
+							variant='ghost'
+							className='flex-1 text-muted-foreground'
 							onClick={onClose}
 						>
 							Skip
 						</Button>
 					)}
 					<Button
-						className="flex-1"
+						className='flex-1'
 						onClick={() => {
 							if (isLastSlide) {
 								onClose();

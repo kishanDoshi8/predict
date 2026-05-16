@@ -29,4 +29,4 @@ function Spinner2({
 	);
 }
 
-export { Spinner2 as Spinner };
+export { Spinner2 as Spinner, Spinner as SpinnerIcon };

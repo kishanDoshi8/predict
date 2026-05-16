@@ -21,8 +21,9 @@ export default function RoomLayout() {
 	const { data: room, isPending, isError } = useRoom(roomCode);
 
 	const { mutate: claimWeeklyReward } = useWeeklyClaim();
-	const { data: preferences } = usePreferences(room?.id ?? "");
-	const { mutate: markSeen } = useMarkHowToPlaySeen(room?.id);
+	const roomId = room?.id ?? "";
+	const { data: preferences } = usePreferences(roomId);
+	const { mutate: markSeen } = useMarkHowToPlaySeen(roomId || undefined);
 	const [showHowToPlay, setShowHowToPlay] = useState(false);
 
 	useEffect(() => {

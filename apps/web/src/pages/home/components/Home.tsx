@@ -16,6 +16,7 @@ import Brand from "./Brand";
 import { usePlayerRooms } from "@/store/room";
 import { toast } from "sonner";
 import { Badge } from "@/components";
+import HowToPlayModal from "@/components/HowToPlayModal";
 
 type Props = {
 	roomCode: string;
@@ -42,6 +43,7 @@ export default function Home({
 	} = usePlayerRooms(player?.id ?? "");
 	const [openCreateUser, setOpenCreateUser] = React.useState(false);
 	const [openCreateRoom, setOpenCreateRoom] = React.useState(false);
+	const [openHowToPlay, setOpenHowToPlay] = React.useState(false);
 
 	useEffect(() => {
 		if (player) {
@@ -145,6 +147,7 @@ export default function Home({
 					variant={"ghost"}
 					size='xs'
 					className={`mt-2 text-muted-foreground self-end`}
+					onClick={() => setOpenHowToPlay(true)}
 				>
 					<HelpCircle className={`mr-1`} />
 					How to play
@@ -199,6 +202,11 @@ export default function Home({
 			/>
 
 			<RoomNew isOpen={openCreateRoom} setIsOpen={setOpenCreateRoom} />
+
+			<HowToPlayModal
+				open={openHowToPlay}
+				onClose={() => setOpenHowToPlay(false)}
+			/>
 		</div>
 	);
 }

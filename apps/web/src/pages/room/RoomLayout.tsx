@@ -8,9 +8,11 @@ import { useRoom } from "@/store/room";
 import { Room } from "@/types";
 import { Spinner } from "@/components";
 import { RoomHeader } from "./components/RoomHeader";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePlayer } from "@/store/player";
 import { useWeeklyClaim } from "@/hooks/useWeeklyClaim";
+import { usePreferences, useMarkHowToPlaySeen } from "@/store/preferences";
+import HowToPlayModal from "@/components/HowToPlayModal";
 
 export default function RoomLayout() {
 	const navigate = useNavigate();
@@ -19,6 +21,9 @@ export default function RoomLayout() {
 	const { data: room, isPending, isError } = useRoom(roomCode);
 
 	const { mutate: claimWeeklyReward } = useWeeklyClaim();
+	const { data: preferences } = usePreferences(room?.id ?? "");
+	const { mutate: markSeen } = useMarkHowToPlaySeen(room?.id);
+	const [showHowToPlay, setShowHowToPlay] = useState(false);
 
 	useEffect(() => {
 		if (player) {
@@ -29,6 +34,17 @@ export default function RoomLayout() {
 			navigate("/create-player");
 		}
 	}, [player, isPlayerLoading, navigate]);
+
+	useEffect(() => {
+		if (preferences && !preferences.has_seen_how_to_play) {
+			setShowHowToPlay(true);
+		}
+	}, [preferences]);
+
+	const handleHowToPlayClose = () => {
+		setShowHowToPlay(false);
+		markSeen();
+	};
 
 	if (isPending || isPlayerLoading) {
 		return (
@@ -50,6 +66,11 @@ export default function RoomLayout() {
 			<main className='px-4 max-w-280 w-full mx-auto flex-1 flex flex-col'>
 				<Outlet context={{ room, roomCode }} />
 			</main>
+
+			<HowToPlayModal
+				open={showHowToPlay}
+				onClose={handleHowToPlayClose}
+			/>
 		</div>
 	);
 }

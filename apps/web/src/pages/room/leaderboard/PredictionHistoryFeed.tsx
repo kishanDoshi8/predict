@@ -36,7 +36,7 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 	const total =
 		entry.options?.reduce((s, o) => s + o.total_bet, 0) ?? entry.total_pool;
 	const winner = entry.options?.find((o) => o.id === entry.winning_option_id);
-	const participants = entry.participant_count || entry.total_bets;
+	const participants = entry.participant_count ?? entry.total_bets;
 
 	const winPct =
 		participants > 0

@@ -475,6 +475,13 @@ export async function getRoomLeaderboard(roomId: string) {
   return assertOk(data, error) as LeaderboardEntry[]
 }
 
+export async function getRoomWeeklyLeaderboard(roomId: string) {
+  const { data, error } = await supabase.rpc('get_room_weekly_leaderboard', {
+    p_room_id: roomId,
+  })
+  return assertOk(data, error) as LeaderboardEntry[]
+}
+
 export async function getRoomPredictionHistory(
   roomId: string,
   limit = 20,

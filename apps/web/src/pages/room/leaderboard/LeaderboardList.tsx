@@ -7,9 +7,10 @@ type Props = {
   entries:         LeaderboardEntry[]
   currentPlayerId: string
   isLoading:       boolean
+  scope:           'All Time' | 'This Week'
 }
 
-export function LeaderboardList({ entries, currentPlayerId, isLoading }: Props) {
+export function LeaderboardList({ entries, currentPlayerId, isLoading, scope }: Props) {
   if (isLoading) {
     return (
       <div className='flex flex-col gap-2'>
@@ -25,7 +26,9 @@ export function LeaderboardList({ entries, currentPlayerId, isLoading }: Props) 
       <div className='flex flex-col items-center gap-2 py-12 text-center'>
         <p className='text-4xl'>🏆</p>
         <p className='text-muted-foreground text-sm'>
-          No one is on the board yet. Make a prediction!
+          {scope === 'This Week'
+            ? "No wins this week yet. Be the first to score."
+            : 'No one is on the board yet. Make a prediction!'}
         </p>
       </div>
     )

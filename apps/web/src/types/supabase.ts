@@ -486,6 +486,7 @@ export type Database = {
       get_player: { Args: never; Returns: Json }
       get_preferences: { Args: { p_room_id?: string }; Returns: Json }
       get_room_leaderboard: { Args: { p_room_id: string }; Returns: Json }
+      get_room_weekly_leaderboard: { Args: { p_room_id: string }; Returns: Json }
       get_room_prediction_history: {
         Args: { p_limit?: number; p_offset?: number; p_room_id: string }
         Returns: Json

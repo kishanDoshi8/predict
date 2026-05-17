@@ -36,18 +36,31 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 	const total =
 		entry.options?.reduce((s, o) => s + o.total_bet, 0) ?? entry.total_pool;
 	const winner = entry.options?.find((o) => o.id === entry.winning_option_id);
+	const participants = entry.participant_count || entry.total_bets;
 
 	const winPct =
-		entry.total_bets > 0
-			? Math.round((entry.winner_count / entry.total_bets) * 100)
+		participants > 0
+			? Math.round((entry.winner_count / participants) * 100)
 			: null;
 
 	const resolvedLabel = entry.resolved_at
-		? new Date(entry.resolved_at).toLocaleDateString(undefined, {
+		? new Date(entry.resolved_at).toLocaleString(undefined, {
 				month: "short",
 				day: "numeric",
+				hour: "numeric",
+				minute: "2-digit",
 			})
 		: null;
+
+	const payoutSummary =
+		entry.status !== "revealed"
+			? "No payout distributed."
+			: entry.winner_count === 0
+				? "Nobody guessed correctly 💀"
+				: `+${entry.total_paid_to_winners.toLocaleString()} pts paid to ${entry.winner_count} winner${entry.winner_count === 1 ? "" : "s"}`;
+
+	const isUpset = entry.status === "revealed" && (winPct ?? 100) <= 25;
+	const isSweep = entry.status === "revealed" && (winPct ?? 0) >= 80;
 
 	return (
 		<div className='border border-border rounded-xl p-3 flex flex-col gap-2 hover:bg-accent/30 transition-colors'>
@@ -66,13 +79,23 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 
 			{/* Winner pill */}
 			{entry.status === "revealed" && winner && (
-				<div className='flex items-center gap-1.5'>
+				<div className='flex items-center gap-1.5 flex-wrap'>
 					<span className='text-xs text-muted-foreground'>
 						Winner:
 					</span>
 					<Badge variant='default' className='text-xs'>
 						{winner.label}
 					</Badge>
+					{isUpset && (
+						<Badge variant='secondary' className='text-xs'>
+							Upset ⚡
+						</Badge>
+					)}
+					{isSweep && (
+						<Badge variant='secondary' className='text-xs'>
+							Sweep 🧹
+						</Badge>
+					)}
 				</div>
 			)}
 
@@ -122,10 +145,10 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 			<div className='flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground'>
 				{total > 0 && <span>Pool: {total.toLocaleString()} pts</span>}
 				<Dot />
-				{entry.total_bets > 0 && (
+				{participants > 0 && (
 					<span>
-						{entry.total_bets} bet
-						{entry.total_bets === 1 ? "" : "s"}
+						{participants} participant
+						{participants === 1 ? "" : "s"}
 					</span>
 				)}
 				<Dot />
@@ -133,6 +156,15 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 					<span>{winPct}% picked right</span>
 				)}
 				<div>by {entry.creator_username}</div>
+			</div>
+
+			<div className='rounded-md bg-muted/40 px-2.5 py-2 text-xs space-y-0.5'>
+				<p className='font-medium text-foreground'>{payoutSummary}</p>
+				{entry.status === "revealed" && entry.biggest_payout > 0 && (
+					<p className='text-muted-foreground'>
+						Biggest payout: +{entry.biggest_payout.toLocaleString()} pts
+					</p>
+				)}
 			</div>
 		</div>
 	);

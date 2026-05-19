@@ -33,7 +33,7 @@ function CreatePredictionButton({
 		<Button
 			variant='default'
 			size='lg'
-			className={cn(`max-w-125 mx-auto font-bold`, className)}
+			className={cn(`w-full mx-auto font-bold`, className)}
 			onClick={() => navigate(`/rooms/${room.code}/predictions/new`)}
 		>
 			Create Prediction <Rocket className={`ml-2`} />

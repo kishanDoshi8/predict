@@ -27,13 +27,13 @@ export function PredictionPhaseView(props: Readonly<Props>) {
 		);
 	}
 
-	if (prediction?.status === "draft") {
+	if (prediction?.status === "draft" || isLoading) {
 		return <DraftPhase {...props} />;
 	} else if (prediction?.status === "locked") {
 		return <LockedPhase {...props} />;
 	} else if (prediction?.status === "revealed") {
 		return <ResolvedPhase {...props} />;
-	} else {
+	} else if (!isLoading) {
 		return <NoResult {...props} />; // update this to a loading component
 	}
 }

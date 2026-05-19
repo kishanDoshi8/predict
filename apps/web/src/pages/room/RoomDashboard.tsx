@@ -7,8 +7,8 @@ import { useRoomContext } from "./RoomLayout";
 
 function RoomDashboard() {
 	const { room } = useRoomContext();
-	const { data: activePrediction, isPending: isActivePredictionPending } =
-		useActivePrediction(room.id);
+	const { data: activePrediction } = useActivePrediction(room.id);
+
 	return (
 		<div>
 			<PredictionHeader />
@@ -18,11 +18,14 @@ function RoomDashboard() {
 				<LeaderboardPage />
 			</div>
 
-			{!activePrediction && !isActivePredictionPending && (
-				<CreatePredictionButton
-					className={`mt-4 fixed left-4 right-4 bottom-4 z-50`}
-				/>
-			)}
+			{activePrediction &&
+				!["draft", "locked"].includes(activePrediction.status) && (
+					<div
+						className={`mt-4 sticky left-4 right-4 bottom-4 z-50 w-3/4 max-w-md mx-auto`}
+					>
+						<CreatePredictionButton />
+					</div>
+				)}
 		</div>
 	);
 }

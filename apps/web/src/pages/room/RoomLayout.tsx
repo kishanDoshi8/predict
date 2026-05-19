@@ -6,13 +6,13 @@ import {
 } from "react-router-dom";
 import { useRoom } from "@/store/room";
 import { Room } from "@/types";
-import { Spinner } from "@/components";
 import { RoomHeader } from "./components/RoomHeader";
 import { useEffect, useState } from "react";
 import { usePlayer } from "@/store/player";
 import { useWeeklyClaim } from "@/hooks/useWeeklyClaim";
 import { usePreferences, useMarkHowToPlaySeen } from "@/store/preferences";
 import HowToPlayModal from "@/components/HowToPlayModal";
+import { Loading } from "@/components";
 
 export default function RoomLayout() {
 	const navigate = useNavigate();
@@ -50,7 +50,7 @@ export default function RoomLayout() {
 	if (isPending || isPlayerLoading) {
 		return (
 			<div className='flex items-center justify-center h-dvh'>
-				<Spinner className={`size-10 text-primary`} />
+				<Loading className={`size-10 text-primary`} />
 			</div>
 		);
 	}

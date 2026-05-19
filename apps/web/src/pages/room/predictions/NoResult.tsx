@@ -1,5 +1,4 @@
 import { Prediction } from "@/types";
-import { CreatePredictionButton } from "../controls/OrganizerControls";
 import PredictionOptions from "../widgets/PredictionOptions";
 import PredictionTitle from "../components/PredictionTitle";
 import { Alert, AlertDescription, AlertTitle, Skeleton } from "@/components";
@@ -86,10 +85,6 @@ function NoResult({ prediction }: Readonly<Props>) {
 					</div>
 				)}
 			</div>
-
-			<CreatePredictionButton
-				className={`mt-4 sticky left-4 right-4 bottom-4 z-50 w-3/4 max-w-md mx-auto`}
-			/>
 		</div>
 	);
 }

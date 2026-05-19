@@ -7,7 +7,6 @@ import { useBets } from "@/store/bet";
 import { useRoomContext } from "../RoomLayout";
 import { usePlayer } from "@/store/player";
 import { useOptionColor } from "@/hooks/useOptionColor";
-import { CreatePredictionButton } from "../controls/OrganizerControls";
 import { useRoomBetRealtime, useRoomRealtime } from "@/hooks/useRoomRealtime";
 
 type Props = {
@@ -123,10 +122,6 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 					</div>
 				)}
 			</div>
-
-			<CreatePredictionButton
-				className={`mt-4 sticky left-4 right-4 bottom-4 z-50 w-3/4 max-w-md mx-auto`}
-			/>
 		</div>
 	);
 }

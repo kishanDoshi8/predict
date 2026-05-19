@@ -6,8 +6,8 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { usePlayer } from "@/store/player";
-import { Spinner } from "@/components";
 import { useWeeklyClaim } from "@/hooks/useWeeklyClaim";
+import { Loading } from "@/components";
 
 export function HomePage() {
 	const navigate = useNavigate();
@@ -59,7 +59,7 @@ export function HomePage() {
 	if (isPlayerLoading) {
 		return (
 			<div className='flex items-center justify-center h-dvh'>
-				<Spinner className={`size-10 text-primary`} />
+				<Loading className={`size-10 text-primary`} />
 			</div>
 		);
 	}

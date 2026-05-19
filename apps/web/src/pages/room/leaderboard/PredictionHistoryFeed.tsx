@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle, MinusCircle } from "lucide-react";
 import Dot from "@/components/ui/dot";
+import { Link } from "react-router-dom";
 
 // ─── PredictionHistoryCard ────────────────────────────────────────────────────
 
@@ -36,21 +37,40 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 	const total =
 		entry.options?.reduce((s, o) => s + o.total_bet, 0) ?? entry.total_pool;
 	const winner = entry.options?.find((o) => o.id === entry.winning_option_id);
+	const participants = entry.participant_count ?? entry.total_bets;
 
 	const winPct =
-		entry.total_bets > 0
-			? Math.round((entry.winner_count / entry.total_bets) * 100)
+		participants > 0
+			? Math.round((entry.winner_count / participants) * 100)
 			: null;
 
 	const resolvedLabel = entry.resolved_at
-		? new Date(entry.resolved_at).toLocaleDateString(undefined, {
+		? new Date(entry.resolved_at).toLocaleString(undefined, {
 				month: "short",
 				day: "numeric",
+				hour: "numeric",
+				minute: "2-digit",
 			})
 		: null;
 
+	let payoutSummary: string;
+	if (entry.status !== "revealed") {
+		payoutSummary = "No payout distributed.";
+	} else if (entry.winner_count === 0) {
+		payoutSummary = "Nobody guessed correctly 💀";
+	} else {
+		const winnerLabel = entry.winner_count === 1 ? "winner" : "winners";
+		payoutSummary = `+${entry.total_paid_to_winners.toLocaleString()} pts paid to ${entry.winner_count} ${winnerLabel}`;
+	}
+
+	const isUpset = entry.status === "revealed" && (winPct ?? 100) <= 25;
+	const isSweep = entry.status === "revealed" && (winPct ?? 0) >= 80;
+
 	return (
-		<div className='border border-border rounded-xl p-3 flex flex-col gap-2 hover:bg-accent/30 transition-colors'>
+		<Link
+			to={`predictions/${entry.prediction_id}`}
+			className='border-2 border-cyan-900 rounded-xl p-3 flex flex-col gap-2 hover:bg-accent/30 transition-colors'
+		>
 			{/* Header row */}
 			<div className='flex items-start gap-2'>
 				<div className='mt-0.5 shrink-0'>{meta.icon}</div>
@@ -66,13 +86,23 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 
 			{/* Winner pill */}
 			{entry.status === "revealed" && winner && (
-				<div className='flex items-center gap-1.5'>
+				<div className='flex items-center gap-1.5 flex-wrap'>
 					<span className='text-xs text-muted-foreground'>
 						Winner:
 					</span>
 					<Badge variant='default' className='text-xs'>
 						{winner.label}
 					</Badge>
+					{isUpset && (
+						<Badge variant='secondary' className='text-xs'>
+							Upset ⚡
+						</Badge>
+					)}
+					{isSweep && (
+						<Badge variant='secondary' className='text-xs'>
+							Sweep 🧹
+						</Badge>
+					)}
 				</div>
 			)}
 
@@ -122,10 +152,10 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 			<div className='flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground'>
 				{total > 0 && <span>Pool: {total.toLocaleString()} pts</span>}
 				<Dot />
-				{entry.total_bets > 0 && (
+				{participants > 0 && (
 					<span>
-						{entry.total_bets} bet
-						{entry.total_bets === 1 ? "" : "s"}
+						{participants} participant
+						{participants === 1 ? "" : "s"}
 					</span>
 				)}
 				<Dot />
@@ -134,7 +164,17 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 				)}
 				<div>by {entry.creator_username}</div>
 			</div>
-		</div>
+
+			<div className='rounded-md bg-muted/40 px-2.5 py-2 text-xs space-y-0.5'>
+				<p className='font-medium text-foreground'>{payoutSummary}</p>
+				{entry.status === "revealed" && entry.biggest_payout > 0 && (
+					<p className='text-muted-foreground'>
+						Biggest payout: +{entry.biggest_payout.toLocaleString()}{" "}
+						pts
+					</p>
+				)}
+			</div>
+		</Link>
 	);
 }
 
@@ -145,7 +185,10 @@ type FeedProps = {
 	isLoading: boolean;
 };
 
-export function PredictionHistoryFeed({ entries, isLoading }: Readonly<FeedProps>) {
+export function PredictionHistoryFeed({
+	entries,
+	isLoading,
+}: Readonly<FeedProps>) {
 	if (isLoading) {
 		return (
 			<div className='flex flex-col gap-2'>
@@ -169,7 +212,7 @@ export function PredictionHistoryFeed({ entries, isLoading }: Readonly<FeedProps
 	}
 
 	return (
-		<div className='flex flex-col gap-2'>
+		<div className='flex flex-col gap-4'>
 			{entries.map((entry) => (
 				<PredictionHistoryCard
 					key={entry.prediction_id}

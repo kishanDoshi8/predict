@@ -347,6 +347,31 @@ export async function createPrediction(
   }
 }
 
+export async function getPrediction(predictionId: string) {
+  const { data, error } = await supabase
+    .from('predictions')
+    .select(`*`)
+    .eq('id', predictionId)
+    .maybeSingle()
+  
+  if (error) throw error
+  if (!data) return null
+
+  const { data: predictionOptions, error: optionsError } = await supabase
+    .from('prediction_options')
+    .select('*')
+    .eq('prediction_id', data.id)
+    .order('display_order', { ascending: true })
+  if (optionsError) throw optionsError
+
+  return {
+    ...data,
+    status: data.status as PredictionStatus,
+    prediction_options: predictionOptions ?? [],
+  }
+}
+
+
 export async function getActivePrediction(roomId: string) {
   const { data, error } = await supabase
     .from('predictions')
@@ -470,6 +495,13 @@ export async function getMyBet(predictionId: string, playerId: string) {
 // #region Leaderboard
 export async function getRoomLeaderboard(roomId: string) {
   const { data, error } = await supabase.rpc('get_room_leaderboard', {
+    p_room_id: roomId,
+  })
+  return assertOk(data, error) as LeaderboardEntry[]
+}
+
+export async function getRoomWeeklyLeaderboard(roomId: string) {
+  const { data, error } = await supabase.rpc('get_room_weekly_leaderboard', {
     p_room_id: roomId,
   })
   return assertOk(data, error) as LeaderboardEntry[]

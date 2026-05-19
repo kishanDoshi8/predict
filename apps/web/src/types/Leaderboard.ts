@@ -33,7 +33,10 @@ export type PredictionHistoryEntry = {
   creator_username:     string
   winning_option_label: string | null
   total_pool:           number
+  participant_count:    number
   total_bets:           number
   winner_count:         number
+  total_paid_to_winners:number
+  biggest_payout:       number
   options:              PredictionHistoryOption[] | null
 }

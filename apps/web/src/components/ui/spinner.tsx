@@ -1,5 +1,6 @@
 import { Loader2Icon } from "lucide-react";
-import { chaoticOrbit } from "ldrs";
+import { chaoticOrbit, ping } from "ldrs";
+ping.register();
 chaoticOrbit.register();
 
 import { cn } from "@/lib/utils";
@@ -15,7 +16,7 @@ function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
 	);
 }
 
-function Spinner2({
+function Loading({
 	className,
 	...props
 }: Readonly<React.ComponentProps<"svg">>) {
@@ -29,4 +30,18 @@ function Spinner2({
 	);
 }
 
-export { Spinner2 as Spinner, Spinner as SpinnerIcon };
+// Default values shown
+function PingLoading({
+	className,
+	...props
+}: Readonly<React.ComponentProps<"svg">>) {
+	return (
+		<l-ping
+			size='32'
+			speed={props.speed ?? 1.5}
+			color={props.color ?? "cyan"}
+		></l-ping>
+	);
+}
+
+export { Loading, Spinner, PingLoading };

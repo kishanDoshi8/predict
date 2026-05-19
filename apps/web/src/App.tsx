@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HomePage } from "@/pages/home/HomePage";
 import { LeaderboardPage } from "@/pages/LeaderboardPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
-import { RoomPage } from "./pages/room/RoomPage";
+import { PredictionPage } from "./pages/room/PredictionPage";
 import PredictionNew from "./pages/room/predictions/New";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
@@ -16,6 +16,7 @@ import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
 import { useEffect } from "react";
 import { registerForPushNotifications } from "@/lib/pushNotifications";
+import RoomDashboard from "./pages/room/RoomDashboard";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,10 @@ function AppRoutes() {
 				{/* Public auth routes */}
 				<Route path='/login' element={<LoginPage />} />
 				<Route path='/signup' element={<SignupPage />} />
-				<Route path='/forgot-password' element={<ForgotPasswordPage />} />
+				<Route
+					path='/forgot-password'
+					element={<ForgotPasswordPage />}
+				/>
 				<Route path='/reset-password' element={<ResetPasswordPage />} />
 
 				{/* Protected routes */}
@@ -40,7 +44,13 @@ function AppRoutes() {
 
 					<Route path='/rooms/:roomCode' element={<RoomLayout />}>
 						{/* This renders at /rooms/:roomCode */}
-						<Route index element={<RoomPage />} />
+						<Route index element={<RoomDashboard />} />
+
+						{/* This renders at /rooms/:roomCode/predictions/:predictionId */}
+						<Route
+							path='predictions/:predictionId'
+							element={<PredictionPage />}
+						/>
 
 						{/* This renders at /rooms/:roomCode/predictions/new */}
 						<Route

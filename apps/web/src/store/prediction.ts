@@ -1,4 +1,4 @@
-import { createPrediction, getActivePrediction, resolvePrediction } from "@/lib/api";
+import { createPrediction, getActivePrediction, getPrediction, resolvePrediction } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "./_keys";
 
@@ -53,5 +53,13 @@ export const useResolvePrediction = () => {
         onError: (error) => {
             console.error("Error resolving prediction:", error);
         },
+    });
+}
+
+export const usePrediction = (roomId?: string, predictionId?: string) => {
+    return useQuery({
+        queryKey: roomKeys.prediction(roomId ?? "", predictionId ?? ""),
+        queryFn: () => getPrediction(predictionId ?? ""),
+        enabled: !!predictionId && !!roomId,
     });
 }

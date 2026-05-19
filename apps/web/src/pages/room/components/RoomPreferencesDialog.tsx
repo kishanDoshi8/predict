@@ -21,7 +21,7 @@ import {
 	useUpdateGlobalPreferences,
 	useUpdateRoomPreferences,
 } from "@/store/preferences";
-import { Settings2 } from "lucide-react";
+import { BellIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -171,8 +171,12 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant='outline' size='sm'>
-					<Settings2 />
+				<Button
+					variant='secondary'
+					size='icon-lg'
+					className={`rounded-full`}
+				>
+					<BellIcon />
 				</Button>
 			</DialogTrigger>
 			<DialogContent className='sm:max-w-xl'>

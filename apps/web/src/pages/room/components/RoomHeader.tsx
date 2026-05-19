@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Room } from "@/types";
-import { HomeIcon, TrophyIcon } from "lucide-react";
+import { CoinsIcon, HomeIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { RoomPreferencesDialog } from "./RoomPreferencesDialog";
+import { usePlayer } from "@/store/player";
+import { Badge } from "@/components";
 
 type Props = {
 	room: Room;
@@ -10,13 +11,10 @@ type Props = {
 
 function RoomHeader({ room }: Readonly<Props>) {
 	const navigate = useNavigate();
+	const { data: player } = usePlayer();
 
 	const handleGoHome = () => {
 		navigate("/");
-	};
-
-	const handleGoLeaderboard = () => {
-		navigate(`/rooms/${room.code}/leaderboard`);
 	};
 
 	return (
@@ -35,16 +33,16 @@ function RoomHeader({ room }: Readonly<Props>) {
 				<Link to={`/rooms/${room.code}`} className={`flex-1`}>
 					<h1>{room.name}</h1>
 				</Link>
-				<Button
-					variant='outline'
-					size='sm'
-					className={`cursor-pointer`}
-					onClick={handleGoLeaderboard}
-					title='Leaderboard'
-				>
-					<TrophyIcon />
-				</Button>
-				<RoomPreferencesDialog roomId={room.id} />
+				<div>
+					{/* point */}
+					<Badge
+						variant='outline'
+						className={`b-4 px-4 py-2 border-accent text-primary text-base`}
+					>
+						<CoinsIcon />
+						{player?.points_balance ?? 0} pts
+					</Badge>
+				</div>
 			</div>
 		</header>
 	);

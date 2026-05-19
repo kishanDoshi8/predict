@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle, MinusCircle } from "lucide-react";
 import Dot from "@/components/ui/dot";
+import { Link } from "react-router-dom";
 
 // ─── PredictionHistoryCard ────────────────────────────────────────────────────
 
@@ -52,18 +53,24 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 			})
 		: null;
 
-	const payoutSummary =
-		entry.status !== "revealed"
-			? "No payout distributed."
-			: entry.winner_count === 0
-				? "Nobody guessed correctly 💀"
-				: `+${entry.total_paid_to_winners.toLocaleString()} pts paid to ${entry.winner_count} winner${entry.winner_count === 1 ? "" : "s"}`;
+	let payoutSummary: string;
+	if (entry.status !== "revealed") {
+		payoutSummary = "No payout distributed.";
+	} else if (entry.winner_count === 0) {
+		payoutSummary = "Nobody guessed correctly 💀";
+	} else {
+		const winnerLabel = entry.winner_count === 1 ? "winner" : "winners";
+		payoutSummary = `+${entry.total_paid_to_winners.toLocaleString()} pts paid to ${entry.winner_count} ${winnerLabel}`;
+	}
 
 	const isUpset = entry.status === "revealed" && (winPct ?? 100) <= 25;
 	const isSweep = entry.status === "revealed" && (winPct ?? 0) >= 80;
 
 	return (
-		<div className='border border-border rounded-xl p-3 flex flex-col gap-2 hover:bg-accent/30 transition-colors'>
+		<Link
+			to={`predictions/${entry.prediction_id}`}
+			className='border-2 border-cyan-900 rounded-xl p-3 flex flex-col gap-2 hover:bg-accent/30 transition-colors'
+		>
 			{/* Header row */}
 			<div className='flex items-start gap-2'>
 				<div className='mt-0.5 shrink-0'>{meta.icon}</div>
@@ -162,11 +169,12 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 				<p className='font-medium text-foreground'>{payoutSummary}</p>
 				{entry.status === "revealed" && entry.biggest_payout > 0 && (
 					<p className='text-muted-foreground'>
-						Biggest payout: +{entry.biggest_payout.toLocaleString()} pts
+						Biggest payout: +{entry.biggest_payout.toLocaleString()}{" "}
+						pts
 					</p>
 				)}
 			</div>
-		</div>
+		</Link>
 	);
 }
 
@@ -177,7 +185,10 @@ type FeedProps = {
 	isLoading: boolean;
 };
 
-export function PredictionHistoryFeed({ entries, isLoading }: Readonly<FeedProps>) {
+export function PredictionHistoryFeed({
+	entries,
+	isLoading,
+}: Readonly<FeedProps>) {
 	if (isLoading) {
 		return (
 			<div className='flex flex-col gap-2'>
@@ -201,7 +212,7 @@ export function PredictionHistoryFeed({ entries, isLoading }: Readonly<FeedProps
 	}
 
 	return (
-		<div className='flex flex-col gap-2'>
+		<div className='flex flex-col gap-4'>
 			{entries.map((entry) => (
 				<PredictionHistoryCard
 					key={entry.prediction_id}

@@ -16,6 +16,9 @@ export const roomKeys = {
   activePrediction: (roomId: string) =>
     [...roomKeys.detail(roomId), "activePrediction"] as const,
 
+  activePredictions: (roomId: string) =>
+    [...roomKeys.detail(roomId), "activePredictions"] as const,
+
   prediction: (roomId: string, predictionId: string) =>
     [...roomKeys.detail(roomId), "predictions", predictionId] as const,
 

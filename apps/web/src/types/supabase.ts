@@ -99,6 +99,7 @@ export type Database = {
           created_at: string
           dark_mode: boolean
           deadline_1h: boolean
+          has_seen_how_to_play: boolean
           player_id: string
           prediction_live: boolean
           prediction_locked: boolean
@@ -111,6 +112,7 @@ export type Database = {
           created_at?: string
           dark_mode?: boolean
           deadline_1h?: boolean
+          has_seen_how_to_play?: boolean
           player_id: string
           prediction_live?: boolean
           prediction_locked?: boolean
@@ -123,6 +125,7 @@ export type Database = {
           created_at?: string
           dark_mode?: boolean
           deadline_1h?: boolean
+          has_seen_how_to_play?: boolean
           player_id?: string
           prediction_live?: boolean
           prediction_locked?: boolean
@@ -386,6 +389,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          predictions_limit: number
           room_code: string
           status: string
         }
@@ -393,6 +397,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          predictions_limit?: number
           room_code: string
           status?: string
         }
@@ -400,6 +405,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          predictions_limit?: number
           room_code?: string
           status?: string
         }
@@ -486,13 +492,17 @@ export type Database = {
       get_player: { Args: never; Returns: Json }
       get_preferences: { Args: { p_room_id?: string }; Returns: Json }
       get_room_leaderboard: { Args: { p_room_id: string }; Returns: Json }
-      get_room_weekly_leaderboard: { Args: { p_room_id: string }; Returns: Json }
       get_room_prediction_history: {
         Args: { p_limit?: number; p_offset?: number; p_room_id: string }
         Returns: Json
       }
+      get_room_weekly_leaderboard: {
+        Args: { p_room_id: string }
+        Returns: Json
+      }
       join_room: { Args: { p_room_code: string }; Returns: Json }
       lock_prediction: { Args: { p_prediction_id: string }; Returns: Json }
+      mark_how_to_play_seen: { Args: never; Returns: undefined }
       place_bet: {
         Args: { p_amount: number; p_option_id: string; p_prediction_id: string }
         Returns: Json
@@ -542,7 +552,6 @@ export type Database = {
         }
         Returns: Json
       }
-      mark_how_to_play_seen: { Args: never; Returns: void }
       upsert_user_push_subscription: {
         Args: { p_subscription: Json }
         Returns: string

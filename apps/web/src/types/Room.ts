@@ -13,10 +13,12 @@ export interface RoomMember {
 }
 
 export interface Room {
-  id:         string
-  code:       string
-  name:       string
-  status:     string
-  created_at: string
-  members:    RoomMember[]
+  id:                string
+  code:              string
+  name:              string
+  status:            string
+  created_at:        string
+  members:           RoomMember[]
+  // Max concurrent active (draft/locked) predictions. Read-only from the app layer.
+  predictions_limit: number
 }

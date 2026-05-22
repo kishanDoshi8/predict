@@ -98,6 +98,9 @@ export async function createRoom(room_name: string): Promise<Room> {
   return {
     ...room,
     members: members,
+    // predictions_limit is not returned by the create_room RPC; default to 5.
+    // The useRoom hook always re-fetches via spectateRoom (select *) which has the real value.
+    predictions_limit: 5,
   }
 }
 
@@ -157,6 +160,9 @@ export async function joinRoom(roomCode: string): Promise<Room> {
   return {
     ...room,
     members: members,
+    // predictions_limit is not returned by the join_room RPC; default to 5.
+    // The useRoom hook always re-fetches via spectateRoom (select *) which has the real value.
+    predictions_limit: 5,
   }
 }
 
@@ -398,6 +404,66 @@ export async function getActivePrediction(roomId: string) {
     status: data.status as PredictionStatus,
     prediction_options: predictionOptions ?? [],
   }
+}
+
+export async function getActivePredictions(roomId: string): Promise<Prediction[]> {
+  // First: fetch all active (draft/locked) predictions ordered by deadline asc
+  const { data: activeRows, error: activeError } = await supabase
+    .from('predictions')
+    .select('*')
+    .eq('room_id', roomId)
+    .in('status', ['draft', 'locked'])
+    .order('deadline', { ascending: true })
+
+  if (activeError) throw activeError
+
+  if (activeRows && activeRows.length > 0) {
+    // Fetch options for each active prediction in parallel
+    const predictions = await Promise.all(
+      activeRows.map(async (row: typeof activeRows[0]) => {
+        const { data: opts, error: optsErr } = await supabase
+          .from('prediction_options')
+          .select('*')
+          .eq('prediction_id', row.id)
+          .order('display_order', { ascending: true })
+        if (optsErr) throw optsErr
+        return {
+          ...row,
+          status: row.status as PredictionStatus,
+          prediction_options: opts ?? [],
+        }
+      })
+    )
+    return predictions
+  }
+
+  // Fallback: no active predictions — return the most recently completed prediction
+  const { data: fallbackRows, error: fallbackError } = await supabase
+    .from('predictions')
+    .select('*')
+    .eq('room_id', roomId)
+    .in('status', ['revealed', 'cancelled', 'no_result'])
+    .order('resolved_at', { ascending: false })
+    .limit(1)
+
+  if (fallbackError) throw fallbackError
+  if (!fallbackRows || fallbackRows.length === 0) return []
+
+  const fallback = fallbackRows[0]
+  const { data: fallbackOpts, error: fallbackOptsErr } = await supabase
+    .from('prediction_options')
+    .select('*')
+    .eq('prediction_id', fallback.id)
+    .order('display_order', { ascending: true })
+  if (fallbackOptsErr) throw fallbackOptsErr
+
+  return [
+    {
+      ...fallback,
+      status: fallback.status as PredictionStatus,
+      prediction_options: fallbackOpts ?? [],
+    },
+  ]
 }
 
 export async function getPredictionHistory(roomId: string) {

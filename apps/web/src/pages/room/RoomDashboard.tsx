@@ -1,4 +1,4 @@
-import { useActivePrediction } from "@/store/prediction";
+import { useActivePredictions } from "@/store/prediction";
 import { LeaderboardPage } from "../LeaderboardPage";
 import InPlayPredictions from "./components/InPlayPredictions";
 import PredictionHeader from "./components/PredictionHeader";
@@ -7,7 +7,15 @@ import { useRoomContext } from "./RoomLayout";
 
 function RoomDashboard() {
 	const { room } = useRoomContext();
-	const { data: activePrediction } = useActivePrediction(room.id);
+	const { data: predictions = [] } = useActivePredictions(room.id);
+
+	// Count predictions that are still active (draft or locked)
+	const activeCount = predictions.filter(
+		(p) => p.status === "draft" || p.status === "locked",
+	).length;
+
+	// Show the create button when below the room's predictions limit
+	const canCreatePrediction = activeCount < room.predictions_limit;
 
 	return (
 		<div>
@@ -18,14 +26,13 @@ function RoomDashboard() {
 				<LeaderboardPage />
 			</div>
 
-			{activePrediction &&
-				!["draft", "locked"].includes(activePrediction.status) && (
-					<div
-						className={`mt-4 sticky left-4 right-4 bottom-4 z-50 w-3/4 max-w-md mx-auto`}
-					>
-						<CreatePredictionButton />
-					</div>
-				)}
+			{canCreatePrediction && (
+				<div
+					className={`mt-4 sticky left-4 right-4 bottom-4 z-50 w-3/4 max-w-md mx-auto`}
+				>
+					<CreatePredictionButton />
+				</div>
+			)}
 		</div>
 	);
 }

@@ -29,16 +29,19 @@ import {
 	RadioGroupItem,
 	Spinner,
 } from "@/components";
-import { useActivePrediction, useResolvePrediction } from "@/store/prediction";
+import { useResolvePrediction } from "@/store/prediction";
 import { useEffect, useState } from "react";
 import { Prediction } from "@/types";
 import { InfoIcon } from "lucide-react";
 import { toast } from "sonner";
 
-export default function LockControls() {
+type LockControlsProps = {
+	prediction: Prediction;
+};
+
+export default function LockControls({ prediction }: Readonly<LockControlsProps>) {
 	const { room } = useRoomContext();
 	const { data: player } = usePlayer();
-	const { data: prediction } = useActivePrediction(room.id);
 
 	const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
@@ -54,7 +57,7 @@ export default function LockControls() {
 		setSelectedOption(null);
 	};
 
-	if (prediction?.status !== "locked") {
+	if (prediction.status !== "locked") {
 		return null;
 	}
 

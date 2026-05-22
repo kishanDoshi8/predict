@@ -22,6 +22,9 @@ import { DotIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Prediction } from "@/types";
 
+// Threshold (as a percentage) above which an option is labelled "🔥 hot pick"
+const HOT_PICK_THRESHOLD_PERCENT = 60;
+
 // ── Per-card component ─────────────────────────────────────────────────────
 // Fetches its own bets so each card in the carousel is self-contained.
 function PredictionCard({ prediction, roomId }: { prediction: Prediction; roomId: string }) {
@@ -92,9 +95,9 @@ function PredictionCard({ prediction, roomId }: { prediction: Prediction; roomId
 							<FieldLabel htmlFor={`progress-${option.id}`}>
 								<span>
 									{option.label}
-									{/* hot pick label if +60% */}
+									{/* hot pick label when one option captures HOT_PICK_THRESHOLD_PERCENT% or more of bets */}
 									{totalBetAmount > 0 &&
-									(betAmountPerOption[option.id] / totalBetAmount) * 100 >= 60 ? (
+									(betAmountPerOption[option.id] / totalBetAmount) * 100 >= HOT_PICK_THRESHOLD_PERCENT ? (
 										<Badge variant='outline' className='ml-2 text-xs'>
 											🔥 hot pick
 										</Badge>
@@ -110,6 +113,8 @@ function PredictionCard({ prediction, roomId }: { prediction: Prediction; roomId
 										? (betAmountPerOption[option.id] / totalBetAmount) * 100
 										: 0
 								}
+								// NOTE: useOptionBgColor is NOT a React hook despite its name —
+								// it contains no React hook calls and is safe to use inside .map()
 								className={`[&>div]:${useOptionBgColor(option.id)}`}
 								id={`progress-${option.id}`}
 							/>

@@ -297,11 +297,13 @@ function InPlayPredictions() {
 					{isPredictionLoading ? (
 						<CarouselItem>
 							<div
-								className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full`}
+								className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full space-y-2`}
 							>
-								<Skeleton className={`h-6 mx-auto w-full`} />
-								<Skeleton className={`h-10 mx-auto w-full`} />
-								<Skeleton className={`h-10 mx-auto w-full`} />
+								<Skeleton className={`h-5 w-22`} />
+								<Skeleton className={`h-7 mx-auto w-full`} />
+								<Skeleton className={`h-9 mx-auto w-full`} />
+								<Skeleton className={`h-9 mx-auto w-full`} />
+								<Skeleton className={`h-6 ml-auto w-34`} />
 							</div>
 						</CarouselItem>
 					) : predictions.length === 0 ? (

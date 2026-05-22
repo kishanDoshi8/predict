@@ -1,4 +1,4 @@
-import { useActivePrediction } from "@/store/prediction";
+import { useActivePredictions } from "@/store/prediction";
 import { useRoomContext } from "../RoomLayout";
 import {
 	Badge,
@@ -8,171 +8,252 @@ import {
 	Skeleton,
 	PingLoading,
 } from "@/components";
+import {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	CarouselNext,
+	CarouselPrevious,
+} from "@/components/ui/carousel";
 import { Countdown } from "../widgets/CountDown";
 import { useBets } from "@/store/bet";
 import { useOptionBgColor } from "@/hooks/useOptionColor";
 import { DotIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Prediction } from "@/types";
 
-function InPlayPredictions() {
-	const { room } = useRoomContext();
-	const { data: activePrediction, isPending: isPredictionLoading } =
-		useActivePrediction(room.id);
-	const { data: bets = [] } = useBets(room.id, activePrediction?.id);
+// ── Per-card component ─────────────────────────────────────────────────────
+// Fetches its own bets so each card in the carousel is self-contained.
+function PredictionCard({ prediction, roomId }: { prediction: Prediction; roomId: string }) {
+	const { data: bets = [] } = useBets(roomId, prediction.id);
 
 	const betAmountPerOption: Record<string, number> = {};
 	for (const bet of bets) {
-		if (!betAmountPerOption[bet.option_id]) {
-			betAmountPerOption[bet.option_id] = 0;
+		betAmountPerOption[bet.option_id] = (betAmountPerOption[bet.option_id] ?? 0) + bet.amount;
+	}
+	const totalBetAmount = bets.reduce((sum, bet) => sum + bet.amount, 0);
+
+	const isActive = prediction.status === "draft" || prediction.status === "locked";
+
+	return (
+		<div
+			className={`border-2 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full transition-colors ${
+				prediction.status === "locked"
+					? "border-orange-600"
+					: isActive
+					? "border-cyan-900"
+					: "border-border"
+			}`}
+		>
+			<Link to={`predictions/${prediction.id}`} className={`no-underline`}>
+				{/* Status badge per card */}
+				<div className={`flex items-center gap-2 mb-2`}>
+					{prediction.status === "draft" && (
+						<>
+							<Badge variant='outline' className={`border-accent text-primary text-xs`}>
+								In Play
+							</Badge>
+							{prediction.deadline && (
+								<Countdown targetTime={new Date(prediction.deadline).getTime()} />
+							)}
+						</>
+					)}
+					{prediction.status === "locked" && (
+						<Badge variant='outline' className={`border-orange-600 text-orange-500 text-xs flex items-center gap-1`}>
+							<PingLoading className={`inline-block`} />
+							Live
+						</Badge>
+					)}
+					{prediction.status === "revealed" && (
+						<Badge variant='outline' className={`text-green-500 text-xs flex items-center gap-1`}>
+							<DotIcon className={`text-green-500`} />
+							Resolved
+						</Badge>
+					)}
+					{prediction.status === "cancelled" && (
+						<Badge variant='outline' className={`text-muted-foreground text-xs flex items-center gap-1`}>
+							<DotIcon className={`text-muted-foreground`} />
+							Cancelled
+						</Badge>
+					)}
+					{prediction.status === "no_result" && (
+						<Badge variant='outline' className={`text-muted-foreground text-xs flex items-center gap-1`}>
+							<DotIcon className={`text-muted-foreground`} />
+							No Result
+						</Badge>
+					)}
+				</div>
+
+				<h4 className={`text-xl md:text-2xl`}>{prediction.title}</h4>
+
+				<div className={`flex flex-col gap-4 mt-6`}>
+					{prediction.prediction_options.map((option) => (
+						<Field className='w-full' key={option.id}>
+							<FieldLabel htmlFor={`progress-${option.id}`}>
+								<span>
+									{option.label}
+									{/* hot pick label if +60% */}
+									{totalBetAmount > 0 &&
+									(betAmountPerOption[option.id] / totalBetAmount) * 100 >= 60 ? (
+										<Badge variant='outline' className='ml-2 text-xs'>
+											🔥 hot pick
+										</Badge>
+									) : null}
+								</span>
+								<span className={`ml-auto`}>
+									{betAmountPerOption[option.id] ?? 0} pts
+								</span>
+							</FieldLabel>
+							<Progress
+								value={
+									totalBetAmount
+										? (betAmountPerOption[option.id] / totalBetAmount) * 100
+										: 0
+								}
+								className={`[&>div]:${useOptionBgColor(option.id)}`}
+								id={`progress-${option.id}`}
+							/>
+						</Field>
+					))}
+				</div>
+
+				{prediction.status === "draft" && (
+					<span className={`text-sm text-muted-foreground text-right mt-4 block`}>
+						Place your bets now!
+					</span>
+				)}
+			</Link>
+		</div>
+	);
+}
+
+// ── Section header ─────────────────────────────────────────────────────────
+function SectionHeader({ predictions }: { predictions: Prediction[] }) {
+	const hasActive = predictions.some(
+		(p) => p.status === "draft" || p.status === "locked",
+	);
+	const allLocked =
+		hasActive && predictions.every((p) => p.status === "locked");
+
+	if (hasActive) {
+		if (allLocked) {
+			return (
+				<h2 className={`my-4 flex items-center gap-2 text-lg font-semibold`}>
+					<PingLoading className={`inline-block`} />
+					Live
+				</h2>
+			);
 		}
-		betAmountPerOption[bet.option_id] += bet.amount;
+		// Mixed or all draft: find the earliest deadline for the countdown
+		const earliest = predictions
+			.filter((p) => p.status === "draft")
+			.sort(
+				(a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime(),
+			)[0];
+		return (
+			<div className={`flex items-center gap-2 my-4`}>
+				<h2 className={`text-lg font-semibold`}>In Play</h2>
+				{earliest?.deadline && (
+					<Countdown targetTime={new Date(earliest.deadline).getTime()} />
+				)}
+			</div>
+		);
 	}
 
-	const totalBetAmount = bets.reduce((sum, bet) => sum + bet.amount, 0);
+	// Fallback: completed prediction
+	const fallback = predictions[0];
+	if (!fallback) return null;
+
+	if (fallback.status === "revealed") {
+		return (
+			<h2 className={`my-4 flex items-center gap-2 text-lg font-semibold`}>
+				<DotIcon className={`inline-block text-green-500 animate-pulse`} />
+				Resolved
+			</h2>
+		);
+	}
+	if (fallback.status === "cancelled") {
+		return (
+			<h2 className={`my-4 flex items-center gap-2 text-lg font-semibold text-muted-foreground`}>
+				<DotIcon className={`inline-block text-muted-foreground animate-pulse`} />
+				Cancelled
+			</h2>
+		);
+	}
+	return (
+		<h2 className={`my-4 flex items-center gap-2 text-lg font-semibold text-muted-foreground`}>
+			<DotIcon className={`inline-block text-muted-foreground animate-pulse`} />
+			No Result
+		</h2>
+	);
+}
+
+// ── Main component ─────────────────────────────────────────────────────────
+function InPlayPredictions() {
+	const { room } = useRoomContext();
+	const { data: predictions = [], isPending: isPredictionLoading } =
+		useActivePredictions(room.id);
+
+	const multipleCards = predictions.length > 1;
 
 	return (
 		<div className={`max-w-lg mx-auto`}>
 			{isPredictionLoading && (
-				<div className={`flex flex-col gap-4  my-4`}>
+				<div className={`flex flex-col gap-4 my-4`}>
 					<Skeleton className={`h-8 w-35`} />
 				</div>
 			)}
-			{activePrediction?.status === "draft" && (
-				<div className={`flex items-center gap-2 my-4`}>
-					<h2 className={`text-lg font-semibold`}>In Play</h2>
-					{activePrediction?.deadline &&
-						activePrediction.status === "draft" && (
-							<Countdown
-								targetTime={new Date(
-									activePrediction.deadline,
-								).getTime()}
-							/>
-						)}
-				</div>
-			)}
-			{activePrediction?.status === "locked" && (
-				<h2
-					className={`my-4 flex items-center gap-2 text-lg font-semibold`}
-				>
-					<PingLoading className={`inline-block`} />
-					Live
-				</h2>
-			)}
-			{activePrediction?.status === "revealed" && (
-				<h2
-					className={`my-4 flex items-center gap-2 text-lg font-semibold`}
-				>
-					<DotIcon
-						className={`inline-block text-green-500 animate-pulse`}
-					/>
-					Resolved
-				</h2>
-			)}
-			{activePrediction?.status === "cancelled" && (
-				<h2
-					className={`my-4 flex items-center gap-2 text-lg font-semibold text-muted-foreground`}
-				>
-					<DotIcon
-						className={`inline-block text-muted-foreground animate-pulse`}
-					/>
-					Cancelled
-				</h2>
-			)}
-			{activePrediction?.status === "no_result" && (
-				<h2
-					className={`my-4 flex items-center gap-2 text-lg font-semibold text-muted-foreground`}
-				>
-					<DotIcon
-						className={`inline-block text-muted-foreground animate-pulse`}
-					/>
-					No Result
-				</h2>
+
+			{!isPredictionLoading && predictions.length > 0 && (
+				<SectionHeader predictions={predictions} />
 			)}
 
-			<div
-				className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full transition-colors`}
+			{/* Carousel — works gracefully with a single card too */}
+			<Carousel
+				opts={{ align: "start", loop: false }}
+				className={`w-full ${multipleCards ? "px-10" : ""}`}
 			>
-				{activePrediction ? (
-					<Link
-						to={`predictions/${activePrediction.id}`}
-						className={`no-underline`}
-					>
-						<h4 className={`text-xl md:text-2xl`}>
-							{activePrediction.title}
-						</h4>
+				<CarouselContent>
+					{isPredictionLoading ? (
+						<CarouselItem>
+							<div
+								className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full`}
+							>
+								<Skeleton className={`h-6 mx-auto w-full`} />
+								<Skeleton className={`h-10 mx-auto w-full`} />
+								<Skeleton className={`h-10 mx-auto w-full`} />
+							</div>
+						</CarouselItem>
+					) : predictions.length === 0 ? (
+						<CarouselItem>
+							<div
+								className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full`}
+							>
+								<p className={`text-muted-foreground text-center py-4`}>
+									No predictions yet. The host will start one soon!
+								</p>
+							</div>
+						</CarouselItem>
+					) : (
+						predictions.map((prediction) => (
+							<CarouselItem key={prediction.id}>
+								<PredictionCard prediction={prediction} roomId={room.id} />
+							</CarouselItem>
+						))
+					)}
+				</CarouselContent>
 
-						<div className={`flex flex-col gap-4 mt-6`}>
-							{activePrediction.prediction_options.map(
-								(option) => (
-									<Field className='w-full' key={option.id}>
-										<FieldLabel
-											htmlFor={`progress-upload-${option.id}`}
-										>
-											<span>
-												{option.label}
-												{/* hot pick label if +60% */}
-												{totalBetAmount > 0 &&
-												(betAmountPerOption[option.id] /
-													totalBetAmount) *
-													100 >=
-													60 ? (
-													<Badge
-														variant='outline'
-														className='ml-2 text-xs'
-													>
-														🔥 hot pick
-													</Badge>
-												) : null}
-											</span>
-											<span className={`ml-auto`}>
-												{betAmountPerOption[
-													option.id
-												] ?? 0}{" "}
-												pts
-											</span>
-										</FieldLabel>
-										<Progress
-											value={
-												totalBetAmount
-													? (betAmountPerOption[
-															option.id
-														] /
-															totalBetAmount) *
-														100
-													: 0
-											}
-											className={
-												false
-													? "[&>div]:bg-slate-400 bg-slate-400/50"
-													: `[&>div]:${useOptionBgColor(option.id)}`
-											}
-											id={`progress-upload-${option.id}`}
-										/>
-									</Field>
-								),
-							)}
-						</div>
-
-						<div>
-							{activePrediction?.status === "draft" && (
-								<span
-									className={`text-sm text-muted-foreground text-right mt-4 block`}
-								>
-									Place your bets now!
-								</span>
-							)}
-						</div>
-					</Link>
-				) : (
-					<div className={`flex flex-col gap-4 justify-center`}>
-						<Skeleton className={`h-6 mx-auto w-full`} />
-						<Skeleton className={`h-10 mx-auto w-full`} />
-						<Skeleton className={`h-10 mx-auto w-full`} />
-					</div>
+				{/* Only show arrows when there are multiple predictions */}
+				{multipleCards && (
+					<>
+						<CarouselPrevious />
+						<CarouselNext />
+					</>
 				)}
-			</div>
+			</Carousel>
 		</div>
 	);
 }
 
 export default InPlayPredictions;
+

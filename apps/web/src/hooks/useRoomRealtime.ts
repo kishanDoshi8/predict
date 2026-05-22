@@ -25,6 +25,23 @@ export function useRoomRealtime(roomId: string | null) {
                 });
             }
         )
+        // Invalidate activePredictions whenever any prediction in this room changes
+        // (created, locked, resolved, cancelled). This keeps the dashboard carousel
+        // in sync without a page refresh.
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "predictions",
+                filter: `room_id=eq.${roomId}`,
+            },
+            () => {
+                queryClient.invalidateQueries({
+                    queryKey: roomKeys.activePredictions(roomId),
+                });
+            }
+        )
         .subscribe((status) => {
             console.log("Realtime status:", status);
         });
@@ -66,3 +83,4 @@ export function useRoomBetRealtime(roomId: string, predictionId: string | null) 
         };
     }, [roomId, predictionId, queryClient]);
 }
+

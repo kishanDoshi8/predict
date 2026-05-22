@@ -1,4 +1,4 @@
-import { createPrediction, getActivePrediction, getPrediction, resolvePrediction } from "@/lib/api";
+import { createPrediction, getActivePrediction, getActivePredictions, getPrediction, resolvePrediction } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "./_keys";
 
@@ -6,6 +6,16 @@ export const useActivePrediction = (roomId?: string) => {
     return useQuery({
         queryKey: roomKeys.activePrediction(roomId ?? ""),
         queryFn: () => getActivePrediction(roomId ?? ""),
+        enabled: !!roomId,
+    });
+}
+
+// Returns all active (draft/locked) predictions for a room ordered by deadline asc.
+// Falls back to the most recently completed prediction when no active ones exist.
+export const useActivePredictions = (roomId?: string) => {
+    return useQuery({
+        queryKey: roomKeys.activePredictions(roomId ?? ""),
+        queryFn: () => getActivePredictions(roomId ?? ""),
         enabled: !!roomId,
     });
 }
@@ -25,6 +35,9 @@ export const useCreatePrediction = () => {
         onSuccess: (data) => {
             queryClient.invalidateQueries({
                 queryKey: roomKeys.activePrediction(data.room_id),
+            });
+            queryClient.invalidateQueries({
+                queryKey: roomKeys.activePredictions(data.room_id),
             });
         },
         onError: (error) => {
@@ -48,6 +61,9 @@ export const useResolvePrediction = () => {
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
                 queryKey: roomKeys.activePrediction(variables.roomId),
+            });
+            queryClient.invalidateQueries({
+                queryKey: roomKeys.activePredictions(variables.roomId),
             });
         },
         onError: (error) => {

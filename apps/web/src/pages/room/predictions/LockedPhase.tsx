@@ -104,7 +104,7 @@ export default function LockedPhase({
 				)}
 			</div>
 
-			<LockControls />
+			{prediction && <LockControls prediction={prediction} />}
 		</div>
 	);
 }

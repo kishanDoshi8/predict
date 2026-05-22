@@ -37,7 +37,7 @@ function RoomHeader({ room }: Readonly<Props>) {
 					{/* point */}
 					<Badge
 						variant='outline'
-						className={`b-4 px-4 py-2 border-accent text-primary text-base`}
+						className={`b-4 px-4 border-accent text-primary text-base`}
 					>
 						<CoinsIcon />
 						{player?.points_balance ?? 0} pts

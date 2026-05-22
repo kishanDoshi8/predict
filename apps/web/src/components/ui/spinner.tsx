@@ -33,11 +33,12 @@ function Loading({
 // Default values shown
 function PingLoading({
 	className,
+	size = 32,
 	...props
-}: Readonly<React.ComponentProps<"svg">>) {
+}: Readonly<React.ComponentProps<"svg"> & { size?: number }>) {
 	return (
 		<l-ping
-			size='32'
+			size={size}
 			speed={props.speed ?? 1.5}
 			color={props.color ?? "cyan"}
 		></l-ping>

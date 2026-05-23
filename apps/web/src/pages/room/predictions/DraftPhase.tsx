@@ -6,7 +6,7 @@ import { Skeleton } from "../../../components/ui/skeleton";
 import PredictionOptions from "../widgets/PredictionOptions";
 import DraftControls from "../controls/DraftControls";
 import { useRoomContext } from "../RoomLayout";
-import { useRoomBetRealtime, useRoomRealtime } from "@/hooks/useRoomRealtime";
+import { useRoomBetRealtime } from "@/hooks/useRoomRealtime";
 import PredictionTitle from "../components/PredictionTitle";
 import { Countdown } from "../widgets/CountDown";
 
@@ -24,7 +24,6 @@ export default function DraftPhase({
 	const { data: player, isPending: isPlayerLoading } = usePlayer();
 	const { room } = useRoomContext();
 
-	useRoomRealtime(room.id);
 	useRoomBetRealtime(room.id, prediction?.id ?? null);
 
 	return (

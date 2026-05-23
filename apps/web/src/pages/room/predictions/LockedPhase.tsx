@@ -9,7 +9,7 @@ import { usePlayer } from "@/store/player";
 import { useOptionColor } from "@/hooks/useOptionColor";
 import { Lock } from "lucide-react";
 import LockControls from "../controls/LockControls";
-import { useRoomBetRealtime, useRoomRealtime } from "@/hooks/useRoomRealtime";
+import { useRoomBetRealtime } from "@/hooks/useRoomRealtime";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -28,7 +28,6 @@ export default function LockedPhase({
 		refetch: refetchBets,
 	} = useBets(room.id, prediction?.id);
 
-	useRoomRealtime(room.id);
 	useRoomBetRealtime(room.id, prediction?.id ?? null);
 
 	useEffect(() => {

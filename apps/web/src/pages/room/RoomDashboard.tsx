@@ -2,6 +2,7 @@ import { useActivePredictions } from "@/store/prediction";
 import { LeaderboardPage } from "../LeaderboardPage";
 import InPlayPredictions from "./components/InPlayPredictions";
 import PredictionHeader from "./components/PredictionHeader";
+import RoomStatsCards from "./components/RoomStatsCards";
 import { CreatePredictionButton } from "./controls/OrganizerControls";
 import { useRoomContext } from "./RoomLayout";
 
@@ -20,6 +21,7 @@ function RoomDashboard() {
 	return (
 		<div>
 			<PredictionHeader />
+			<RoomStatsCards />
 
 			<InPlayPredictions />
 			<div className={`mt-6`}>

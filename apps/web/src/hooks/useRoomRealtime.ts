@@ -42,6 +42,34 @@ export function useRoomRealtime(roomId: string | null) {
                 });
             }
         )
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "room_stats",
+                filter: `room_id=eq.${roomId}`,
+            },
+            () => {
+                queryClient.invalidateQueries({
+                    queryKey: roomKeys.stats(roomId),
+                });
+            }
+        )
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "player_room_stats",
+                filter: `room_id=eq.${roomId}`,
+            },
+            () => {
+                queryClient.invalidateQueries({
+                    queryKey: roomKeys.stats(roomId),
+                });
+            }
+        )
         .subscribe((status) => {
             console.log("Realtime status:", status);
         });

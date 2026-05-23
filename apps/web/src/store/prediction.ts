@@ -65,6 +65,9 @@ export const useResolvePrediction = () => {
             queryClient.invalidateQueries({
                 queryKey: roomKeys.activePredictions(variables.roomId),
             });
+            queryClient.invalidateQueries({
+                queryKey: roomKeys.stats(variables.roomId),
+            });
         },
         onError: (error) => {
             console.error("Error resolving prediction:", error);

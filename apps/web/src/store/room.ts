@@ -1,4 +1,4 @@
-import { createRoom, getPlayerRooms, joinRoom, spectateRoom } from "@/lib/api";
+import { createRoom, getPlayerRooms, getRoomStatCards, joinRoom, spectateRoom } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "./_keys";
 
@@ -41,5 +41,13 @@ export const usePlayerRooms = (player_id: string) => {
         queryFn: () => getPlayerRooms(player_id),
         retry: false,
         enabled: !!player_id,
+    });
+}
+
+export const useRoomStatCards = (roomId?: string, limit = 5) => {
+    return useQuery({
+        queryKey: roomKeys.stats(roomId ?? ""),
+        queryFn: () => getRoomStatCards(roomId ?? "", limit),
+        enabled: !!roomId,
     });
 }

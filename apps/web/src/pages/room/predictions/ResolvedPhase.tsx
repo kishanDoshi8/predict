@@ -7,7 +7,7 @@ import { useBets } from "@/store/bet";
 import { useRoomContext } from "../RoomLayout";
 import { usePlayer } from "@/store/player";
 import { useOptionColor } from "@/hooks/useOptionColor";
-import { useRoomBetRealtime, useRoomRealtime } from "@/hooks/useRoomRealtime";
+import { useRoomBetRealtime } from "@/hooks/useRoomRealtime";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -23,7 +23,6 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 		prediction.id,
 	);
 
-	useRoomRealtime(room.id);
 	useRoomBetRealtime(room.id, prediction?.id ?? null);
 
 	const getPlayerName = (playerId: string) => {

@@ -144,6 +144,51 @@ export type Database = {
           },
         ]
       }
+      player_room_stats: {
+        Row: {
+          created_at: string
+          id: string
+          room_id: string
+          stat_key: string
+          stat_value_json: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          room_id: string
+          stat_key: string
+          stat_value_json?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          room_id?: string
+          stat_key?: string
+          stat_value_json?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_room_stats_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_room_stats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       players: {
         Row: {
           created_at: string
@@ -284,6 +329,8 @@ export type Database = {
       }
       room_members: {
         Row: {
+          current_streak: number
+          highest_streak: number
           id: string
           is_organizer: boolean
           joined_at: string
@@ -292,6 +339,8 @@ export type Database = {
           total_won_in_room: number
         }
         Insert: {
+          current_streak?: number
+          highest_streak?: number
           id?: string
           is_organizer?: boolean
           joined_at?: string
@@ -300,6 +349,8 @@ export type Database = {
           total_won_in_room?: number
         }
         Update: {
+          current_streak?: number
+          highest_streak?: number
           id?: string
           is_organizer?: boolean
           joined_at?: string
@@ -377,6 +428,41 @@ export type Database = {
           },
           {
             foreignKeyName: "room_preferences_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      room_stats: {
+        Row: {
+          created_at: string
+          id: string
+          room_id: string
+          stat_key: string
+          stat_value_json: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          room_id: string
+          stat_key: string
+          stat_value_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          room_id?: string
+          stat_key?: string
+          stat_value_json?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_stats_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "rooms"
@@ -543,6 +629,15 @@ export type Database = {
         }
         Returns: Json
       }
+      update_player_stats_after_resolution: {
+        Args: {
+          p_outcome: string
+          p_prediction_id: string
+          p_room_id: string
+          p_winning_option_id: string
+        }
+        Returns: undefined
+      }
       update_room_preferences: {
         Args: {
           p_dark_mode?: boolean
@@ -555,6 +650,24 @@ export type Database = {
           p_weekly_points_claim?: boolean
         }
         Returns: Json
+      }
+      update_room_stats_after_resolution: {
+        Args: {
+          p_outcome: string
+          p_prediction_id: string
+          p_room_id: string
+          p_winning_option_id: string
+        }
+        Returns: undefined
+      }
+      update_streaks_after_resolution: {
+        Args: {
+          p_outcome: string
+          p_prediction_id: string
+          p_room_id: string
+          p_winning_option_id: string
+        }
+        Returns: undefined
       }
       upsert_user_push_subscription: {
         Args: { p_subscription: Json }

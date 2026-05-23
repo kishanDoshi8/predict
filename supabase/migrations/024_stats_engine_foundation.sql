@@ -430,7 +430,7 @@ begin
           case rs.stat_key
             when 'current_streak' then format('%s Win Streak', coalesce((rs.stat_value_json ->> 'streak')::int, 0))
             when 'highest_streak' then format('%s Highest', coalesce((rs.stat_value_json ->> 'streak')::int, 0))
-            else format('%s pts', to_char(coalesce((rs.stat_value_json ->> 'amount')::numeric, 0), 'FM999G999G999G999'))
+            else format('%s pts', to_char(coalesce((rs.stat_value_json ->> 'amount')::numeric, 0), 'FM999,999,999,999'))
           end,
         'subtitle',
           case

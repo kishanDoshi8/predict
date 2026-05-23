@@ -107,18 +107,19 @@ declare
   v_current record;
   v_highest record;
 begin
-  select
-    prs.user_id,
-    p.username,
-    coalesce((prs.stat_value_json ->> 'streak')::integer, 0) as streak
+  select s.user_id, s.username, s.streak
   into v_current
-  from public.player_room_stats prs
-  join public.players p on p.id = prs.user_id
-  where prs.room_id = p_room_id
-    and prs.stat_key = 'current_streak'
-  order by
-    coalesce((prs.stat_value_json ->> 'streak')::integer, 0) desc,
-    p.username asc
+  from (
+    select
+      prs.user_id,
+      p.username,
+      coalesce((prs.stat_value_json ->> 'streak')::integer, 0) as streak
+    from public.player_room_stats prs
+    join public.players p on p.id = prs.user_id
+    where prs.room_id = p_room_id
+      and prs.stat_key = 'current_streak'
+  ) s
+  order by s.streak desc, s.username asc
   limit 1;
 
   if found and v_current.streak > 0 then
@@ -137,18 +138,19 @@ begin
       and stat_key = 'current_streak';
   end if;
 
-  select
-    prs.user_id,
-    p.username,
-    coalesce((prs.stat_value_json ->> 'streak')::integer, 0) as streak
+  select s.user_id, s.username, s.streak
   into v_highest
-  from public.player_room_stats prs
-  join public.players p on p.id = prs.user_id
-  where prs.room_id = p_room_id
-    and prs.stat_key = 'highest_streak'
-  order by
-    coalesce((prs.stat_value_json ->> 'streak')::integer, 0) desc,
-    p.username asc
+  from (
+    select
+      prs.user_id,
+      p.username,
+      coalesce((prs.stat_value_json ->> 'streak')::integer, 0) as streak
+    from public.player_room_stats prs
+    join public.players p on p.id = prs.user_id
+    where prs.room_id = p_room_id
+      and prs.stat_key = 'highest_streak'
+  ) s
+  order by s.streak desc, s.username asc
   limit 1;
 
   if found and v_highest.streak > 0 then
@@ -411,58 +413,21 @@ begin
 
   p_limit := greatest(1, least(p_limit, 10));
 
-  select json_agg(c.card order by (c.card ->> 'priority')::int asc)
+  select json_agg(
+    json_build_object(
+      'key', c.stat_key,
+      'title', c.title,
+      'value', c.value,
+      'subtitle', c.subtitle,
+      'icon', c.icon,
+      'priority', c.priority
+    )
+    order by c.priority asc
+  )
   into v_cards
   from (
     select
-      json_build_object(
-        'key', rs.stat_key,
-        'title',
-          case rs.stat_key
-            when 'current_streak' then 'Win Streak'
-            when 'highest_streak' then 'Best Streak'
-            when 'biggest_win' then 'Biggest Win'
-            when 'biggest_bet' then 'Biggest Bet'
-            when 'most_profit' then 'Most Profit'
-            else initcap(replace(rs.stat_key, '_', ' '))
-          end,
-        'value',
-          case rs.stat_key
-            when 'current_streak' then format('%s Win Streak', coalesce((rs.stat_value_json ->> 'streak')::int, 0))
-            when 'highest_streak' then format('%s Highest', coalesce((rs.stat_value_json ->> 'streak')::int, 0))
-            else format('%s pts', to_char(coalesce((rs.stat_value_json ->> 'amount')::numeric, 0), 'FM999,999,999,999'))
-          end,
-        'subtitle',
-          case
-            when rs.stat_key in ('current_streak', 'highest_streak')
-              then coalesce(rs.stat_value_json ->> 'username', '')
-            when rs.stat_key in ('biggest_win', 'biggest_bet', 'most_profit')
-              then coalesce(rs.stat_value_json ->> 'username', '')
-            else null
-          end,
-        'icon',
-          case rs.stat_key
-            when 'current_streak' then '🔥'
-            when 'highest_streak' then '🏅'
-            when 'biggest_win' then '💰'
-            when 'biggest_bet' then '🎯'
-            when 'most_profit' then '📈'
-            else '⭐'
-          end,
-        'priority',
-          case rs.stat_key
-            when 'current_streak' then 10
-            when 'highest_streak' then 20
-            when 'biggest_win' then 30
-            when 'biggest_bet' then 40
-            when 'most_profit' then 50
-            else 100
-          end
-      ) as card
-    from public.room_stats rs
-    where rs.room_id = p_room_id
-      and rs.stat_key in ('current_streak', 'highest_streak', 'biggest_win', 'biggest_bet', 'most_profit')
-    order by
+      rs.stat_key,
       case rs.stat_key
         when 'current_streak' then 10
         when 'highest_streak' then 20
@@ -470,8 +435,33 @@ begin
         when 'biggest_bet' then 40
         when 'most_profit' then 50
         else 100
-      end,
-      rs.stat_key
+      end as priority,
+      case rs.stat_key
+        when 'current_streak' then 'Win Streak'
+        when 'highest_streak' then 'Best Streak'
+        when 'biggest_win' then 'Biggest Win'
+        when 'biggest_bet' then 'Biggest Bet'
+        when 'most_profit' then 'Most Profit'
+        else initcap(replace(rs.stat_key, '_', ' '))
+      end as title,
+      case rs.stat_key
+        when 'current_streak' then format('%s Win Streak', coalesce((rs.stat_value_json ->> 'streak')::int, 0))
+        when 'highest_streak' then format('%s Highest', coalesce((rs.stat_value_json ->> 'streak')::int, 0))
+        else format('%s pts', to_char(coalesce((rs.stat_value_json ->> 'amount')::numeric, 0), 'FM999,999,999,999'))
+      end as value,
+      coalesce(rs.stat_value_json ->> 'username', '') as subtitle,
+      case rs.stat_key
+        when 'current_streak' then '🔥'
+        when 'highest_streak' then '🏅'
+        when 'biggest_win' then '💰'
+        when 'biggest_bet' then '🎯'
+        when 'most_profit' then '📈'
+        else '⭐'
+      end as icon
+    from public.room_stats rs
+    where rs.room_id = p_room_id
+      and rs.stat_key in ('current_streak', 'highest_streak', 'biggest_win', 'biggest_bet', 'most_profit')
+    order by priority asc, rs.stat_key
     limit p_limit
   ) c;
 

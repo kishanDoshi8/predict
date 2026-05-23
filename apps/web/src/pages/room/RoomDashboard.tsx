@@ -1,6 +1,5 @@
 import { useActivePredictions } from "@/store/prediction";
 import { LeaderboardPage } from "../LeaderboardPage";
-import { useRoomRealtime } from "@/hooks/useRoomRealtime";
 import InPlayPredictions from "./components/InPlayPredictions";
 import PredictionHeader from "./components/PredictionHeader";
 import RoomStatsCards from "./components/RoomStatsCards";
@@ -10,7 +9,6 @@ import { useRoomContext } from "./RoomLayout";
 function RoomDashboard() {
 	const { room } = useRoomContext();
 	const { data: predictions = [] } = useActivePredictions(room.id);
-	useRoomRealtime(room.id);
 
 	// Count predictions that are still active (draft or locked)
 	const activeCount = predictions.filter(

@@ -13,12 +13,15 @@ import { useWeeklyClaim } from "@/hooks/useWeeklyClaim";
 import { usePreferences, useMarkHowToPlaySeen } from "@/store/preferences";
 import HowToPlayModal from "@/components/HowToPlayModal";
 import { Loading } from "@/components";
+import { useRoomRealtime } from "@/hooks/useRoomRealtime";
 
 export default function RoomLayout() {
 	const navigate = useNavigate();
 	const { data: player, isPending: isPlayerLoading } = usePlayer();
 	const { roomCode } = useParams<{ roomCode: string }>();
 	const { data: room, isPending, isError } = useRoom(roomCode);
+
+	useRoomRealtime(room?.id ?? null);
 
 	const { mutate: claimWeeklyReward } = useWeeklyClaim();
 	const roomId = room?.id ?? "";

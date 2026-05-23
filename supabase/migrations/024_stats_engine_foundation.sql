@@ -509,6 +509,7 @@ declare
   v_winners_count     integer := 0;
   v_losers_count      integer := 0;
   v_multiple_sides    boolean;
+  v_effective_outcome text;
 begin
   v_player_id := private.get_player_id_from_auth();
 
@@ -538,8 +539,13 @@ begin
   if p_outcome in ('no_result', 'cancel') then
     perform private.refund_all_bets_v2(p_prediction_id);
 
+    v_effective_outcome := case
+      when p_outcome = 'cancel' then 'cancelled'
+      else p_outcome
+    end;
+
     update public.predictions
-    set status      = p_outcome,
+    set status      = v_effective_outcome,
         resolved_at = now()
     where id = p_prediction_id;
 
@@ -547,19 +553,19 @@ begin
       p_room_id,
       p_prediction_id,
       null,
-      p_outcome
+      v_effective_outcome
     );
 
     perform public.update_room_stats_after_resolution(
       p_room_id,
       p_prediction_id,
       null,
-      p_outcome
+      v_effective_outcome
     );
 
     return json_build_object(
       'resolved', true,
-      'outcome',  p_outcome,
+      'outcome',  v_effective_outcome,
       'refunded', true
     );
   end if;

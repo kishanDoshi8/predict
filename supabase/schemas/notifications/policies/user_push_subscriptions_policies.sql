@@ -1,0 +1,12 @@
+alter table public.user_push_subscriptions enable row level security;
+revoke all on public.user_push_subscriptions from anon;
+drop policy if exists "user_push_subscriptions_no_direct_select" on public.user_push_subscriptions;
+drop policy if exists "user_push_subscriptions_select_own" on public.user_push_subscriptions;
+create policy "user_push_subscriptions_select_own" on public.user_push_subscriptions for select using (user_id = private.get_player_id_from_auth());
+drop policy if exists "user_push_subscriptions_no_direct_insert" on public.user_push_subscriptions;
+create policy "user_push_subscriptions_no_direct_insert" on public.user_push_subscriptions for insert with check (false);
+drop policy if exists "user_push_subscriptions_no_direct_update" on public.user_push_subscriptions;
+create policy "user_push_subscriptions_no_direct_update" on public.user_push_subscriptions for update using (false);
+drop policy if exists "user_push_subscriptions_no_direct_delete" on public.user_push_subscriptions;
+create policy "user_push_subscriptions_no_direct_delete" on public.user_push_subscriptions for delete using (false);
+grant select on public.user_push_subscriptions to authenticated;

@@ -1,0 +1,12 @@
+alter table public.room_preferences enable row level security;
+revoke all on public.room_preferences from anon;
+drop policy if exists "room_preferences_no_direct_select" on public.room_preferences;
+drop policy if exists "room_preferences_select_own" on public.room_preferences;
+create policy "room_preferences_select_own" on public.room_preferences for select using (player_id = private.get_player_id_from_auth());
+drop policy if exists "room_preferences_no_direct_insert" on public.room_preferences;
+create policy "room_preferences_no_direct_insert" on public.room_preferences for insert with check (false);
+drop policy if exists "room_preferences_no_direct_update" on public.room_preferences;
+create policy "room_preferences_no_direct_update" on public.room_preferences for update using (false);
+drop policy if exists "room_preferences_no_direct_delete" on public.room_preferences;
+create policy "room_preferences_no_direct_delete" on public.room_preferences for delete using (false);
+grant select on public.room_preferences to authenticated;

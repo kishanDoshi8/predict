@@ -23,3 +23,13 @@ enabled = true
 
 [functions.send-push-notifications]
 verify_jwt = true
+
+[db.migrations]
+schema_paths = [
+  "./supabase/schemas/_global/*.sql",
+  "./supabase/schemas/**/tables/*.sql",
+  "./supabase/schemas/**/functions/*.sql",
+  "./supabase/schemas/**/policies/*.sql",
+  "./supabase/schemas/**/triggers/*.sql",
+  "./supabase/schemas/**/views/*.sql"
+]

@@ -496,6 +496,10 @@ export type Database = {
         Args: { p_limit?: number; p_offset?: number; p_room_id: string }
         Returns: Json
       }
+      get_room_stat_cards: {
+        Args: { p_limit?: number; p_room_id: string }
+        Returns: Json
+      }
       get_room_weekly_leaderboard: {
         Args: { p_room_id: string }
         Returns: Json

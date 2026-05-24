@@ -8,7 +8,7 @@ export function RoomStatRenderer({ stat }: Readonly<{ stat: RoomStat }>) {
 			return <DefaultStatCard stat={stat} />;
 
 		case "podium":
-			return <PodiumStatCard stat={stat} />;
+			return <PodiumStatCard />;
 
 		default:
 			return null;

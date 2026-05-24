@@ -18,8 +18,7 @@ export const useCreatePlayer = () => {
 
     return useMutation({
         mutationFn: (username: string) => createPlayer(username),
-        onSuccess: async (data) => {
-            console.log("Player created successfully:", data);
+        onSuccess: async () => {
             await registerForPushNotifications();
             const player = await getPlayer();
             queryClient.setQueryData(playerQueryKey, player);

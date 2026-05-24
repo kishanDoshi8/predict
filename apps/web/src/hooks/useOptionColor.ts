@@ -21,6 +21,5 @@ export function useOptionBgColor(optionId: string) {
   const color = useOptionColor(optionId)
   
   const bgColor = color.replace("text-", "bg-").replace("-500", "-100")
-  console.log(bgColor);
   return bgColor
 }

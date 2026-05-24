@@ -1,0 +1,16 @@
+import { RoomStat } from "@/types";
+import DefaultStatCard from "./stats/DefaultStatCard";
+import PodiumStatCard from "./stats/PodiumStatCard";
+
+export function RoomStatRenderer({ stat }: Readonly<{ stat: RoomStat }>) {
+	switch (stat.type) {
+		case "default":
+			return <DefaultStatCard stat={stat} />;
+
+		case "podium":
+			return <PodiumStatCard stat={stat} />;
+
+		default:
+			return null;
+	}
+}

@@ -2,43 +2,32 @@ import { useRoomContext } from "./room/RoomLayout";
 import { usePlayer } from "@/store/player";
 import {
 	useRoomLeaderboard,
-	usePredictionHistory,
 	useRoomWeeklyLeaderboard,
 } from "@/store/leaderboard";
 import { LeaderboardList } from "./room/leaderboard/LeaderboardList";
-import { PredictionHistoryFeed } from "./room/leaderboard/PredictionHistoryFeed";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { TopThreePodium } from "./room/leaderboard/TopThreePodium";
 
-const TABS = ["History", "Leaderboard"] as const;
-type Tab = (typeof TABS)[number];
 const LEADERBOARD_TABS = ["This Week", "All Time"] as const;
 type LeaderboardTab = (typeof LEADERBOARD_TABS)[number];
 
 export function LeaderboardPage() {
 	const { room } = useRoomContext();
 	const { data: player } = usePlayer();
-	const [activeTab, setActiveTab] = useState<Tab>("History");
 	const [activeLeaderboardTab, setActiveLeaderboardTab] =
 		useState<LeaderboardTab>("This Week");
-	const isLeaderboardView = activeTab === "Leaderboard";
 
 	const {
 		data: allTimeLeaderboard = [],
 		isPending: isAllTimeLeaderboardLoading,
-	} = useRoomLeaderboard(
-		room.id,
-		isLeaderboardView && activeLeaderboardTab === "All Time",
-	);
+	} = useRoomLeaderboard(room.id, activeLeaderboardTab === "All Time");
+
 	const {
 		data: weeklyLeaderboard = [],
 		isPending: isWeeklyLeaderboardLoading,
-	} = useRoomWeeklyLeaderboard(
-		room.id,
-		isLeaderboardView && activeLeaderboardTab === "This Week",
-	);
-	const { data: history = [], isPending: isHistoryLoading } =
-		usePredictionHistory(room.id);
+	} = useRoomWeeklyLeaderboard(room.id, activeLeaderboardTab === "This Week");
+
 	const leaderboard =
 		activeLeaderboardTab === "All Time"
 			? allTimeLeaderboard
@@ -59,56 +48,36 @@ export function LeaderboardPage() {
 				</p>
 			</div>
 
-			{/* Tab switcher */}
-			<div className='flex gap-1 p-1 rounded-lg bg-muted'>
-				{TABS.map((tab) => (
-					<button
-						key={tab}
-						onClick={() => setActiveTab(tab)}
-						className={cn(
-							"flex-1 text-sm py-1.5 rounded-md font-medium transition-colors",
-							activeTab === tab
-								? "bg-background shadow-sm text-foreground"
-								: "text-muted-foreground hover:text-foreground",
-						)}
-					>
-						{tab}
-					</button>
-				))}
-			</div>
-
-			{/* Content */}
-			{activeTab === "Leaderboard" ? (
-				<div className='flex flex-col gap-3'>
-					<div className='flex gap-1 p-1 rounded-lg bg-muted'>
-						{LEADERBOARD_TABS.map((tab) => (
-							<button
-								key={tab}
-								onClick={() => setActiveLeaderboardTab(tab)}
-								className={cn(
-									"flex-1 text-sm py-1.5 rounded-md font-medium transition-colors",
-									activeLeaderboardTab === tab
-										? "bg-background shadow-sm text-foreground"
-										: "text-muted-foreground hover:text-foreground",
-								)}
-							>
-								{tab}
-							</button>
-						))}
-					</div>
-					<LeaderboardList
-						entries={leaderboard}
-						currentPlayerId={player?.id ?? ""}
-						isLoading={isLeaderboardLoading}
-						scope={activeLeaderboardTab}
-					/>
+			<div className='flex flex-col gap-3'>
+				<div className='flex gap-1 p-1 rounded-lg bg-muted'>
+					{LEADERBOARD_TABS.map((tab) => (
+						<button
+							key={tab}
+							onClick={() => setActiveLeaderboardTab(tab)}
+							className={cn(
+								"flex-1 text-sm py-1.5 rounded-md font-medium transition-colors",
+								activeLeaderboardTab === tab
+									? "bg-background shadow-sm text-foreground"
+									: "text-muted-foreground hover:text-foreground",
+							)}
+						>
+							{tab}
+						</button>
+					))}
 				</div>
-			) : (
-				<PredictionHistoryFeed
-					entries={history}
-					isLoading={isHistoryLoading}
+
+				<TopThreePodium
+					top={leaderboard.slice(0, 3)}
+					currentPlayerId={player?.id ?? ""}
 				/>
-			)}
+
+				<LeaderboardList
+					entries={leaderboard}
+					currentPlayerId={player?.id ?? ""}
+					isLoading={isLeaderboardLoading}
+					scope={activeLeaderboardTab}
+				/>
+			</div>
 		</div>
 	);
 }

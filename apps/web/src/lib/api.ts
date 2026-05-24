@@ -1,4 +1,4 @@
-import { Player, Prediction, PredictionStatus, Room, PredictionHistoryEntry, LeaderboardEntry, RoomStatCard } from '@/types'
+import { Player, Prediction, PredictionStatus, Room, PredictionHistoryEntry, LeaderboardEntry, RoomStat, DefaultRoomStat } from '@/types'
 import type { Json } from '@/types/supabase'
 import { supabase } from './supabase'
 
@@ -592,6 +592,8 @@ export async function getRoomStatCards(roomId: string, limit = 5) {
     p_limit: limit,
   })
 
-  return assertOk(data, error) as RoomStatCard[]
+  console.log('Fetched room stat cards:', { data, error })
+
+  return assertOk(data, error) as DefaultRoomStat[]
 }
 // #endregion Leaderboard

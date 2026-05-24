@@ -1,4 +1,10 @@
-import { Alert, AlertDescription, AlertTitle, Skeleton } from "@/components";
+import {
+	Alert,
+	AlertDescription,
+	AlertTitle,
+	Badge,
+	Skeleton,
+} from "@/components";
 import { Prediction } from "@/types";
 import PredictionTitle from "../components/PredictionTitle";
 import PredictionOptions from "../widgets/PredictionOptions";
@@ -105,15 +111,18 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 										{bet.payout} PTS
 									</p>
 									{bet.payout !== null && (
-										<p
-											className={`text-sm ${
+										<Badge
+											variant={
 												bet.payout - bet.amount > 0
-													? "text-primary"
-													: "text-destructive"
-											}`}
+													? "default"
+													: "destructive"
+											}
 										>
+											{bet.payout - bet.amount > 0
+												? "+"
+												: ""}
 											{bet.payout - bet.amount} PTS
-										</p>
+										</Badge>
 									)}
 								</div>
 							</div>

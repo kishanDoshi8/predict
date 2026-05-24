@@ -2,9 +2,10 @@ import { useActivePredictions } from "@/store/prediction";
 import { LeaderboardPage } from "../LeaderboardPage";
 import InPlayPredictions from "./components/InPlayPredictions";
 import PredictionHeader from "./components/PredictionHeader";
-import RoomStatsCards from "./components/RoomStatsCards";
 import { CreatePredictionButton } from "./controls/OrganizerControls";
 import { useRoomContext } from "./RoomLayout";
+import RoomStats from "./components/stats/RoomStats";
+import HistoryFeed from "./components/HistoryFeed";
 
 function RoomDashboard() {
 	const { room } = useRoomContext();
@@ -21,11 +22,14 @@ function RoomDashboard() {
 	return (
 		<div>
 			<PredictionHeader />
-			<RoomStatsCards />
+			<RoomStats />
 
-			<InPlayPredictions />
 			<div className={`mt-6`}>
-				<LeaderboardPage />
+				<InPlayPredictions />
+			</div>
+			<div className={`mt-6`}>
+				{/* <LeaderboardPage /> */}
+				<HistoryFeed />
 			</div>
 
 			{canCreatePrediction && (

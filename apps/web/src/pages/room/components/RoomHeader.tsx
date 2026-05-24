@@ -3,7 +3,6 @@ import { Room } from "@/types";
 import { CoinsIcon, HomeIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { usePlayer } from "@/store/player";
-import { Badge } from "@/components";
 
 type Props = {
 	room: Room;
@@ -35,13 +34,14 @@ function RoomHeader({ room }: Readonly<Props>) {
 				</Link>
 				<div>
 					{/* point */}
-					<Badge
-						variant='outline'
-						className={`b-4 px-4 border-accent text-primary text-base`}
+					<Button
+						variant='ghost'
+						size='sm'
+						className={`text-primary text-base cursor-default`}
 					>
 						<CoinsIcon />
 						{player?.points_balance ?? 0} pts
-					</Badge>
+					</Button>
 				</div>
 			</div>
 		</header>

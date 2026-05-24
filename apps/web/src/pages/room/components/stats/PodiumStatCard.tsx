@@ -1,6 +1,4 @@
-import { PodiumRoomStat } from "@/types/Stats";
-
-function PodiumStatCard({ stat }: Readonly<{ stat: PodiumRoomStat }>) {
+function PodiumStatCard() {
 	// TODO: implement podium stat card UI
 	return null;
 }

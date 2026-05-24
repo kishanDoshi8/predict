@@ -10,6 +10,17 @@ create table if not exists public.predictions (
   resolved_at timestamptz,
   notified_1h boolean not null default false
 );
+
+create table if not exists public.prediction_options (
+  id uuid primary key default gen_random_uuid(),
+  prediction_id uuid not null references public.predictions(id) on delete cascade,
+  label text not null,
+  display_order smallint not null default 0,
+  total_bet integer not null default 0 check (total_bet >= 0),
+  created_at timestamptz not null default now()
+);
+
+
 alter table public.predictions
   drop constraint if exists fk_predictions_winning_option,
   add constraint fk_predictions_winning_option foreign key (winning_option_id) references public.prediction_options(id);

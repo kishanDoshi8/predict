@@ -1,4 +1,4 @@
-project_id = "kizogptkryjjxzlixtqp"   # replace with your Supabase project ref
+project_id = "kizogptkryjjxzlixtqp"
 
 [api]
 port = 54321
@@ -13,10 +13,10 @@ port = 54323
 port = 54324
 
 [storage]
-enabled = false   # not needed for this app
+enabled = false
 
 [auth]
-enabled = false   # we handle identity via tokens, no Supabase Auth needed
+enabled = true
 
 [realtime]
 enabled = true
@@ -26,10 +26,10 @@ verify_jwt = true
 
 [db.migrations]
 schema_paths = [
-  "./supabase/schemas/_global/*.sql",
-  "./supabase/schemas/**/tables/*.sql",
-  "./supabase/schemas/**/functions/*.sql",
-  "./supabase/schemas/**/policies/*.sql",
-  "./supabase/schemas/**/triggers/*.sql",
-  "./supabase/schemas/**/views/*.sql"
+  "./schemas/_global/*.sql",
+  "./schemas/**/tables/*.sql",
+  "./schemas/**/functions/*.sql",
+  "./schemas/**/policies/*.sql",
+  "./schemas/**/triggers/*.sql",
+  "./schemas/**/views/*.sql"
 ]

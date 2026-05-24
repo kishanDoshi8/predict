@@ -10,9 +10,13 @@
 		"host": "npm run dev --workspace=apps/web -- --host",
 		"build": "npm run build --workspace=apps/web",
 		"lint": "npm run lint --workspace=apps/web",
+		"db:diff": "supabase db diff -f",
+		"db:sync": "supabase db reset",
 		"db:migrate": "supabase db push",
 		"db:reset": "supabase db reset",
-		"db:types": "supabase gen types typescript --linked > apps/web/src/types/supabase.ts"
+		"db:types": "supabase gen types typescript --linked > apps/web/src/types/supabase.ts",
+		"db:verify": "supabase db diff --from migrations --to local",
+		"db:backup": "supabase db dump --linked > supabase/schemas/live_backup_$(date +%F_%H%M%S).sql"
 	},
 	"devDependencies": {
 		"supabase": "^1.226.4"

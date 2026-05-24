@@ -1,0 +1,12 @@
+alter table public.rooms enable row level security;
+revoke all on public.rooms from anon;
+drop policy if exists "rooms_select" on public.rooms;
+create policy "rooms_select" on public.rooms for select using (true);
+drop policy if exists "rooms_no_direct_write" on public.rooms;
+create policy "rooms_no_direct_write" on public.rooms for insert with check (false);
+drop policy if exists "rooms_no_direct_update" on public.rooms;
+create policy "rooms_no_direct_update" on public.rooms for update using (false);
+drop policy if exists "rooms_no_direct_delete" on public.rooms;
+create policy "rooms_no_direct_delete" on public.rooms for delete using (false);
+grant select (id, room_code, name, status, created_at) on public.rooms to anon;
+grant select (id, room_code, name, status, created_at) on public.rooms to authenticated;

@@ -1,0 +1,17 @@
+create table if not exists public.players (
+  id uuid primary key default gen_random_uuid(),
+  username text not null,
+  player_token text not null unique,
+  points_balance integer not null default 0 check (points_balance >= 0),
+  points_in_escrow integer not null default 0 check (points_in_escrow >= 0),
+  total_won integer not null default 0,
+  current_streak integer not null default 0,
+  longest_streak integer not null default 0,
+  last_claim_at timestamptz,
+  created_at timestamptz not null default now(),
+  user_id uuid unique references auth.users(id) on delete cascade,
+  unique (username)
+);
+create index if not exists idx_players_total_won on public.players(total_won desc);
+create index if not exists idx_players_username on public.players(lower(username));
+create index if not exists idx_players_user_id on public.players(user_id);

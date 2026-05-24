@@ -1,0 +1,12 @@
+alter table public.room_members enable row level security;
+revoke all on public.room_members from anon;
+drop policy if exists "room_members_select" on public.room_members;
+create policy "room_members_select" on public.room_members for select using (true);
+drop policy if exists "room_members_no_direct_write" on public.room_members;
+create policy "room_members_no_direct_write" on public.room_members for insert with check (false);
+drop policy if exists "room_members_no_direct_update" on public.room_members;
+create policy "room_members_no_direct_update" on public.room_members for update using (false);
+drop policy if exists "room_members_no_direct_delete" on public.room_members;
+create policy "room_members_no_direct_delete" on public.room_members for delete using (false);
+grant select (id, room_id, player_id, is_organizer, total_won_in_room, joined_at) on public.room_members to anon;
+grant select (id, room_id, player_id, is_organizer, total_won_in_room, joined_at) on public.room_members to authenticated;

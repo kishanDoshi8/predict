@@ -15,6 +15,8 @@
 -- Releases escrow for every bettor. points_balance unchanged
 -- (funds were never actually deducted, only escrowed).
 -- ============================================================
+create extension if not exists "pg_cron" with schema "pg_catalog";
+
 create or replace function private.refund_all_bets(p_prediction_id uuid)
 returns void
 language plpgsql

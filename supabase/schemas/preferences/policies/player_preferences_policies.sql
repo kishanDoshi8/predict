@@ -1,0 +1,12 @@
+alter table public.player_preferences enable row level security;
+revoke all on public.player_preferences from anon;
+drop policy if exists "player_preferences_no_direct_select" on public.player_preferences;
+drop policy if exists "player_preferences_select_own" on public.player_preferences;
+create policy "player_preferences_select_own" on public.player_preferences for select using (player_id = private.get_player_id_from_auth());
+drop policy if exists "player_preferences_no_direct_insert" on public.player_preferences;
+create policy "player_preferences_no_direct_insert" on public.player_preferences for insert with check (false);
+drop policy if exists "player_preferences_no_direct_update" on public.player_preferences;
+create policy "player_preferences_no_direct_update" on public.player_preferences for update using (false);
+drop policy if exists "player_preferences_no_direct_delete" on public.player_preferences;
+create policy "player_preferences_no_direct_delete" on public.player_preferences for delete using (false);
+grant select on public.player_preferences to authenticated;

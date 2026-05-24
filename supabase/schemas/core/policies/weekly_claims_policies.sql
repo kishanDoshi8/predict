@@ -1,0 +1,12 @@
+alter table public.weekly_claims enable row level security;
+revoke all on public.weekly_claims from anon;
+drop policy if exists "weekly_claims_select" on public.weekly_claims;
+create policy "weekly_claims_select" on public.weekly_claims for select using (true);
+drop policy if exists "weekly_claims_no_direct_write" on public.weekly_claims;
+create policy "weekly_claims_no_direct_write" on public.weekly_claims for insert with check (false);
+drop policy if exists "weekly_claims_no_direct_update" on public.weekly_claims;
+create policy "weekly_claims_no_direct_update" on public.weekly_claims for update using (false);
+drop policy if exists "weekly_claims_no_direct_delete" on public.weekly_claims;
+create policy "weekly_claims_no_direct_delete" on public.weekly_claims for delete using (false);
+grant select (id, player_id, week_key, claimed_at) on public.weekly_claims to anon;
+grant select (id, player_id, week_key, claimed_at) on public.weekly_claims to authenticated;

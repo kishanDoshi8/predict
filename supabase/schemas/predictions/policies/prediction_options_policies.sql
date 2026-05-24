@@ -1,0 +1,12 @@
+alter table public.prediction_options enable row level security;
+revoke all on public.prediction_options from anon;
+drop policy if exists "prediction_options_select" on public.prediction_options;
+create policy "prediction_options_select" on public.prediction_options for select using (true);
+drop policy if exists "prediction_options_no_direct_write" on public.prediction_options;
+create policy "prediction_options_no_direct_write" on public.prediction_options for insert with check (false);
+drop policy if exists "prediction_options_no_direct_update" on public.prediction_options;
+create policy "prediction_options_no_direct_update" on public.prediction_options for update using (false);
+drop policy if exists "prediction_options_no_direct_delete" on public.prediction_options;
+create policy "prediction_options_no_direct_delete" on public.prediction_options for delete using (false);
+grant select (id, prediction_id, label, display_order, total_bet, created_at) on public.prediction_options to anon;
+grant select (id, prediction_id, label, display_order, total_bet, created_at) on public.prediction_options to authenticated;

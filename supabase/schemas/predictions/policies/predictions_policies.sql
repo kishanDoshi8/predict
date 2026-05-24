@@ -1,0 +1,12 @@
+alter table public.predictions enable row level security;
+revoke all on public.predictions from anon;
+drop policy if exists "predictions_select" on public.predictions;
+create policy "predictions_select" on public.predictions for select using (true);
+drop policy if exists "predictions_no_direct_write" on public.predictions;
+create policy "predictions_no_direct_write" on public.predictions for insert with check (false);
+drop policy if exists "predictions_no_direct_update" on public.predictions;
+create policy "predictions_no_direct_update" on public.predictions for update using (false);
+drop policy if exists "predictions_no_direct_delete" on public.predictions;
+create policy "predictions_no_direct_delete" on public.predictions for delete using (false);
+grant select (id, room_id, created_by, title, status, deadline, winning_option_id, resolved_at, created_at) on public.predictions to anon;
+grant select (id, room_id, created_by, title, status, deadline, winning_option_id, resolved_at, created_at) on public.predictions to authenticated;

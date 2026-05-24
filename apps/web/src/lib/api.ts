@@ -1,4 +1,4 @@
-import { Player, Prediction, PredictionStatus, Room, PredictionHistoryEntry, LeaderboardEntry, RoomStat, DefaultRoomStat } from '@/types'
+import { Player, Prediction, PredictionStatus, Room, PredictionHistoryEntry, LeaderboardEntry, DefaultRoomStat } from '@/types'
 import type { Json } from '@/types/supabase'
 import { supabase } from './supabase'
 

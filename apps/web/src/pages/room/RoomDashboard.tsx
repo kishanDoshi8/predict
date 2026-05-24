@@ -1,5 +1,4 @@
 import { useActivePredictions } from "@/store/prediction";
-import { LeaderboardPage } from "../LeaderboardPage";
 import InPlayPredictions from "./components/InPlayPredictions";
 import PredictionHeader from "./components/PredictionHeader";
 import { CreatePredictionButton } from "./controls/OrganizerControls";

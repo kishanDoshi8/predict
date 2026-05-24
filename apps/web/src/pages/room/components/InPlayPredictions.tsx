@@ -7,7 +7,6 @@ import {
 	Progress,
 	Skeleton,
 	PingLoading,
-	Button,
 } from "@/components";
 import {
 	Carousel,
@@ -18,13 +17,7 @@ import {
 import { Countdown } from "../widgets/CountDown";
 import { useBets } from "@/store/bet";
 import { useOptionBgColor } from "@/hooks/useOptionColor";
-import {
-	ArrowBigRight,
-	ArrowRightIcon,
-	ChevronLeftIcon,
-	ChevronRightIcon,
-	DotIcon,
-} from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, DotIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Prediction } from "@/types";
 import React from "react";

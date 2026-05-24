@@ -16,7 +16,8 @@
 		"db:reset": "supabase db reset",
 		"db:types": "supabase gen types typescript --linked > apps/web/src/types/supabase.ts",
 		"db:verify": "supabase db diff --from migrations --to local",
-		"db:backup": "supabase db dump --linked > supabase/schemas/live_backup_$(date +%F_%H%M%S).sql"
+		"db:backup": "supabase db dump --linked > supabase/schemas/live_backup_$(date +%F_%H%M%S).sql",
+		"db:new": "supabase migration new"
 	},
 	"devDependencies": {
 		"supabase": "^1.226.4"

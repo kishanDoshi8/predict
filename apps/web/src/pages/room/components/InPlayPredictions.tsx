@@ -17,7 +17,14 @@ import {
 import { Countdown } from "../widgets/CountDown";
 import { useBets } from "@/store/bet";
 import { useOptionBgColor } from "@/hooks/useOptionColor";
-import { ChevronLeftIcon, ChevronRightIcon, DotIcon } from "lucide-react";
+import {
+	ChevronLeftIcon,
+	ChevronRightIcon,
+	Clock,
+	DotIcon,
+	TrophyIcon,
+	UsersIcon,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { Prediction } from "@/types";
 import React from "react";
@@ -45,28 +52,29 @@ function PredictionCard({
 
 	let borderClass = "border-border";
 	if (prediction.status === "locked") {
-		borderClass = "border-primary/70";
+		borderClass = "border-primary/50";
 	} else if (isActive) {
-		borderClass = "border-cyan-900";
+		borderClass = "border-accent";
 	}
 
 	return (
 		<div
-			className={`border-2 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full transition-colors ${borderClass}`}
+			className={`text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-rose-500/5 p-5 mb-4 ${borderClass}`}
 		>
-			<Link
-				to={`predictions/${prediction.id}`}
-				className={`no-underline`}
-			>
+			<div
+				className={`absolute inset-0 bg-linear-to-r from-rose-500/0 via-rose-500/10 to-rose-500/0 animate-pulse pointer-events-none`}
+			></div>
+			<Link to={`predictions/${prediction.id}`}>
 				{/* Status badge per card */}
-				<div className={`flex items-center gap-2 mb-2`}>
+				<div className={`flex items-center gap-2 mb-3`}>
 					{prediction.status === "draft" && (
 						<>
 							<Badge
-								variant='outline'
-								className={`border-cyan-500 text-cyan-500 text-xs`}
+								variant='secondary'
+								className={`text-muted-foreground font-bold text-xs flex items-center gap-1 mr-auto`}
 							>
-								In Play
+								<Clock />
+								COMING UP
 							</Badge>
 							{prediction.deadline && (
 								<Countdown
@@ -78,18 +86,15 @@ function PredictionCard({
 						</>
 					)}
 					{prediction.status === "locked" && (
-						<div className={`flex items-center gap-2`}>
+						<div className='flex items-center gap-2 mr-auto'>
 							<Badge
-								variant='outline'
-								className={`border-primary text-primary text-xs flex items-center gap-1`}
+								className={`bg-primary/20 text-primary text-xs flex items-center gap-1`}
 							>
-								Live
+								<span
+									className={`h-2 w-2 rounded-full bg-primary animate-pulse`}
+								/>{" "}
+								In Play
 							</Badge>
-							<PingLoading
-								className={`inline-block`}
-								size={20}
-								speed={2}
-							/>
 						</div>
 					)}
 					{prediction.status === "revealed" && (
@@ -121,7 +126,7 @@ function PredictionCard({
 					)}
 				</div>
 
-				<h4 className={`text-xl md:text-2xl mt-4`}>
+				<h4 className={`text-xl md:text-2xl mb-4`}>
 					{prediction.title}
 				</h4>
 
@@ -157,8 +162,6 @@ function PredictionCard({
 											100
 										: 0
 								}
-								// NOTE: useOptionBgColor is NOT a React hook despite its name —
-								// it contains no React hook calls and is safe to use inside .map()
 								className={`[&>div]:${useOptionBgColor(option.id)}`}
 								id={`progress-${option.id}`}
 							/>
@@ -166,16 +169,43 @@ function PredictionCard({
 					))}
 				</div>
 
+				{/* show total pooled */}
+				<div className={`flex items-center justify-between mt-4`}>
+					<div className={`flex items-center gap-2`}>
+						<TrophyIcon
+							className={`text-muted-foreground w-3 h-3`}
+						/>
+						<p className={`text-sm text-muted-foreground`}>
+							Pooled:{" "}
+							<span className={`text-foreground font-semibold`}>
+								{totalBetAmount} pts
+							</span>
+						</p>
+					</div>
+					{/* total participants */}
+					<div className={`flex items-center gap-2`}>
+						<UsersIcon
+							className={`text-muted-foreground w-3 h-3`}
+						/>
+						<span
+							className={`text-foreground text-sm font-semibold`}
+						>
+							{bets.length}
+						</span>
+					</div>
+				</div>
+
 				{prediction.status === "draft" && (
 					<span
-						className={`text-sm text-muted-foreground text-right mt-4 block`}
+						className={`flex items-center justify-end text-sm text-muted-foreground text-right mt-6`}
 					>
 						Place your bets now!
+						<ChevronRightIcon className={`inline-block ml-1 `} />
 					</span>
 				)}
 				{prediction.status === "locked" && (
 					<span
-						className={`text-sm text-muted-foreground text-right mt-4 block`}
+						className={`text-sm text-muted-foreground text-right mt-6 block`}
 					>
 						Waiting for result...
 					</span>
@@ -208,7 +238,16 @@ function SectionHeader({
 
 		return (
 			<div className={`flex items-center gap-2 my-4`}>
-				<h2 className={`text-lg font-semibold`}>Upcoming</h2>
+				<div className={`flex flex-1 items-center gap-2`}>
+					<span
+						className={`h-2 w-2 rounded-full bg-primary animate-pulse`}
+					/>
+					<h2 className={`text-lg font-semibold`}>What's Hot</h2>
+				</div>
+				<div className={`text-xs text-muted-foreground`}>
+					{predictions.length}
+					{" active"}
+				</div>
 			</div>
 		);
 	}

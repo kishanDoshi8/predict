@@ -89,7 +89,6 @@ function LeaderboardContent({
 							entry.total_won_in_room >
 							leaderboardPlayer.total_won_in_room,
 					) || null;
-				console.log(nextPlayer);
 				setGapToNextPlayer(nextPlayer);
 			}
 		}
@@ -106,11 +105,11 @@ function LeaderboardContent({
 	return (
 		<div className={`flex flex-col gap-4`}>
 			<div
-				className={`flex flex-col gap-6 p-5 bg-card rounded-lg mt-2 border`}
+				className={`text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-rose-500/5 p-5 mt-3`}
 			>
 				<div className={`flex gap-4 items-center`}>
 					<div
-						className={`p-3 rounded-lg bg-linear-to-r from-primary to-accent font-bold text-foreground text-2xl`}
+						className={`w-14 h-14 flex items-center justify-center rounded-lg bg-linear-to-r from-primary to-accent font-bold text-foreground text-2xl`}
 					>
 						#{leaderboardPlayer?.rank ?? 0}
 					</div>

@@ -4,7 +4,7 @@ import {
 	HoverCardContent,
 	HoverCardTrigger,
 } from "@/components";
-import { Clock } from "lucide-react";
+import { Clock, ZapIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type CountdownProps = {
@@ -47,8 +47,10 @@ export function Countdown({ targetTime }: Readonly<CountdownProps>) {
 				<div
 					className={`flex flex-col items-center justify-center gap-1`}
 				>
-					<Badge variant={"destructive"}>
-						<Clock />
+					<Badge
+						className={`flex items-center gap-1.5 rounded-lg bg-secondary/80 px-3 py-1.5 font-mono text-sm font-bold text-rose-400`}
+					>
+						<ZapIcon />
 						{timeLeft > 0 ? formatTime(timeLeft) : "00:00:00"}
 					</Badge>
 				</div>

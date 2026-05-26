@@ -22,9 +22,9 @@ function RoomHeader({ room }: Readonly<Props>) {
 		>
 			<div className={`max-w-280 mx-auto flex gap-4 items-center`}>
 				<Button
-					variant='outline'
-					size='sm'
-					className={`cursor-pointer`}
+					variant='linear'
+					// size='sm'
+					className={`cursor-pointer rounded-lg`}
 					onClick={handleGoHome}
 				>
 					<HomeIcon />

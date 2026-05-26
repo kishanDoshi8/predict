@@ -31,12 +31,16 @@ function CreatePredictionButton({
 
 	return (
 		<Button
-			variant='default'
+			variant='linear'
 			size='lg'
-			className={cn(`w-full mx-auto font-bold`, className)}
+			className={cn(
+				`w-full mx-auto font-bold shadow-lg text-foreground`,
+				className,
+			)}
 			onClick={() => navigate(`/rooms/${room.code}/predictions/new`)}
 		>
-			Create Prediction <Rocket className={`ml-2`} />
+			<Rocket className={`ml-2`} />
+			Create Prediction
 		</Button>
 	);
 }

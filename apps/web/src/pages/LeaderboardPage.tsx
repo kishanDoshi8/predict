@@ -38,7 +38,7 @@ export function LeaderboardPage() {
 			: isWeeklyLeaderboardLoading;
 
 	return (
-		<div className='flex flex-col gap-4 py-4 max-w-lg mx-auto w-full'>
+		<div className='flex flex-col gap-4 p-4 max-w-lg mx-auto w-full'>
 			{/* Section heading */}
 			<div>
 				<h2 className='text-lg font-semibold'>Room Rankings</h2>
@@ -55,9 +55,9 @@ export function LeaderboardPage() {
 							key={tab}
 							onClick={() => setActiveLeaderboardTab(tab)}
 							className={cn(
-								"flex-1 text-sm py-1.5 rounded-md font-medium transition-colors",
+								"flex-1 text-sm py-2 rounded-md font-bold transition-colors",
 								activeLeaderboardTab === tab
-									? "bg-background shadow-sm text-foreground"
+									? "bg-linear-to-r from-primary to-accent shadow-sm text-foreground"
 									: "text-muted-foreground hover:text-foreground",
 							)}
 						>

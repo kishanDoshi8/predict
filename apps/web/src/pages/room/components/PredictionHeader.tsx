@@ -25,9 +25,7 @@ export default function PredictionHeader() {
 				<div
 					className={`flex items-center gap-2 max-w-md w-full mx-auto`}
 				>
-					<h2
-						className={`text-2xl md:text-4xl text-muted-foreground uppercase`}
-					>
+					<h2 className={`text-2xl md:text-4xl uppercase`}>
 						{room.code}
 					</h2>
 					<Button

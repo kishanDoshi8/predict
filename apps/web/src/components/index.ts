@@ -24,3 +24,6 @@ export { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from './ui/i
 export { Alert, AlertDescription, AlertTitle } from './ui/alert'
 export { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card'
 export { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
+export { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
+export { ScrollArea, ScrollBar } from './ui/scroll-area'
+export { Popover, PopoverContent, PopoverTrigger } from './ui/popover'

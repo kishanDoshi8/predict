@@ -5,6 +5,7 @@ import { CreatePredictionButton } from "./controls/OrganizerControls";
 import { useRoomContext } from "./RoomLayout";
 import RoomStats from "./components/stats/RoomStats";
 import HistoryFeed from "./components/HistoryFeed";
+import UserStats from "./components/stats/UserStats";
 
 function RoomDashboard() {
 	const { room } = useRoomContext();
@@ -20,20 +21,23 @@ function RoomDashboard() {
 
 	return (
 		<div>
-			<PredictionHeader />
-			<RoomStats />
+			<div className={`px-4`}>
+				<PredictionHeader />
+				{/* <RoomStats /> */}
+				<UserStats />
 
-			<div className={`mt-6`}>
-				<InPlayPredictions />
-			</div>
-			<div className={`mt-6`}>
-				{/* <LeaderboardPage /> */}
-				<HistoryFeed />
+				<div className={`mt-6`}>
+					<InPlayPredictions />
+				</div>
+				<div className={`mt-6`}>
+					{/* <LeaderboardPage /> */}
+					<HistoryFeed />
+				</div>
 			</div>
 
 			{canCreatePrediction && (
 				<div
-					className={`mt-4 sticky left-4 right-4 bottom-4 z-50 w-3/4 max-w-md mx-auto`}
+					className={`bg-background px-4 pt-4 pb-6 border-t-2 mt-4 sticky left-4 right-4 bottom-0 z-50 w-full max-w-md mx-auto`}
 				>
 					<CreatePredictionButton />
 				</div>

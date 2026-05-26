@@ -67,7 +67,7 @@ export default function RoomLayout() {
 		<div className='min-h-dvh flex flex-col'>
 			<RoomHeader room={room} />
 
-			<main className='px-4 max-w-280 w-full mx-auto flex-1 flex flex-col'>
+			<main className='max-w-280 w-full mx-auto flex-1 flex flex-col'>
 				<Outlet context={{ room, roomCode }} />
 			</main>
 

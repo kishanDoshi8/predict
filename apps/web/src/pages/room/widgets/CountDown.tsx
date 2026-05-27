@@ -4,7 +4,7 @@ import {
 	HoverCardContent,
 	HoverCardTrigger,
 } from "@/components";
-import { Clock, ZapIcon } from "lucide-react";
+import { ZapIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type CountdownProps = {

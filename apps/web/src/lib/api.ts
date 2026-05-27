@@ -167,16 +167,51 @@ export async function joinRoom(roomCode: string): Promise<Room> {
 }
 
 export async function getPlayerRooms(player_id: string): Promise<Room[]> {
+  // also get total number of members in each room to display on the home page, without needing to fetch each room separately
+  // and get number of active predictions to display on the home page (active = draft or locked predictions)
+  // getting only numbers for both is fine, we don't need the full prediction or member data here
+
+  // First, get all rooms the player is a member of
   const { data, error } = await supabase
     .from('room_members')
     .select(`room:rooms(*)`)
     .eq('player_id', player_id)
 
   if (error) throw error
-  return (data as any[]).map((room) => ({
-    ...room.room,
-    code: room.room.room_code,
-  }))
+  if (!data) return []
+
+  // For each room, fetch member count and active prediction count in parallel
+  const roomsWithCounts = await Promise.all(
+    data.map(async (roomMember: any) => {
+      const room = roomMember.room
+      if (!room) return null
+
+      // Get member count
+      const { count: memberCount } = await supabase
+        .from('room_members')
+        .select('id', { count: 'exact', head: true })
+        .eq('room_id', room.id)
+
+      // Get active prediction count
+      const { count: activePredictionCount } = await supabase
+        .from('predictions')
+        .select('id', { count: 'exact', head: true })
+        .eq('room_id', room.id)
+        .in('status', ['draft', 'locked'])
+
+      const roomData = {
+        ...room,
+        code: room.room_code,
+        member_count: memberCount ?? 0,
+        active_prediction_count: activePredictionCount ?? 0,
+      }
+      
+      return roomData
+    })
+  )
+
+  // Filter out any nulls (in case a room was missing)
+  return roomsWithCounts.filter(Boolean)
 }
 
 // #endregion Rooms

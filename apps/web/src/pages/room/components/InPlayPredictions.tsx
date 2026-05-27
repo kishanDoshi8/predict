@@ -1,13 +1,6 @@
 import { useActivePredictions } from "@/store/prediction";
 import { useRoomContext } from "../RoomLayout";
-import {
-	Badge,
-	Field,
-	FieldLabel,
-	Progress,
-	Skeleton,
-	PingLoading,
-} from "@/components";
+import { Badge, Field, FieldLabel, Progress, Skeleton } from "@/components";
 import {
 	Carousel,
 	CarouselApi,
@@ -22,6 +15,7 @@ import {
 	ChevronLeftIcon,
 	ChevronRightIcon,
 	Clock,
+	CrownIcon,
 	DotIcon,
 	TrophyIcon,
 	UsersIcon,
@@ -99,13 +93,15 @@ function PredictionCard({
 						</div>
 					)}
 					{prediction.status === "revealed" && (
-						<Badge
-							variant='outline'
-							className={`text-green-500 text-xs flex items-center gap-1`}
-						>
-							<CheckIcon className={`w-3 h-3`} />
-							Resolved
-						</Badge>
+						<div className={`flex items-center gap-2`}>
+							<Badge
+								variant='outline'
+								className={`text-green-500 text-xs flex items-center gap-1`}
+							>
+								<CheckIcon className={`w-3 h-3`} />
+								Resolved
+							</Badge>
+						</div>
 					)}
 					{prediction.status === "cancelled" && (
 						<Badge
@@ -135,8 +131,19 @@ function PredictionCard({
 					{prediction.prediction_options.map((option) => (
 						<Field className='w-full' key={option.id}>
 							<FieldLabel htmlFor={`progress-${option.id}`}>
-								<span>
+								<span className={`flex items-center`}>
 									{option.label}
+									{prediction.winning_option_id ===
+										option.id && (
+										<Badge
+											variant='outline'
+											className=' text-sm flex items-center gap-1 text-win ml-2'
+										>
+											<CrownIcon
+												className={`w-4! h-4!`}
+											/>
+										</Badge>
+									)}
 									{/* hot pick label when one option captures HOT_PICK_THRESHOLD_PERCENT% or more of bets */}
 									{totalBetAmount > 0 &&
 									(betAmountPerOption[option.id] /
@@ -145,7 +152,7 @@ function PredictionCard({
 										HOT_PICK_THRESHOLD_PERCENT ? (
 										<Badge
 											variant='outline'
-											className='ml-2 text-xs'
+											className='ml-1 text-xs'
 										>
 											🔥 hot pick
 										</Badge>

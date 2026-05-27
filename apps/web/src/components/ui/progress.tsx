@@ -5,9 +5,12 @@ import { cn } from "@/lib/utils";
 
 function Progress({
 	className,
+	indicatorBgClassName,
 	value,
 	...props
-}: React.ComponentProps<typeof ProgressPrimitive.Root>) {
+}: React.ComponentProps<typeof ProgressPrimitive.Root> & {
+	indicatorBgClassName?: string;
+}) {
 	return (
 		<ProgressPrimitive.Root
 			data-slot='progress'
@@ -19,7 +22,10 @@ function Progress({
 		>
 			<ProgressPrimitive.Indicator
 				data-slot='progress-indicator'
-				className='bg-linear-to-r from-primary to-accent h-full w-full flex-1 transition-all rounded-full'
+				className={cn(
+					"h-full w-full flex-1 transition-all rounded-full",
+					indicatorBgClassName || "bg-linear-to-r from-primary to-accent ",
+				)}
 				style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
 			/>
 		</ProgressPrimitive.Root>

@@ -9,11 +9,11 @@ export default function PredictionTitle({ prediction }: Readonly<Props>) {
 	return (
 		<>
 			{prediction ? (
-				<h4 className={`text-xl md:text-3xl text-center`}>
+				<h4 className={`text-xl md:text-3xl font-semibold text-center`}>
 					{prediction.title}
 				</h4>
 			) : (
-				<Skeleton className={`h-8 max-w-md w-full mx-auto mt-2`} />
+				<Skeleton className={`h-7 max-w-md w-full mx-auto`} />
 			)}
 		</>
 	);

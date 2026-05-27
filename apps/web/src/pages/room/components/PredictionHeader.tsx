@@ -1,9 +1,8 @@
 import { Button } from "@/components";
-import { Copy, CopyCheck, TrophyIcon } from "lucide-react";
+import { Copy, CopyCheck } from "lucide-react";
 import { useRoomContext } from "../RoomLayout";
 import { useState } from "react";
 import { RoomPreferencesDialog } from "./RoomPreferencesDialog";
-import { Link } from "react-router-dom";
 
 export default function PredictionHeader() {
 	const { room } = useRoomContext();
@@ -47,7 +46,7 @@ export default function PredictionHeader() {
 			</div>
 			<div className={`flex gap-4`}>
 				<RoomPreferencesDialog roomId={room.id} />
-				<Link to={`/rooms/${room.code}/leaderboard`}>
+				{/* <Link to={`/rooms/${room.code}/leaderboard`}>
 					<Button
 						variant='secondary'
 						size='icon-lg'
@@ -55,7 +54,7 @@ export default function PredictionHeader() {
 					>
 						<TrophyIcon />
 					</Button>
-				</Link>
+				</Link> */}
 			</div>
 		</div>
 	);

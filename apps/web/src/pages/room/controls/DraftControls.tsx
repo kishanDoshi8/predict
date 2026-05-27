@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Slider } from "../../../components/ui/slider";
 import { Button } from "../../../components/ui/button";
-import { Coins, X } from "lucide-react";
+import { Coins, MinusIcon, PlusIcon, RotateCcw, X } from "lucide-react";
 import { Player } from "@/types";
 import { useCancelBet, useMyBet, usePlaceBet } from "@/store/bet";
 import { Spinner } from "../../../components/ui/spinner";
@@ -92,6 +92,14 @@ export default function DraftControls({
 		);
 	};
 
+	const handleAddAmount = () => {
+		setBetAmount((prev) => Math.min(prev + 1, availableBalance));
+	};
+
+	const handleSubtractAmount = () => {
+		setBetAmount((prev) => Math.max(prev - 1, 1));
+	};
+
 	return (
 		<div className={`p-4 border rounded-md bg-background`}>
 			<div className={`flex flex-col gap-6`}>
@@ -99,21 +107,28 @@ export default function DraftControls({
 					{selectedOption && (
 						<Button
 							className={`flex-col gap-1 items-end p-2`}
-							variant={"ghost"}
+							variant={"none"}
 							onClick={handleResetBetAmount}
 						>
-							<p className={`text-xs text-muted-foreground`}>
+							<p
+								className={`flex items-center justify-start gap-2 text-xs text-muted-foreground text-left`}
+							>
+								{myBet && myBet.amount !== betAmount && (
+									<RotateCcw className={`w-3! h-3!`} />
+								)}
 								Bet Amount
 							</p>
-							<p className={`text-primary w-full text-left`}>
+							<p
+								className={`text-win w-full text-left text-lg font-semibold`}
+							>
 								{myBet && myBet?.amount !== betAmount && (
 									<span
 										className={`text-xs text-muted-foreground`}
 									>
 										{myBet.amount - betAmount < 0 && "+"}
-										{betAmount - (myBet.amount ?? 0)}
+										{betAmount - (myBet.amount ?? 0)}{" "}
 									</span>
-								)}{" "}
+								)}
 								{betAmount} pts
 							</p>
 						</Button>
@@ -123,19 +138,37 @@ export default function DraftControls({
 							Your Balance
 						</p>
 						<p className={`${selectedOption ? "text-right" : ""}`}>
-							{availableBalance} pts
+							<span className={`text-xl font-semibold`}>
+								{availableBalance} pts
+							</span>
 						</p>
 					</div>
 				</div>
 				{selectedOption && (
-					<Slider
-						min={1}
-						max={availableBalance}
-						step={1}
-						value={[betAmount]}
-						onValueChange={(value) => setBetAmount(value[0])}
-						disabled={isPlacingBet}
-					/>
+					<div className={`flex gap-3 items-center`}>
+						<Button
+							variant={"secondary"}
+							size={"icon-sm"}
+							onClick={handleSubtractAmount}
+						>
+							<MinusIcon className={`w-3 h-3`} />
+						</Button>
+						<Slider
+							min={1}
+							max={availableBalance}
+							step={1}
+							value={[betAmount]}
+							onValueChange={(value) => setBetAmount(value[0])}
+							disabled={isPlacingBet}
+						/>
+						<Button
+							variant={"secondary"}
+							size={"icon-sm"}
+							onClick={handleAddAmount}
+						>
+							<PlusIcon className={`w-3 h-3`} />
+						</Button>
+					</div>
 				)}
 				<div>
 					{myBet && (
@@ -150,7 +183,7 @@ export default function DraftControls({
 								Cancel Bet
 							</Button>
 							<Button
-								variant={"secondary"}
+								variant={"linear"}
 								className={`flex-1`}
 								disabled={
 									isPlacingBet || myBet.amount === betAmount
@@ -165,19 +198,21 @@ export default function DraftControls({
 					{selectedOption && !myBet && (
 						<div className={`flex gap-2 mt-2`}>
 							<Button
-								variant={"destructive"}
+								variant={"secondary"}
+								size={"lg"}
 								onClick={() => setSelectedOption(null)}
 							>
 								<X />
 							</Button>
 							<Button
+								variant={"linear"}
+								size={"lg"}
 								className={`flex-1`}
 								onClick={handlePlaceBet}
 								disabled={isPlacingBet}
 							>
-								{isPlacingBet && <Spinner />}
+								{isPlacingBet ? <Spinner /> : <Coins />}
 								Place Bet
-								<Coins fill='black' />
 							</Button>
 						</div>
 					)}

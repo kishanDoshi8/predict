@@ -39,6 +39,10 @@ function UserStats() {
 
 	return (
 		<div className={`w-full max-w-md mx-auto`}>
+			<h2 className={`text-lg font-semibold`}>The Hall of Fame</h2>
+			<p className={`text-xs text-muted-foreground mb-4`}>
+				Where legends are made (and egos are crushed)
+			</p>
 			<Tabs defaultValue='this_week' onValueChange={handleOnTabChange}>
 				<TabsList className={`w-full`}>
 					<TabsTrigger value='this_week'>
@@ -151,6 +155,18 @@ function LeaderboardContent({
 							</p>
 							<p className={`font-medium`}>
 								{entry.username}
+								{entry.current_streak >= 3 && (
+									<div className={`inline-block`}>
+										<Badge
+											className={`flex gap-0 items-center justify-center bg-accent/20 text-accent text-xs ml-2`}
+										>
+											<FlameIcon
+												className={`w-2 h-2 text-rank-3`}
+											/>
+											{entry.current_streak}
+										</Badge>
+									</div>
+								)}
 								{entry.player_id === player?.id && (
 									<Badge
 										variant='outline'

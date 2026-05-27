@@ -18,6 +18,7 @@ import { Countdown } from "../widgets/CountDown";
 import { useBets } from "@/store/bet";
 import { useOptionBgColor } from "@/hooks/useOptionColor";
 import {
+	CheckIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
 	Clock,
@@ -93,7 +94,7 @@ function PredictionCard({
 								<span
 									className={`h-2 w-2 rounded-full bg-primary animate-pulse`}
 								/>{" "}
-								In Play
+								LIVE
 							</Badge>
 						</div>
 					)}
@@ -102,7 +103,7 @@ function PredictionCard({
 							variant='outline'
 							className={`text-green-500 text-xs flex items-center gap-1`}
 						>
-							<DotIcon className={`text-green-500`} />
+							<CheckIcon className={`w-3 h-3`} />
 							Resolved
 						</Badge>
 					)}
@@ -222,20 +223,8 @@ function SectionHeader({
 	const hasActive = predictions.some(
 		(p) => p.status === "draft" || p.status === "locked",
 	);
-	const allLocked =
-		hasActive && predictions.every((p) => p.status === "locked");
 
 	if (hasActive) {
-		if (allLocked) {
-			return (
-				<h2
-					className={`my-4 flex items-center gap-2 text-lg font-semibold`}
-				>
-					Live
-				</h2>
-			);
-		}
-
 		return (
 			<div className={`flex items-center gap-2 my-4`}>
 				<div className={`flex flex-1 items-center gap-2`}>
@@ -261,10 +250,7 @@ function SectionHeader({
 			<h2
 				className={`my-4 flex items-center gap-2 text-lg font-semibold`}
 			>
-				<DotIcon
-					className={`inline-block text-green-500 animate-pulse`}
-				/>
-				Resolved
+				Last Played
 			</h2>
 		);
 	}
@@ -371,7 +357,7 @@ function InPlayPredictions() {
 				</CarouselContent>
 			</Carousel>
 
-			<div className={`flex justify-between items-center mt-4 px-2`}>
+			<div className={`flex justify-between items-center  px-2`}>
 				{predictions.length > 1 && (
 					<button
 						onClick={() => api?.scrollPrev()}

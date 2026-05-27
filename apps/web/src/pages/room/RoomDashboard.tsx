@@ -3,7 +3,6 @@ import InPlayPredictions from "./components/InPlayPredictions";
 import PredictionHeader from "./components/PredictionHeader";
 import { CreatePredictionButton } from "./controls/OrganizerControls";
 import { useRoomContext } from "./RoomLayout";
-import RoomStats from "./components/stats/RoomStats";
 import HistoryFeed from "./components/HistoryFeed";
 import UserStats from "./components/stats/UserStats";
 
@@ -23,14 +22,16 @@ function RoomDashboard() {
 		<div>
 			<div className={`px-4`}>
 				<PredictionHeader />
-				{/* <RoomStats /> */}
-				<UserStats />
 
-				<div className={`mt-6`}>
+				<div className={`mt-2`}>
 					<InPlayPredictions />
 				</div>
+
 				<div className={`mt-6`}>
-					{/* <LeaderboardPage /> */}
+					<UserStats />
+				</div>
+
+				<div className={`mt-4`}>
 					<HistoryFeed />
 				</div>
 			</div>

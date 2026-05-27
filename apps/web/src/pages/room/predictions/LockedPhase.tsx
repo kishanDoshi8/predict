@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertTitle, Skeleton } from "@/components";
+import { Badge, Skeleton } from "@/components";
 import { Prediction } from "@/types";
 import PredictionTitle from "../components/PredictionTitle";
 import PredictionOptions from "../widgets/PredictionOptions";
@@ -7,9 +7,10 @@ import { useBets } from "@/store/bet";
 import { useEffect } from "react";
 import { usePlayer } from "@/store/player";
 import { useOptionColor } from "@/hooks/useOptionColor";
-import { Lock } from "lucide-react";
+import { ClockIcon, LockIcon } from "lucide-react";
 import LockControls from "../controls/LockControls";
 import { useRoomBetRealtime } from "@/hooks/useRoomRealtime";
+import PredictionData from "./PredictionData";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -45,20 +46,37 @@ export default function LockedPhase({
 	};
 
 	return (
-		<div className={`flex-1 flex flex-col gap-4 items-center pb-4 mt-4`}>
-			<Alert variant='default' className={`w-full max-w-md mx-auto mb-4`}>
-				<Lock />
-				<AlertTitle>Betting is now closed!</AlertTitle>
-				<AlertDescription>
-					The host has locked the prediction. Please wait for the
-					results.
-				</AlertDescription>
-			</Alert>
-
+		<div className={`flex-1 flex flex-col gap-4 items-center pb-4`}>
 			<div
-				className={`border border-border rounded-xl p-4 flex flex-col gap-2 bg-secondary/30 w-full transition-colors`}
+				className={`flex flex-col gap-4 justify-center w-full max-w-md mx-auto relative overflow-hidden rounded-2xl bg-linear-to-br from-accent-500/15 via-card to-primary-500/10 border border-orange-500/20 p-5`}
 			>
+				{prediction?.status === "locked" ? (
+					<Badge
+						className={`mx-auto bg-accent/25 text-accent font-semibold`}
+					>
+						<LockIcon className={`w-3 h-3 mr-2`} />
+						BETS CLOSED
+					</Badge>
+				) : (
+					<Skeleton className={`h-5 w-25 mx-auto`} />
+				)}
+
 				<PredictionTitle prediction={prediction} />
+
+				{prediction ? (
+					<Badge
+						className={`mx-auto py-2 rounded-md bg-secondary/70 text-base text-accent/70`}
+					>
+						<ClockIcon
+							className={`w-5! h-5! text-accent mr-1 animate-pulse`}
+						/>
+						Awaiting Results
+					</Badge>
+				) : (
+					<Skeleton className={`h-10 w-36 mx-auto`} />
+				)}
+
+				<PredictionData prediction={prediction} />
 
 				<PredictionOptions
 					prediction={prediction}
@@ -67,11 +85,9 @@ export default function LockedPhase({
 				/>
 			</div>
 
-			<div
-				className={`max-w-md w-full mx-auto mt-4 p-4 border rounded-lg bg-secondary/50`}
-			>
+			<div className={`max-w-md w-full mx-auto mt-4`}>
 				<div className={`flex mb-2`}>
-					<p className={`text-xl`}>Who bet what?</p>
+					<p className={`text-2xl`}>Who bet what?</p>
 				</div>
 				{isBetsLoading ? (
 					<>
@@ -79,11 +95,13 @@ export default function LockedPhase({
 						<Skeleton className={`h-15 w-full mx-auto mt-4`} />
 					</>
 				) : (
-					<div>
+					<div
+						className={`rounded-xl overflow-hidden border border-border`}
+					>
 						{bets?.map((bet) => (
 							<div
 								key={bet.id}
-								className={`flex justify-between mt-2 border border-secondary hover:bg-accent p-4 rounded-xl`}
+								className={`flex justify-between border-b border-secondary bg-card hover:bg-secondary p-4`}
 							>
 								<div>
 									<p>{getPlayerName(bet.player_id)}</p>

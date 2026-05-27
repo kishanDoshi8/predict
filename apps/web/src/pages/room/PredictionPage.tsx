@@ -24,15 +24,19 @@ export function PredictionPage() {
 	if (!room) return null; // This should never happen because RoomLayout already checks for room and redirects to 404 if not found
 
 	return (
-		<>
-			<PredictionHeader />
+		<div>
+			<div className={`px-4`}>
+				<PredictionHeader />
+			</div>
 
-			<PredictionPhaseView
-				isLoading={isPredictionLoading}
-				prediction={prediction}
-				selectedOption={selectedOption}
-				setSelectedOption={setSelectedOption}
-			/>
-		</>
+			<div className={`p-4`}>
+				<PredictionPhaseView
+					isLoading={isPredictionLoading}
+					prediction={prediction}
+					selectedOption={selectedOption}
+					setSelectedOption={setSelectedOption}
+				/>
+			</div>
+		</div>
 	);
 }

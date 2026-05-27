@@ -39,7 +39,9 @@ type LockControlsProps = {
 	prediction: Prediction;
 };
 
-export default function LockControls({ prediction }: Readonly<LockControlsProps>) {
+export default function LockControls({
+	prediction,
+}: Readonly<LockControlsProps>) {
 	const { room } = useRoomContext();
 	const { data: player } = usePlayer();
 
@@ -67,7 +69,7 @@ export default function LockControls({ prediction }: Readonly<LockControlsProps>
 		>
 			<Drawer onClose={handleOnClose}>
 				<DrawerTrigger asChild>
-					<Button className={`w-full`} size='lg'>
+					<Button variant={"linear"} className={`w-full`} size='lg'>
 						Reveal Results
 					</Button>
 				</DrawerTrigger>
@@ -104,7 +106,7 @@ export default function LockControls({ prediction }: Readonly<LockControlsProps>
 					</DrawerHeader>
 					<DrawerFooter className={`gap-4`}>
 						<DrawerClose asChild>
-							<Button variant='secondary' size='lg'>
+							<Button variant='outline' size='lg'>
 								Cancel
 							</Button>
 						</DrawerClose>
@@ -150,7 +152,7 @@ function NoResult({ prediction }: Readonly<{ prediction: Prediction }>) {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant='destructive' size='lg'>
+				<Button variant='secondary' size='lg'>
 					No Result
 				</Button>
 			</DialogTrigger>
@@ -253,6 +255,7 @@ function RevealResults({
 		<Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
 			<DialogTrigger asChild>
 				<Button
+					variant={"linear"}
 					className={`w-full`}
 					size='lg'
 					disabled={!selectedOption}

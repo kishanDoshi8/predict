@@ -9,6 +9,7 @@ import { useRoomContext } from "../RoomLayout";
 import { useRoomBetRealtime } from "@/hooks/useRoomRealtime";
 import PredictionTitle from "../components/PredictionTitle";
 import { Countdown } from "../widgets/CountDown";
+import PredictionData from "./PredictionData";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -27,15 +28,17 @@ export default function DraftPhase({
 	useRoomBetRealtime(room.id, prediction?.id ?? null);
 
 	return (
-		<div className={`flex-1 flex flex-col gap-4 items-center pb-4 mt-4`}>
+		<div className={`flex-1 flex flex-col gap-4 items-center`}>
 			<div
-				className={`border border-border rounded-xl p-4 flex flex-col gap-2 bg-secondary/30 w-full transition-colors`}
+				className={`w-full max-w-md mx-auto text-card-foreground flex flex-col gap-4 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-rose-500/5 p-5`}
 			>
 				{prediction?.status === "draft" ? (
 					<Badge
-						variant='outline'
-						className={`b-4 border-accent text-primary mx-auto`}
+						className={`mx-auto bg-primary/25 text-primary font-semibold`}
 					>
+						<span
+							className={`h-2 w-2 rounded-full bg-primary animate-pulse`}
+						/>{" "}
 						In Play
 					</Badge>
 				) : (
@@ -44,11 +47,23 @@ export default function DraftPhase({
 
 				<PredictionTitle prediction={prediction} />
 
-				{prediction?.deadline && prediction.status === "draft" && (
-					<Countdown
-						targetTime={new Date(prediction.deadline).getTime()}
-					/>
+				{prediction?.deadline ? (
+					<>
+						{prediction?.deadline &&
+							prediction.status === "draft" && (
+								<Countdown
+									targetTime={new Date(
+										prediction.deadline,
+									).getTime()}
+									textSize='text-2xl'
+								/>
+							)}
+					</>
+				) : (
+					<Skeleton className={`h-10 w-36 mx-auto`} />
 				)}
+
+				<PredictionData prediction={prediction} />
 
 				<PredictionOptions
 					prediction={prediction}

@@ -514,6 +514,7 @@ export async function getBetsForPrediction(predictionId: string) {
       )  
     `)
     .eq('prediction_id', predictionId)
+    .order('amount', { ascending: false })
 
   if (error) throw error
   return data ?? []

@@ -59,7 +59,7 @@ export function TopThreePodium({ top, currentPlayerId }: Readonly<Props>) {
 
 						<p
 							className={cn(
-								"text-center font-medium leading-tight max-w-[6rem] truncate text-sm",
+								"text-center font-medium leading-tight max-w-24 truncate text-sm",
 								isSelf && "text-primary",
 							)}
 						>
@@ -82,16 +82,24 @@ export function TopThreePodium({ top, currentPlayerId }: Readonly<Props>) {
 							{entry.total_won_in_room.toLocaleString()} pts
 						</p>
 
-						<div
-							className={cn(
-								"w-full rounded-t-md flex items-center justify-center",
-								isFirst
-									? "bg-yellow-400/20 dark:bg-yellow-500/15 min-h-[3rem]"
-									: visualRank === 2
-										? "bg-muted/50 min-h-[2rem]"
-										: "bg-muted/30 min-h-[1.5rem]",
-							)}
-						/>
+						{(() => {
+							let podiumClass = "";
+							if (isFirst) {
+								podiumClass = "bg-yellow-400/20 dark:bg-yellow-500/15 min-h-[3rem]";
+							} else if (visualRank === 2) {
+								podiumClass = "bg-muted/50 min-h-8";
+							} else {
+								podiumClass = "bg-muted/30 min-h-6";
+							}
+							return (
+								<div
+									className={cn(
+										"w-full rounded-t-md flex items-center justify-center",
+										podiumClass,
+									)}
+								/>
+							);
+						})()}
 					</div>
 				);
 			})}

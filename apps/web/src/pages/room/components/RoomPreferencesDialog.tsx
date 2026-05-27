@@ -193,7 +193,7 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 						<Spinner className='size-8' />
 					</div>
 				) : (
-					<div className='-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4 space-y-6 bg-accent/30 py-2'>
+					<div className='-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4 space-y-6 bg-card/70 py-2'>
 						<section className='space-y-3'>
 							<h3 className='font-semibold'>Global Defaults</h3>
 							<div className='space-y-2'>

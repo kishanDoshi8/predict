@@ -3,10 +3,7 @@ import { Badge } from "@/components";
 function Brand() {
 	return (
 		<>
-			<Badge
-				variant='outline'
-				className={`b-4 border-primary text-primary`}
-			>
+			<Badge variant='outline' className={`b-4 border-win text-win`}>
 				Beta v0.1
 			</Badge>
 			<div className={`flex flex-col gap-2 items-center`}>

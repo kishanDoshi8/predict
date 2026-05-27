@@ -127,6 +127,7 @@ export default function Home({
 						</InputOTPGroup>
 					</InputOTP>
 					<Button
+						variant={"linear"}
 						size='lg'
 						onClick={handleEnterRoom}
 						disabled={isLoading}

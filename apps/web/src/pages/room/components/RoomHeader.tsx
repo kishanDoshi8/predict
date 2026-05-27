@@ -29,7 +29,10 @@ function RoomHeader({ room }: Readonly<Props>) {
 				>
 					<HomeIcon />
 				</Button>
-				<Link to={`/rooms/${room.code}`} className={`flex-1`}>
+				<Link
+					to={`/rooms/${room.code}`}
+					className={`flex-1 font-bold truncate`}
+				>
 					<h1>{room.name}</h1>
 				</Link>
 				<div>

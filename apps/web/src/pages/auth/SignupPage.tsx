@@ -7,118 +7,136 @@ import { Spinner } from "@/components/ui/spinner";
 import Brand from "@/pages/home/components/Brand";
 
 export function SignupPage() {
-  const { signUp } = useAuth();
-  const navigate = useNavigate();
+	const { signUp } = useAuth();
+	const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setError(null);
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
+		if (password !== confirmPassword) {
+			setError("Passwords do not match.");
+			return;
+		}
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
+		if (password.length < 6) {
+			setError("Password must be at least 6 characters.");
+			return;
+		}
 
-    setIsLoading(true);
-    try {
-      await signUp(email, password);
-      navigate("/create-player");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create account.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+		setIsLoading(true);
+		try {
+			await signUp(email, password);
+			navigate("/create-player");
+		} catch (err) {
+			setError(
+				err instanceof Error
+					? err.message
+					: "Failed to create account.",
+			);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-  return (
-    <div className='p-8 mt-4 flex flex-col items-center gap-8'>
-      <Brand />
+	return (
+		<div className='p-8 mt-4 flex flex-col items-center gap-8'>
+			<Brand />
 
-      <div className='flex flex-col gap-4 border-2 p-8 w-full max-w-sm'>
-        <h2 className='text-2xl font-bold'>Create account</h2>
+			<div className='flex flex-col gap-4 border-2 p-8 w-full max-w-sm'>
+				<h2 className='text-2xl font-bold'>Create account</h2>
 
-        <form onSubmit={(e) => void handleSubmit(e)} className='flex flex-col gap-4'>
-          <div className='flex flex-col gap-1'>
-            <label htmlFor='email' className='text-sm text-muted-foreground'>
-              Email
-            </label>
-            <Input
-              id='email'
-              type='email'
-              placeholder='you@example.com'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete='email'
-              required
-              disabled={isLoading}
-            />
-          </div>
+				<form
+					onSubmit={(e) => void handleSubmit(e)}
+					className='flex flex-col gap-4'
+				>
+					<div className='flex flex-col gap-1'>
+						<label
+							htmlFor='email'
+							className='text-sm text-muted-foreground'
+						>
+							Email
+						</label>
+						<Input
+							id='email'
+							type='email'
+							placeholder='you@example.com'
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							autoComplete='email'
+							required
+							disabled={isLoading}
+						/>
+					</div>
 
-          <div className='flex flex-col gap-1'>
-            <label htmlFor='password' className='text-sm text-muted-foreground'>
-              Password
-            </label>
-            <Input
-              id='password'
-              type='password'
-              placeholder='••••••••'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete='new-password'
-              required
-              disabled={isLoading}
-            />
-          </div>
+					<div className='flex flex-col gap-1'>
+						<label
+							htmlFor='password'
+							className='text-sm text-muted-foreground'
+						>
+							Password
+						</label>
+						<Input
+							id='password'
+							type='password'
+							placeholder='••••••••'
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							autoComplete='new-password'
+							required
+							disabled={isLoading}
+						/>
+					</div>
 
-          <div className='flex flex-col gap-1'>
-            <label
-              htmlFor='confirm-password'
-              className='text-sm text-muted-foreground'
-            >
-              Confirm password
-            </label>
-            <Input
-              id='confirm-password'
-              type='password'
-              placeholder='••••••••'
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete='new-password'
-              required
-              disabled={isLoading}
-            />
-          </div>
+					<div className='flex flex-col gap-1'>
+						<label
+							htmlFor='confirm-password'
+							className='text-sm text-muted-foreground'
+						>
+							Confirm password
+						</label>
+						<Input
+							id='confirm-password'
+							type='password'
+							placeholder='••••••••'
+							value={confirmPassword}
+							onChange={(e) => setConfirmPassword(e.target.value)}
+							autoComplete='new-password'
+							required
+							disabled={isLoading}
+						/>
+					</div>
 
-          {error && (
-            <p className='text-sm text-red-500' role='alert'>
-              {error}
-            </p>
-          )}
+					{error && (
+						<p className='text-sm text-red-500' role='alert'>
+							{error}
+						</p>
+					)}
 
-          <Button type='submit' disabled={isLoading} className='w-full'>
-            {isLoading && <Spinner />}
-            Create account
-          </Button>
-        </form>
+					<Button
+						variant='linear'
+						type='submit'
+						disabled={isLoading}
+						className='w-full'
+					>
+						{isLoading && <Spinner />}
+						Create account
+					</Button>
+				</form>
 
-        <p className='text-sm text-center text-muted-foreground'>
-          Already have an account?{" "}
-          <Link to='/login' className='text-primary hover:underline'>
-            Sign in
-          </Link>
-        </p>
-      </div>
-    </div>
-  );
+				<p className='text-sm text-center text-muted-foreground'>
+					Already have an account?{" "}
+					<Link to='/login' className='text-accent hover:underline'>
+						Sign in
+					</Link>
+				</p>
+			</div>
+		</div>
+	);
 }

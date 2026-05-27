@@ -1,5 +1,6 @@
 import {
 	Alert,
+	AlertAction,
 	AlertDescription,
 	AlertTitle,
 	Badge,
@@ -8,12 +9,12 @@ import {
 import { Prediction } from "@/types";
 import PredictionTitle from "../components/PredictionTitle";
 import PredictionOptions from "../widgets/PredictionOptions";
-import { CheckCircle } from "lucide-react";
+import { BicepsFlexed, CheckIcon, CrownIcon, FrownIcon } from "lucide-react";
 import { useBets } from "@/store/bet";
 import { useRoomContext } from "../RoomLayout";
 import { usePlayer } from "@/store/player";
-import { useOptionColor } from "@/hooks/useOptionColor";
 import { useRoomBetRealtime } from "@/hooks/useRoomRealtime";
+import PredictionData from "./PredictionData";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -41,36 +42,110 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 
 	return (
 		<div className={`flex-1 flex flex-col gap-4 items-center pb-4 mt-4`}>
-			<Alert className={`mb-4 border-primary w-full max-w-md mx-auto`}>
-				<CheckCircle />
-				<AlertTitle>Verdict:</AlertTitle>
-				<AlertDescription
-					className={`text-secondary-foreground text-2xl`}
-				>
-					{
-						prediction.prediction_options.find(
-							(o) => o.id === prediction.winning_option_id,
-						)?.label
-					}
-					{prediction.resolved_at && (
-						<span className={`text-muted-foreground text-sm`}>
-							Resolved at:{" "}
-							{new Date(prediction.resolved_at).toLocaleString()}
-						</span>
-					)}
-				</AlertDescription>
-			</Alert>
-
 			<div
-				className={`border border-border rounded-xl p-4 flex flex-col gap-2 bg-secondary/30 w-full transition-colors`}
+				className={`flex flex-col justify-center items-center gap-4 w-full max-w-md max-auto relative overflow-hidden rounded-2xl bg-linear-to-br from-win/20 via-card to-emerald-500/10 border border-green-500/30 p-5`}
 			>
+				{prediction?.status === "revealed" ? (
+					<Badge
+						className={`mx-auto bg-win/25 text-win font-semibold`}
+					>
+						<CheckIcon className={`w-3 h-3`} />
+						REVEALED
+					</Badge>
+				) : (
+					<Skeleton className={`h-5 w-25 mx-auto`} />
+				)}
+
 				<PredictionTitle prediction={prediction} />
+
+				<div
+					className={`flex gap-2 items-center justify-center bg-win/10 rounded-xl px-4 py-2`}
+				>
+					<CrownIcon className={`text-win rounded-full mx-auto`} />
+					<p className={`text-center text-lg font-semibold`}>
+						<span className={`text-2xl text-win`}>
+							{
+								prediction.prediction_options.find(
+									(option) =>
+										option.id ===
+										prediction.winning_option_id,
+								)?.label
+							}
+						</span>
+					</p>
+				</div>
+
+				<PredictionData prediction={prediction} />
 
 				<PredictionOptions
 					prediction={prediction}
 					selectedOption={null}
 					setSelectedOption={() => {}}
 				/>
+			</div>
+
+			<div className={`w-full max-w-md mx-auto`}>
+				{(() => {
+					if (!player || !bets) return null;
+					const playerBet = bets.find(
+						(b) => b.player_id === player.id,
+					);
+					if (!playerBet || !prediction.winning_option_id)
+						return null;
+					if (playerBet.option_id === prediction.winning_option_id) {
+						return (
+							<Alert variant='success'>
+								<BicepsFlexed className={`w-4 h-4 text-win`} />
+								<AlertTitle>Congratulations!</AlertTitle>
+								<AlertDescription>
+									You won the prediction.
+								</AlertDescription>
+								<AlertAction>
+									{playerBet.payout !== null && (
+										<p
+											className={`text-lg font-semibold ${playerBet.payout - playerBet.amount > 0 ? "text-win" : "text-loss"}`}
+										>
+											{playerBet.payout -
+												playerBet.amount >
+											0
+												? "+"
+												: ""}
+											{playerBet.payout -
+												playerBet.amount}{" "}
+											PTS
+										</p>
+									)}
+								</AlertAction>
+							</Alert>
+						);
+					} else {
+						return (
+							<Alert variant='destructive'>
+								<FrownIcon className={`w-4 h-4 text-loss`} />
+								<AlertTitle>Better luck next time!</AlertTitle>
+								<AlertDescription>
+									You lost the prediction.
+								</AlertDescription>
+								<AlertAction>
+									{playerBet.payout !== null && (
+										<p
+											className={`text-lg font-semibold ${playerBet.payout - playerBet.amount > 0 ? "text-win" : "text-loss"}`}
+										>
+											{playerBet.payout -
+												playerBet.amount >
+											0
+												? "+"
+												: ""}
+											{playerBet.payout -
+												playerBet.amount}{" "}
+											PTS
+										</p>
+									)}
+								</AlertAction>
+							</Alert>
+						);
+					}
+				})()}
 			</div>
 
 			<div className={`max-w-md w-full mx-auto mt-4`}>
@@ -83,14 +158,16 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 						<Skeleton className={`h-15 w-full mx-auto mt-4`} />
 					</>
 				) : (
-					<div>
+					<div
+						className={`rounded-xl overflow-hidden border border-border`}
+					>
 						{bets?.map((bet) => (
 							<div
 								key={bet.id}
-								className={`flex justify-between mt-2 border border-secondary hover:bg-accent p-4 rounded-xl`}
+								className={`flex justify-between border-b border-secondary bg-card hover:bg-secondary p-4`}
 							>
 								<div>
-									<p className={`text-lg`}>
+									<p className={`text-lg font-semibold`}>
 										{getPlayerName(bet.player_id)}
 									</p>
 									<p className={`text-sm`}>
@@ -100,29 +177,22 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 											{bet.amount} PTS{" "}
 										</span>
 										<span
-											className={`text-sm text-right ${useOptionColor(bet.option?.id ?? "")}`}
+											className={`text-sm text-right ${prediction.winning_option_id === bet.option_id ? "text-win" : "text-loss"}`}
 										>
 											on {bet.option?.label ?? "Unknown"}
 										</span>
 									</p>
 								</div>
 								<div className={`flex flex-col items-end`}>
-									<p className={`text-lg`}>
-										{bet.payout} PTS
-									</p>
 									{bet.payout !== null && (
-										<Badge
-											variant={
-												bet.payout - bet.amount > 0
-													? "default"
-													: "destructive"
-											}
+										<p
+											className={`text-lg font-semibold ${bet.payout - bet.amount > 0 ? "text-win" : "text-loss"}`}
 										>
 											{bet.payout - bet.amount > 0
 												? "+"
 												: ""}
 											{bet.payout - bet.amount} PTS
-										</Badge>
+										</p>
 									)}
 								</div>
 							</div>

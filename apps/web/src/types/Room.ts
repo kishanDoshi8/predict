@@ -21,4 +21,8 @@ export interface Room {
   members:           RoomMember[]
   // Max concurrent active (draft/locked) predictions. Read-only from the app layer.
   predictions_limit: number
+
+  // UI helper properties
+  member_count?: number
+  active_prediction_count?: number
 }

@@ -2,7 +2,13 @@ import { PredictionHistoryEntry } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, XCircle, MinusCircle } from "lucide-react";
+import {
+	CheckCircle2,
+	XCircle,
+	MinusCircle,
+	CrownIcon,
+	TrendingUpIcon,
+} from "lucide-react";
 import Dot from "@/components/ui/dot";
 import { Link } from "react-router-dom";
 
@@ -12,7 +18,7 @@ function statusMeta(status: PredictionHistoryEntry["status"]) {
 	switch (status) {
 		case "revealed":
 			return {
-				icon: <CheckCircle2 className='size-4 text-primary' />,
+				icon: <CheckCircle2 className='size-4 text-win' />,
 				label: "Resolved",
 			};
 		case "cancelled":
@@ -53,14 +59,24 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 			})
 		: null;
 
-	let payoutSummary: string;
+	let payoutSummary: JSX.Element | string;
 	if (entry.status !== "revealed") {
 		payoutSummary = "No payout distributed.";
 	} else if (entry.winner_count === 0) {
 		payoutSummary = "Nobody guessed correctly 💀";
 	} else {
 		const winnerLabel = entry.winner_count === 1 ? "winner" : "winners";
-		payoutSummary = `+${entry.total_paid_to_winners.toLocaleString()} pts paid to ${entry.winner_count} ${winnerLabel}`;
+		payoutSummary = (
+			<p className={`text-muted-foreground`}>
+				<TrendingUpIcon
+					className={`w-3 h-3 inline-block mr-2 text-green-500`}
+				/>
+				<span className={`text-sm text-foreground font-semibold`}>
+					+{entry.total_paid_to_winners.toLocaleString()} pts
+				</span>{" "}
+				paid to {entry.winner_count} {winnerLabel}
+			</p>
+		);
 	}
 
 	const isUpset = entry.status === "revealed" && (winPct ?? 100) <= 25;
@@ -69,7 +85,7 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 	return (
 		<Link
 			to={`predictions/${entry.prediction_id}`}
-			className='border-2 border-cyan-900 rounded-xl p-3 flex flex-col gap-2 hover:bg-accent/30 transition-colors'
+			className='border-2 rounded-xl p-3 flex flex-col gap-2 hover:bg-secondary/50 hover:border-win/30 transition-colors'
 		>
 			{/* Header row */}
 			<div className='flex items-start gap-2'>
@@ -90,7 +106,8 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 					<span className='text-xs text-muted-foreground'>
 						Winner:
 					</span>
-					<Badge variant='default' className='text-xs'>
+					<Badge className='text-xs bg-win/20 text-win font-semibold'>
+						<CrownIcon />
 						{winner.label}
 					</Badge>
 					{isUpset && (
@@ -120,13 +137,15 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 								key={opt.id}
 								className='flex items-center gap-2'
 							>
-								<p className={`text-xs`}>{opt.label}</p>
-								<div className='flex-1 h-1.5 rounded-full bg-muted overflow-hidden'>
+								<p className={`text-xs w-10 truncate`}>
+									{opt.label}
+								</p>
+								<div className='flex-1 h-2 rounded-full bg-muted overflow-hidden'>
 									<div
 										className={cn(
 											"h-full rounded-full transition-all",
 											isWinner
-												? "bg-primary"
+												? "bg-win"
 												: "bg-muted-foreground/40",
 										)}
 										style={{ width: `${pct}%` }}
@@ -136,7 +155,7 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 									className={cn(
 										"text-xs tabular-nums w-8 text-right",
 										isWinner
-											? "text-primary font-medium"
+											? "text-win font-medium"
 											: "text-muted-foreground",
 									)}
 								>
@@ -154,23 +173,24 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 				<Dot />
 				{participants > 0 && (
 					<span>
-						{participants} participant
+						{participants} predictors
 						{participants === 1 ? "" : "s"}
 					</span>
 				)}
 				<Dot />
 				{winPct !== null && entry.status === "revealed" && (
-					<span>{winPct}% picked right</span>
+					<span>{winPct}% called it</span>
 				)}
-				<div>by {entry.creator_username}</div>
 			</div>
 
 			<div className='rounded-md bg-muted/40 px-2.5 py-2 text-xs space-y-0.5'>
 				<p className='font-medium text-foreground'>{payoutSummary}</p>
 				{entry.status === "revealed" && entry.biggest_payout > 0 && (
 					<p className='text-muted-foreground'>
-						Biggest payout: +{entry.biggest_payout.toLocaleString()}{" "}
-						pts
+						Biggest payout:{" "}
+						<span className={`text-win font-semibold`}>
+							+{entry.biggest_payout.toLocaleString()} pts
+						</span>
 					</p>
 				)}
 			</div>

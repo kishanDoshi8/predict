@@ -72,7 +72,7 @@ export default function HowToPlayModal({ open, onClose }: Readonly<Props>) {
 
 	return (
 		<Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-			<DialogContent showCloseButton={false}>
+			<DialogContent showCloseButton={false} className={`bg-card`}>
 				<DialogHeader>
 					<DialogTitle className='text-center text-xl'>
 						How to Play 🎮
@@ -130,6 +130,7 @@ export default function HowToPlayModal({ open, onClose }: Readonly<Props>) {
 						</Button>
 					)}
 					<Button
+						variant={"linear"}
 						className='flex-1'
 						onClick={() => {
 							if (isLastSlide) {

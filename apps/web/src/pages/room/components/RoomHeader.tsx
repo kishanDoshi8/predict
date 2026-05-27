@@ -22,14 +22,17 @@ function RoomHeader({ room }: Readonly<Props>) {
 		>
 			<div className={`max-w-280 mx-auto flex gap-4 items-center`}>
 				<Button
-					variant='outline'
-					size='sm'
-					className={`cursor-pointer`}
+					variant='linear'
+					// size='sm'
+					className={`cursor-pointer rounded-lg`}
 					onClick={handleGoHome}
 				>
 					<HomeIcon />
 				</Button>
-				<Link to={`/rooms/${room.code}`} className={`flex-1`}>
+				<Link
+					to={`/rooms/${room.code}`}
+					className={`flex-1 font-bold truncate`}
+				>
 					<h1>{room.name}</h1>
 				</Link>
 				<div>
@@ -37,7 +40,7 @@ function RoomHeader({ room }: Readonly<Props>) {
 					<Button
 						variant='ghost'
 						size='sm'
-						className={`text-primary text-base cursor-default`}
+						className={`text-accent text-base cursor-default`}
 					>
 						<CoinsIcon />
 						{player?.points_balance ?? 0} pts

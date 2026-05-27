@@ -63,75 +63,169 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+    --color-win: var(--win);
+    --color-loss: var(--loss);
+    --color-live: var(--live);
+    --color-hot: var(--hot);
+    --color-rank-1: var(--rank-1);
+    --color-rank-2: var(--rank-2);
+    --color-rank-3: var(--rank-3);
 }
+
+/* 
+ * DARK MODE SETUP - Rose/Coral to Orange Theme
+ * Copy this to your globals.css
+ * 
+ * Color Palette:
+ * - Primary: Rose (#f43f5e) 
+ * - Accent: Orange (#fb923c)
+ * - Background: True black (#09090b)
+ * - Cards: Zinc-900 (#18181b)
+ * - Win: Green (#4ade80)
+ * - Loss: Rose (#f43f5e)
+ * - Rank 1: Gold (#fbbf24)
+ * - Rank 2: Silver (#a1a1aa)
+ * - Rank 3: Orange (#fb923c)
+ */
 
 :root {
     --radius: 0.625rem;
+
+    /* Light mode (keep your existing or use these defaults) */
     --background: oklch(1 0 0);
     --foreground: oklch(0.129 0.042 264.695);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.129 0.042 264.695);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.129 0.042 264.695);
-    --primary: oklch(0.208 0.042 265.755);
+    --primary: oklch(0.645 0.246 16.439);
+    /* Rose-500 */
     --primary-foreground: oklch(0.984 0.003 247.858);
     --secondary: oklch(0.968 0.007 247.896);
     --secondary-foreground: oklch(0.208 0.042 265.755);
     --muted: oklch(0.968 0.007 247.896);
     --muted-foreground: oklch(0.554 0.046 257.417);
-    --accent: oklch(0.968 0.007 247.896);
+    --accent: oklch(0.769 0.188 70.08);
+    /* Orange-400 */
     --accent-foreground: oklch(0.208 0.042 265.755);
     --destructive: oklch(0.577 0.245 27.325);
     --border: oklch(0.929 0.013 255.508);
     --input: oklch(0.929 0.013 255.508);
-    --ring: oklch(0.704 0.04 256.788);
-    --chart-1: oklch(0.646 0.222 41.116);
-    --chart-2: oklch(0.6 0.118 184.704);
+    --ring: oklch(0.645 0.246 16.439);
+    /* Rose-500 */
+    --chart-1: oklch(0.645 0.246 16.439);
+    --chart-2: oklch(0.769 0.188 70.08);
     --chart-3: oklch(0.398 0.07 227.392);
     --chart-4: oklch(0.828 0.189 84.429);
-    --chart-5: oklch(0.769 0.188 70.08);
+    --chart-5: oklch(0.6 0.118 184.704);
     --sidebar: oklch(0.984 0.003 247.858);
     --sidebar-foreground: oklch(0.129 0.042 264.695);
-    --sidebar-primary: oklch(0.208 0.042 265.755);
+    --sidebar-primary: oklch(0.645 0.246 16.439);
     --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
     --sidebar-accent: oklch(0.968 0.007 247.896);
     --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
     --sidebar-border: oklch(0.929 0.013 255.508);
-    --sidebar-ring: oklch(0.704 0.04 256.788);
+    --sidebar-ring: oklch(0.645 0.246 16.439);
+
+    /* Game-specific tokens */
+    --win: oklch(0.723 0.191 142.542);
+    /* Green-400 #4ade80 */
+    --loss: oklch(0.645 0.246 16.439);
+    /* Rose-500 #f43f5e */
+    --live: oklch(0.645 0.246 16.439);
+    /* Rose-500 (pulsing live) */
+    --hot: oklch(0.769 0.188 70.08);
+    /* Orange-400 #fb923c */
+    --rank-1: oklch(0.828 0.189 84.429);
+    /* Amber-400 #fbbf24 (gold) */
+    --rank-2: oklch(0.705 0.015 264.695);
+    /* Zinc-400 #a1a1aa (silver) */
+    --rank-3: oklch(0.769 0.188 70.08);
+    /* Orange-400 #fb923c (bronze) */
 }
 
 .dark {
-    --background: oklch(0.129 0.042 264.695);
+    /* True black base with zinc grays */
+    --background: #09090b;
+    /* Zinc-950 */
     --foreground: oklch(0.984 0.003 247.858);
-    --card: oklch(0.208 0.042 265.755);
+    /* Near white */
+
+    /* Cards: slightly elevated from background */
+    --card: oklch(0.21 0.006 285.885);
+    /* Zinc-900 #18181b */
     --card-foreground: oklch(0.984 0.003 247.858);
-    --popover: oklch(0.208 0.042 265.755);
+
+    /* Popover: same as card */
+    --popover: oklch(0.21 0.006 285.885);
     --popover-foreground: oklch(0.984 0.003 247.858);
-    --primary: oklch(89.97% 0.126 160.60);
-    --primary-foreground: oklch(0.208 0.042 265.755);
-    --secondary: oklch(0.279 0.041 260.031);
+
+    /* Primary: Rose-500 */
+    --primary: oklch(0.645 0.246 16.439);
+    /* #f43f5e */
+    --primary-foreground: oklch(0.984 0.003 247.858);
+
+    /* Secondary: Zinc-800 */
+    --secondary: oklch(0.274 0.006 286.033);
+    /* #27272a */
     --secondary-foreground: oklch(0.984 0.003 247.858);
-    --muted: oklch(0.279 0.041 260.031);
-    --muted-foreground: oklch(0.704 0.04 256.788);
-    --accent: oklch(0.279 0.041 260.031);
-    --accent-foreground: oklch(0.984 0.003 247.858);
-    --destructive: oklch(0.704 0.191 22.216);
+
+    /* Muted: Zinc-800 */
+    --muted: oklch(0.274 0.006 286.033);
+    --muted-foreground: oklch(0.705 0.015 264.695);
+    /* Zinc-400 */
+
+    /* Accent: Orange-400 */
+    --accent: oklch(0.769 0.188 70.08);
+    /* #fb923c */
+    --accent-foreground: oklch(0.21 0.006 285.885);
+
+    /* Destructive: Rose-500 */
+    --destructive: oklch(0.645 0.246 16.439);
+
+    /* Borders: subtle white with transparency */
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.551 0.027 264.364);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.769 0.188 70.08);
-    --chart-4: oklch(0.627 0.265 303.9);
-    --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.208 0.042 265.755);
+    --ring: oklch(0.645 0.246 16.439);
+    /* Rose-500 */
+
+    /* Charts: vibrant game colors */
+    --chart-1: oklch(0.645 0.246 16.439);
+    /* Rose */
+    --chart-2: oklch(0.769 0.188 70.08);
+    /* Orange */
+    --chart-3: oklch(0.723 0.191 142.542);
+    /* Green */
+    --chart-4: oklch(0.828 0.189 84.429);
+    /* Amber */
+    --chart-5: oklch(0.627 0.265 303.9);
+    /* Purple */
+
+    /* Sidebar */
+    --sidebar: oklch(0.21 0.006 285.885);
     --sidebar-foreground: oklch(0.984 0.003 247.858);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary: oklch(0.645 0.246 16.439);
     --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-    --sidebar-accent: oklch(0.279 0.041 260.031);
+    --sidebar-accent: oklch(0.274 0.006 286.033);
     --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
     --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.551 0.027 264.364);
+    --sidebar-ring: oklch(0.645 0.246 16.439);
+
+    /* Game-specific tokens (same as :root, dark mode ready) */
+    --win: oklch(0.723 0.191 142.542);
+    /* Green-400 #4ade80 */
+    --loss: oklch(0.645 0.246 16.439);
+    /* Rose-500 #f43f5e */
+    --live: oklch(0.645 0.246 16.439);
+    /* Rose-500 */
+    --hot: oklch(0.769 0.188 70.08);
+    /* Orange-400 #fb923c */
+    --rank-1: oklch(0.828 0.189 84.429);
+    /* Gold */
+    --rank-2: oklch(0.705 0.015 264.695);
+    /* Silver */
+    --rank-3: oklch(0.769 0.188 70.08);
+    /* Bronze/Orange */
 }
 
 @layer base {

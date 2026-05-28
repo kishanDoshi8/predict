@@ -139,7 +139,7 @@ function LeaderboardContent({
 							className={`relative w-14 h-14 flex items-center justify-center rounded-lg font-bold text-foreground text-2xl ${leaderboardPlayer?.rank === 1 ? "bg-rank-1 text-secondary" : "bg-linear-to-r from-primary to-accent"}`}
 						>
 							#{leaderboardPlayer?.rank ?? 0}
-							{leaderboardPlayer?.rank === 2 && (
+							{leaderboardPlayer?.rank === 1 && (
 								<span>
 									<CrownIcon
 										className={`w-6 h-6 text-rank-1 absolute -top-2 border border-rank-1 -right-2 bg-background rounded-full p-1`}

@@ -1,12 +1,20 @@
 import React, { useEffect } from "react";
 import { Slider } from "../../../components/ui/slider";
 import { Button } from "../../../components/ui/button";
-import { Coins, MinusIcon, PlusIcon, RotateCcw, X } from "lucide-react";
+import {
+	ChevronDown,
+	Coins,
+	MinusIcon,
+	PlusIcon,
+	RotateCcw,
+	X,
+} from "lucide-react";
 import { Player } from "@/types";
 import { useCancelBet, useMyBet, usePlaceBet } from "@/store/bet";
 import { Spinner } from "../../../components/ui/spinner";
 import { toast } from "sonner";
 import { useRoomContext } from "../RoomLayout";
+import { twColor } from "@/lib/utils";
 
 type Props = {
 	player: Player;
@@ -27,6 +35,7 @@ export default function DraftControls({
 	const { mutate: cancelBet, isPending: isCancellingBet } = useCancelBet();
 
 	const [betAmount, setBetAmount] = React.useState<number>(1);
+	const [collapseControls, setCollapseControls] = React.useState(false);
 
 	const availableBalance =
 		player.points_balance - player.points_in_escrow + (myBet?.amount ?? 0);
@@ -38,6 +47,7 @@ export default function DraftControls({
 		} else {
 			setBetAmount(1);
 		}
+		console.log(twColor("text-primary"));
 	}, [myBet]);
 
 	const handlePlaceBet = () => {
@@ -92,8 +102,10 @@ export default function DraftControls({
 		);
 	};
 
-	const handleAddAmount = () => {
-		setBetAmount((prev) => Math.min(prev + 1, availableBalance));
+	const handleAddAmount = (number?: number) => {
+		setBetAmount((prev) =>
+			Math.min(prev + (number ?? 1), availableBalance),
+		);
 	};
 
 	const handleSubtractAmount = () => {
@@ -101,8 +113,23 @@ export default function DraftControls({
 	};
 
 	return (
-		<div className={`p-4 border rounded-md bg-background`}>
-			<div className={`flex flex-col gap-6`}>
+		<div className={`relative p-4 border rounded-md bg-background`}>
+			<Button
+				variant={"secondary"}
+				className={`absolute -top-1 left-1/2 -translate-x-1/2 bg-background hover:bg-background/80 data-[state=open]:bg-background/80 border rounded-lg rounded-tr-none rounded-tl-none`}
+				size={"icon-lg"}
+				disabled={!myBet}
+				onClick={() =>
+					setCollapseControls((prev) => (myBet ? !prev : prev))
+				}
+			>
+				<ChevronDown
+					className={`w-4 h-4 duration-300 ${collapseControls ? "rotate-180" : ""}`}
+				/>
+			</Button>
+			<div
+				className={`flex flex-col ${collapseControls ? "gap-2" : "gap-6"}`}
+			>
 				<div className={`flex justify-between items-center`}>
 					{selectedOption && (
 						<Button
@@ -144,77 +171,132 @@ export default function DraftControls({
 						</p>
 					</div>
 				</div>
-				{selectedOption && (
-					<div className={`flex gap-3 items-center`}>
-						<Button
-							variant={"secondary"}
-							size={"icon-sm"}
-							onClick={handleSubtractAmount}
-						>
-							<MinusIcon className={`w-3 h-3`} />
-						</Button>
-						<Slider
-							min={1}
-							max={availableBalance}
-							step={1}
-							value={[betAmount]}
-							onValueChange={(value) => setBetAmount(value[0])}
-							disabled={isPlacingBet}
-						/>
-						<Button
-							variant={"secondary"}
-							size={"icon-sm"}
-							onClick={handleAddAmount}
-						>
-							<PlusIcon className={`w-3 h-3`} />
-						</Button>
-					</div>
+				{!collapseControls && (
+					<>
+						{selectedOption && (
+							<div className={`flex flex-col gap-3`}>
+								<div className={`flex gap-2 *:flex-1`}>
+									<Button
+										variant={"outline"}
+										size={"sm"}
+										onClick={() => handleAddAmount(5)}
+										disabled={
+											betAmount === availableBalance
+										}
+									>
+										+5
+									</Button>
+									<Button
+										variant={"outline"}
+										size={"sm"}
+										onClick={() => handleAddAmount(20)}
+										disabled={
+											betAmount === availableBalance
+										}
+									>
+										+20
+									</Button>
+									<Button
+										variant={"outline"}
+										size={"sm"}
+										onClick={() => handleAddAmount(50)}
+										disabled={
+											betAmount === availableBalance
+										}
+									>
+										+50
+									</Button>
+									<Button
+										variant={"outline"}
+										size={"sm"}
+										onClick={() => handleAddAmount(100)}
+										disabled={
+											betAmount === availableBalance
+										}
+									>
+										+100
+									</Button>
+								</div>
+								<div className={`flex gap-3 `}>
+									<Button
+										variant={"secondary"}
+										size={"icon-sm"}
+										onClick={handleSubtractAmount}
+									>
+										<MinusIcon className={`w-3 h-3`} />
+									</Button>
+									<Slider
+										min={1}
+										max={availableBalance}
+										step={1}
+										value={[betAmount]}
+										onValueChange={(value) =>
+											setBetAmount(value[0])
+										}
+										disabled={isPlacingBet}
+									/>
+									<Button
+										variant={"secondary"}
+										size={"icon-sm"}
+										onClick={() => handleAddAmount()}
+									>
+										<PlusIcon className={`w-3 h-3`} />
+									</Button>
+								</div>
+							</div>
+						)}
+					</>
 				)}
 				<div>
-					{myBet && (
-						<div className={`flex gap-4`}>
-							<Button
-								variant={"outline"}
-								className={`flex-1`}
-								disabled={isCancellingBet}
-								onClick={handleCancelBet}
-							>
-								{isCancellingBet && <Spinner />}
-								Cancel Bet
-							</Button>
-							<Button
-								variant={"linear"}
-								className={`flex-1`}
-								disabled={
-									isPlacingBet || myBet.amount === betAmount
-								}
-								onClick={handlePlaceBet}
-							>
-								{isPlacingBet && <Spinner />}
-								Update Bet
-							</Button>
-						</div>
-					)}
-					{selectedOption && !myBet && (
-						<div className={`flex gap-2 mt-2`}>
-							<Button
-								variant={"secondary"}
-								size={"lg"}
-								onClick={() => setSelectedOption(null)}
-							>
-								<X />
-							</Button>
-							<Button
-								variant={"linear"}
-								size={"lg"}
-								className={`flex-1`}
-								onClick={handlePlaceBet}
-								disabled={isPlacingBet}
-							>
-								{isPlacingBet ? <Spinner /> : <Coins />}
-								Place Bet
-							</Button>
-						</div>
+					{!collapseControls && (
+						<>
+							{myBet && (
+								<div className={`flex gap-4`}>
+									<Button
+										variant={"outline"}
+										className={`flex-1`}
+										disabled={isCancellingBet}
+										onClick={handleCancelBet}
+									>
+										{isCancellingBet && <Spinner />}
+										Cancel Bet
+									</Button>
+									<Button
+										variant={"linear"}
+										className={`flex-1`}
+										disabled={
+											isPlacingBet ||
+											myBet.amount === betAmount
+										}
+										onClick={handlePlaceBet}
+									>
+										{isPlacingBet && <Spinner />}
+										Update Bet
+									</Button>
+								</div>
+							)}
+							{selectedOption && !myBet && (
+								<div className={`flex gap-2 mt-2`}>
+									<Button
+										variant={"secondary"}
+										size={"lg"}
+										onClick={() => setSelectedOption(null)}
+									>
+										<X />
+									</Button>
+									<Button
+										variant={"linear"}
+										size={"lg"}
+										className={`flex-1`}
+										onClick={handlePlaceBet}
+										disabled={isPlacingBet}
+									>
+										{isPlacingBet ? <Spinner /> : <Coins />}
+										Place Bet
+									</Button>
+								</div>
+							)}
+						</>
 					)}
 					{selectedOption && !myBet && (
 						<p className={`text-xs text-muted-foreground mt-2`}>

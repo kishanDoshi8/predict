@@ -5,7 +5,7 @@ export type LeaderboardEntry = {
   joined_at:          string
   is_organizer:       boolean
   current_streak:     number
-  longest_streak:     number
+  highest_streak:     number
   total_bets:         number
   total_revealed_bets:number
   winning_bets:       number

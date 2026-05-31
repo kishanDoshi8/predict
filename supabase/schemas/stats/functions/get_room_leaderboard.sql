@@ -35,8 +35,8 @@ begin
       rm.total_won_in_room,
       rm.joined_at,
       rm.is_organizer,
-      p.current_streak,
-      p.longest_streak,
+      rm.current_streak,
+      rm.highest_streak,
       -- Bet aggregates scoped to this room
       coalesce(s.total_bets,         0)  as total_bets,
       coalesce(s.total_revealed_bets,0)  as total_revealed_bets,

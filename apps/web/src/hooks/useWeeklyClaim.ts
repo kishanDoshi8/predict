@@ -1,4 +1,5 @@
 import { claimWeeklyPoints } from "@/lib/api";
+import { twColor } from "@/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -19,8 +20,16 @@ export function useWeeklyClaim() {
             queryClient.setQueryData(["weeklyClaim"], {...data, lastClaimed: new Date()});
             if (!data.already_claimed) {
                 toast(`Weekly reward auto-claimed! +${data.points_added} • Streak ${data.current_streak} 🔥`, {
-                    duration: 7000,
-                    position: "top-center"
+                    duration: Infinity,
+                    dismissible: true,
+                    position: "top-center",
+                    style: {
+                        background: twColor("card"),
+                        color: twColor("card-foreground"),
+                        border: `1px solid ${twColor("accent")}`,
+                        boxShadow: `0 0 10px ${twColor("accent", 0.5)}`,
+                        fontFamily: "monospace",
+                    }
                 });
             }
             queryClient.invalidateQueries({ queryKey: ["player"] });

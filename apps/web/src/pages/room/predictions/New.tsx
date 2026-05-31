@@ -382,8 +382,10 @@ export default function PredictionNew() {
 					</Field>
 				</FieldGroup>
 				<Button
-					className={`w-full mt-6 cursor-pointer`}
+					variant={"linear"}
+					className={`w-full cursor-pointer`}
 					onClick={handleCreatePrediction}
+					size='lg'
 					disabled={isLoading}
 				>
 					{isLoading && <Spinner />}
@@ -391,7 +393,8 @@ export default function PredictionNew() {
 				</Button>
 				<Button
 					variant={"outline"}
-					className={`w-full`}
+					className={`w-full -mt-2`}
+					size={"lg"}
 					onClick={() => navigate("/rooms/" + room.code)}
 					disabled={isLoading}
 				>

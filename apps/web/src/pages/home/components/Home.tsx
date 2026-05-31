@@ -167,17 +167,23 @@ function YourRooms() {
 										{room.member_count ??
 											room.members.length}
 									</div>
-									{room.active_prediction_count && (
-										<div
-											className={`flex items-center gap-1 text-sm text-primary`}
-										>
-											<ZapIcon className={`w-3 h-3`} />
-											<span className={`text-sm`}>
-												{room.active_prediction_count}
-											</span>
-											<span>live</span>
-										</div>
-									)}
+									{room.active_prediction_count !=
+										undefined &&
+										room.active_prediction_count > 0 && (
+											<div
+												className={`flex items-center gap-1 text-sm text-primary`}
+											>
+												<ZapIcon
+													className={`w-3 h-3`}
+												/>
+												<span className={`text-sm`}>
+													{
+														room.active_prediction_count
+													}
+												</span>
+												<span>live</span>
+											</div>
+										)}
 								</div>
 							</div>
 							<ChevronRightIcon

@@ -24,7 +24,7 @@ const SLIDES = [
 		emoji: "🪙",
 		title: "Claim your points",
 		description:
-			"You get 100 points every week, automatically soon as log on. That's your ammunition - spend it wisely.",
+			"You get 100 points every week, automatically soon as you log on. That's your ammunition - spend it wisely.",
 	},
 	{
 		emoji: "💰",
@@ -36,7 +36,7 @@ const SLIDES = [
 		emoji: "🏆",
 		title: "Wait for the verdict",
 		description:
-			"Once the organizer calls it, winners get paid out. Losers cope. Check the leaderboard and do better next week.",
+			"Once the organizer calls it, winners get paid out. Losers cope. Check the leaderboard and do better next time.",
 	},
 ] as const;
 

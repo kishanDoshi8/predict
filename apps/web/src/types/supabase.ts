@@ -177,6 +177,13 @@ export type Database = {
             foreignKeyName: "player_room_stats_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
+          },
+          {
+            foreignKeyName: "player_room_stats_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
             referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
@@ -322,6 +329,13 @@ export type Database = {
             foreignKeyName: "predictions_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
+          },
+          {
+            foreignKeyName: "predictions_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
             referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
@@ -365,6 +379,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_members_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
           },
           {
             foreignKeyName: "room_members_room_id_fkey"
@@ -430,6 +451,13 @@ export type Database = {
             foreignKeyName: "room_preferences_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
+          },
+          {
+            foreignKeyName: "room_preferences_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
             referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
@@ -461,6 +489,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "room_stats_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
+          },
           {
             foreignKeyName: "room_stats_room_id_fkey"
             columns: ["room_id"]
@@ -560,7 +595,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      player_rooms_by_activity: {
+        Row: {
+          latest_prediction_at: string | null
+          name: string | null
+          player_id: string | null
+          room_created_at: string | null
+          room_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_members_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       cancel_bet: { Args: { p_prediction_id: string }; Returns: Json }

@@ -167,51 +167,28 @@ export async function joinRoom(roomCode: string): Promise<Room> {
 }
 
 export async function getPlayerRooms(player_id: string): Promise<Room[]> {
-  // also get total number of members in each room to display on the home page, without needing to fetch each room separately
-  // and get number of active predictions to display on the home page (active = draft or locked predictions)
-  // getting only numbers for both is fine, we don't need the full prediction or member data here
-
-  // First, get all rooms the player is a member of
   const { data, error } = await supabase
-    .from('room_members')
-    .select(`room:rooms(*)`)
+    .from('player_rooms_by_activity')
+    .select('*')
     .eq('player_id', player_id)
+    .order('latest_prediction_at', { ascending: false, nullsFirst: false });
 
-  if (error) throw error
-  if (!data) return []
+  if (error) throw error;
+  if (!data) return [];
 
-  // For each room, fetch member count and active prediction count in parallel
-  const roomsWithCounts = await Promise.all(
-    data.map(async (roomMember: any) => {
-      const room = roomMember.room
-      if (!room) return null
-
-      // Get member count
-      const { count: memberCount } = await supabase
-        .from('room_members')
-        .select('id', { count: 'exact', head: true })
-        .eq('room_id', room.id)
-
-      // Get active prediction count
-      const { count: activePredictionCount } = await supabase
-        .from('predictions')
-        .select('id', { count: 'exact', head: true })
-        .eq('room_id', room.id)
-        .in('status', ['draft', 'locked'])
-
-      const roomData = {
-        ...room,
-        code: room.room_code,
-        member_count: memberCount ?? 0,
-        active_prediction_count: activePredictionCount ?? 0,
-      }
-      
-      return roomData
-    })
-  )
-
-  // Filter out any nulls (in case a room was missing)
-  return roomsWithCounts.filter(Boolean)
+  return data.map((row: any): Room => ({
+    id: row.room_id,
+    name: row.name,
+    code: row.room_code,
+    status: row.status,
+    predictions_limit: row.predictions_limit,
+    created_at: row.created_at,
+    
+    // UI Counter Helpers
+    member_count: row.member_count ?? 0,
+    active_prediction_count: row.active_prediction_count ?? 0,
+    members: Object.assign([], { length: row.member_count ?? 0 })
+  }));
 }
 
 // #endregion Rooms

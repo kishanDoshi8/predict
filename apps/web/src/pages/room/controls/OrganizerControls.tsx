@@ -2,6 +2,7 @@ import { Button } from "../../../components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRoomContext } from "@/pages/room/RoomLayout";
 import { usePlayer } from "@/store/player";
+import { useActivePredictions } from "@/store/prediction";
 import { Rocket } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -14,6 +15,7 @@ function CreatePredictionButton({
 }: Readonly<CreatePredictionButtonProps>) {
 	const navigate = useNavigate();
 	const { room } = useRoomContext();
+	const { data: predictions = [] } = useActivePredictions(room.id);
 	const { data: player } = usePlayer();
 
 	if (!room) {
@@ -25,23 +27,33 @@ function CreatePredictionButton({
 		(m) => m.player_id === player?.id,
 	)?.is_organizer;
 
-	if (!isRoomAdmin) {
+	const activeCount = predictions.filter(
+		(p) => p.status === "draft" || p.status === "locked",
+	).length;
+
+	const canCreatePrediction = activeCount < room.predictions_limit;
+
+	if (!isRoomAdmin || !canCreatePrediction) {
 		return null;
 	}
 
 	return (
-		<Button
-			variant='linear'
-			size='lg'
-			className={cn(
-				`w-full mx-auto font-bold shadow-lg text-foreground`,
-				className,
-			)}
-			onClick={() => navigate(`/rooms/${room.code}/predictions/new`)}
+		<div
+			className={`bg-background px-4 pt-4 pb-6 border-t-2 mt-4 sticky left-4 right-4 bottom-0 z-50 w-full max-w-md mx-auto`}
 		>
-			<Rocket className={`ml-2`} />
-			Create Prediction
-		</Button>
+			<Button
+				variant='linear'
+				size='lg'
+				className={cn(
+					`w-full mx-auto font-bold shadow-lg text-foreground`,
+					className,
+				)}
+				onClick={() => navigate(`/rooms/${room.code}/predictions/new`)}
+			>
+				<Rocket className={`ml-2`} />
+				Create Prediction
+			</Button>
+		</div>
 	);
 }
 

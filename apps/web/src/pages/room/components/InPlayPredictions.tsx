@@ -186,7 +186,7 @@ function PredictionCard({
 						<p className={`text-sm text-muted-foreground`}>
 							Pooled:{" "}
 							<span className={`text-foreground font-semibold`}>
-								{totalBetAmount} pts
+								{totalBetAmount.toLocaleString()} pts
 							</span>
 						</p>
 					</div>
@@ -198,7 +198,7 @@ function PredictionCard({
 						<span
 							className={`text-foreground text-sm font-semibold`}
 						>
-							{bets.length}
+							{bets.length.toLocaleString()}
 						</span>
 					</div>
 				</div>
@@ -308,6 +308,41 @@ function InPlayPredictions() {
 		api.scrollTo(0);
 	}, [api]);
 
+	let carouselContent;
+	if (isPredictionLoading) {
+		carouselContent = (
+			<CarouselItem>
+				<div
+					className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full space-y-2`}
+				>
+					<Skeleton className={`h-5 w-22`} />
+					<Skeleton className={`h-7 mx-auto w-full`} />
+					<Skeleton className={`h-9 mx-auto w-full`} />
+					<Skeleton className={`h-9 mx-auto w-full`} />
+					<Skeleton className={`h-6 ml-auto w-34`} />
+				</div>
+			</CarouselItem>
+		);
+	} else if (predictions.length === 0) {
+		carouselContent = (
+			<CarouselItem>
+				<div
+					className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full`}
+				>
+					<p className={`text-muted-foreground text-center py-4`}>
+						No predictions yet. The host will start one soon!
+					</p>
+				</div>
+			</CarouselItem>
+		);
+	} else {
+		carouselContent = predictions.map((prediction) => (
+			<CarouselItem key={prediction.id}>
+				<PredictionCard prediction={prediction} roomId={room.id} />
+			</CarouselItem>
+		));
+	}
+
 	return (
 		<div className={`max-w-lg mx-auto`}>
 			{isPredictionLoading && (
@@ -325,43 +360,7 @@ function InPlayPredictions() {
 				className={`w-full`}
 				setApi={setApi}
 			>
-				<CarouselContent>
-					{isPredictionLoading ? (
-						<CarouselItem>
-							<div
-								className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full space-y-2`}
-							>
-								<Skeleton className={`h-5 w-22`} />
-								<Skeleton className={`h-7 mx-auto w-full`} />
-								<Skeleton className={`h-9 mx-auto w-full`} />
-								<Skeleton className={`h-9 mx-auto w-full`} />
-								<Skeleton className={`h-6 ml-auto w-34`} />
-							</div>
-						</CarouselItem>
-					) : predictions.length === 0 ? (
-						<CarouselItem>
-							<div
-								className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full`}
-							>
-								<p
-									className={`text-muted-foreground text-center py-4`}
-								>
-									No predictions yet. The host will start one
-									soon!
-								</p>
-							</div>
-						</CarouselItem>
-					) : (
-						predictions.map((prediction) => (
-							<CarouselItem key={prediction.id}>
-								<PredictionCard
-									prediction={prediction}
-									roomId={room.id}
-								/>
-							</CarouselItem>
-						))
-					)}
-				</CarouselContent>
+				<CarouselContent>{carouselContent}</CarouselContent>
 			</Carousel>
 
 			<div className={`flex justify-between items-center  px-2`}>

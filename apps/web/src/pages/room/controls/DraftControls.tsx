@@ -14,7 +14,8 @@ import { useCancelBet, useMyBet, usePlaceBet } from "@/store/bet";
 import { Spinner } from "../../../components/ui/spinner";
 import { toast } from "sonner";
 import { useRoomContext } from "../RoomLayout";
-import { twColor } from "@/lib/utils";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { localStorageKeys } from "@/store/_keys";
 
 type Props = {
 	player: Player;
@@ -31,11 +32,18 @@ export default function DraftControls({
 }: Readonly<Props>) {
 	const { room } = useRoomContext();
 	const { mutate: placeBet, isPending: isPlacingBet } = usePlaceBet();
-	const { data: myBet } = useMyBet(room.id, predictionId, player.id);
+	const { data: myBet, isPending: isMyBetLoading } = useMyBet(
+		room.id,
+		predictionId,
+		player.id,
+	);
 	const { mutate: cancelBet, isPending: isCancellingBet } = useCancelBet();
 
 	const [betAmount, setBetAmount] = React.useState<number>(1);
-	const [collapseControls, setCollapseControls] = React.useState(false);
+	const [collapseControls, setCollapseControls] = useLocalStorage<boolean>(
+		false,
+		localStorageKeys.userPreference.bettingContorls.collapsed,
+	);
 
 	const availableBalance =
 		player.points_balance - player.points_in_escrow + (myBet?.amount ?? 0);
@@ -47,8 +55,11 @@ export default function DraftControls({
 		} else {
 			setBetAmount(1);
 		}
-		console.log(twColor("text-primary"));
-	}, [myBet]);
+
+		if (!myBet && !isMyBetLoading) {
+			setCollapseControls(false);
+		}
+	}, [myBet, isMyBetLoading, setSelectedOption]);
 
 	const handlePlaceBet = () => {
 		if (!player || !predictionId || !selectedOption) return;

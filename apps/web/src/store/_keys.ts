@@ -43,3 +43,12 @@ export const roomKeys = {
   predictionHistory: (roomId: string) =>
     [...roomKeys.detail(roomId), "predictionHistory"] as const,
 };
+
+export const localStorageKeys = {
+  userPreference: {
+    theme: "theme",
+    bettingContorls: {
+      collapsed: "bettingControls.collapsed",
+    }
+  }
+}

@@ -25,7 +25,7 @@ function deriveBadges(
 		badges.push({ icon: "🔥", label: "Hot streak" });
 	}
 
-	if (entry.longest_streak >= 8) {
+	if (entry.highest_streak >= 8) {
 		badges.push({ icon: "🐐", label: "GOAT" });
 	}
 

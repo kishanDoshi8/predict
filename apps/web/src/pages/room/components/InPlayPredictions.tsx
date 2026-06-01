@@ -159,7 +159,10 @@ function PredictionCard({
 									) : null}
 								</span>
 								<span className={`ml-auto`}>
-									{betAmountPerOption[option.id] ?? 0} pts
+									{(
+										betAmountPerOption[option.id] ?? 0
+									).toLocaleString()}{" "}
+									pts
 								</span>
 							</FieldLabel>
 							<Progress

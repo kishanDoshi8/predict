@@ -110,8 +110,10 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 											0
 												? "+"
 												: ""}
-											{playerBet.payout -
-												playerBet.amount}{" "}
+											{(
+												playerBet.payout -
+												playerBet.amount
+											).toLocaleString()}{" "}
 											PTS
 										</p>
 									)}
@@ -174,7 +176,8 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 										<span
 											className={`text-muted-foreground`}
 										>
-											{bet.amount} PTS{" "}
+											{bet.amount.toLocaleString()}{" "}
+											PTS{" "}
 										</span>
 										<span
 											className={`text-sm text-right ${prediction.winning_option_id === bet.option_id ? "text-win" : "text-loss"}`}
@@ -191,7 +194,10 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 											{bet.payout - bet.amount > 0
 												? "+"
 												: ""}
-											{bet.payout - bet.amount} PTS
+											{(
+												bet.payout - bet.amount
+											).toLocaleString()}{" "}
+											PTS
 										</p>
 									)}
 								</div>

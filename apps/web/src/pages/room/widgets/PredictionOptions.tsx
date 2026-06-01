@@ -77,11 +77,13 @@ export default function PredictionOptions({
 											let optionTextClass = "";
 											if (prediction.winning_option_id) {
 												optionTextClass =
-													prediction.winning_option_id === option.id
+													prediction.winning_option_id ===
+													option.id
 														? "text-win"
 														: "text-red-500";
 											} else {
-												optionTextClass = useOptionColor(option.id);
+												optionTextClass =
+													useOptionColor(option.id);
 											}
 											return (
 												<p className={`flex flex-col`}>
@@ -91,7 +93,8 @@ export default function PredictionOptions({
 														{totalBetAmount
 															? (
 																	((betAmountPerOption[
-																		option.id
+																		option
+																			.id
 																	] ?? 0) /
 																		totalBetAmount) *
 																	100
@@ -102,9 +105,11 @@ export default function PredictionOptions({
 													<span
 														className={`text-xs text-muted-foreground text-right`}
 													>
-														{betAmountPerOption[
-															option.id
-														] ?? 0}{" "}
+														{(
+															betAmountPerOption[
+																option.id
+															] ?? 0
+														).toLocaleString()}{" "}
 														pts
 													</span>
 												</p>

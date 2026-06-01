@@ -39,7 +39,7 @@ function CreatePredictionButton({
 
 	return (
 		<div
-			className={`bg-background px-4 pt-4 pb-6 border-t-2 mt-4 sticky left-4 right-4 bottom-0 z-50 w-full max-w-md mx-auto`}
+			className={`bg-background p-4 border-t-2 mt-4 sticky left-4 right-4 bottom-0 z-50 w-full max-w-md mx-auto`}
 		>
 			<Button
 				variant='linear'

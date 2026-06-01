@@ -162,7 +162,9 @@ function LeaderboardContent({
 						<div className={`flex-1`}>
 							<p className={`text-xs`}>YOUR POINTS</p>
 							<p className={`text-3xl font-extrabold`}>
-								{leaderboardPlayer?.total_won_in_room ?? 0}
+								{(
+									leaderboardPlayer?.total_won_in_room ?? 0
+								).toLocaleString()}
 							</p>
 						</div>
 					)}
@@ -186,8 +188,10 @@ function LeaderboardContent({
 											className={`text-lg font-bold justify-end flex items-center gap-1 text-accent`}
 										>
 											+
-											{gapToNextPlayer.total_won_in_room -
-												leaderboardPlayer.total_won_in_room}
+											{(
+												gapToNextPlayer.total_won_in_room -
+												leaderboardPlayer.total_won_in_room
+											).toLocaleString()}
 										</p>
 									</div>
 								)}
@@ -272,7 +276,9 @@ function LeaderboardContent({
 										)}
 									</p>
 									<p className={`ml-auto font-bold`}>
-										{entry.total_won_in_room}
+										{(
+											entry.total_won_in_room ?? 0
+										).toLocaleString()}
 									</p>
 								</div>
 							);

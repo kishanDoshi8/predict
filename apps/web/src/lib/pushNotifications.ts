@@ -46,21 +46,11 @@ export async function registerForPushNotifications(forcePrompt = false) {
 		return;
 	}
 
-	const existingRegistrations = await navigator.serviceWorker.getRegistrations();
-	for (const existingRegistration of existingRegistrations) {
-		const scriptUrl =
-			existingRegistration.active?.scriptURL ??
-			existingRegistration.installing?.scriptURL ??
-			existingRegistration.waiting?.scriptURL ??
-			"";
-		if (scriptUrl.endsWith("/pwa-sw.js")) {
-			await existingRegistration.unregister();
-		}
-	}
-
-	const registration = await navigator.serviceWorker.register("/sw.js", {
-		scope: "/",
-	});
+	const registration =
+		(await navigator.serviceWorker.getRegistration("/")) ??
+		(await navigator.serviceWorker.register("/sw.js", {
+			scope: "/",
+		}));
 
 	const hasPermission = await ensureNotificationPermission(forcePrompt);
 	if (!hasPermission) return;

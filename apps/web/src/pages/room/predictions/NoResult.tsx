@@ -34,7 +34,8 @@ function NoResult({ prediction }: Readonly<Props>) {
 				<InfoIcon />
 				<AlertTitle>No Result</AlertTitle>
 				<AlertDescription className={`text-secondary-foreground `}>
-					All bets have been returned.
+					{prediction?.no_result_reason ??
+						"All bets have been returned."}
 				</AlertDescription>
 			</Alert>
 

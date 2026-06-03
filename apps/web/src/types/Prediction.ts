@@ -21,4 +21,5 @@ export interface Prediction {
   // created_at:        string
   resolved_at:       string | null
   prediction_options: PredictionOption[]
+  no_result_reason?: string | null
 }

@@ -25,6 +25,7 @@ import {
 	FieldContent,
 	FieldLabel,
 	FieldTitle,
+	Input,
 	RadioGroup,
 	RadioGroupItem,
 	Spinner,
@@ -44,8 +45,11 @@ export default function LockControls({
 }: Readonly<LockControlsProps>) {
 	const { room } = useRoomContext();
 	const { data: player } = usePlayer();
+	const { mutate: resolveMutation, isPending: isResolvingPrediction } =
+		useResolvePrediction();
 
 	const [selectedOption, setSelectedOption] = useState<string | null>(null);
+	const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
 	const isRoomAdmin = room.members.find(
 		(m) => m.player_id === player?.id,
@@ -59,6 +63,10 @@ export default function LockControls({
 		setSelectedOption(null);
 	};
 
+	const handleOnSuccess = () => {
+		setIsDrawerOpen(false);
+	};
+
 	if (prediction.status !== "locked") {
 		return null;
 	}
@@ -67,7 +75,11 @@ export default function LockControls({
 		<div
 			className={`sticky bottom-2 left-0 right-0 p-4 flex bg-background/45 w-full max-w-2xs mx-auto rounded-lg `}
 		>
-			<Drawer onClose={handleOnClose}>
+			<Drawer
+				onClose={handleOnClose}
+				open={isDrawerOpen}
+				onOpenChange={setIsDrawerOpen}
+			>
 				<DrawerTrigger asChild>
 					<Button variant={"linear"} className={`w-full`} size='lg'>
 						Reveal Results
@@ -110,10 +122,18 @@ export default function LockControls({
 								Cancel
 							</Button>
 						</DrawerClose>
-						<NoResult prediction={prediction} />
+						<NoResult
+							prediction={prediction}
+							resolvePrediction={resolveMutation}
+							isResolvingPrediction={isResolvingPrediction}
+							onSuccess={handleOnSuccess}
+						/>
 						<RevealResults
 							selectedOption={selectedOption}
 							prediction={prediction}
+							resolvePrediction={resolveMutation}
+							isResolvingPrediction={isResolvingPrediction}
+							onSuccess={handleOnSuccess}
 						/>
 					</DrawerFooter>
 				</DrawerContent>
@@ -122,26 +142,47 @@ export default function LockControls({
 	);
 }
 
-function NoResult({ prediction }: Readonly<{ prediction: Prediction }>) {
+function NoResult({
+	prediction,
+	resolvePrediction,
+	isResolvingPrediction,
+	onSuccess,
+}: Readonly<{
+	prediction: Prediction;
+	resolvePrediction: ReturnType<typeof useResolvePrediction>["mutate"];
+	isResolvingPrediction: boolean;
+	onSuccess: () => void;
+}>) {
 	const { room } = useRoomContext();
-	const {
-		mutate: resolvePredictionMutation,
-		isPending: isResolvingPrediction,
-	} = useResolvePrediction();
+
+	const [noResultReason, setNoResultReason] = useState<string | null>(null);
+	const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
 	const handleOnNoResult = () => {
-		resolvePredictionMutation(
+		resolvePrediction(
 			{
 				predictionId: prediction.id,
 				outcome: "no_result",
 				roomId: room.id,
+				noResultReason,
 			},
 			{
+				onSuccess: () => {
+					setIsDrawerOpen(false);
+					onSuccess();
+					setTimeout(() => {
+						toast.success("Prediction ended with no result.", {
+							dismissible: true,
+							duration: 5000,
+							position: "top-center",
+						});
+					}, 500);
+				},
 				onError: (error) => {
 					toast.error("Failed to end prediction with no result.", {
 						description: error.message,
 						dismissible: true,
-						duration: 7000,
+						duration: Infinity,
 						position: "top-center",
 					});
 				},
@@ -150,13 +191,18 @@ function NoResult({ prediction }: Readonly<{ prediction: Prediction }>) {
 	};
 
 	return (
-		<Dialog>
+		<Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
 			<DialogTrigger asChild>
 				<Button variant='secondary' size='lg'>
 					No Result
 				</Button>
 			</DialogTrigger>
-			<DialogContent className={`sm:max-w-md mx-auto`}>
+			<DialogContent
+				className={`sm:max-w-md mx-auto`}
+				onOpenAutoFocus={(e) => {
+					e.preventDefault();
+				}}
+			>
 				<DialogHeader>
 					<DialogTitle>Are you sure?</DialogTitle>
 					<DialogDescription>
@@ -171,9 +217,20 @@ function NoResult({ prediction }: Readonly<{ prediction: Prediction }>) {
 						</Alert>
 					</DialogDescription>
 				</DialogHeader>
-				<DialogFooter className={`gap-4`}>
+				<Input
+					placeholder='Reason (optional)'
+					className={`w-full`}
+					value={noResultReason ?? ""}
+					onChange={(e) => setNoResultReason(e.target.value)}
+					autoFocus={false}
+				/>
+				<DialogFooter className={`gap-4 mt-4`}>
 					<DialogClose asChild>
-						<Button variant='outline' size='lg'>
+						<Button
+							variant='outline'
+							size='lg'
+							disabled={isResolvingPrediction}
+						>
 							Cancel
 						</Button>
 					</DialogClose>
@@ -195,16 +252,18 @@ function NoResult({ prediction }: Readonly<{ prediction: Prediction }>) {
 function RevealResults({
 	selectedOption,
 	prediction,
+	resolvePrediction,
+	isResolvingPrediction,
+	onSuccess,
 }: Readonly<{
 	selectedOption: string | null;
 	prediction: Prediction;
+	resolvePrediction: ReturnType<typeof useResolvePrediction>["mutate"];
+	isResolvingPrediction: boolean;
+	onSuccess: () => void;
 }>) {
 	const [optionLabel, setOptionLabel] = useState<string | null>(null);
 	const { room } = useRoomContext();
-	const {
-		mutate: resolvePredictionMutation,
-		isPending: isResolvingPrediction,
-	} = useResolvePrediction();
 
 	const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
@@ -223,7 +282,7 @@ function RevealResults({
 		if (!selectedOption || !prediction) {
 			return;
 		}
-		resolvePredictionMutation(
+		resolvePrediction(
 			{
 				predictionId: prediction.id,
 				outcome: "win",
@@ -246,6 +305,7 @@ function RevealResults({
 						position: "top-center",
 					});
 					setIsDrawerOpen(false);
+					onSuccess();
 				},
 			},
 		);

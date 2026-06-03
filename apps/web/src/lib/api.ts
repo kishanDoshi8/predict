@@ -495,12 +495,14 @@ export async function resolvePrediction(
   roomId: string,
   outcome: 'win' | 'no_result' | 'cancel',
   winningOptionId?: string,
+  noResultReason?: string | null,
 ) {  
   const { data, error } = await supabase.rpc('resolve_prediction_v2', {
     p_prediction_id: predictionId,
     p_room_id: roomId,
     p_outcome: outcome,
     p_winning_option_id: winningOptionId ?? undefined,
+    p_no_result_reason: noResultReason ?? undefined,
   })
   return assertOk(data, error)
 }

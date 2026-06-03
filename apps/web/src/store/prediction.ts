@@ -51,13 +51,14 @@ type ResolvePredictionParams = {
     outcome: 'win' | 'no_result' | 'cancel';
     winningOptionId?: string;
     roomId: string;
+    noResultReason?: string | null;
 }
 
 export const useResolvePrediction = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (data: ResolvePredictionParams) =>
-            resolvePrediction(data.predictionId, data.roomId, data.outcome, data.winningOptionId),
+            resolvePrediction(data.predictionId, data.roomId, data.outcome, data.winningOptionId, data.noResultReason),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
                 queryKey: roomKeys.activePrediction(variables.roomId),

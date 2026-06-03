@@ -279,6 +279,7 @@ export type Database = {
           created_by: string
           deadline: string
           id: string
+          no_result_reason: string | null
           notified_1h: boolean
           resolved_at: string | null
           room_id: string
@@ -291,6 +292,7 @@ export type Database = {
           created_by: string
           deadline: string
           id?: string
+          no_result_reason?: string | null
           notified_1h?: boolean
           resolved_at?: string | null
           room_id: string
@@ -303,6 +305,7 @@ export type Database = {
           created_by?: string
           deadline?: string
           id?: string
+          no_result_reason?: string | null
           notified_1h?: boolean
           resolved_at?: string | null
           room_id?: string
@@ -597,11 +600,16 @@ export type Database = {
     Views: {
       player_rooms_by_activity: {
         Row: {
+          active_prediction_count: number | null
+          created_at: string | null
           latest_prediction_at: string | null
+          member_count: number | null
           name: string | null
           player_id: string | null
-          room_created_at: string | null
+          predictions_limit: number | null
+          room_code: string | null
           room_id: string | null
+          status: string | null
         }
         Relationships: [
           {

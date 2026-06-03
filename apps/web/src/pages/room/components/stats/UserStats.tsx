@@ -8,6 +8,7 @@ import {
 } from "@/components";
 import {
 	Calendar1Icon,
+	ChevronRightIcon,
 	CrownIcon,
 	FlameIcon,
 	TargetIcon,
@@ -20,8 +21,9 @@ import {
 	useRoomLeaderboard,
 	useRoomWeeklyLeaderboard,
 } from "@/store/leaderboard";
-import { LeaderboardEntry } from "@/types";
+import { LeaderboardEntry, Room } from "@/types";
 import { twColor } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 type LeaderboardTab = "this_week" | "all_time";
 
@@ -63,12 +65,14 @@ function UserStats() {
 					<LeaderboardContent
 						leaderboard={weeklyLeaderboard}
 						isLoading={isWeeklyLeaderboardLoading}
+						room={room}
 					/>
 				</TabsContent>
 				<TabsContent value='all_time'>
 					<LeaderboardContent
 						leaderboard={allTimeLeaderboard}
 						isLoading={isAllTimeLeaderboardLoading}
+						room={room}
 					/>
 				</TabsContent>
 			</Tabs>
@@ -79,7 +83,12 @@ function UserStats() {
 function LeaderboardContent({
 	leaderboard,
 	isLoading,
-}: Readonly<{ leaderboard: LeaderboardEntry[]; isLoading: boolean }>) {
+	room,
+}: Readonly<{
+	leaderboard: LeaderboardEntry[];
+	isLoading: boolean;
+	room: Room;
+}>) {
 	const { data: player } = usePlayer();
 	const [leaderboardPlayer, setLeaderboardPlayer] =
 		useState<LeaderboardEntry | null>(null);
@@ -217,6 +226,9 @@ function LeaderboardContent({
 								/>
 							</div>
 						))}
+						<Skeleton
+							className={`h-6 w-20 ml-auto bg-secondary rounded-lg mt-2`}
+						/>
 					</div>
 				) : (
 					<div className={`flex flex-col gap-2`}>
@@ -283,6 +295,15 @@ function LeaderboardContent({
 								</div>
 							);
 						})}
+						<Link
+							to={`/rooms/${room.code}/leaderboard`}
+							className={`flex items-center justify-end text-sm text-accent text-right mt-2 cursor-pointer`}
+						>
+							see all
+							<ChevronRightIcon
+								className={`w-3 h-3 inline-block ml-1`}
+							/>
+						</Link>
 					</div>
 				)}
 			</div>

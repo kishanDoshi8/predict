@@ -86,7 +86,7 @@ export function LeaderboardRow({
 			className={cn(
 				"flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-colors",
 				isSelf
-					? "border-primary/30 bg-primary/5"
+					? "border-win/30 bg-win/5"
 					: "border-transparent hover:bg-accent/50",
 			)}
 		>
@@ -96,7 +96,7 @@ export function LeaderboardRow({
 			</span>
 
 			{/* Avatar */}
-			<Avatar size='sm' className={cn(isSelf && "ring-1 ring-primary")}>
+			<Avatar size='sm' className={cn(isSelf && "ring-1 ring-win")}>
 				<AvatarFallback className='text-xs'>{initials}</AvatarFallback>
 			</Avatar>
 
@@ -105,7 +105,7 @@ export function LeaderboardRow({
 				<p
 					className={cn(
 						"text-sm font-medium truncate",
-						isSelf && "text-primary",
+						isSelf && "text-win",
 					)}
 				>
 					{entry.username}

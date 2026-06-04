@@ -24,13 +24,18 @@ import {
 import { LeaderboardEntry, Room } from "@/types";
 import { twColor } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { localStorageKeys } from "@/store/_keys";
 
 type LeaderboardTab = "this_week" | "all_time";
 
 function UserStats() {
 	const { room } = useRoomContext();
 	const [activeLeaderboardTab, setActiveLeaderboardTab] =
-		useState<LeaderboardTab>("this_week");
+		useLocalStorage<LeaderboardTab>(
+			"this_week",
+			localStorageKeys.userPreference.active_leaderboard_tab,
+		);
 
 	const {
 		data: allTimeLeaderboard = [],
@@ -52,7 +57,10 @@ function UserStats() {
 			<p className={`text-xs text-muted-foreground mb-4`}>
 				Where legends are made (and egos are crushed)
 			</p>
-			<Tabs defaultValue='this_week' onValueChange={handleOnTabChange}>
+			<Tabs
+				defaultValue={activeLeaderboardTab}
+				onValueChange={handleOnTabChange}
+			>
 				<TabsList className={`w-full`}>
 					<TabsTrigger value='this_week'>
 						<Calendar1Icon /> This Week

@@ -5,35 +5,39 @@ import {
 	useRoomWeeklyLeaderboard,
 } from "@/store/leaderboard";
 import { LeaderboardList } from "./room/leaderboard/LeaderboardList";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { TopThreePodium } from "./room/leaderboard/TopThreePodium";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { localStorageKeys } from "@/store/_keys";
 
-const LEADERBOARD_TABS = ["This Week", "All Time"] as const;
+const LEADERBOARD_TABS = ["this_week", "all_time"] as const;
 type LeaderboardTab = (typeof LEADERBOARD_TABS)[number];
 
 export function LeaderboardPage() {
 	const { room } = useRoomContext();
 	const { data: player } = usePlayer();
 	const [activeLeaderboardTab, setActiveLeaderboardTab] =
-		useState<LeaderboardTab>("This Week");
+		useLocalStorage<LeaderboardTab>(
+			"this_week",
+			localStorageKeys.userPreference.active_leaderboard_tab,
+		);
 
 	const {
 		data: allTimeLeaderboard = [],
 		isPending: isAllTimeLeaderboardLoading,
-	} = useRoomLeaderboard(room.id, activeLeaderboardTab === "All Time");
+	} = useRoomLeaderboard(room.id, activeLeaderboardTab === "all_time");
 
 	const {
 		data: weeklyLeaderboard = [],
 		isPending: isWeeklyLeaderboardLoading,
-	} = useRoomWeeklyLeaderboard(room.id, activeLeaderboardTab === "This Week");
+	} = useRoomWeeklyLeaderboard(room.id, activeLeaderboardTab === "this_week");
 
 	const leaderboard =
-		activeLeaderboardTab === "All Time"
+		activeLeaderboardTab === "all_time"
 			? allTimeLeaderboard
 			: weeklyLeaderboard;
 	const isLeaderboardLoading =
-		activeLeaderboardTab === "All Time"
+		activeLeaderboardTab === "all_time"
 			? isAllTimeLeaderboardLoading
 			: isWeeklyLeaderboardLoading;
 
@@ -61,7 +65,7 @@ export function LeaderboardPage() {
 									: "text-muted-foreground hover:text-foreground",
 							)}
 						>
-							{tab}
+							{tab === "this_week" ? "This Week" : "All Time"}
 						</button>
 					))}
 				</div>

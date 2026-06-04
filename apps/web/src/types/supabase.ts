@@ -670,6 +670,7 @@ export type Database = {
       }
       resolve_prediction_v2: {
         Args: {
+          p_no_result_reason?: string
           p_outcome: string
           p_prediction_id: string
           p_room_id: string

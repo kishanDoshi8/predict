@@ -2,7 +2,8 @@ create or replace function public.resolve_prediction_v2(
   p_prediction_id     uuid,
   p_room_id           uuid,
   p_outcome           text,
-  p_winning_option_id uuid default null
+  p_winning_option_id uuid default null,
+  p_no_result_reason  varchar(50) default null
 )
 returns json
 language plpgsql
@@ -60,7 +61,8 @@ begin
 
     update public.predictions
     set status      = v_effective_outcome,
-        resolved_at = now()
+      no_result_reason = nullif(trim(p_no_result_reason), ''),
+      resolved_at = now()
     where id = p_prediction_id;
 
     perform public.update_player_stats_after_resolution(
@@ -110,6 +112,11 @@ begin
 
     update public.predictions
     set status = 'no_result',
+        winning_option_id = p_winning_option_id,
+        no_result_reason = coalesce(
+          nullif(trim(p_no_result_reason), ''),
+          'Only one option had bets — all refunded'
+        ),
         resolved_at = now()
     where id = p_prediction_id;
 
@@ -131,6 +138,7 @@ begin
       'resolved', true,
       'outcome', 'no_result',
       'reason', 'Only one option had bets — all refunded',
+      'winning_option_id', p_winning_option_id,
       'refunded', true
     );
   end if;
@@ -140,6 +148,11 @@ begin
 
     update public.predictions
     set status = 'no_result',
+        winning_option_id = p_winning_option_id,
+        no_result_reason = coalesce(
+          nullif(trim(p_no_result_reason), ''),
+          'Nobody bet on the winning option — all refunded'
+        ),
         resolved_at = now()
     where id = p_prediction_id;
 
@@ -161,6 +174,7 @@ begin
       'resolved', true,
       'outcome', 'no_result',
       'reason', 'Nobody bet on the winning option — all refunded',
+      'winning_option_id', p_winning_option_id,
       'refunded', true
     );
   end if;

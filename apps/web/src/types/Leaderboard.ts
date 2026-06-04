@@ -38,5 +38,7 @@ export type PredictionHistoryEntry = {
   winner_count:         number
   total_paid_to_winners:number
   biggest_payout:       number
+  selected_option_id  : string | null
+  selected_option_label: string | null
   options:              PredictionHistoryOption[] | null
 }

@@ -82,10 +82,25 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 	const isUpset = entry.status === "revealed" && (winPct ?? 100) <= 25;
 	const isSweep = entry.status === "revealed" && (winPct ?? 0) >= 80;
 
+	const isWin =
+		entry.selected_option_id === entry.winning_option_id &&
+		entry.status === "revealed";
+	const isLoss =
+		entry.selected_option_id !== null &&
+		!isWin &&
+		entry.status === "revealed";
+
+	let borderClass = "border-muted/30";
+	if (isWin) {
+		borderClass = "border-win/30";
+	} else if (isLoss) {
+		borderClass = "border-loss/30";
+	}
+
 	return (
 		<Link
 			to={`predictions/${entry.prediction_id}`}
-			className='border-2 rounded-xl p-3 flex flex-col gap-2 hover:bg-secondary/50 hover:border-win/30 transition-colors'
+			className={`border-2 rounded-xl p-3 flex flex-col gap-2 hover:bg-secondary/50 transition-colors ${borderClass}`}
 		>
 			{/* Header row */}
 			<div className='flex items-start gap-2'>
@@ -110,6 +125,19 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 						<CrownIcon />
 						{winner.label}
 					</Badge>
+					{entry.selected_option_label && (
+						<>
+							<Dot />
+							<span className='text-xs text-muted-foreground'>
+								Your pick:
+							</span>
+							<span
+								className={`text-xs font-semibold ${entry.selected_option_id === entry.winning_option_id ? "text-win" : "text-loss"}`}
+							>
+								{entry.selected_option_label}
+							</span>
+						</>
+					)}
 					{isUpset && (
 						<Badge variant='secondary' className='text-xs'>
 							Upset ⚡
@@ -124,7 +152,7 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 			)}
 
 			{/* Option bars */}
-			{entry.status === "revealed" && entry.options && total > 0 && (
+			{entry.options && total > 0 && (
 				<div className='flex flex-col gap-1 my-1'>
 					{entry.options.map((opt) => {
 						const pct =
@@ -170,16 +198,18 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 			{/* Footer meta */}
 			<div className='flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground'>
 				{total > 0 && <span>Pool: {total.toLocaleString()} pts</span>}
-				<Dot />
 				{participants > 0 && (
-					<span>
+					<>
+						<Dot />
 						{participants} predictors
 						{participants === 1 ? "" : "s"}
-					</span>
+					</>
 				)}
-				<Dot />
 				{winPct !== null && entry.status === "revealed" && (
-					<span>{winPct}% called it</span>
+					<>
+						<Dot />
+						<span>{winPct}% called it</span>
+					</>
 				)}
 			</div>
 

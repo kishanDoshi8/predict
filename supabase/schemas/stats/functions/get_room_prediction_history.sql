@@ -40,6 +40,8 @@ begin
       pred.resolved_at,
       pred.created_at,
       pred.winning_option_id,
+      user_bet.option_id  as selected_option_id,
+      selected_opt.label  as selected_option_label,
       creator.username    as creator_username,
       winning_opt.label   as winning_option_label,
       (
@@ -68,6 +70,11 @@ begin
     join public.players creator on creator.id = pred.created_by
     left join public.prediction_options winning_opt
       on winning_opt.id = pred.winning_option_id
+    left join public.bets user_bet
+      on user_bet.prediction_id = pred.id
+      and user_bet.player_id = v_caller_id
+    left join public.prediction_options selected_opt
+      on selected_opt.id = user_bet.option_id
     left join (
       select
         b.prediction_id,

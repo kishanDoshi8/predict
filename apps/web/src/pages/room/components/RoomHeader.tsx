@@ -43,7 +43,7 @@ function RoomHeader({ room }: Readonly<Props>) {
 						className={`text-accent text-base cursor-default`}
 					>
 						<CoinsIcon />
-						{(player?.points_balance ?? 0).toLocaleString()} pts
+						{(player?.points_balance ?? 0).toLocaleString()}
 					</Button>
 				</div>
 			</div>

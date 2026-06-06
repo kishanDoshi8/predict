@@ -275,6 +275,7 @@ export type Database = {
       }
       predictions: {
         Row: {
+          affects_rating: boolean
           created_at: string
           created_by: string
           deadline: string
@@ -288,6 +289,7 @@ export type Database = {
           winning_option_id: string | null
         }
         Insert: {
+          affects_rating?: boolean
           created_at?: string
           created_by: string
           deadline: string
@@ -301,6 +303,7 @@ export type Database = {
           winning_option_id?: string | null
         }
         Update: {
+          affects_rating?: boolean
           created_at?: string
           created_by?: string
           deadline?: string
@@ -344,6 +347,30 @@ export type Database = {
           },
         ]
       }
+      rating_system_config: {
+        Row: {
+          base_k: number
+          created_at: string
+          is_active: boolean
+          min_participants: number
+          version: number
+        }
+        Insert: {
+          base_k: number
+          created_at?: string
+          is_active: boolean
+          min_participants: number
+          version: number
+        }
+        Update: {
+          base_k?: number
+          created_at?: string
+          is_active?: boolean
+          min_participants?: number
+          version?: number
+        }
+        Relationships: []
+      }
       room_members: {
         Row: {
           current_streak: number
@@ -352,6 +379,9 @@ export type Database = {
           is_organizer: boolean
           joined_at: string
           player_id: string
+          prediction_rating: number
+          rated_predictions_count: number
+          rating_system_version: number
           room_id: string
           total_won_in_room: number
         }
@@ -362,6 +392,9 @@ export type Database = {
           is_organizer?: boolean
           joined_at?: string
           player_id: string
+          prediction_rating?: number
+          rated_predictions_count?: number
+          rating_system_version?: number
           room_id: string
           total_won_in_room?: number
         }
@@ -372,6 +405,9 @@ export type Database = {
           is_organizer?: boolean
           joined_at?: string
           player_id?: string
+          prediction_rating?: number
+          rated_predictions_count?: number
+          rating_system_version?: number
           room_id?: string
           total_won_in_room?: number
         }
@@ -693,6 +729,14 @@ export type Database = {
       update_player_stats_after_resolution: {
         Args: {
           p_outcome: string
+          p_prediction_id: string
+          p_room_id: string
+          p_winning_option_id: string
+        }
+        Returns: undefined
+      }
+      update_prediction_ratings: {
+        Args: {
           p_prediction_id: string
           p_room_id: string
           p_winning_option_id: string

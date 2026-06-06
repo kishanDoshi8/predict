@@ -6,6 +6,7 @@ create table if not exists public.predictions (
   status text not null default 'draft' check (status in ('draft', 'locked', 'revealed', 'cancelled', 'no_result')),
   deadline timestamptz not null,
   winning_option_id uuid,
+  affects_rating boolean not null default true,
   created_at timestamptz not null default now(),
   resolved_at timestamptz,
   notified_1h boolean not null default false

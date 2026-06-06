@@ -8,5 +8,5 @@ drop policy if exists "room_members_no_direct_update" on public.room_members;
 create policy "room_members_no_direct_update" on public.room_members for update using (false);
 drop policy if exists "room_members_no_direct_delete" on public.room_members;
 create policy "room_members_no_direct_delete" on public.room_members for delete using (false);
-grant select (id, room_id, player_id, is_organizer, total_won_in_room, joined_at) on public.room_members to anon;
-grant select (id, room_id, player_id, is_organizer, total_won_in_room, joined_at) on public.room_members to authenticated;
+grant select (id, room_id, player_id, is_organizer, total_won_in_room, prediction_rating, rated_predictions_count, rating_system_version, joined_at) on public.room_members to anon;
+grant select (id, room_id, player_id, is_organizer, total_won_in_room, prediction_rating, rated_predictions_count, rating_system_version, joined_at) on public.room_members to authenticated;

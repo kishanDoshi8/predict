@@ -5,7 +5,7 @@ grant execute on function public.join_room(text) to authenticated;
 grant execute on function public.claim_weekly_points(boolean) to authenticated;
 grant execute on function public.create_prediction(uuid, text, text[], timestamptz) to authenticated;
 grant execute on function public.lock_prediction(uuid) to authenticated;
-grant execute on function public.resolve_prediction_v2(uuid, uuid, text, uuid) to authenticated;
+grant execute on function public.resolve_prediction_v2(uuid, uuid, text, uuid, varchar) to authenticated;
 grant execute on function public.place_bet(uuid, uuid, integer) to authenticated;
 grant execute on function public.cancel_bet(uuid) to authenticated;
 grant execute on function public.get_preferences(uuid) to authenticated;
@@ -22,3 +22,4 @@ grant execute on function public.get_room_stat_cards(uuid, int) to authenticated
 revoke execute on function public.update_streaks_after_resolution(uuid, uuid, uuid, text) from public;
 revoke execute on function public.update_player_stats_after_resolution(uuid, uuid, uuid, text) from public;
 revoke execute on function public.update_room_stats_after_resolution(uuid, uuid, uuid, text) from public;
+revoke execute on function public.update_prediction_ratings(uuid, uuid, uuid) from public;

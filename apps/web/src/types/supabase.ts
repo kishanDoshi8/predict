@@ -378,6 +378,7 @@ export type Database = {
           id: string
           is_organizer: boolean
           joined_at: string
+          peak_prediction_rating: number
           player_id: string
           prediction_rating: number
           rated_predictions_count: number
@@ -391,6 +392,7 @@ export type Database = {
           id?: string
           is_organizer?: boolean
           joined_at?: string
+          peak_prediction_rating?: number
           player_id: string
           prediction_rating?: number
           rated_predictions_count?: number
@@ -404,6 +406,7 @@ export type Database = {
           id?: string
           is_organizer?: boolean
           joined_at?: string
+          peak_prediction_rating?: number
           player_id?: string
           prediction_rating?: number
           rated_predictions_count?: number
@@ -673,7 +676,10 @@ export type Database = {
       create_room: { Args: { p_room_name: string }; Returns: Json }
       get_player: { Args: never; Returns: Json }
       get_preferences: { Args: { p_room_id?: string }; Returns: Json }
-      get_room_leaderboard: { Args: { p_room_id: string }; Returns: Json }
+      get_room_leaderboard: {
+        Args: { p_room_id: string; p_sort_by?: string }
+        Returns: Json
+      }
       get_room_prediction_history: {
         Args: { p_limit?: number; p_offset?: number; p_room_id: string }
         Returns: Json
@@ -683,7 +689,7 @@ export type Database = {
         Returns: Json
       }
       get_room_weekly_leaderboard: {
-        Args: { p_room_id: string }
+        Args: { p_room_id: string; p_sort_by?: string }
         Returns: Json
       }
       join_room: { Args: { p_room_code: string }; Returns: Json }

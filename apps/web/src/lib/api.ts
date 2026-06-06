@@ -574,16 +574,24 @@ export async function getMyBet(predictionId: string, playerId: string) {
 // #endregion Bets
 
 // #region Leaderboard
-export async function getRoomLeaderboard(roomId: string) {
+export async function getRoomLeaderboard(
+  roomId: string,
+  sortBy: 'points' | 'rating' | 'accuracy' | 'streak' = 'points',
+) {
   const { data, error } = await supabase.rpc('get_room_leaderboard', {
     p_room_id: roomId,
+    p_sort_by: sortBy,
   })
   return assertOk(data, error) as LeaderboardEntry[]
 }
 
-export async function getRoomWeeklyLeaderboard(roomId: string) {
+export async function getRoomWeeklyLeaderboard(
+  roomId: string,
+  sortBy: 'points' | 'rating' | 'accuracy' | 'streak' = 'points',
+) {
   const { data, error } = await supabase.rpc('get_room_weekly_leaderboard', {
     p_room_id: roomId,
+    p_sort_by: sortBy,
   })
   return assertOk(data, error) as LeaderboardEntry[]
 }

@@ -1,4 +1,7 @@
-create or replace function public.get_room_weekly_leaderboard(p_room_id uuid)
+create or replace function public.get_room_weekly_leaderboard(
+  p_room_id uuid,
+  p_sort_by text default 'points'
+)
 returns json
 language plpgsql
 security definer
@@ -25,6 +28,10 @@ begin
     raise exception 'You are not a member of this room' using errcode = 'P0011';
   end if;
 
+  if p_sort_by not in ('points', 'rating', 'accuracy', 'streak') then
+    raise exception 'Invalid sort mode: %', p_sort_by using errcode = 'P0001';
+  end if;
+
   select json_agg(lb order by lb.rank)
   into v_result
   from (
@@ -36,6 +43,9 @@ begin
       rm.is_organizer,
       rm.current_streak,
       rm.highest_streak,
+      rm.prediction_rating,
+      rm.peak_prediction_rating,
+      rm.rated_predictions_count,
       coalesce(s.total_bets, 0) as total_bets,
       coalesce(s.total_revealed_bets, 0) as total_revealed_bets,
       coalesce(s.winning_bets, 0) as winning_bets,
@@ -49,12 +59,18 @@ begin
       end as win_percentage,
       rank() over (
         order by
-          coalesce(s.weekly_total_won, 0) desc,
-          case
-            when coalesce(s.total_revealed_bets, 0) > 0
-              then (coalesce(s.winning_bets, 0)::numeric / s.total_revealed_bets)
-            else 0
-          end desc,
+          case when p_sort_by = 'points' then coalesce(s.weekly_total_won, 0) end desc nulls last,
+          case when p_sort_by = 'points' and coalesce(s.total_revealed_bets, 0) > 0
+            then (coalesce(s.winning_bets, 0)::numeric / s.total_revealed_bets)
+          end desc nulls last,
+          case when p_sort_by = 'rating' then rm.prediction_rating end desc nulls last,
+          case when p_sort_by = 'rating' then rm.rated_predictions_count end desc nulls last,
+          case when p_sort_by = 'accuracy' and coalesce(s.total_revealed_bets, 0) > 0
+            then (coalesce(s.winning_bets, 0)::numeric / s.total_revealed_bets)
+          end desc nulls last,
+          case when p_sort_by = 'accuracy' then coalesce(s.total_revealed_bets, 0) end desc nulls last,
+          case when p_sort_by = 'streak' then rm.current_streak end desc nulls last,
+          case when p_sort_by = 'streak' then rm.highest_streak end desc nulls last,
           rm.joined_at asc
       ) as rank
     from public.room_members rm

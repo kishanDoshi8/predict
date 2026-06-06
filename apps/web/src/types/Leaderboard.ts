@@ -6,6 +6,9 @@ export type LeaderboardEntry = {
   is_organizer:       boolean
   current_streak:     number
   highest_streak:     number
+  prediction_rating:  number
+  peak_prediction_rating: number
+  rated_predictions_count: number
   total_bets:         number
   total_revealed_bets:number
   winning_bets:       number

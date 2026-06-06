@@ -5,6 +5,7 @@ create table if not exists public.room_members (
   is_organizer boolean not null default false,
   total_won_in_room integer not null default 0,
   prediction_rating integer not null default 1500,
+  peak_prediction_rating integer not null default 1500,
   rated_predictions_count integer not null default 0,
   rating_system_version smallint not null default 1,
   joined_at timestamptz not null default now(),
@@ -16,3 +17,4 @@ create index if not exists idx_room_members_room_id on public.room_members(room_
 create index if not exists idx_room_members_player_id on public.room_members(player_id);
 create index if not exists idx_room_members_leaderboard on public.room_members(room_id, total_won_in_room desc);
 create index if not exists idx_room_members_prediction_rating on public.room_members(room_id, prediction_rating desc);
+create index if not exists idx_room_members_room_prediction_rating on public.room_members(room_id, prediction_rating desc);

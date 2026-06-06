@@ -122,17 +122,15 @@ select cron.schedule(
   $cron$
 );
 
--- Notify all opted-in players every Monday at 08:00 UTC that weekly points are claimable.
+-- Weekly pipeline every Monday at 08:00 UTC:
+-- 1) create weekly room-member snapshots
+-- 2) run weekly claims processing hook (if configured)
+-- 3) notify players that weekly points are claimable
 select cron.schedule(
-  'push-weekly-points-claim',
+  'run-weekly-processing',
   '0 8 * * 1',
   $cron$
-    select private.fire_push_notification(
-      'weekly_points_claim', null, null,
-      '💰 Weekly Points Available!',
-      'Claim your 100 free points now.',
-      '/'
-    );
+    select private.run_weekly_processing();
   $cron$
 );
 ```

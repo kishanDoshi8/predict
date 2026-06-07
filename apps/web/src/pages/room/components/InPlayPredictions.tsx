@@ -23,6 +23,7 @@ import {
 import { Link } from "react-router-dom";
 import { Prediction } from "@/types";
 import React from "react";
+import { usePlayer } from "@/store/player";
 
 // Threshold (as a percentage) above which an option is labelled "🔥 hot pick"
 const HOT_PICK_THRESHOLD_PERCENT = 60;
@@ -34,6 +35,7 @@ function PredictionCard({
 	roomId,
 }: Readonly<{ prediction: Prediction; roomId: string }>) {
 	const { data: bets = [] } = useBets(roomId, prediction.id);
+	const { data: player } = usePlayer();
 
 	const betAmountPerOption: Record<string, number> = {};
 	for (const bet of bets) {
@@ -41,6 +43,7 @@ function PredictionCard({
 			(betAmountPerOption[bet.option_id] ?? 0) + bet.amount;
 	}
 	const totalBetAmount = bets.reduce((sum, bet) => sum + bet.amount, 0);
+	const myBet = bets.find((b) => b.player_id === player?.id);
 
 	const isActive =
 		prediction.status === "draft" || prediction.status === "locked";
@@ -123,7 +126,7 @@ function PredictionCard({
 					)}
 				</div>
 
-				<h4 className={`text-xl md:text-2xl mb-4`}>
+				<h4 className={`text-xl md:text-2xl font-semibold mb-4`}>
 					{prediction.title}
 				</h4>
 
@@ -206,19 +209,48 @@ function PredictionCard({
 					</div>
 				</div>
 
+				{myBet &&
+					prediction.status === "revealed" &&
+					(() => {
+						const pickedOption = prediction.prediction_options.find(
+							(opt) => opt.id === myBet.option_id,
+						)?.label;
+						const isWin =
+							myBet.option_id === prediction.winning_option_id;
+
+						return (
+							<span
+								className={`flex items-center justify-end text-sm mt-6 text-muted-foreground`}
+							>
+								{isWin
+									? "🎉 Nailed it with:"
+									: "😵 Plot twist, you picked:"}{" "}
+								<span
+									className={`font-semibold ml-1 ${isWin ? "text-win" : "text-loss"}`}
+								>
+									{pickedOption}
+								</span>
+							</span>
+						);
+					})()}
+
 				{prediction.status === "draft" && (
 					<span
-						className={`flex items-center justify-end text-sm text-muted-foreground text-right mt-6`}
+						className={`flex items-center justify-end text-sm text-foreground text-right mt-6`}
 					>
-						Place your bets now!
-						<ChevronRightIcon className={`inline-block ml-1 `} />
+						{myBet
+							? `${myBet.amount.toLocaleString()} pts riding on ${prediction.prediction_options.find((opt) => opt.id === myBet.option_id)?.label}`
+							: "Place your bet now!"}
+						<ChevronRightIcon className={`inline-block ml-1`} />
 					</span>
 				)}
 				{prediction.status === "locked" && (
 					<span
 						className={`text-sm text-muted-foreground text-right mt-6 block`}
 					>
-						Waiting for result...
+						{myBet
+							? "Locked in — fingers crossed!"
+							: "Market closed. Watching live..."}
 					</span>
 				)}
 			</Link>

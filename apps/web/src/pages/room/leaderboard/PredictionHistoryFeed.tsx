@@ -61,7 +61,7 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 
 	let payoutSummary: JSX.Element | string;
 	if (entry.status !== "revealed") {
-		payoutSummary = "No payout distributed.";
+		payoutSummary = entry.no_result_reason ?? "No payout distributed.";
 	} else if (entry.winner_count === 0) {
 		payoutSummary = "Nobody guessed correctly 💀";
 	} else {

@@ -30,6 +30,7 @@ export type PredictionHistoryEntry = {
   prediction_id:        string
   title:                string
   status:               'revealed' | 'cancelled' | 'no_result'
+  no_result_reason:     string | null
   resolved_at:          string | null
   created_at:           string
   winning_option_id:    string | null

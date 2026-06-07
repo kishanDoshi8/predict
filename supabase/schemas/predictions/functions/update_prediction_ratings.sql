@@ -113,6 +113,7 @@ begin
 
     update public.room_members
     set prediction_rating = v_new_rating,
+        peak_prediction_rating = greatest(peak_prediction_rating, v_new_rating),
         rated_predictions_count = rated_predictions_count + 1,
         rating_system_version = v_config.version
     where id = v_member.id;

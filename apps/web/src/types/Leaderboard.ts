@@ -6,6 +6,9 @@ export type LeaderboardEntry = {
   is_organizer:       boolean
   current_streak:     number
   highest_streak:     number
+  prediction_rating:  number
+  peak_prediction_rating: number
+  rated_predictions_count: number
   total_bets:         number
   total_revealed_bets:number
   winning_bets:       number
@@ -27,6 +30,7 @@ export type PredictionHistoryEntry = {
   prediction_id:        string
   title:                string
   status:               'revealed' | 'cancelled' | 'no_result'
+  no_result_reason:     string | null
   resolved_at:          string | null
   created_at:           string
   winning_option_id:    string | null

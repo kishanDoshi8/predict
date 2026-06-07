@@ -37,6 +37,7 @@ begin
       pred.id             as prediction_id,
       pred.title,
       pred.status,
+      pred.no_result_reason,
       pred.resolved_at,
       pred.created_at,
       pred.winning_option_id,

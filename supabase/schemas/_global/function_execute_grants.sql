@@ -14,8 +14,8 @@ grant execute on function public.update_room_preferences(uuid, boolean, boolean,
 grant execute on function public.reset_room_preferences(uuid) to authenticated;
 grant execute on function public.mark_how_to_play_seen() to authenticated;
 grant execute on function public.upsert_user_push_subscription(jsonb) to authenticated;
-grant execute on function public.get_room_leaderboard(uuid) to authenticated;
-grant execute on function public.get_room_weekly_leaderboard(uuid) to authenticated;
+grant execute on function public.get_room_leaderboard(uuid, text) to authenticated;
+grant execute on function public.get_room_weekly_leaderboard(uuid, text) to authenticated;
 grant execute on function public.get_room_prediction_history(uuid, int, int) to authenticated;
 grant execute on function public.get_room_stat_cards(uuid, int) to authenticated;
 

@@ -1,4 +1,4 @@
-import { Badge, Skeleton } from "@/components";
+import { Badge, FadeContent, Skeleton } from "@/components";
 import { Prediction } from "@/types";
 import PredictionTitle from "../components/PredictionTitle";
 import PredictionOptions from "../widgets/PredictionOptions";
@@ -11,7 +11,6 @@ import { ClockIcon, LockIcon } from "lucide-react";
 import LockControls from "../controls/LockControls";
 import { useRoomBetRealtime } from "@/hooks/useRoomRealtime";
 import PredictionData from "./PredictionData";
-import FadeContent from "@/components/animations/fade-content";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -69,9 +68,10 @@ export default function LockedPhase({
 					<Skeleton className={`h-5 w-25 mx-auto`} />
 				)}
 
-				<FadeContent delay={contentDelays.title}>
-					<PredictionTitle prediction={prediction} />
-				</FadeContent>
+				<PredictionTitle
+					prediction={prediction}
+					fadeDelay={contentDelays.title}
+				/>
 
 				{prediction ? (
 					<Badge
@@ -91,17 +91,17 @@ export default function LockedPhase({
 					<Skeleton className={`h-10 w-36 mx-auto`} />
 				)}
 
-				<FadeContent delay={contentDelays.data}>
-					<PredictionData prediction={prediction} />
-				</FadeContent>
+				<PredictionData
+					prediction={prediction}
+					fadeDelay={contentDelays.data}
+				/>
 
-				<FadeContent delay={contentDelays.options}>
-					<PredictionOptions
-						prediction={prediction}
-						selectedOption={selectedOption}
-						setSelectedOption={() => {}}
-					/>
-				</FadeContent>
+				<PredictionOptions
+					prediction={prediction}
+					selectedOption={selectedOption}
+					setSelectedOption={() => {}}
+					fadeDelay={contentDelays.options}
+				/>
 			</div>
 
 			<div className={`max-w-md w-full mx-auto mt-4`}>

@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { useRoomContext } from "../RoomLayout";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { localStorageKeys } from "@/store/_keys";
-import Counter from "@/components/animations/counter";
+import { Counter, FadeContent } from "@/components";
 
 type Props = {
 	player: Player;
@@ -60,7 +60,22 @@ export default function DraftControls({
 		if (!myBet && !isMyBetLoading) {
 			setCollapseControls(false);
 		}
-	}, [myBet, isMyBetLoading, setSelectedOption]);
+
+		if (selectedOption && !myBet && !isMyBetLoading) {
+			setCollapseControls(false);
+		}
+
+		if (collapseControls && myBet?.amount !== betAmount) {
+			setBetAmount(myBet?.amount ?? 0);
+		}
+	}, [
+		myBet,
+		isMyBetLoading,
+		selectedOption,
+		setSelectedOption,
+		collapseControls,
+		setCollapseControls,
+	]);
 
 	const handlePlaceBet = () => {
 		if (!player || !predictionId || !selectedOption) return;
@@ -124,6 +139,12 @@ export default function DraftControls({
 		setBetAmount((prev) => Math.max(prev - 1, 1));
 	};
 
+	const removeSelectedOption = () => {
+		setSelectedOption(null);
+		setBetAmount(0);
+		setCollapseControls(true);
+	};
+
 	return (
 		<div className={`relative p-4 border rounded-md bg-background`}>
 			<Button
@@ -143,36 +164,40 @@ export default function DraftControls({
 				className={`flex flex-col ${collapseControls ? "gap-2" : "gap-6"}`}
 			>
 				<div className={`flex justify-between items-center`}>
-					{selectedOption && (
-						<Button
-							className={`flex-col gap-1 items-start p-2`}
-							variant={"none"}
-							onClick={handleResetBetAmount}
-						>
-							<p
-								className={`flex items-center justify-start gap-2 text-xs text-muted-foreground`}
+					<div>
+						{selectedOption && (
+							<Button
+								className={`flex-col gap-1 items-start p-2`}
+								variant={"none"}
+								onClick={handleResetBetAmount}
 							>
-								{myBet && myBet.amount !== betAmount && (
-									<RotateCcw className={`w-3! h-3!`} />
-								)}
-								Bet Amount
-							</p>
-							<p
-								className={`flex items-center gap-2 text-win w-full text-lg font-semibold`}
-							>
-								<Counter value={betAmount} fontSize={24} />
-								{" pts"}
-								{myBet && myBet?.amount !== betAmount && (
-									<span
-										className={`text-xs text-muted-foreground`}
-									>
-										{myBet.amount - betAmount < 0 && "+"}
-										{betAmount - (myBet.amount ?? 0)}{" "}
-									</span>
-								)}
-							</p>
-						</Button>
-					)}
+								<p
+									className={`flex items-center justify-start gap-2 text-xs text-muted-foreground`}
+								>
+									{myBet && myBet.amount !== betAmount && (
+										<RotateCcw className={`w-3! h-3!`} />
+									)}
+									Bet Amount
+								</p>
+								<p
+									className={`flex items-center gap-2 text-win w-full text-lg font-semibold`}
+								>
+									<Counter value={betAmount} fontSize={24} />
+									{" pts"}
+									{myBet && myBet?.amount !== betAmount && (
+										<span
+											className={`text-xs text-muted-foreground`}
+										>
+											{myBet.amount - betAmount < 0 &&
+												"+"}
+											{betAmount -
+												(myBet.amount ?? 0)}{" "}
+										</span>
+									)}
+								</p>
+							</Button>
+						)}
+					</div>
 					<div>
 						<p className={`text-xs text-muted-foreground`}>
 							Your Balance
@@ -187,7 +212,7 @@ export default function DraftControls({
 				{!collapseControls && (
 					<>
 						{selectedOption && (
-							<div className={`flex flex-col gap-3`}>
+							<FadeContent className={`flex flex-col gap-3`}>
 								<div className={`flex gap-2 *:flex-1`}>
 									<Button
 										variant={"outline"}
@@ -256,13 +281,13 @@ export default function DraftControls({
 										<PlusIcon className={`w-3 h-3`} />
 									</Button>
 								</div>
-							</div>
+							</FadeContent>
 						)}
 					</>
 				)}
 				<div>
 					{!collapseControls && (
-						<>
+						<FadeContent>
 							{myBet && (
 								<div className={`flex gap-4`}>
 									<Button
@@ -293,7 +318,7 @@ export default function DraftControls({
 									<Button
 										variant={"secondary"}
 										size={"lg"}
-										onClick={() => setSelectedOption(null)}
+										onClick={() => removeSelectedOption()}
 									>
 										<X />
 									</Button>
@@ -309,7 +334,7 @@ export default function DraftControls({
 									</Button>
 								</div>
 							)}
-						</>
+						</FadeContent>
 					)}
 					{selectedOption && !myBet && (
 						<p className={`text-xs text-muted-foreground mt-2`}>

@@ -4,6 +4,7 @@ import {
 	AlertDescription,
 	AlertTitle,
 	Badge,
+	FadeContent,
 	Skeleton,
 } from "@/components";
 import { Prediction } from "@/types";
@@ -15,7 +16,6 @@ import { useRoomContext } from "../RoomLayout";
 import { usePlayer } from "@/store/player";
 import { useRoomBetRealtime } from "@/hooks/useRoomRealtime";
 import PredictionData from "./PredictionData";
-import FadeContent from "@/components/animations/fade-content";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -65,9 +65,10 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 					<Skeleton className={`h-5 w-25 mx-auto`} />
 				)}
 
-				<FadeContent delay={contentDelays.title}>
-					<PredictionTitle prediction={prediction} />
-				</FadeContent>
+				<PredictionTitle
+					prediction={prediction}
+					fadeDelay={contentDelays.title}
+				/>
 
 				<div
 					className={`flex gap-2 items-center justify-center bg-win/10 rounded-xl px-4 py-2`}
@@ -86,17 +87,17 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 					</p>
 				</div>
 
-				<FadeContent delay={contentDelays.data}>
-					<PredictionData prediction={prediction} />
-				</FadeContent>
+				<PredictionData
+					prediction={prediction}
+					fadeDelay={contentDelays.data}
+				/>
 
-				<FadeContent delay={contentDelays.options} className={`w-full`}>
-					<PredictionOptions
-						prediction={prediction}
-						selectedOption={null}
-						setSelectedOption={() => {}}
-					/>
-				</FadeContent>
+				<PredictionOptions
+					prediction={prediction}
+					selectedOption={null}
+					setSelectedOption={() => {}}
+					fadeDelay={contentDelays.options}
+				/>
 			</div>
 
 			<FadeContent
@@ -168,10 +169,7 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 				})()}
 			</FadeContent>
 
-			<FadeContent
-				delay={contentDelays.payout}
-				className={`max-w-md w-full mx-auto mt-4`}
-			>
+			<div className={`max-w-md w-full mx-auto mt-4`}>
 				<div className={`flex mb-2`}>
 					<p className={`text-2xl`}>Payout</p>
 				</div>
@@ -181,7 +179,8 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 						<Skeleton className={`h-15 w-full mx-auto mt-4`} />
 					</>
 				) : (
-					<div
+					<FadeContent
+						delay={contentDelays.payout}
 						className={`rounded-xl overflow-hidden border border-border`}
 					>
 						{bets?.map((bet) => (
@@ -224,9 +223,9 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 								</div>
 							</div>
 						))}
-					</div>
+					</FadeContent>
 				)}
-			</FadeContent>
+			</div>
 		</div>
 	);
 }

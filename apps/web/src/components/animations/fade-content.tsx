@@ -26,6 +26,11 @@ const FadeContent: React.FC<FadeContentProps> = ({
 	const ref = useRef<HTMLDivElement | null>(null);
 	const isInView = useInView(ref, { once: true, amount: threshold });
 
+	let filterValue = "none";
+	if (blur) {
+		filterValue = isInView ? "blur(0px)" : "blur(10px)";
+	}
+
 	return (
 		<div
 			ref={ref}
@@ -33,7 +38,7 @@ const FadeContent: React.FC<FadeContentProps> = ({
 			style={{
 				opacity: isInView ? 1 : initialOpacity,
 				transition: `opacity ${duration}ms ${easing} ${delay}ms, filter ${duration}ms ${easing} ${delay}ms`,
-				filter: blur ? (isInView ? "blur(0px)" : "blur(10px)") : "none",
+				filter: filterValue,
 			}}
 		>
 			{children}

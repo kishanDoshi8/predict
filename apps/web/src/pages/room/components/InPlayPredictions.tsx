@@ -1,7 +1,15 @@
 import { useActivePredictions } from "@/store/prediction";
 import { motion } from "framer-motion";
 import { useRoomContext } from "../RoomLayout";
-import { Badge, Field, FieldLabel, Progress, Skeleton } from "@/components";
+import {
+	Badge,
+	CountUp,
+	FadeContent,
+	Field,
+	FieldLabel,
+	Progress,
+	Skeleton,
+} from "@/components";
 import {
 	Carousel,
 	CarouselApi,
@@ -25,8 +33,6 @@ import { Link } from "react-router-dom";
 import { Prediction } from "@/types";
 import React from "react";
 import { usePlayer } from "@/store/player";
-import FadeContent from "@/components/animations/fade-content";
-import CountUp from "@/components/animations/count-up";
 
 // Threshold (as a percentage) above which an option is labelled "🔥 hot pick"
 const HOT_PICK_THRESHOLD_PERCENT = 60;

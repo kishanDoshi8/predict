@@ -1,5 +1,6 @@
 import {
 	Badge,
+	FadeContent,
 	Skeleton,
 	Tabs,
 	TabsContent,
@@ -26,7 +27,6 @@ import { twColor } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { localStorageKeys } from "@/store/_keys";
-import FadeContent from "@/components/animations/fade-content";
 
 type LeaderboardTab = "this_week" | "all_time";
 

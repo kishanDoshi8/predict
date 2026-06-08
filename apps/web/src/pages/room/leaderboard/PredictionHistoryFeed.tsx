@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Dot from "@/components/ui/dot";
 import { Link } from "react-router-dom";
-import FadeContent from "@/components/animations/fade-content";
+import { FadeContent } from "@/components";
 
 // ─── PredictionHistoryCard ────────────────────────────────────────────────────
 

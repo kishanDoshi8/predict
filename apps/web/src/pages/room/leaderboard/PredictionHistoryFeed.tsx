@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Dot from "@/components/ui/dot";
 import { Link } from "react-router-dom";
+import { FadeContent } from "@/components";
 
 // ─── PredictionHistoryCard ────────────────────────────────────────────────────
 
@@ -264,10 +265,9 @@ export function PredictionHistoryFeed({
 	return (
 		<div className='flex flex-col gap-4'>
 			{entries.map((entry) => (
-				<PredictionHistoryCard
-					key={entry.prediction_id}
-					entry={entry}
-				/>
+				<FadeContent key={entry.prediction_id}>
+					<PredictionHistoryCard entry={entry} />
+				</FadeContent>
 			))}
 		</div>
 	);

@@ -1,4 +1,4 @@
-import { Badge, Skeleton } from "@/components";
+import { Badge, FadeContent, Skeleton } from "@/components";
 import { Prediction } from "@/types";
 import PredictionTitle from "../components/PredictionTitle";
 import PredictionOptions from "../widgets/PredictionOptions";
@@ -15,6 +15,13 @@ import PredictionData from "./PredictionData";
 type Props = {
 	prediction: Prediction | null | undefined;
 	selectedOption: string | null;
+};
+
+const contentDelays = {
+	title: 0,
+	data: 200,
+	options: 300,
+	bets: 300,
 };
 
 export default function LockedPhase({
@@ -61,27 +68,39 @@ export default function LockedPhase({
 					<Skeleton className={`h-5 w-25 mx-auto`} />
 				)}
 
-				<PredictionTitle prediction={prediction} />
+				<PredictionTitle
+					prediction={prediction}
+					fadeDelay={contentDelays.title}
+				/>
 
 				{prediction ? (
 					<Badge
 						className={`mx-auto py-2 rounded-md bg-secondary/70 text-base text-accent/70`}
 					>
-						<ClockIcon
-							className={`w-5! h-5! text-accent mr-1 animate-pulse`}
-						/>
-						Awaiting Results
+						<FadeContent
+							delay={contentDelays.data}
+							className={`flex gap-2 items-center`}
+						>
+							<ClockIcon
+								className={`w-5! h-5! text-accent animate-pulse inline-block`}
+							/>
+							Awaiting Results
+						</FadeContent>
 					</Badge>
 				) : (
 					<Skeleton className={`h-10 w-36 mx-auto`} />
 				)}
 
-				<PredictionData prediction={prediction} />
+				<PredictionData
+					prediction={prediction}
+					fadeDelay={contentDelays.data}
+				/>
 
 				<PredictionOptions
 					prediction={prediction}
 					selectedOption={selectedOption}
 					setSelectedOption={() => {}}
+					fadeDelay={contentDelays.options}
 				/>
 			</div>
 
@@ -95,7 +114,8 @@ export default function LockedPhase({
 						<Skeleton className={`h-15 w-full mx-auto mt-4`} />
 					</>
 				) : (
-					<div
+					<FadeContent
+						delay={contentDelays.bets}
 						className={`rounded-xl overflow-hidden border border-border`}
 					>
 						{bets?.map((bet) => (
@@ -117,7 +137,7 @@ export default function LockedPhase({
 								</div>
 							</div>
 						))}
-					</div>
+					</FadeContent>
 				)}
 			</div>
 

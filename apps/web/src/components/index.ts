@@ -27,3 +27,8 @@ export { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 export { ScrollArea, ScrollBar } from './ui/scroll-area'
 export { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+
+// -- animations --
+export { default as Counter } from './animations/counter'
+export { default as FadeContent } from './animations/fade-content'
+export { default as CountUp } from './animations/count-up'

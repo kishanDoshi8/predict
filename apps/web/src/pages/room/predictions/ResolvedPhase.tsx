@@ -4,6 +4,7 @@ import {
 	AlertDescription,
 	AlertTitle,
 	Badge,
+	FadeContent,
 	Skeleton,
 } from "@/components";
 import { Prediction } from "@/types";
@@ -18,6 +19,14 @@ import PredictionData from "./PredictionData";
 
 type Props = {
 	prediction: Prediction | null | undefined;
+};
+
+const contentDelays = {
+	title: 0,
+	result: 200,
+	data: 300,
+	options: 400,
+	payout: 400,
 };
 
 function ResolvedPhase({ prediction }: Readonly<Props>) {
@@ -56,7 +65,10 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 					<Skeleton className={`h-5 w-25 mx-auto`} />
 				)}
 
-				<PredictionTitle prediction={prediction} />
+				<PredictionTitle
+					prediction={prediction}
+					fadeDelay={contentDelays.title}
+				/>
 
 				<div
 					className={`flex gap-2 items-center justify-center bg-win/10 rounded-xl px-4 py-2`}
@@ -75,16 +87,23 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 					</p>
 				</div>
 
-				<PredictionData prediction={prediction} />
+				<PredictionData
+					prediction={prediction}
+					fadeDelay={contentDelays.data}
+				/>
 
 				<PredictionOptions
 					prediction={prediction}
 					selectedOption={null}
 					setSelectedOption={() => {}}
+					fadeDelay={contentDelays.options}
 				/>
 			</div>
 
-			<div className={`w-full max-w-md mx-auto`}>
+			<FadeContent
+				delay={contentDelays.result}
+				className={`w-full max-w-md mx-auto`}
+			>
 				{(() => {
 					if (!player || !bets) return null;
 					const playerBet = bets.find(
@@ -148,7 +167,7 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 						);
 					}
 				})()}
-			</div>
+			</FadeContent>
 
 			<div className={`max-w-md w-full mx-auto mt-4`}>
 				<div className={`flex mb-2`}>
@@ -160,7 +179,8 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 						<Skeleton className={`h-15 w-full mx-auto mt-4`} />
 					</>
 				) : (
-					<div
+					<FadeContent
+						delay={contentDelays.payout}
 						className={`rounded-xl overflow-hidden border border-border`}
 					>
 						{bets?.map((bet) => (
@@ -203,7 +223,7 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 								</div>
 							</div>
 						))}
-					</div>
+					</FadeContent>
 				)}
 			</div>
 		</div>

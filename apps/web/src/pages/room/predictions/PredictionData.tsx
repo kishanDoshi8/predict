@@ -1,13 +1,14 @@
-import { Skeleton } from "@/components";
+import { FadeContent, Skeleton } from "@/components";
 import { useBets } from "@/store/bet";
 import { Prediction } from "@/types";
 import { CoinsIcon, UsersIcon } from "lucide-react";
 
 type Props = {
 	prediction: Prediction | null | undefined;
+	fadeDelay?: number;
 };
 
-const PredictionData = ({ prediction }: Props) => {
+const PredictionData = ({ prediction, fadeDelay }: Props) => {
 	const { data: bets, isLoading: isBetsLoading } = useBets(
 		prediction?.room_id ?? "",
 		prediction?.id ?? "",
@@ -15,7 +16,8 @@ const PredictionData = ({ prediction }: Props) => {
 	return (
 		<>
 			{prediction?.prediction_options && !isBetsLoading ? (
-				<div
+				<FadeContent
+					delay={fadeDelay}
 					className={`flex justify-center items-center gap-4 text-sm`}
 				>
 					{/* total pooled */}
@@ -45,7 +47,7 @@ const PredictionData = ({ prediction }: Props) => {
 							</span>
 						)}
 					</p>
-				</div>
+				</FadeContent>
 			) : (
 				<Skeleton className={`h-5 w-36 mx-auto`} />
 			)}

@@ -17,6 +17,13 @@ type Props = {
 	setSelectedOption: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
+const contentDelays = {
+	status: 0,
+	title: 0,
+	data: 200,
+	options: 300,
+};
+
 export default function DraftPhase({
 	prediction,
 	selectedOption,
@@ -45,7 +52,10 @@ export default function DraftPhase({
 					<Skeleton className={`h-5 w-25 mx-auto`} />
 				)}
 
-				<PredictionTitle prediction={prediction} />
+				<PredictionTitle
+					prediction={prediction}
+					fadeDelay={contentDelays.title}
+				/>
 
 				{prediction?.deadline ? (
 					<>
@@ -63,12 +73,16 @@ export default function DraftPhase({
 					<Skeleton className={`h-10 w-36 mx-auto`} />
 				)}
 
-				<PredictionData prediction={prediction} />
+				<PredictionData
+					prediction={prediction}
+					fadeDelay={contentDelays.data}
+				/>
 
 				<PredictionOptions
 					prediction={prediction}
 					selectedOption={selectedOption}
 					setSelectedOption={setSelectedOption}
+					fadeDelay={contentDelays.options}
 				/>
 			</div>
 

@@ -26,6 +26,7 @@ import { twColor } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { localStorageKeys } from "@/store/_keys";
+import FadeContent from "@/components/animations/fade-content";
 
 type LeaderboardTab = "this_week" | "all_time";
 
@@ -87,6 +88,14 @@ function UserStats() {
 		</div>
 	);
 }
+
+const contentDelay = {
+	rank: 0,
+	yourPoints: 200,
+	gap: 300,
+	leaderboard: 300,
+	stats: 300,
+};
 
 function LeaderboardContent({
 	leaderboard,
@@ -152,7 +161,8 @@ function LeaderboardContent({
 							className={`w-14 h-14 rounded-lg bg-secondary animate-pulse`}
 						/>
 					) : (
-						<div
+						<FadeContent
+							delay={contentDelay.rank}
 							className={`relative w-14 h-14 flex items-center justify-center rounded-lg font-bold text-foreground text-2xl ${leaderboardPlayer?.rank === 1 ? "bg-rank-1 text-secondary" : "bg-linear-to-r from-primary to-accent"}`}
 						>
 							#{leaderboardPlayer?.rank ?? 0}
@@ -163,7 +173,7 @@ function LeaderboardContent({
 									/>
 								</span>
 							)}
-						</div>
+						</FadeContent>
 					)}
 
 					{isLoading ? (
@@ -176,14 +186,17 @@ function LeaderboardContent({
 							/>
 						</div>
 					) : (
-						<div className={`flex-1`}>
+						<FadeContent
+							delay={contentDelay.yourPoints}
+							className={`flex-1`}
+						>
 							<p className={`text-xs`}>YOUR POINTS</p>
 							<p className={`text-3xl font-extrabold`}>
 								{(
 									leaderboardPlayer?.total_won_in_room ?? 0
 								).toLocaleString()}
 							</p>
-						</div>
+						</FadeContent>
 					)}
 
 					{isLoading ? (
@@ -195,7 +208,10 @@ function LeaderboardContent({
 							{leaderboardPlayer &&
 								gapToNextPlayer &&
 								gapToNextPlayer.total_won_in_room > 0 && (
-									<div>
+									<FadeContent
+										delay={contentDelay.gap}
+										className={`flex flex-col gap-1`}
+									>
 										<p
 											className={`text-xs justify-end flex items-center gap-1 text-muted-foreground`}
 										>
@@ -210,7 +226,7 @@ function LeaderboardContent({
 												leaderboardPlayer.total_won_in_room
 											).toLocaleString()}
 										</p>
-									</div>
+									</FadeContent>
 								)}
 						</>
 					)}
@@ -259,7 +275,8 @@ function LeaderboardContent({
 							}
 
 							return (
-								<div
+								<FadeContent
+									delay={contentDelay.leaderboard}
 									key={entry.player_id}
 									className={`flex items-center gap-3 p-3 rounded-lg ${entry.player_id === player?.id ? "bg-linear-30 from-accent/10 border to-primary/10" : "bg-secondary/60"}`}
 								>
@@ -300,7 +317,7 @@ function LeaderboardContent({
 											entry.total_won_in_room ?? 0
 										).toLocaleString()}
 									</p>
-								</div>
+								</FadeContent>
 							);
 						})}
 						<Link
@@ -326,7 +343,10 @@ function LeaderboardContent({
 					))}
 				</div>
 			) : (
-				<div className={`flex gap-2`}>
+				<FadeContent
+					delay={contentDelay.stats}
+					className={`flex gap-2`}
+				>
 					<StatTile
 						icon={<TrophyIcon className={`w-4 h-4 text-rank-1`} />}
 						value={leaderboardPlayer?.winning_bets ?? 0}
@@ -342,7 +362,7 @@ function LeaderboardContent({
 						value={leaderboardPlayer?.current_streak ?? 0}
 						label='STREAK'
 					/>
-				</div>
+				</FadeContent>
 			)}
 		</div>
 	);

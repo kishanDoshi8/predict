@@ -1,4 +1,5 @@
 import { useActivePredictions } from "@/store/prediction";
+import { motion } from "framer-motion";
 import { useRoomContext } from "../RoomLayout";
 import { Badge, Field, FieldLabel, Progress, Skeleton } from "@/components";
 import {
@@ -24,9 +25,18 @@ import { Link } from "react-router-dom";
 import { Prediction } from "@/types";
 import React from "react";
 import { usePlayer } from "@/store/player";
+import FadeContent from "@/components/animations/fade-content";
+import CountUp from "@/components/animations/count-up";
 
 // Threshold (as a percentage) above which an option is labelled "🔥 hot pick"
 const HOT_PICK_THRESHOLD_PERCENT = 60;
+const contentDelays = {
+	title: 0,
+	options: 200,
+	pooled: 400,
+	participants: 400,
+	timer: 600,
+};
 
 // ── Per-card component ─────────────────────────────────────────────────────
 // Fetches its own bets so each card in the carousel is self-contained.
@@ -56,11 +66,13 @@ function PredictionCard({
 	}
 
 	return (
-		<div
-			className={`text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-rose-500/5 p-5 mb-4 ${borderClass}`}
+		<motion.div
+			animate={{ height: "auto", opacity: 1 }}
+			transition={{ type: "spring", duration: 0.4 }}
+			className={`text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-primary/5 p-5 mb-4 ${borderClass}`}
 		>
 			<div
-				className={`absolute inset-0 bg-linear-to-r from-rose-500/0 via-rose-500/10 to-rose-500/0 animate-pulse pointer-events-none`}
+				className={`absolute inset-0 bg-linear-to-r from-primary/5 via-primary/15 to-primary/5 animate-pulse pointer-events-none`}
 			></div>
 			<Link to={`predictions/${prediction.id}`}>
 				{/* Status badge per card */}
@@ -75,11 +87,13 @@ function PredictionCard({
 								COMING UP
 							</Badge>
 							{prediction.deadline && (
-								<Countdown
-									targetTime={new Date(
-										prediction.deadline,
-									).getTime()}
-								/>
+								<FadeContent delay={contentDelays.timer}>
+									<Countdown
+										targetTime={new Date(
+											prediction.deadline,
+										).getTime()}
+									/>
+								</FadeContent>
 							)}
 						</>
 					)}
@@ -126,11 +140,16 @@ function PredictionCard({
 					)}
 				</div>
 
-				<h4 className={`text-xl md:text-2xl font-semibold mb-4`}>
-					{prediction.title}
-				</h4>
+				<FadeContent delay={contentDelays.title}>
+					<h4 className={`text-xl md:text-2xl font-semibold mb-4`}>
+						{prediction.title}
+					</h4>
+				</FadeContent>
 
-				<div className={`flex flex-col gap-4 mt-2`}>
+				<FadeContent
+					delay={contentDelays.options}
+					className={`flex flex-col gap-4 mt-2`}
+				>
 					{prediction.prediction_options.map((option) => (
 						<Field className='w-full' key={option.id}>
 							<FieldLabel htmlFor={`progress-${option.id}`}>
@@ -181,23 +200,32 @@ function PredictionCard({
 							/>
 						</Field>
 					))}
-				</div>
+				</FadeContent>
 
-				{/* show total pooled */}
 				<div className={`flex items-center justify-between mt-4`}>
-					<div className={`flex items-center gap-2`}>
+					{/* show total pooled */}
+					<FadeContent
+						delay={contentDelays.pooled}
+						className={`flex items-center gap-2`}
+					>
 						<TrophyIcon
 							className={`text-muted-foreground w-3 h-3`}
 						/>
 						<p className={`text-sm text-muted-foreground`}>
 							Pooled:{" "}
-							<span className={`text-foreground font-semibold`}>
-								{totalBetAmount.toLocaleString()} pts
-							</span>
+							<CountUp
+								className={`text-foreground font-semibold`}
+								to={totalBetAmount}
+								separator=','
+							/>{" "}
+							pts
 						</p>
-					</div>
+					</FadeContent>
 					{/* total participants */}
-					<div className={`flex items-center gap-2`}>
+					<FadeContent
+						delay={contentDelays.participants}
+						className={`flex items-center gap-2`}
+					>
 						<UsersIcon
 							className={`text-muted-foreground w-3 h-3`}
 						/>
@@ -206,7 +234,7 @@ function PredictionCard({
 						>
 							{bets.length.toLocaleString()}
 						</span>
-					</div>
+					</FadeContent>
 				</div>
 
 				{myBet &&
@@ -254,7 +282,7 @@ function PredictionCard({
 					</span>
 				)}
 			</Link>
-		</div>
+		</motion.div>
 	);
 }
 
@@ -352,8 +380,12 @@ function InPlayPredictions() {
 				>
 					<Skeleton className={`h-5 w-22`} />
 					<Skeleton className={`h-7 mx-auto w-full`} />
-					<Skeleton className={`h-9 mx-auto w-full`} />
-					<Skeleton className={`h-9 mx-auto w-full`} />
+					<Skeleton className={`h-11 mx-auto w-full`} />
+					<Skeleton className={`h-11 mx-auto w-full`} />
+					<span className={`flex justify-between items-center`}>
+						<Skeleton className={`h-6 w-34`} />
+						<Skeleton className={`h-6 w-20`} />
+					</span>
 					<Skeleton className={`h-6 ml-auto w-34`} />
 				</div>
 			</CarouselItem>

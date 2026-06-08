@@ -10,11 +10,18 @@ import { useRoomBetRealtime } from "@/hooks/useRoomRealtime";
 import PredictionTitle from "../components/PredictionTitle";
 import { Countdown } from "../widgets/CountDown";
 import PredictionData from "./PredictionData";
+import FadeContent from "@/components/animations/fade-content";
 
 type Props = {
 	prediction: Prediction | null | undefined;
 	selectedOption: string | null;
 	setSelectedOption: React.Dispatch<React.SetStateAction<string | null>>;
+};
+
+const contentDelays = {
+	title: 0,
+	data: 200,
+	options: 300,
 };
 
 export default function DraftPhase({
@@ -45,7 +52,9 @@ export default function DraftPhase({
 					<Skeleton className={`h-5 w-25 mx-auto`} />
 				)}
 
-				<PredictionTitle prediction={prediction} />
+				<FadeContent delay={contentDelays.title}>
+					<PredictionTitle prediction={prediction} />
+				</FadeContent>
 
 				{prediction?.deadline ? (
 					<>
@@ -62,14 +71,17 @@ export default function DraftPhase({
 				) : (
 					<Skeleton className={`h-10 w-36 mx-auto`} />
 				)}
+				<FadeContent delay={contentDelays.data}>
+					<PredictionData prediction={prediction} />
+				</FadeContent>
 
-				<PredictionData prediction={prediction} />
-
-				<PredictionOptions
-					prediction={prediction}
-					selectedOption={selectedOption}
-					setSelectedOption={setSelectedOption}
-				/>
+				<FadeContent delay={contentDelays.options}>
+					<PredictionOptions
+						prediction={prediction}
+						selectedOption={selectedOption}
+						setSelectedOption={setSelectedOption}
+					/>
+				</FadeContent>
 			</div>
 
 			<div className={`flex-1`}></div>

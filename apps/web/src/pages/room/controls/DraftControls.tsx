@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useRoomContext } from "../RoomLayout";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { localStorageKeys } from "@/store/_keys";
+import Counter from "@/components/animations/counter";
 
 type Props = {
 	player: Player;
@@ -144,12 +145,12 @@ export default function DraftControls({
 				<div className={`flex justify-between items-center`}>
 					{selectedOption && (
 						<Button
-							className={`flex-col gap-1 items-end p-2`}
+							className={`flex-col gap-1 items-start p-2`}
 							variant={"none"}
 							onClick={handleResetBetAmount}
 						>
 							<p
-								className={`flex items-center justify-start gap-2 text-xs text-muted-foreground text-left`}
+								className={`flex items-center justify-start gap-2 text-xs text-muted-foreground`}
 							>
 								{myBet && myBet.amount !== betAmount && (
 									<RotateCcw className={`w-3! h-3!`} />
@@ -157,8 +158,10 @@ export default function DraftControls({
 								Bet Amount
 							</p>
 							<p
-								className={`text-win w-full text-left text-lg font-semibold`}
+								className={`flex items-center gap-2 text-win w-full text-lg font-semibold`}
 							>
+								<Counter value={betAmount} fontSize={24} />
+								{" pts"}
 								{myBet && myBet?.amount !== betAmount && (
 									<span
 										className={`text-xs text-muted-foreground`}
@@ -167,7 +170,6 @@ export default function DraftControls({
 										{betAmount - (myBet.amount ?? 0)}{" "}
 									</span>
 								)}
-								{betAmount} pts
 							</p>
 						</Button>
 					)}

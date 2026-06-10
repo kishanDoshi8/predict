@@ -7,6 +7,8 @@ create table if not exists public.room_member_weekly_snapshots (
   prediction_rating integer not null,
   peak_prediction_rating integer not null,
   rated_predictions_count integer not null,
+  correct_predictions integer not null default 0,
+  total_predictions integer not null default 0,
   current_streak integer not null,
   highest_streak integer not null,
   created_at timestamptz not null default now(),

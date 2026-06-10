@@ -17,6 +17,12 @@ export type LeaderboardEntry = {
   net_points:         number
   win_percentage:     number
   rank:               number
+  previous_rank: number | null
+  rank_change: number | null
+  previous_prediction_rating: number | null
+  rating_change: number | null
+  previous_total_won_in_room: number | null
+  points_change: number | null
 }
 
 export type PredictionHistoryOption = {

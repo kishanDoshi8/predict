@@ -76,11 +76,6 @@ export function LeaderboardRow({
 		rankLabel = `#${entry.rank}`;
 	}
 
-	if (entry.total_revealed_bets === 0) {
-		// Don't show players with 0 revealed bets — keeps the board more meaningful and less noisy
-		return null;
-	}
-
 	return (
 		<div
 			className={cn(

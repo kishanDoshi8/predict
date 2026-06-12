@@ -166,7 +166,7 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 								key={opt.id}
 								className='flex items-center gap-2'
 							>
-								<p className={`text-xs w-10 truncate`}>
+								<p className={`text-xs w-13 truncate`}>
 									{opt.label}
 								</p>
 								<div className='flex-1 h-2 rounded-full bg-muted overflow-hidden'>

@@ -24,8 +24,9 @@ self.addEventListener("push", (event) => {
 	const title = payload.title ?? "Predikt";
 	const options = {
 		body: payload.body ?? "You have a new notification.",
-		icon: "/pwa-192x192.png",
-		badge: "/pwa-192x192.png",
+		icon: payload.icon ?? "/pwa-192x192.png",
+		badge: payload.badge ?? "/notification-badge-96.png",
+		image: payload.image,
 		data: payload.data ?? {},
 	};
 

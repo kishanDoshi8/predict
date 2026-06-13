@@ -31,14 +31,14 @@ export const roomKeys = {
   preferences: (roomId: string) =>
     [...roomKeys.detail(roomId), "preferences"] as const,
 
-  leaderboard: (roomId: string) =>
-    [...roomKeys.detail(roomId), "leaderboard"] as const,
+  leaderboard: (roomId: string, sortBy = "points") =>
+    [...roomKeys.detail(roomId), "leaderboard", sortBy] as const,
 
   stats: (roomId: string) =>
     [...roomKeys.detail(roomId), "stats"] as const,
 
-  weeklyLeaderboard: (roomId: string) =>
-    [...roomKeys.detail(roomId), "weeklyLeaderboard"] as const,
+  weeklyLeaderboard: (roomId: string, sortBy = "points") =>
+    [...roomKeys.detail(roomId), "weeklyLeaderboard", sortBy] as const,
 
   predictionHistory: (roomId: string) =>
     [...roomKeys.detail(roomId), "predictionHistory"] as const,

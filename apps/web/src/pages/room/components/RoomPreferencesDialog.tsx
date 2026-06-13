@@ -148,7 +148,7 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 			const response = await sendPushNotificationTrigger({
 				event_type: "prediction_live",
 				payload: {
-					title: "Predikt test notification",
+					title: "Verdict test notification",
 					body: "Push notifications are configured for your account.",
 					url: globalThis.window.location.pathname,
 				},
@@ -280,7 +280,9 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 						onClick={() => void handleSendTestPush()}
 						disabled={isBusy || isSendingTestPush}
 					>
-						{isSendingTestPush ? "Sending..." : "Send test push"}
+						{isSendingTestPush
+							? "Sending..."
+							: "Send Test Notification"}
 					</Button>
 					<Button
 						variant='outline'

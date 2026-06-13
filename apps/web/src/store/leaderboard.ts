@@ -6,18 +6,33 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { roomKeys } from './_keys'
 
-export const useRoomLeaderboard = (roomId?: string, enabled = true) => {
+export type LeaderboardSortBy = 'points' | 'ratings'
+
+const toApiSortBy = (sortBy: LeaderboardSortBy): 'points' | 'rating' => {
+    return sortBy === 'ratings' ? 'rating' : 'points'
+}
+
+export const useRoomLeaderboard = (
+    roomId?: string,
+    enabled = true,
+    sortBy: LeaderboardSortBy = 'points',
+) => {
     return useQuery({
-        queryKey: roomKeys.leaderboard(roomId ?? ''),
-        queryFn: () => getRoomLeaderboard(roomId ?? ''),
+        queryKey: roomKeys.leaderboard(roomId ?? '', sortBy),
+        queryFn: () => getRoomLeaderboard(roomId ?? '', toApiSortBy(sortBy)),
         enabled: !!roomId && enabled,
     })
 }
 
-export const useRoomWeeklyLeaderboard = (roomId?: string, enabled = true) => {
+export const useRoomWeeklyLeaderboard = (
+    roomId?: string,
+    enabled = true,
+    sortBy: LeaderboardSortBy = 'points',
+) => {
     return useQuery({
-        queryKey: roomKeys.weeklyLeaderboard(roomId ?? ''),
-        queryFn: () => getRoomWeeklyLeaderboard(roomId ?? ''),
+        queryKey: roomKeys.weeklyLeaderboard(roomId ?? '', sortBy),
+        queryFn: () =>
+            getRoomWeeklyLeaderboard(roomId ?? '', toApiSortBy(sortBy)),
         enabled: !!roomId && enabled,
     })
 }

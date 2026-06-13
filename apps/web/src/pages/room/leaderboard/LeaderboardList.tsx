@@ -1,12 +1,14 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { LeaderboardEntry } from "@/types";
 import { LeaderboardRow } from "./LeaderboardRow";
+import { LeaderboardSortBy } from "@/store/leaderboard";
 
 type Props = {
 	entries: LeaderboardEntry[];
 	currentPlayerId: string;
 	isLoading: boolean;
 	scope: "all_time" | "this_week";
+	sortBy: LeaderboardSortBy;
 };
 
 export function LeaderboardList({
@@ -14,6 +16,7 @@ export function LeaderboardList({
 	currentPlayerId,
 	isLoading,
 	scope,
+	sortBy,
 }: Readonly<Props>) {
 	if (isLoading) {
 		return (
@@ -51,6 +54,7 @@ export function LeaderboardList({
 						key={entry.player_id}
 						entry={entry}
 						currentPlayerId={currentPlayerId}
+						sortBy={sortBy}
 					/>
 				))}
 			</div>

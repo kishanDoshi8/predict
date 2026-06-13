@@ -50,12 +50,20 @@ function UserStats() {
 	const {
 		data: allTimeLeaderboard = [],
 		isPending: isAllTimeLeaderboardLoading,
-	} = useRoomLeaderboard(room.id, activeLeaderboardTab === "all_time");
+	} = useRoomLeaderboard(
+		room.id,
+		activeLeaderboardTab === "all_time",
+		sortBy,
+	);
 
 	const {
 		data: weeklyLeaderboard = [],
 		isPending: isWeeklyLeaderboardLoading,
-	} = useRoomWeeklyLeaderboard(room.id, activeLeaderboardTab === "this_week");
+	} = useRoomWeeklyLeaderboard(
+		room.id,
+		activeLeaderboardTab === "this_week",
+		sortBy,
+	);
 
 	const handleOnTabChange = (value: string) => {
 		setActiveLeaderboardTab(value as LeaderboardTab);
@@ -101,6 +109,7 @@ function UserStats() {
 						leaderboard={weeklyLeaderboard}
 						isLoading={isWeeklyLeaderboardLoading}
 						room={room}
+						sortBy={sortBy}
 					/>
 				</TabsContent>
 				<TabsContent value='all_time'>
@@ -108,6 +117,7 @@ function UserStats() {
 						leaderboard={allTimeLeaderboard}
 						isLoading={isAllTimeLeaderboardLoading}
 						room={room}
+						sortBy={sortBy}
 					/>
 				</TabsContent>
 			</Tabs>
@@ -127,49 +137,96 @@ function LeaderboardContent({
 	leaderboard,
 	isLoading,
 	room,
+	sortBy,
 }: Readonly<{
 	leaderboard: LeaderboardEntry[];
 	isLoading: boolean;
 	room: Room;
+	sortBy: SortByOption;
 }>) {
 	const { data: player } = usePlayer();
 	const [leaderboardPlayer, setLeaderboardPlayer] =
 		useState<LeaderboardEntry | null>(null);
 	const [gapToNextPlayer, setGapToNextPlayer] =
 		useState<LeaderboardEntry | null>(null);
+	const isRatingsView = sortBy === "ratings";
+
+	const metricValue = (entry: LeaderboardEntry) =>
+		isRatingsView
+			? (entry.prediction_rating ?? 0)
+			: (entry.total_won_in_room ?? 0);
+	const currentMetric = leaderboardPlayer
+		? metricValue(leaderboardPlayer)
+		: 0;
+	const gapMetric =
+		leaderboardPlayer && gapToNextPlayer
+			? metricValue(gapToNextPlayer) - metricValue(leaderboardPlayer)
+			: 0;
 
 	useEffect(() => {
-		if (leaderboard.length > 0 && player) {
-			const leaderboardPlayer =
-				leaderboard.find((entry) => entry.player_id === player.id) ||
-				null;
-			setLeaderboardPlayer(leaderboardPlayer);
-
-			if (leaderboardPlayer && leaderboardPlayer.rank !== 1) {
-				const nextPlayer = leaderboard
-					.filter(
-						(entry) =>
-							entry.rank < leaderboardPlayer.rank &&
-							entry.total_won_in_room >
-								leaderboardPlayer.total_won_in_room,
-					)
-					.reduce<LeaderboardEntry | null>((closest, entry) => {
-						if (!closest || entry.rank > closest.rank) {
-							return entry;
-						}
-
-						return closest;
-					}, null);
-				setGapToNextPlayer(nextPlayer);
-			} else {
-				setGapToNextPlayer(null);
-			}
-		} else {
+		if (!player || leaderboard.length === 0) {
 			setLeaderboardPlayer(null);
 			setGapToNextPlayer(null);
+			return;
 		}
+
+		const currentPlayerEntry =
+			leaderboard.find((entry) => entry.player_id === player.id) ?? null;
+		setLeaderboardPlayer(currentPlayerEntry);
+
+		if (!currentPlayerEntry || currentPlayerEntry.rank === 1) {
+			setGapToNextPlayer(null);
+			return;
+		}
+
+		const nextPlayer =
+			leaderboard.find(
+				(entry) => entry.rank === currentPlayerEntry.rank - 1,
+			) ?? null;
+		setGapToNextPlayer(nextPlayer);
 	}, [leaderboard, player]);
 
+	const playerId = player?.id;
+
+	return (
+		<LeaderboardContentView
+			leaderboard={leaderboard}
+			isLoading={isLoading}
+			room={room}
+			playerId={playerId}
+			leaderboardPlayer={leaderboardPlayer}
+			gapToNextPlayer={gapToNextPlayer}
+			isRatingsView={isRatingsView}
+			currentMetric={currentMetric}
+			gapMetric={gapMetric}
+			metricValue={metricValue}
+		/>
+	);
+}
+
+function LeaderboardContentView({
+	leaderboard,
+	isLoading,
+	room,
+	playerId,
+	leaderboardPlayer,
+	gapToNextPlayer,
+	isRatingsView,
+	currentMetric,
+	gapMetric,
+	metricValue,
+}: Readonly<{
+	leaderboard: LeaderboardEntry[];
+	isLoading: boolean;
+	room: Room;
+	playerId?: string;
+	leaderboardPlayer: LeaderboardEntry | null;
+	gapToNextPlayer: LeaderboardEntry | null;
+	isRatingsView: boolean;
+	currentMetric: number;
+	gapMetric: number;
+	metricValue: (entry: LeaderboardEntry) => number;
+}>) {
 	return (
 		<div className={`flex flex-col gap-4`}>
 			<div
@@ -210,11 +267,13 @@ function LeaderboardContent({
 							delay={contentDelay.yourPoints}
 							className={`flex-1`}
 						>
-							<p className={`text-xs`}>YOUR POINTS</p>
+							<p className={`text-xs`}>
+								{isRatingsView ? "YOUR RATING" : "YOUR POINTS"}
+							</p>
 							<p className={`text-3xl font-extrabold`}>
-								{(
-									leaderboardPlayer?.total_won_in_room ?? 0
-								).toLocaleString()}
+								{isRatingsView
+									? currentMetric
+									: currentMetric.toLocaleString()}
 							</p>
 						</FadeContent>
 					)}
@@ -227,7 +286,7 @@ function LeaderboardContent({
 						<>
 							{leaderboardPlayer &&
 								gapToNextPlayer &&
-								gapToNextPlayer.total_won_in_room > 0 && (
+								gapMetric > 0 && (
 									<FadeContent
 										delay={contentDelay.gap}
 										className={`flex flex-col gap-1`}
@@ -240,11 +299,7 @@ function LeaderboardContent({
 										<p
 											className={`text-lg font-bold justify-end flex items-center gap-1 text-accent`}
 										>
-											+
-											{(
-												gapToNextPlayer.total_won_in_room -
-												leaderboardPlayer.total_won_in_room
-											).toLocaleString()}
+											+{gapMetric.toLocaleString()}
 										</p>
 									</FadeContent>
 								)}
@@ -275,81 +330,13 @@ function LeaderboardContent({
 						/>
 					</div>
 				) : (
-					<div className={`flex flex-col gap-2`}>
-						{leaderboard.slice(0, 4).map((entry) => {
-							let backgroundColor: string;
-							let color: string;
-
-							if (entry.rank === 1) {
-								backgroundColor = twColor("rank-1", 0.1);
-								color = twColor("rank-1");
-							} else if (entry.rank === 2) {
-								backgroundColor = twColor("rank-2", 0.2);
-								color = twColor("foreground");
-							} else if (entry.rank === 3) {
-								backgroundColor = twColor("rank-3", 0.2);
-								color = twColor("rank-3");
-							} else {
-								backgroundColor = twColor("foreground", 0.001);
-								color = twColor("foreground");
-							}
-
-							return (
-								<FadeContent
-									delay={contentDelay.leaderboard}
-									key={entry.player_id}
-									className={`flex items-center gap-3 p-3 rounded-lg ${entry.player_id === player?.id ? "bg-linear-30 from-accent/10 border to-primary/10" : "bg-secondary/60"}`}
-								>
-									<p
-										className={`w-6 h-6 text-sm font-bold rounded-md flex items-center justify-center`}
-										style={{
-											backgroundColor,
-											color,
-										}}
-									>
-										{entry.rank}
-									</p>
-									<p className={`font-medium`}>
-										{entry.username}
-										{entry.current_streak >= 3 && (
-											<div className={`inline-block`}>
-												<Badge
-													className={`flex gap-0 items-center justify-center bg-accent/20 text-accent text-xs ml-2`}
-												>
-													<FlameIcon
-														className={`w-2 h-2 text-rank-3`}
-													/>
-													{entry.current_streak}
-												</Badge>
-											</div>
-										)}
-										{entry.player_id === player?.id && (
-											<Badge
-												variant='outline'
-												className={`ml-3 text-xs rounded-md`}
-											>
-												You
-											</Badge>
-										)}
-									</p>
-									<p className={`ml-auto font-bold`}>
-										{(
-											entry.total_won_in_room ?? 0
-										).toLocaleString()}
-									</p>
-								</FadeContent>
-							);
-						})}
-						<Link
-							to={`/rooms/${room.code}/leaderboard`}
-							className={`flex items-center justify-end text-sm text-accent text-right mt-2 cursor-pointer`}
-						>
-							see all
-							<ChevronRightIcon
-								className={`w-3 h-3 inline-block ml-1`}
-							/>
-						</Link>
-					</div>
+					<LeaderboardMiniRows
+						leaderboard={leaderboard}
+						playerId={playerId}
+						roomCode={room.code}
+						isRatingsView={isRatingsView}
+						metricValue={metricValue}
+					/>
 				)}
 			</div>
 
@@ -387,11 +374,116 @@ function LeaderboardContent({
 						label={`${
 							leaderboardPlayer?.current_streak === 0
 								? "BEST STREAK"
-								: "STREAK *"
+								: "STREAK"
 						}`}
 					/>
 				</FadeContent>
 			)}
+		</div>
+	);
+}
+
+function getRankChipStyle(rank: number) {
+	if (rank === 1) {
+		return {
+			backgroundColor: twColor("rank-1", 0.1),
+			color: twColor("rank-1"),
+		};
+	}
+
+	if (rank === 2) {
+		return {
+			backgroundColor: twColor("rank-2", 0.2),
+			color: twColor("foreground"),
+		};
+	}
+
+	if (rank === 3) {
+		return {
+			backgroundColor: twColor("rank-3", 0.2),
+			color: twColor("rank-3"),
+		};
+	}
+
+	return {
+		backgroundColor: twColor("foreground", 0.001),
+		color: twColor("foreground"),
+	};
+}
+
+function LeaderboardMiniRows({
+	leaderboard,
+	playerId,
+	roomCode,
+	isRatingsView,
+	metricValue,
+}: Readonly<{
+	leaderboard: LeaderboardEntry[];
+	playerId?: string;
+	roomCode: string;
+	isRatingsView: boolean;
+	metricValue: (entry: LeaderboardEntry) => number;
+}>) {
+	return (
+		<div className={`flex flex-col gap-2`}>
+			{leaderboard.slice(0, 4).map((entry) => {
+				const rankChipStyle = getRankChipStyle(entry.rank);
+
+				return (
+					<FadeContent
+						delay={contentDelay.leaderboard}
+						key={entry.player_id + isRatingsView}
+						className={`flex items-center gap-3 p-3 rounded-lg ${entry.player_id === playerId ? "bg-linear-30 from-accent/10 border to-primary/10" : "bg-secondary/60"}`}
+					>
+						<p
+							className={`w-6 h-6 text-sm font-bold rounded-md flex items-center justify-center`}
+							style={rankChipStyle}
+						>
+							{entry.rank}
+						</p>
+						<p className={`font-medium`}>
+							{entry.username}
+							{entry.current_streak >= 3 && (
+								<div className={`inline-block`}>
+									<Badge
+										className={`flex gap-0 items-center justify-center bg-accent/20 text-accent text-xs ml-2`}
+									>
+										<FlameIcon
+											className={`w-2 h-2 text-rank-3`}
+										/>
+										{entry.current_streak}
+									</Badge>
+								</div>
+							)}
+							{entry.player_id === playerId && (
+								<Badge
+									variant='outline'
+									className={`ml-3 text-xs rounded-md`}
+								>
+									You
+								</Badge>
+							)}
+						</p>
+						<p className={`ml-auto font-bold`}>
+							{isRatingsView
+								? metricValue(entry)
+								: metricValue(entry).toLocaleString()}
+							<span
+								className={`text-xs ml-1 text-muted-foreground font-normal`}
+							>
+								{isRatingsView ? "" : "pts"}
+							</span>
+						</p>
+					</FadeContent>
+				);
+			})}
+			<Link
+				to={`/rooms/${roomCode}/leaderboard`}
+				className={`flex items-center justify-end text-sm text-accent text-right mt-2 cursor-pointer`}
+			>
+				see all
+				<ChevronRightIcon className={`w-3 h-3 inline-block ml-1`} />
+			</Link>
 		</div>
 	);
 }

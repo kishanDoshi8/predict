@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { TopThreePodium } from "./room/leaderboard/TopThreePodium";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { localStorageKeys } from "@/store/_keys";
-import { ArrowDown10Icon } from "lucide-react";
+import { ArrowDown10Icon, CircleQuestionMarkIcon } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components";
 
 const LEADERBOARD_TABS = ["this_week", "all_time"] as const;
@@ -35,12 +35,20 @@ export function LeaderboardPage() {
 	const {
 		data: allTimeLeaderboard = [],
 		isPending: isAllTimeLeaderboardLoading,
-	} = useRoomLeaderboard(room.id, activeLeaderboardTab === "all_time");
+	} = useRoomLeaderboard(
+		room.id,
+		activeLeaderboardTab === "all_time",
+		sortBy,
+	);
 
 	const {
 		data: weeklyLeaderboard = [],
 		isPending: isWeeklyLeaderboardLoading,
-	} = useRoomWeeklyLeaderboard(room.id, activeLeaderboardTab === "this_week");
+	} = useRoomWeeklyLeaderboard(
+		room.id,
+		activeLeaderboardTab === "this_week",
+		sortBy,
+	);
 
 	const leaderboard =
 		activeLeaderboardTab === "all_time"
@@ -55,7 +63,10 @@ export function LeaderboardPage() {
 		<div className='flex flex-col gap-4 p-4 max-w-lg mx-auto w-full'>
 			{/* Section heading */}
 			<div>
-				<h2 className='text-lg font-semibold'>Room Rankings</h2>
+				<h2 className='flex gap-2 items-center text-lg font-semibold'>
+					Room Rankings
+					<CircleQuestionMarkIcon className='h-4 w-4 text-muted-foreground' />
+				</h2>
 				<p className='text-sm text-muted-foreground'>
 					{room.members.length} member
 					{room.members.length === 1 ? "" : "s"}
@@ -101,6 +112,7 @@ export function LeaderboardPage() {
 				<TopThreePodium
 					top={leaderboard.slice(0, 3)}
 					currentPlayerId={player?.id ?? ""}
+					sortBy={sortBy}
 				/>
 
 				<LeaderboardList
@@ -108,6 +120,7 @@ export function LeaderboardPage() {
 					currentPlayerId={player?.id ?? ""}
 					isLoading={isLeaderboardLoading}
 					scope={activeLeaderboardTab}
+					sortBy={sortBy}
 				/>
 			</div>
 		</div>

@@ -455,7 +455,7 @@ function InPlayPredictions() {
 			)}
 
 			<Carousel
-				opts={{ align: "start", loop: true }}
+				opts={{ align: "start" }}
 				className={`w-full`}
 				setApi={setApi}
 			>

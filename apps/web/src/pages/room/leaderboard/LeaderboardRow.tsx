@@ -1,17 +1,24 @@
 import { LeaderboardEntry } from "@/types";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { FlameIcon, StarIcon, TriangleIcon } from "lucide-react";
+import { CoinsIcon, FlameIcon, TriangleIcon, ZapIcon } from "lucide-react";
 import { Badge } from "@/components";
+import { LeaderboardSortBy } from "@/store/leaderboard";
 
 type Props = {
 	entry: LeaderboardEntry;
 	currentPlayerId: string;
+	sortBy: LeaderboardSortBy;
 };
 
-export function LeaderboardRow({ entry, currentPlayerId }: Readonly<Props>) {
+export function LeaderboardRow({
+	entry,
+	currentPlayerId,
+	sortBy,
+}: Readonly<Props>) {
 	const isSelf = entry.player_id === currentPlayerId;
 	const initials = entry.username.slice(0, 2).toUpperCase();
+	const isRatingsView = sortBy === "ratings";
 
 	let rankLabel: string;
 	if (entry.rank === 1) {
@@ -96,17 +103,26 @@ export function LeaderboardRow({ entry, currentPlayerId }: Readonly<Props>) {
 
 			{/* Stats */}
 			<div className='flex flex-col items-end gap-0.5 shrink-0 text-right'>
-				<p className='text-sm font-semibold tabular-nums'>
-					{entry.total_won_in_room.toLocaleString()}
-					<span className='font-normal text-muted-foreground ml-1'>
-						pts
-					</span>
-				</p>
-				{entry.prediction_rating !== null && (
-					<p className='flex items-center text-xs text-muted-foreground tabular-nums'>
-						<StarIcon className='w-3 h-3 text-rank-1 inline-block mr-1' />
-						{entry.prediction_rating}
-					</p>
+				{isRatingsView ? (
+					<>
+						<p className='flex items-center font-semibold tabular-nums'>
+							<ZapIcon className='w-4 h-4 text-cyan-500 inline-block mr-0.5' />
+							{entry.prediction_rating}
+						</p>
+						<p className='text-xs text-muted-foreground tabular-nums'>
+							{entry.total_won_in_room.toLocaleString()} pts
+						</p>
+					</>
+				) : (
+					<>
+						<p className='font-semibold tabular-nums'>
+							<CoinsIcon className='w-4 h-4 text-yellow-400 inline-block mr-0.5' />
+							{entry.total_won_in_room.toLocaleString()}
+						</p>
+						<p className='flex items-center text-xs text-muted-foreground tabular-nums'>
+							{entry.prediction_rating} SR
+						</p>
+					</>
 				)}
 			</div>
 		</div>

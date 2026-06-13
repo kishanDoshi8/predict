@@ -1,18 +1,25 @@
 import { LeaderboardEntry } from "@/types";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { LeaderboardSortBy } from "@/store/leaderboard";
 
 type Props = {
 	top: LeaderboardEntry[];
 	currentPlayerId: string;
+	sortBy: LeaderboardSortBy;
 };
 
 const MEDALS = ["🥇", "🥈", "🥉"] as const;
 
 const podiumOrder = [1, 0, 2]; // visually: 2nd | 1st | 3rd
 
-export function TopThreePodium({ top, currentPlayerId }: Readonly<Props>) {
+export function TopThreePodium({
+	top,
+	currentPlayerId,
+	sortBy,
+}: Readonly<Props>) {
 	if (top.length === 0) return null;
+	const isRatingsView = sortBy === "ratings";
 
 	const slots = podiumOrder.map((i) => top[i]).filter(Boolean);
 
@@ -79,7 +86,14 @@ export function TopThreePodium({ top, currentPlayerId }: Readonly<Props>) {
 									: "text-muted-foreground",
 							)}
 						>
-							{entry.total_won_in_room.toLocaleString()} pts
+							{isRatingsView
+								? `${entry.prediction_rating}`
+								: `${entry.total_won_in_room.toLocaleString()} pts`}
+						</p>
+						<p className='text-[10px] text-muted-foreground tabular-nums'>
+							{isRatingsView
+								? `${entry.total_won_in_room.toLocaleString()} pts`
+								: `${entry.prediction_rating}`}
 						</p>
 
 						{(() => {

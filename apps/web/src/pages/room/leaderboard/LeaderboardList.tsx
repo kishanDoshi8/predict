@@ -50,7 +50,6 @@ export function LeaderboardList({
 					<LeaderboardRow
 						key={entry.player_id}
 						entry={entry}
-						all={entries}
 						currentPlayerId={currentPlayerId}
 					/>
 				))}

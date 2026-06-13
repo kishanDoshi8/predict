@@ -1,69 +1,17 @@
 import { LeaderboardEntry } from "@/types";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-// ─── badge derivation ────────────────────────────────────────────────────────
-// Badges are derived purely from stats — nothing hardcoded per player.
-
-type BadgeDef = {
-	icon: string;
-	label: string;
-};
-
-function deriveBadges(
-	entry: LeaderboardEntry,
-	all: LeaderboardEntry[],
-): BadgeDef[] {
-	const badges: BadgeDef[] = [];
-
-	if (entry.rank === 1) {
-		badges.push({ icon: "🥇", label: "Leader" });
-	}
-
-	if (entry.current_streak >= 4) {
-		badges.push({ icon: "🔥", label: "Hot streak" });
-	}
-
-	if (entry.highest_streak >= 8) {
-		badges.push({ icon: "🐐", label: "GOAT" });
-	}
-
-	if (entry.total_revealed_bets >= 5 && entry.win_percentage >= 65) {
-		badges.push({ icon: "🎯", label: "Sharp" });
-	}
-
-	// Biggest net loser in the room
-	const minNet = Math.min(...all.map((e) => e.net_points));
-	if (minNet < 0 && entry.net_points === minNet && all.length > 1) {
-		badges.push({ icon: "💀", label: "Biggest L" });
-	}
-
-	// Most bets placed (risk addict) — only if clearly more than average
-	const maxBets = Math.max(...all.map((e) => e.total_bets));
-	if (maxBets > 0 && entry.total_bets === maxBets && all.length > 1) {
-		badges.push({ icon: "🎲", label: "Risk addict" });
-	}
-
-	return badges;
-}
-
-// ─── component ───────────────────────────────────────────────────────────────
+import { FlameIcon, StarIcon, TriangleIcon } from "lucide-react";
+import { Badge } from "@/components";
 
 type Props = {
 	entry: LeaderboardEntry;
-	all: LeaderboardEntry[];
 	currentPlayerId: string;
 };
 
-export function LeaderboardRow({
-	entry,
-	all,
-	currentPlayerId,
-}: Readonly<Props>) {
+export function LeaderboardRow({ entry, currentPlayerId }: Readonly<Props>) {
 	const isSelf = entry.player_id === currentPlayerId;
 	const initials = entry.username.slice(0, 2).toUpperCase();
-	const badges = deriveBadges(entry, all);
 
 	let rankLabel: string;
 	if (entry.rank === 1) {
@@ -82,7 +30,7 @@ export function LeaderboardRow({
 				"flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-colors",
 				isSelf
 					? "border-win/30 bg-win/5"
-					: "border-transparent hover:bg-accent/50",
+					: "border-transparent hover:bg-accent/25",
 			)}
 		>
 			{/* Rank */}
@@ -91,7 +39,7 @@ export function LeaderboardRow({
 			</span>
 
 			{/* Avatar */}
-			<Avatar size='sm' className={cn(isSelf && "ring-1 ring-win")}>
+			<Avatar size='default' className={cn(isSelf && "ring-1 ring-win")}>
 				<AvatarFallback className='text-xs'>{initials}</AvatarFallback>
 			</Avatar>
 
@@ -99,7 +47,7 @@ export function LeaderboardRow({
 			<div className='flex-1 min-w-0'>
 				<p
 					className={cn(
-						"text-sm font-medium truncate",
+						" font-medium truncate",
 						isSelf && "text-win",
 					)}
 				>
@@ -109,33 +57,55 @@ export function LeaderboardRow({
 							(You)
 						</span>
 					)}
-				</p>
-				{badges.length > 0 && (
-					<div className='flex flex-wrap gap-1 mt-0.5'>
-						{badges.map((b) => (
+					{entry.current_streak >= 3 && (
+						<div className={`inline-block`}>
 							<Badge
-								key={b.label}
-								variant='secondary'
-								className='text-xs py-0 px-1.5 h-4 leading-none'
+								className={`flex gap-0 items-center justify-center bg-accent/20 text-accent text-xs ml-2`}
 							>
-								{b.icon} {b.label}
+								<FlameIcon className={`w-2 h-2 text-rank-3`} />
+								{entry.current_streak}
 							</Badge>
-						))}
-					</div>
-				)}
+						</div>
+					)}
+				</p>
+				<p className={`flex gap-4 items-center`}>
+					{entry.total_revealed_bets > 0 && (
+						<p className='text-xs text-muted-foreground tabular-nums'>
+							{entry.winning_bets}/{entry.total_revealed_bets}{" "}
+							wins
+						</p>
+					)}
+					{entry.rank_change !== null && entry.rank_change < 0 && (
+						<p className='flex items-center text-xs text-loss tabular-nums'>
+							<TriangleIcon
+								className={`w-3 h-3 inline-block mr-1 rotate-180`}
+							/>
+							{Math.abs(entry.rank_change)}
+						</p>
+					)}
+					{entry.rank_change !== null && entry.rank_change > 0 && (
+						<p className='flex items-center text-xs text-win tabular-nums'>
+							<TriangleIcon
+								className={`w-3 h-3 inline-block mr-1`}
+							/>
+							{Math.abs(entry.rank_change)}
+						</p>
+					)}
+				</p>
 			</div>
 
 			{/* Stats */}
 			<div className='flex flex-col items-end gap-0.5 shrink-0 text-right'>
 				<p className='text-sm font-semibold tabular-nums'>
 					{entry.total_won_in_room.toLocaleString()}
-					<span className='text-xs font-normal text-muted-foreground ml-0.5'>
+					<span className='font-normal text-muted-foreground ml-1'>
 						pts
 					</span>
 				</p>
-				{entry.total_revealed_bets > 0 && (
-					<p className='text-xs text-muted-foreground tabular-nums'>
-						{entry.winning_bets}/{entry.total_revealed_bets} wins
+				{entry.prediction_rating !== null && (
+					<p className='flex items-center text-xs text-muted-foreground tabular-nums'>
+						<StarIcon className='w-3 h-3 text-rank-1 inline-block mr-1' />
+						{entry.prediction_rating}
 					</p>
 				)}
 			</div>

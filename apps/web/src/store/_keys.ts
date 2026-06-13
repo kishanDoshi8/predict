@@ -47,7 +47,10 @@ export const roomKeys = {
 export const localStorageKeys = {
   userPreference: {
     theme: "theme",
-    active_leaderboard_tab: "active_leaderboard_tab",
+    leaderboard: {
+      active_leaderboard_tab: "active_leaderboard_tab",
+      sort_by: "sort_by",
+    },
     bettingContorls: {
       collapsed: "bettingControls.collapsed",
     }

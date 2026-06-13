@@ -6,8 +6,11 @@ import {
 	TabsContent,
 	TabsList,
 	TabsTrigger,
+	ToggleGroup,
+	ToggleGroupItem,
 } from "@/components";
 import {
+	ArrowDown10Icon,
 	Calendar1Icon,
 	ChevronRightIcon,
 	CrownIcon,
@@ -27,6 +30,7 @@ import { twColor } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { localStorageKeys } from "@/store/_keys";
+import { SortByOption } from "@/pages/LeaderboardPage";
 
 type LeaderboardTab = "this_week" | "all_time";
 
@@ -35,8 +39,13 @@ function UserStats() {
 	const [activeLeaderboardTab, setActiveLeaderboardTab] =
 		useLocalStorage<LeaderboardTab>(
 			"this_week",
-			localStorageKeys.userPreference.active_leaderboard_tab,
+			localStorageKeys.userPreference.leaderboard.active_leaderboard_tab,
 		);
+
+	const [sortBy, setSortBy] = useLocalStorage<SortByOption>(
+		"ratings",
+		localStorageKeys.userPreference.leaderboard.sort_by,
+	);
 
 	const {
 		data: allTimeLeaderboard = [],
@@ -70,6 +79,23 @@ function UserStats() {
 						<TrophyIcon /> All Time
 					</TabsTrigger>
 				</TabsList>
+				{/* Sort by */}
+				<div className={`flex gap-1 my-1 justify-end items-center`}>
+					<ArrowDown10Icon className={`text-muted-foreground/70`} />
+					<ToggleGroup
+						type='single'
+						value={sortBy}
+						onValueChange={(value) => {
+							if (value !== "points" && value !== "ratings")
+								return;
+							setSortBy(value);
+						}}
+						variant={"outline"}
+					>
+						<ToggleGroupItem value='ratings'>Skill</ToggleGroupItem>
+						<ToggleGroupItem value='points'>Wealth</ToggleGroupItem>
+					</ToggleGroup>
+				</div>
 				<TabsContent value='this_week'>
 					<LeaderboardContent
 						leaderboard={weeklyLeaderboard}
@@ -147,7 +173,7 @@ function LeaderboardContent({
 	return (
 		<div className={`flex flex-col gap-4`}>
 			<div
-				className={`text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-rose-500/5 p-5 mt-3`}
+				className={`text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-rose-500/5 p-5`}
 			>
 				<div className={`flex gap-4 items-center`}>
 					{isLoading ? (

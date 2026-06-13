@@ -365,17 +365,43 @@ function InPlayPredictions() {
 
 	React.useEffect(() => {
 		if (!api) return;
-		setCurrent(api.selectedScrollSnap());
 
-		api.on("select", () => {
-			setCurrent(api.selectedScrollSnap());
-		});
-	}, [api]);
+		const storageKey = `room-${room.id}-predictions-carousel-index`;
+		const maxIndex = Math.max(predictions.length - 1, 0);
 
-	React.useEffect(() => {
-		if (!api) return;
-		api.scrollTo(0);
-	}, [api]);
+		let initialIndex = 0;
+
+		try {
+			const raw = localStorage.getItem(storageKey);
+			const parsed = raw === null ? Number.NaN : Number.parseInt(raw, 10);
+
+			if (Number.isInteger(parsed)) {
+				// Clamp to valid range [0, maxIndex]
+				initialIndex = Math.min(Math.max(parsed, 0), maxIndex);
+			}
+		} catch {
+			initialIndex = 0;
+		}
+
+		api.scrollTo(initialIndex);
+		setCurrent(initialIndex);
+
+		const onSelect = () => {
+			const selected = api.selectedScrollSnap();
+			setCurrent(selected);
+			try {
+				localStorage.setItem(storageKey, String(selected));
+			} catch {
+				// ignore storage errors
+			}
+		};
+
+		api.on("select", onSelect);
+
+		return () => {
+			api.off("select", onSelect);
+		};
+	}, [api, room.id, predictions.length]);
 
 	let carouselContent;
 	if (isPredictionLoading) {
@@ -429,7 +455,7 @@ function InPlayPredictions() {
 			)}
 
 			<Carousel
-				opts={{ align: "start" }}
+				opts={{ align: "start", loop: true }}
 				className={`w-full`}
 				setApi={setApi}
 			>

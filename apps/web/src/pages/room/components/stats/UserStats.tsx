@@ -134,12 +134,6 @@ function LeaderboardContent({
 
 						return closest;
 					}, null);
-				console.log(
-					"Player rank: ",
-					leaderboardPlayer.rank,
-					" Next rank: ",
-					nextPlayer?.rank,
-				);
 				setGapToNextPlayer(nextPlayer);
 			} else {
 				setGapToNextPlayer(null);
@@ -359,8 +353,16 @@ function LeaderboardContent({
 					/>
 					<StatTile
 						icon={<FlameIcon className={`w-4 h-4 text-rank-3`} />}
-						value={leaderboardPlayer?.current_streak ?? 0}
-						label='STREAK'
+						value={
+							leaderboardPlayer?.current_streak === 0
+								? (leaderboardPlayer?.highest_streak ?? 0)
+								: (leaderboardPlayer?.current_streak ?? 0)
+						}
+						label={`${
+							leaderboardPlayer?.current_streak === 0
+								? "BEST STREAK"
+								: "STREAK *"
+						}`}
 					/>
 				</FadeContent>
 			)}

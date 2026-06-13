@@ -615,8 +615,6 @@ export async function getRoomStatCards(roomId: string, limit = 5) {
     p_limit: limit,
   })
 
-  console.log('Fetched room stat cards:', { data, error })
-
   return assertOk(data, error) as DefaultRoomStat[]
 }
 // #endregion Leaderboard

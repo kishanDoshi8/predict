@@ -68,7 +68,6 @@ export default function PlayerNew({
 					error_.message ||
 						"An error occurred while creating the user.",
 				);
-				console.log(error_);
 			},
 		});
 	};

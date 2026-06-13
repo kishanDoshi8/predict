@@ -202,7 +202,7 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 				{participants > 0 && (
 					<>
 						<Dot />
-						{participants} predictors
+						{participants} predictor
 						{participants === 1 ? "" : "s"}
 					</>
 				)}

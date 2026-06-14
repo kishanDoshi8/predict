@@ -100,6 +100,7 @@ export type Database = {
           dark_mode: boolean
           deadline_1h: boolean
           has_seen_how_to_play: boolean
+          has_seen_ratings_tip: boolean
           player_id: string
           prediction_live: boolean
           prediction_locked: boolean
@@ -113,6 +114,7 @@ export type Database = {
           dark_mode?: boolean
           deadline_1h?: boolean
           has_seen_how_to_play?: boolean
+          has_seen_ratings_tip?: boolean
           player_id: string
           prediction_live?: boolean
           prediction_locked?: boolean
@@ -126,6 +128,7 @@ export type Database = {
           dark_mode?: boolean
           deadline_1h?: boolean
           has_seen_how_to_play?: boolean
+          has_seen_ratings_tip?: boolean
           player_id?: string
           prediction_live?: boolean
           prediction_locked?: boolean
@@ -760,6 +763,7 @@ export type Database = {
       join_room: { Args: { p_room_code: string }; Returns: Json }
       lock_prediction: { Args: { p_prediction_id: string }; Returns: Json }
       mark_how_to_play_seen: { Args: never; Returns: undefined }
+      mark_ratings_tip_seen: { Args: never; Returns: undefined }
       place_bet: {
         Args: { p_amount: number; p_option_id: string; p_prediction_id: string }
         Returns: Json

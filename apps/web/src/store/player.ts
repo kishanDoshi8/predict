@@ -1,6 +1,5 @@
 import { getPlayer, createPlayer } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { registerForPushNotifications } from "@/lib/pushNotifications";
 
 export const playerQueryKey = ["player"];
 
@@ -19,7 +18,6 @@ export const useCreatePlayer = () => {
     return useMutation({
         mutationFn: (username: string) => createPlayer(username),
         onSuccess: async () => {
-            await registerForPushNotifications();
             const player = await getPlayer();
             queryClient.setQueryData(playerQueryKey, player);
         },

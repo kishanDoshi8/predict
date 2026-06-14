@@ -6,9 +6,9 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
 	Spinner,
 } from "@/components";
+import { useNotificationPermission } from "@/hooks/useNotificationPermission";
 import {
 	PreferenceSettings,
 	RoomPreferenceOverrides,
@@ -21,9 +21,10 @@ import {
 	useUpdateGlobalPreferences,
 	useUpdateRoomPreferences,
 } from "@/store/preferences";
-import { BellIcon } from "lucide-react";
+import { BellIcon, BellOffIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { NotificationPermissionBlockedDialog } from "./NotificationPermissionBlockedDialog";
 
 type Props = {
 	roomId: string;
@@ -75,6 +76,10 @@ const getErrorMessage = (error: unknown) =>
 
 export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 	const [isSendingTestPush, setIsSendingTestPush] = useState(false);
+	const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
+	const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
+	const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+	const { permission, requestPermission } = useNotificationPermission();
 	const { data: preferences, isPending: isPreferencesPending } =
 		usePreferences(roomId);
 	const { mutate: updateGlobal, isPending: isUpdatingGlobal } =
@@ -144,7 +149,7 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 	const handleSendTestPush = async () => {
 		try {
 			setIsSendingTestPush(true);
-			await registerForPushNotifications(true);
+			await registerForPushNotifications(permission);
 			const response = await sendPushNotificationTrigger({
 				event_type: "prediction_live",
 				payload: {
@@ -168,17 +173,47 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 		}
 	};
 
+	const handleNotificationBellClick = async () => {
+		if (permission === "granted") {
+			setIsPreferencesOpen(true);
+			return;
+		}
+
+		if (permission === "denied") {
+			setIsBlockedDialogOpen(true);
+			return;
+		}
+
+		try {
+			setIsRequestingPermission(true);
+			const nextPermission = await requestPermission();
+			if (nextPermission === "granted") {
+				await registerForPushNotifications(nextPermission);
+				setIsPreferencesOpen(true);
+				return;
+			}
+
+			if (nextPermission === "denied") {
+				setIsBlockedDialogOpen(true);
+			}
+		} finally {
+			setIsRequestingPermission(false);
+		}
+	};
+
 	return (
-		<Dialog>
-			<DialogTrigger asChild>
-				<Button
-					variant='secondary'
-					size='icon-lg'
-					className={`rounded-full`}
-				>
-					<BellIcon />
-				</Button>
-			</DialogTrigger>
+		<>
+			<Button
+				variant='secondary'
+				size='icon-lg'
+				className={`rounded-full`}
+				onClick={() => void handleNotificationBellClick()}
+				disabled={isRequestingPermission}
+			>
+				{permission === "granted" ? <BellIcon /> : <BellOffIcon />}
+			</Button>
+
+			<Dialog open={isPreferencesOpen} onOpenChange={setIsPreferencesOpen}>
 			<DialogContent className='sm:max-w-xl'>
 				<DialogHeader>
 					<DialogTitle>Room Preferences</DialogTitle>
@@ -293,6 +328,12 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 					</Button>
 				</DialogFooter>
 			</DialogContent>
-		</Dialog>
+			</Dialog>
+
+			<NotificationPermissionBlockedDialog
+				open={isBlockedDialogOpen}
+				onOpenChange={setIsBlockedDialogOpen}
+			/>
+		</>
 	);
 }

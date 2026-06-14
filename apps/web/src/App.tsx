@@ -14,17 +14,11 @@ import { LoginPage } from "@/pages/auth/LoginPage";
 import { SignupPage } from "@/pages/auth/SignupPage";
 import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
-import { useEffect } from "react";
-import { registerForPushNotifications } from "@/lib/pushNotifications";
 import RoomDashboard from "./pages/room/RoomDashboard";
 
 const queryClient = new QueryClient();
 
 function AppRoutes() {
-	useEffect(() => {
-		void registerForPushNotifications();
-	}, []);
-
 	return (
 		<BrowserRouter>
 			<Routes>

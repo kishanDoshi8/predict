@@ -102,7 +102,7 @@ export function LeaderboardPage() {
 			{/* Section heading */}
 			<div>
 				<h2 className='flex gap-2 items-center text-lg font-semibold'>
-					Room Rankings
+					Room Rankings{" "}
 					<button
 						type='button'
 						onClick={() => {

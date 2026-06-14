@@ -12,6 +12,7 @@ import {
 	type CarouselApi,
 } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
+import { CoinsIcon, ZapIcon } from "lucide-react";
 
 type LeaderboardTipsDialogProps = {
 	open: boolean;
@@ -20,14 +21,41 @@ type LeaderboardTipsDialogProps = {
 
 const SLIDES = [
 	{
-		title: "Prediction Rating",
-		description:
-			"Prediction Rating measures prediction skill, not how many points you've earned. Correct predictions increase your rating. Harder predictions are worth more. Everyone starts at 1500.",
+		key: "ratings",
+		title: (
+			<h3 className={`flex gap-2 items-center`}>
+				<ZapIcon className={`text-cyan-500`} />
+				Prediction Rating
+			</h3>
+		),
+		description: (
+			<p>
+				Ratings measure prediction skill, not points earned. Correct
+				predictions increase your rating, and harder predictions are
+				worth more
+				<br />
+				<br />
+				Everyone starts at 1500.
+			</p>
+		),
 	},
 	{
-		title: "Points",
-		description:
-			"Points track how many points you've won from predictions. Points determine your winnings. Prediction Rating measures your prediction skill.",
+		key: "points",
+		title: (
+			<h3 className={`flex gap-2 items-center`}>
+				<CoinsIcon className={`text-rank-1`} />
+				Points
+			</h3>
+		),
+		description: (
+			<p>
+				Points track how many points you've won from predictions.
+				<br />
+				<br />
+				Points determine your winnings. Prediction Rating measures your
+				prediction skill.
+			</p>
+		),
 	},
 ] as const;
 
@@ -74,12 +102,12 @@ export default function LeaderboardTipsDialog({
 				>
 					<CarouselContent>
 						{SLIDES.map((slide) => (
-							<CarouselItem key={slide.title}>
-								<div className='flex flex-col gap-3 px-1 py-2 text-center'>
+							<CarouselItem key={slide.key}>
+								<div className='flex flex-col gap-3 px-1 py-2'>
 									<h3 className='text-lg font-semibold'>
 										{slide.title}
 									</h3>
-									<p className='text-muted-foreground text-sm leading-relaxed'>
+									<p className='text-sm leading-relaxed'>
 										{slide.description}
 									</p>
 								</div>

@@ -25,6 +25,7 @@ export type RoomPreferenceOverrides = {
 export type PreferenceResponse = {
   room_id: string | null
   has_seen_how_to_play: boolean
+  has_seen_ratings_tip: boolean
   global: PreferenceSettings
   room_overrides: RoomPreferenceOverrides
   effective: PreferenceSettings
@@ -268,6 +269,11 @@ export async function resetRoomPreferences(roomId: string) {
 
 export async function markHowToPlaySeen() {
   const { error } = await supabase.rpc('mark_how_to_play_seen')
+  if (error) throw error
+}
+
+export async function markRatingsTipSeen() {
+  const { error } = await supabase.rpc('mark_ratings_tip_seen')
   if (error) throw error
 }
 

@@ -13,6 +13,7 @@ grant execute on function public.update_global_preferences(boolean, boolean, boo
 grant execute on function public.update_room_preferences(uuid, boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
 grant execute on function public.reset_room_preferences(uuid) to authenticated;
 grant execute on function public.mark_how_to_play_seen() to authenticated;
+grant execute on function public.mark_ratings_tip_seen() to authenticated;
 grant execute on function public.upsert_user_push_subscription(jsonb) to authenticated;
 grant execute on function public.get_room_leaderboard(uuid, text) to authenticated;
 grant execute on function public.get_room_weekly_leaderboard(uuid, text) to authenticated;

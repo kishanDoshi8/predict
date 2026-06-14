@@ -11,6 +11,9 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { localStorageKeys } from "@/store/_keys";
 import { ArrowDown10Icon, CircleQuestionMarkIcon } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components";
+import LeaderboardTipsDialog from "@/components/LeaderboardTipsDialog";
+import { useMarkRatingsTipSeen, usePreferences } from "@/store/preferences";
+import React from "react";
 
 const LEADERBOARD_TABS = ["this_week", "all_time"] as const;
 type LeaderboardTab = (typeof LEADERBOARD_TABS)[number];
@@ -21,6 +24,14 @@ export type SortByOption = (typeof SORT_BY_OPTIONS)[number];
 export function LeaderboardPage() {
 	const { room } = useRoomContext();
 	const { data: player } = usePlayer();
+	const { data: preferences } = usePreferences(room.id);
+	const { mutate: markRatingsTipSeen } = useMarkRatingsTipSeen(room.id);
+	const [isTipsDialogOpen, setIsTipsDialogOpen] = React.useState(false);
+	const [tipsDialogSource, setTipsDialogSource] = React.useState<
+		"onboarding" | "help" | null
+	>(null);
+	const hasOpenedOnboardingRef = React.useRef(false);
+	const hasMarkedRatingsTipSeenRef = React.useRef(false);
 	const [activeLeaderboardTab, setActiveLeaderboardTab] =
 		useLocalStorage<LeaderboardTab>(
 			"this_week",
@@ -59,13 +70,50 @@ export function LeaderboardPage() {
 			? isAllTimeLeaderboardLoading
 			: isWeeklyLeaderboardLoading;
 
+	React.useEffect(() => {
+		if (!preferences) return;
+		if (preferences.has_seen_ratings_tip) return;
+		if (hasOpenedOnboardingRef.current) return;
+		if (isTipsDialogOpen) return;
+
+		hasOpenedOnboardingRef.current = true;
+		setTipsDialogSource("onboarding");
+		setIsTipsDialogOpen(true);
+	}, [preferences, isTipsDialogOpen]);
+
+	const handleTipsDialogOpenChange = (open: boolean) => {
+		setIsTipsDialogOpen(open);
+
+		if (open) return;
+
+		if (
+			tipsDialogSource === "onboarding" &&
+			!hasMarkedRatingsTipSeenRef.current
+		) {
+			hasMarkedRatingsTipSeenRef.current = true;
+			markRatingsTipSeen();
+		}
+
+		setTipsDialogSource(null);
+	};
+
 	return (
 		<div className='flex flex-col gap-4 p-4 max-w-lg mx-auto w-full'>
 			{/* Section heading */}
 			<div>
 				<h2 className='flex gap-2 items-center text-lg font-semibold'>
-					Room Rankings
-					<CircleQuestionMarkIcon className='h-4 w-4 text-muted-foreground' />
+					Room Rankings{" "}
+					<button
+						type='button'
+						onClick={() => {
+							setTipsDialogSource("help");
+							setIsTipsDialogOpen(true);
+						}}
+						className='rounded-sm text-muted-foreground hover:text-foreground transition-colors'
+						aria-label='Open leaderboard tips'
+					>
+						<CircleQuestionMarkIcon className='h-4 w-4' />
+					</button>
 				</h2>
 				<p className='text-sm text-muted-foreground'>
 					{room.members.length} member
@@ -123,6 +171,11 @@ export function LeaderboardPage() {
 					sortBy={sortBy}
 				/>
 			</div>
+
+			<LeaderboardTipsDialog
+				open={isTipsDialogOpen}
+				onOpenChange={handleTipsDialogOpenChange}
+			/>
 		</div>
 	);
 }

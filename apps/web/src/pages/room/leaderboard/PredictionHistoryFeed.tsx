@@ -117,7 +117,7 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 			</div>
 
 			{/* Winner pill */}
-			{entry.status === "revealed" && winner && (
+			{winner && (
 				<div className='flex items-center gap-1.5 flex-wrap'>
 					<span className='text-xs text-muted-foreground'>
 						Winner:

@@ -120,7 +120,7 @@ export function LeaderboardRow({
 							{entry.total_won_in_room.toLocaleString()}
 						</p>
 						<p className='flex items-center text-xs text-muted-foreground tabular-nums'>
-							{entry.prediction_rating} SR
+							{entry.prediction_rating} PR
 						</p>
 					</>
 				)}

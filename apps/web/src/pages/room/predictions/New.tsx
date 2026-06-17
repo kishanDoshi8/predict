@@ -54,7 +54,7 @@ export default function PredictionNew() {
 	const [customDate, setCustomDate] = useState<Date | undefined>(
 		new Date(Date.now() + 24 * 60 * 60 * 1000),
 	);
-	const [customTime, setCustomTime] = useState<string>("22:30:00");
+	const [customTime, setCustomTime] = useState<string>("22:00:00");
 	const [openCustomDatePicker, setOpenCustomDatePicker] = useState(false);
 
 	const [errors, setErrors] = useState<string[]>([]);
@@ -352,6 +352,7 @@ export default function PredictionNew() {
 													before: new Date(),
 												}}
 												onSelect={(date) => {
+													if (!date) return;
 													setCustomDate(date);
 													setOpenCustomDatePicker(
 														false,

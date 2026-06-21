@@ -748,6 +748,19 @@ export type Database = {
         Args: { p_room_id: string; p_sort_by?: string }
         Returns: Json
       }
+      get_room_member_recent_predictions: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_player_id: string
+          p_room_id: string
+        }
+        Returns: Json
+      }
+      get_room_member_stats: {
+        Args: { p_player_id: string; p_room_id: string }
+        Returns: Json
+      }
       get_room_prediction_history: {
         Args: { p_limit?: number; p_offset?: number; p_room_id: string }
         Returns: Json

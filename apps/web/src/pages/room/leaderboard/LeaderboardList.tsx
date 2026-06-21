@@ -9,6 +9,7 @@ type Props = {
 	isLoading: boolean;
 	scope: "all_time" | "this_week";
 	sortBy: LeaderboardSortBy;
+	onRowClick?: (playerId: string) => void;
 };
 
 export function LeaderboardList({
@@ -17,6 +18,7 @@ export function LeaderboardList({
 	isLoading,
 	scope,
 	sortBy,
+	onRowClick,
 }: Readonly<Props>) {
 	if (isLoading) {
 		return (
@@ -55,6 +57,7 @@ export function LeaderboardList({
 						entry={entry}
 						currentPlayerId={currentPlayerId}
 						sortBy={sortBy}
+						onClick={onRowClick}
 					/>
 				))}
 			</div>

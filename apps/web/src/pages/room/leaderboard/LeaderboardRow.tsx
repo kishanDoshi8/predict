@@ -9,12 +9,14 @@ type Props = {
 	entry: LeaderboardEntry;
 	currentPlayerId: string;
 	sortBy: LeaderboardSortBy;
+	onClick?: (playerId: string) => void;
 };
 
 export function LeaderboardRow({
 	entry,
 	currentPlayerId,
 	sortBy,
+	onClick,
 }: Readonly<Props>) {
 	const isSelf = entry.player_id === currentPlayerId;
 	const initials = entry.username.slice(0, 2).toUpperCase();
@@ -38,7 +40,18 @@ export function LeaderboardRow({
 				isSelf
 					? "border-win/30 bg-win/5"
 					: "border-transparent hover:bg-accent/25",
+				onClick && "cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
 			)}
+			role={onClick ? "button" : undefined}
+			tabIndex={onClick ? 0 : undefined}
+			onClick={() => onClick?.(entry.player_id)}
+			onKeyDown={(event) => {
+				if (!onClick) return;
+				if (event.key === "Enter" || event.key === " ") {
+					event.preventDefault();
+					onClick(entry.player_id);
+				}
+			}}
 		>
 			{/* Rank */}
 			<span className='w-8 text-center text-sm text-muted-foreground shrink-0 tabular-nums'>

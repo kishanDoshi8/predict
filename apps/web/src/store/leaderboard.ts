@@ -1,5 +1,7 @@
 import {
     getRoomLeaderboard,
+    getRoomMemberRecentPredictions,
+    getRoomMemberStats,
     getRoomPredictionHistory,
     getRoomWeeklyLeaderboard,
 } from '@/lib/api'
@@ -42,5 +44,43 @@ export const usePredictionHistory = (roomId?: string) => {
         queryKey: roomKeys.predictionHistory(roomId ?? ''),
         queryFn: () => getRoomPredictionHistory(roomId ?? ''),
         enabled: !!roomId,
+    })
+}
+
+
+export const useRoomMemberStats = (
+    roomId?: string,
+    playerId?: string | null,
+    enabled = true,
+) => {
+    return useQuery({
+        queryKey: roomKeys.roomMemberStats(roomId ?? "", playerId ?? ""),
+        queryFn: () => getRoomMemberStats(roomId ?? "", playerId ?? ""),
+        enabled: !!roomId && !!playerId && enabled,
+    })
+}
+
+export const useRoomMemberRecentPredictions = (
+    roomId?: string,
+    playerId?: string | null,
+    limit = 5,
+    offset = 0,
+    enabled = true,
+) => {
+    return useQuery({
+        queryKey: roomKeys.roomMemberRecentPredictions(
+            roomId ?? "",
+            playerId ?? "",
+            limit,
+            offset,
+        ),
+        queryFn: () =>
+            getRoomMemberRecentPredictions(
+                roomId ?? "",
+                playerId ?? "",
+                limit,
+                offset,
+            ),
+        enabled: !!roomId && !!playerId && enabled,
     })
 }

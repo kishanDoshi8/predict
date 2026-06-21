@@ -14,6 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components";
 import LeaderboardTipsDialog from "@/components/LeaderboardTipsDialog";
 import { useMarkRatingsTipSeen, usePreferences } from "@/store/preferences";
 import React from "react";
+import { PlayerProfileDialog } from "./room/player/PlayerProfileDialog";
 
 const LEADERBOARD_TABS = ["this_week", "all_time"] as const;
 type LeaderboardTab = (typeof LEADERBOARD_TABS)[number];
@@ -42,6 +43,10 @@ export function LeaderboardPage() {
 		"ratings",
 		localStorageKeys.userPreference.leaderboard.sort_by,
 	);
+	const [selectedPlayerId, setSelectedPlayerId] = React.useState<
+		string | null
+	>(null);
+	const [isProfileDialogOpen, setIsProfileDialogOpen] = React.useState(false);
 
 	const {
 		data: allTimeLeaderboard = [],
@@ -169,8 +174,22 @@ export function LeaderboardPage() {
 					isLoading={isLeaderboardLoading}
 					scope={activeLeaderboardTab}
 					sortBy={sortBy}
+					onRowClick={(playerId) => {
+						setSelectedPlayerId(playerId);
+						setIsProfileDialogOpen(true);
+					}}
 				/>
 			</div>
+
+			<PlayerProfileDialog
+				roomId={room.id}
+				playerId={selectedPlayerId}
+				open={isProfileDialogOpen}
+				onOpenChange={(open) => {
+					setIsProfileDialogOpen(open);
+					if (!open) setSelectedPlayerId(null);
+				}}
+			/>
 
 			<LeaderboardTipsDialog
 				open={isTipsDialogOpen}

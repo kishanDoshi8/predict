@@ -52,3 +52,29 @@ export type PredictionHistoryEntry = {
   selected_option_label: string | null
   options:              PredictionHistoryOption[] | null
 }
+
+
+export type RoomMemberStats = {
+  player_id: string
+  username: string
+  current_points: number
+  current_rating: number
+  peak_rating: number
+  total_predictions: number
+  winning_predictions: number
+  total_rated_predictions: number
+  current_win_streak: number
+  highest_win_streak: number
+  activity_streak: number
+  largest_win_bet: number
+  largest_win_payout: number
+  largest_win_multiplier: number
+}
+
+export type RoomMemberRecentPrediction = {
+  prediction_id: string
+  prediction_title: string
+  selected_option: string
+  result: "won" | "lost" | "no_result"
+  resolved_at: string
+}

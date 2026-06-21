@@ -20,6 +20,8 @@ grant execute on function public.get_room_weekly_leaderboard(uuid, text) to auth
 grant execute on function public.get_latest_room_member_snapshot(uuid, uuid) to authenticated;
 grant execute on function public.get_room_prediction_history(uuid, int, int) to authenticated;
 grant execute on function public.get_room_stat_cards(uuid, int) to authenticated;
+grant execute on function public.get_room_member_stats(uuid, uuid) to authenticated;
+grant execute on function public.get_room_member_recent_predictions(uuid, uuid, int, int) to authenticated;
 
 revoke execute on function public.update_streaks_after_resolution(uuid, uuid, uuid, text) from public;
 revoke execute on function public.update_player_stats_after_resolution(uuid, uuid, uuid, text) from public;

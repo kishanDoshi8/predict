@@ -31,6 +31,7 @@ import { Link } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { localStorageKeys } from "@/store/_keys";
 import { SortByOption } from "@/pages/LeaderboardPage";
+import { PlayerProfileDialog } from "../../player/PlayerProfileDialog";
 
 type LeaderboardTab = "this_week" | "all_time";
 
@@ -424,57 +425,71 @@ function LeaderboardMiniRows({
 	isRatingsView: boolean;
 	metricValue: (entry: LeaderboardEntry) => number;
 }>) {
+	const { room } = useRoomContext();
+	const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(
+		null,
+	);
+	const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+
 	return (
 		<div className={`flex flex-col gap-2`}>
 			{leaderboard.slice(0, 4).map((entry) => {
 				const rankChipStyle = getRankChipStyle(entry.rank);
 
 				return (
-					<FadeContent
-						delay={contentDelay.leaderboard}
+					<button
 						key={entry.player_id + isRatingsView}
-						className={`flex items-center gap-3 p-3 rounded-lg ${entry.player_id === playerId ? "bg-linear-30 from-accent/10 border to-primary/10" : "bg-secondary/60"}`}
+						onClick={() => {
+							setSelectedPlayerId(entry.player_id);
+							setIsProfileDialogOpen(true);
+						}}
+						className={`cursor-pointer`}
 					>
-						<p
-							className={`w-6 h-6 text-sm font-bold rounded-md flex items-center justify-center`}
-							style={rankChipStyle}
+						<FadeContent
+							delay={contentDelay.leaderboard}
+							className={`flex items-center gap-3 p-3 rounded-lg ${entry.player_id === playerId ? "bg-linear-30 from-accent/10 border to-primary/10" : "bg-secondary/60"}`}
 						>
-							{entry.rank}
-						</p>
-						<p className={`font-medium`}>
-							{entry.username}
-							{entry.current_streak >= 3 && (
-								<div className={`inline-block`}>
-									<Badge
-										className={`flex gap-0 items-center justify-center bg-accent/20 text-accent text-xs ml-2`}
-									>
-										<FlameIcon
-											className={`w-2 h-2 text-rank-3`}
-										/>
-										{entry.current_streak}
-									</Badge>
-								</div>
-							)}
-							{entry.player_id === playerId && (
-								<Badge
-									variant='outline'
-									className={`ml-3 text-xs rounded-md`}
-								>
-									You
-								</Badge>
-							)}
-						</p>
-						<p className={`ml-auto font-bold`}>
-							{isRatingsView
-								? metricValue(entry)
-								: metricValue(entry).toLocaleString()}
-							<span
-								className={`text-xs ml-1 text-muted-foreground font-normal`}
+							<p
+								className={`w-6 h-6 text-sm font-bold rounded-md flex items-center justify-center`}
+								style={rankChipStyle}
 							>
-								{isRatingsView ? "" : "pts"}
-							</span>
-						</p>
-					</FadeContent>
+								{entry.rank}
+							</p>
+							<p className={`font-medium`}>
+								{entry.username}
+								{entry.current_streak >= 3 && (
+									<div className={`inline-block`}>
+										<Badge
+											className={`flex gap-0 items-center justify-center bg-accent/20 text-accent text-xs ml-2`}
+										>
+											<FlameIcon
+												className={`w-2 h-2 text-rank-3`}
+											/>
+											{entry.current_streak}
+										</Badge>
+									</div>
+								)}
+								{entry.player_id === playerId && (
+									<Badge
+										variant='outline'
+										className={`ml-3 text-xs rounded-md`}
+									>
+										You
+									</Badge>
+								)}
+							</p>
+							<p className={`ml-auto font-bold`}>
+								{isRatingsView
+									? metricValue(entry)
+									: metricValue(entry).toLocaleString()}
+								<span
+									className={`text-xs ml-1 text-muted-foreground font-normal`}
+								>
+									{isRatingsView ? "" : "pts"}
+								</span>
+							</p>
+						</FadeContent>
+					</button>
 				);
 			})}
 			<Link
@@ -484,6 +499,16 @@ function LeaderboardMiniRows({
 				see all
 				<ChevronRightIcon className={`w-3 h-3 inline-block ml-1`} />
 			</Link>
+
+			<PlayerProfileDialog
+				roomId={room.id}
+				playerId={selectedPlayerId}
+				open={isProfileDialogOpen}
+				onOpenChange={(open) => {
+					setIsProfileDialogOpen(open);
+					if (!open) setSelectedPlayerId(null);
+				}}
+			/>
 		</div>
 	);
 }

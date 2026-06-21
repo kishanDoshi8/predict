@@ -42,6 +42,12 @@ export const roomKeys = {
 
   predictionHistory: (roomId: string) =>
     [...roomKeys.detail(roomId), "predictionHistory"] as const,
+
+  roomMemberStats: (roomId: string, playerId: string) =>
+    [...roomKeys.detail(roomId), "memberProfile", playerId, "stats"] as const,
+
+  roomMemberRecentPredictions: (roomId: string, playerId: string, limit = 5, offset = 0) =>
+    [...roomKeys.detail(roomId), "memberProfile", playerId, "recentPredictions", limit, offset] as const,
 };
 
 export const localStorageKeys = {

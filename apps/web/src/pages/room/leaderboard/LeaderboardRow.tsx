@@ -34,13 +34,14 @@ export function LeaderboardRow({
 	}
 
 	return (
-		<div
+		<button
 			className={cn(
 				"flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-colors",
 				isSelf
 					? "border-win/30 bg-win/5"
 					: "border-transparent hover:bg-accent/25",
-				onClick && "cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+				onClick &&
+					"cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
 			)}
 			role={onClick ? "button" : undefined}
 			tabIndex={onClick ? 0 : undefined}
@@ -67,7 +68,7 @@ export function LeaderboardRow({
 			<div className='flex-1 min-w-0'>
 				<p
 					className={cn(
-						" font-medium truncate",
+						" font-medium truncate text-left",
 						isSelf && "text-win",
 					)}
 				>
@@ -138,6 +139,6 @@ export function LeaderboardRow({
 					</>
 				)}
 			</div>
-		</div>
+		</button>
 	);
 }

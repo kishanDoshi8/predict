@@ -66,6 +66,9 @@ export type RoomMemberStats = {
   current_win_streak: number
   highest_win_streak: number
   activity_streak: number
+  largest_win_bet: number
+  largest_win_payout: number
+  largest_win_multiplier: number
 }
 
 export type RoomMemberRecentPrediction = {

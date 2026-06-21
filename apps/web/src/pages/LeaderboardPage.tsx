@@ -14,7 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components";
 import LeaderboardTipsDialog from "@/components/LeaderboardTipsDialog";
 import { useMarkRatingsTipSeen, usePreferences } from "@/store/preferences";
 import React from "react";
-import { PlayerProfileDialog } from "./room/leaderboard/PlayerProfileDialog";
+import { PlayerProfileDialog } from "./room/player/PlayerProfileDialog";
 
 const LEADERBOARD_TABS = ["this_week", "all_time"] as const;
 type LeaderboardTab = (typeof LEADERBOARD_TABS)[number];
@@ -43,7 +43,9 @@ export function LeaderboardPage() {
 		"ratings",
 		localStorageKeys.userPreference.leaderboard.sort_by,
 	);
-	const [selectedPlayerId, setSelectedPlayerId] = React.useState<string | null>(null);
+	const [selectedPlayerId, setSelectedPlayerId] = React.useState<
+		string | null
+	>(null);
 	const [isProfileDialogOpen, setIsProfileDialogOpen] = React.useState(false);
 
 	const {

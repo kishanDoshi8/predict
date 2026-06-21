@@ -30,7 +30,11 @@ export { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 export { Carousel, CarouselItem } from './ui/carousel'
 export { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 
+// -- charts --
+export { ChartContainer, ChartTooltipContent, ChartTooltip, ChartStyle, ChartLegendContent, ChartLegend, type ChartConfig } from './ui/charts'
+
 // -- animations --
 export { default as Counter } from './animations/counter'
 export { default as FadeContent } from './animations/fade-content'
 export { default as CountUp } from './animations/count-up'
+export { LayoutTextFlip } from './animations/layout-text-flip'

@@ -14,6 +14,7 @@ import {
 	Field,
 	FieldLabel,
 	Progress,
+	FadeContent,
 } from "@/components";
 import {
 	useRoomMemberRecentPredictions,
@@ -94,10 +95,10 @@ function StatsSkeleton() {
 	return (
 		<div className='grid grid-cols-2 gap-4'>
 			{Array.from({ length: 4 }).map((_, i) => (
-				<Skeleton key={i} className='h-18 rounded-lg' />
+				<Skeleton key={i} className='h-19 rounded-lg' />
 			))}
 			{Array.from({ length: 2 }).map((_, i) => (
-				<Skeleton key={i} className='h-22 rounded-lg col-span-2' />
+				<Skeleton key={i} className='h-26 rounded-lg col-span-2' />
 			))}
 		</div>
 	);
@@ -227,8 +228,9 @@ export function PlayerProfileDialog({
 						) : (
 							<div className='grid grid-cols-2 gap-4'>
 								{statsLabels.map(({ key, label, icon }) => (
-									<div
+									<FadeContent
 										key={key}
+										delay={200}
 										className='rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'
 									>
 										<p className='text-xs text-muted-foreground'>
@@ -240,9 +242,12 @@ export function PlayerProfileDialog({
 												{stats[key]}
 											</span>
 										</p>
-									</div>
+									</FadeContent>
 								))}
-								<div className='col-span-2 rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'>
+								<FadeContent
+									delay={300}
+									className='col-span-2 rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'
+								>
 									<h3 className='flex gap-2 items-center text-xs text-muted-foreground'>
 										<span>Largest Win</span>
 									</h3>
@@ -269,8 +274,11 @@ export function PlayerProfileDialog({
 											x return
 										</p>
 									</div>
-								</div>
-								<div className='col-span-2 rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'>
+								</FadeContent>
+								<FadeContent
+									delay={300}
+									className='col-span-2 rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'
+								>
 									<h3 className='flex items-center gap-2 text-xs text-muted-foreground'>
 										Win rate
 									</h3>
@@ -314,16 +322,18 @@ export function PlayerProfileDialog({
 											id='progress-upload'
 										/>
 									</Field>
-								</div>
+								</FadeContent>
 							</div>
 						)}
 					</section>
 
-					<section className='space-y-2 mt-6'>
-						<h3 className='text-sm font-semibold text-muted-foreground'>
-							Last 5 Predictions
-						</h3>
-						{recentPredictionsContent}
+					<section className='mt-6 mb-4'>
+						<FadeContent delay={350}>
+							<h3 className='text-sm font-semibold text-muted-foreground mb-2'>
+								Last 5 Predictions
+							</h3>
+							{recentPredictionsContent}
+						</FadeContent>
 					</section>
 				</div>
 			</ContentComponent>

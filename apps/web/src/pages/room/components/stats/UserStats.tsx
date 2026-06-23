@@ -13,9 +13,9 @@ import {
 	ArrowDown10Icon,
 	Calendar1Icon,
 	ChevronRightIcon,
+	CrosshairIcon,
 	CrownIcon,
 	FlameIcon,
-	TargetIcon,
 	TrophyIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -361,7 +361,7 @@ function LeaderboardContentView({
 						label='WINS'
 					/>
 					<StatTile
-						icon={<TargetIcon className={`w-4 h-4 text-loss`} />}
+						icon={<CrosshairIcon className={`w-4 h-4 text-loss`} />}
 						value={`${Math.round(leaderboardPlayer?.win_percentage ?? 0)}%`}
 						label='ACCURACY'
 					/>

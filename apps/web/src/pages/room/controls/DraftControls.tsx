@@ -129,10 +129,13 @@ export default function DraftControls({
 		);
 	};
 
-	const handleAddAmount = (number?: number) => {
-		setBetAmount((prev) =>
-			Math.min(prev + (number ?? 1), availableBalance),
-		);
+	const handleAddAmount = (number?: number, isButtonPress?: boolean) => {
+		setBetAmount((prev) => {
+			if (prev === 1 && isButtonPress) {
+				return Math.min(number ?? 1, availableBalance);
+			}
+			return Math.min(prev + (number ?? 1), availableBalance);
+		});
 	};
 
 	const handleSubtractAmount = () => {
@@ -217,7 +220,7 @@ export default function DraftControls({
 									<Button
 										variant={"outline"}
 										size={"sm"}
-										onClick={() => handleAddAmount(5)}
+										onClick={() => handleAddAmount(5, true)}
 										disabled={
 											betAmount === availableBalance
 										}
@@ -227,7 +230,9 @@ export default function DraftControls({
 									<Button
 										variant={"outline"}
 										size={"sm"}
-										onClick={() => handleAddAmount(20)}
+										onClick={() =>
+											handleAddAmount(20, true)
+										}
 										disabled={
 											betAmount === availableBalance
 										}
@@ -237,7 +242,9 @@ export default function DraftControls({
 									<Button
 										variant={"outline"}
 										size={"sm"}
-										onClick={() => handleAddAmount(50)}
+										onClick={() =>
+											handleAddAmount(50, true)
+										}
 										disabled={
 											betAmount === availableBalance
 										}
@@ -247,7 +254,9 @@ export default function DraftControls({
 									<Button
 										variant={"outline"}
 										size={"sm"}
-										onClick={() => handleAddAmount(100)}
+										onClick={() =>
+											handleAddAmount(100, true)
+										}
 										disabled={
 											betAmount === availableBalance
 										}

@@ -5,7 +5,8 @@ import {
     getRoomPredictionHistory,
     getRoomWeeklyLeaderboard,
 } from '@/lib/api'
-import { useQuery } from '@tanstack/react-query'
+import { PredictionHistoryFilter, PredictionHistoryPage } from '@/types'
+import { InfiniteData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { roomKeys } from './_keys'
 
 export type LeaderboardSortBy = 'points' | 'ratings'
@@ -39,10 +40,52 @@ export const useRoomWeeklyLeaderboard = (
     })
 }
 
-export const usePredictionHistory = (roomId?: string) => {
-    return useQuery({
-        queryKey: roomKeys.predictionHistory(roomId ?? ''),
-        queryFn: () => getRoomPredictionHistory(roomId ?? ''),
+type PredictionHistoryCursor = {
+    cursorCreatedAt: string | null
+    cursorId: string | null
+}
+
+const DEFAULT_PREDICTION_HISTORY_LIMIT = 20
+
+export const usePredictionHistory = (
+    roomId?: string,
+    filter: PredictionHistoryFilter = 'all',
+    search = '',
+) => {
+    const initialCursor: PredictionHistoryCursor = {
+        cursorCreatedAt: null,
+        cursorId: null,
+    }
+
+    return useInfiniteQuery<
+        PredictionHistoryPage,
+        Error,
+        InfiniteData<PredictionHistoryPage, PredictionHistoryCursor>,
+        readonly [string, string, PredictionHistoryFilter, string],
+        PredictionHistoryCursor
+    >({
+        queryKey: ['prediction-history', roomId ?? '', filter, search],
+        queryFn: ({ pageParam }) =>
+            getRoomPredictionHistory({
+                roomId: roomId ?? '',
+                limit: DEFAULT_PREDICTION_HISTORY_LIMIT,
+                cursorCreatedAt: pageParam.cursorCreatedAt,
+                cursorId: pageParam.cursorId,
+                search,
+                filter,
+            }),
+        initialPageParam: initialCursor,
+        getNextPageParam: (lastPage) => {
+            if (!lastPage.has_more) return undefined
+            if (!lastPage.next_cursor_created_at || !lastPage.next_cursor_id) {
+                return undefined
+            }
+
+            return {
+                cursorCreatedAt: lastPage.next_cursor_created_at,
+                cursorId: lastPage.next_cursor_id,
+            } satisfies PredictionHistoryCursor
+        },
         enabled: !!roomId,
     })
 }

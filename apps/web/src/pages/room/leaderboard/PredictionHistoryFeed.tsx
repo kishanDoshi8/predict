@@ -234,11 +234,13 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 type FeedProps = {
 	entries: PredictionHistoryEntry[];
 	isLoading: boolean;
+	emptyMessage?: string;
 };
 
 export function PredictionHistoryFeed({
 	entries,
 	isLoading,
+	emptyMessage,
 }: Readonly<FeedProps>) {
 	if (isLoading) {
 		return (
@@ -255,8 +257,8 @@ export function PredictionHistoryFeed({
 			<div className='flex flex-col items-center gap-2 py-12 text-center'>
 				<p className='text-4xl'>📭</p>
 				<p className='text-muted-foreground text-sm'>
-					No resolved predictions yet. Check back after the next one
-					wraps up.
+					{emptyMessage ??
+						"No resolved predictions yet. Check back after the next one wraps up."}
 				</p>
 			</div>
 		);

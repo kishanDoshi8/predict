@@ -1,3 +1,5 @@
+drop function if exists public.get_room_prediction_history(uuid, int, int);
+
 create or replace function public.get_room_prediction_history(
   p_room_id uuid,
   p_limit   int default 20,
@@ -177,3 +179,5 @@ begin
   );
 end;
 $$;
+
+grant execute on function public.get_room_prediction_history(uuid, int, timestamptz, uuid, text, text) to authenticated;

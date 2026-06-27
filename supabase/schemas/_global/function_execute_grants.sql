@@ -18,7 +18,7 @@ grant execute on function public.upsert_user_push_subscription(jsonb) to authent
 grant execute on function public.get_room_leaderboard(uuid, text) to authenticated;
 grant execute on function public.get_room_weekly_leaderboard(uuid, text) to authenticated;
 grant execute on function public.get_latest_room_member_snapshot(uuid, uuid) to authenticated;
-grant execute on function public.get_room_prediction_history(uuid, int, int) to authenticated;
+grant execute on function public.get_room_prediction_history(uuid, int, timestamptz, uuid, text, text) to authenticated;
 grant execute on function public.get_room_stat_cards(uuid, int) to authenticated;
 grant execute on function public.get_room_member_stats(uuid, uuid) to authenticated;
 grant execute on function public.get_room_member_recent_predictions(uuid, uuid, int, int) to authenticated;

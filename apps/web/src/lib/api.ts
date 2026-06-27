@@ -1,4 +1,4 @@
-import { Player, Prediction, PredictionStatus, Room, PredictionHistoryEntry, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats } from '@/types'
+import { Player, Prediction, PredictionStatus, Room, PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats } from '@/types'
 import type { Json } from '@/types/supabase'
 import { supabase } from './supabase'
 
@@ -602,17 +602,32 @@ export async function getRoomWeeklyLeaderboard(
   return assertOk(data, error) as LeaderboardEntry[]
 }
 
-export async function getRoomPredictionHistory(
-  roomId: string,
+type GetRoomPredictionHistoryParams = {
+  roomId: string
+  limit?: number
+  cursorCreatedAt?: string | null
+  cursorId?: string | null
+  search?: string | null
+  filter?: PredictionHistoryFilter
+}
+
+export async function getRoomPredictionHistory({
+  roomId,
   limit = 20,
-  offset = 0,
-) {
+  cursorCreatedAt = null,
+  cursorId = null,
+  search = null,
+  filter = 'all',
+}: GetRoomPredictionHistoryParams) {
   const { data, error } = await supabase.rpc('get_room_prediction_history', {
     p_room_id: roomId,
     p_limit:   limit,
-    p_offset:  offset,
+    p_cursor_created_at: cursorCreatedAt,
+    p_cursor_id: cursorId,
+    p_search: search,
+    p_filter: filter,
   })
-  return assertOk(data, error) as PredictionHistoryEntry[]
+  return assertOk(data, error) as PredictionHistoryPage
 }
 
 

@@ -2,8 +2,7 @@ import { PredictionHistoryFeed } from "../leaderboard/PredictionHistoryFeed";
 import { usePredictionHistory } from "@/store/leaderboard";
 import { useRoomContext } from "../RoomLayout";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input, Button } from "@/components";
 import { PredictionHistoryFilter } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -14,10 +13,7 @@ const FILTERS: Array<{ label: string; value: PredictionHistoryFilter }> = [
 	{ label: "My Bets", value: "my_bets" },
 ];
 
-function emptyStateMessage(
-	filter: PredictionHistoryFilter,
-	search: string,
-) {
+function emptyStateMessage(filter: PredictionHistoryFilter, search: string) {
 	if (search.trim().length > 0) {
 		return "No predictions match your search.";
 	}
@@ -42,11 +38,11 @@ function HistoryFeed() {
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
-		const timeoutId = window.setTimeout(() => {
+		const timeoutId = globalThis.setTimeout(() => {
 			setDebouncedSearch(searchInput.trim());
 		}, 300);
 
-		return () => window.clearTimeout(timeoutId);
+		return () => globalThis.clearTimeout(timeoutId);
 	}, [searchInput]);
 
 	const {
@@ -109,7 +105,7 @@ function HistoryFeed() {
 							key={item.value}
 							size='sm'
 							variant={
-								filter === item.value ? "secondary" : "outline"
+								filter === item.value ? "default" : "outline"
 							}
 							onClick={() => setFilter(item.value)}
 						>

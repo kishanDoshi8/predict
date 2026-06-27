@@ -25,6 +25,7 @@ export function RatingBadge({ rating }: Readonly<Props>) {
 			<div className='relative flex items-center justify-center'>
 				{/* Prefix View */}
 				<motion.span
+					initial={{ opacity: 0, y: -10, filter: "blur(6px)" }}
 					animate={{
 						opacity: revealed ? 0 : 1,
 						y: revealed ? 10 : 0,

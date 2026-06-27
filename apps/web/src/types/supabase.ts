@@ -762,7 +762,14 @@ export type Database = {
         Returns: Json
       }
       get_room_prediction_history: {
-        Args: { p_limit?: number; p_offset?: number; p_room_id: string }
+        Args: {
+          p_cursor_created_at?: string | null
+          p_cursor_id?: string | null
+          p_filter?: string
+          p_limit?: number
+          p_room_id: string
+          p_search?: string | null
+        }
         Returns: Json
       }
       get_room_stat_cards: {

@@ -53,6 +53,15 @@ export type PredictionHistoryEntry = {
   options:              PredictionHistoryOption[] | null
 }
 
+export type PredictionHistoryFilter = "all" | "wins" | "losses" | "my_bets"
+
+export type PredictionHistoryPage = {
+  items: PredictionHistoryEntry[]
+  next_cursor_created_at: string | null
+  next_cursor_id: string | null
+  has_more: boolean
+}
+
 
 export type RoomMemberStats = {
   player_id: string

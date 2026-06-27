@@ -49,7 +49,12 @@ const contentDelays = {
 function PredictionCard({
 	prediction,
 	roomId,
-}: Readonly<{ prediction: Prediction; roomId: string }>) {
+	refetchPredictions,
+}: Readonly<{
+	prediction: Prediction;
+	roomId: string;
+	refetchPredictions: () => void;
+}>) {
 	const { data: bets = [] } = useBets(roomId, prediction.id);
 	const { data: player } = usePlayer();
 
@@ -98,6 +103,7 @@ function PredictionCard({
 										targetTime={new Date(
 											prediction.deadline,
 										).getTime()}
+										onExpire={refetchPredictions}
 									/>
 								</FadeContent>
 							)}
@@ -357,8 +363,11 @@ function SectionHeader({
 // ── Main component ─────────────────────────────────────────────────────────
 function InPlayPredictions() {
 	const { room } = useRoomContext();
-	const { data: predictions = [], isPending: isPredictionLoading } =
-		useActivePredictions(room.id);
+	const {
+		data: predictions = [],
+		isPending: isPredictionLoading,
+		refetch: refetchPredictions,
+	} = useActivePredictions(room.id);
 
 	const [api, setApi] = React.useState<CarouselApi>();
 	const [current, setCurrent] = React.useState(0);
@@ -437,7 +446,11 @@ function InPlayPredictions() {
 	} else {
 		carouselContent = predictions.map((prediction) => (
 			<CarouselItem key={prediction.id}>
-				<PredictionCard prediction={prediction} roomId={room.id} />
+				<PredictionCard
+					prediction={prediction}
+					roomId={room.id}
+					refetchPredictions={refetchPredictions}
+				/>
 			</CarouselItem>
 		));
 	}

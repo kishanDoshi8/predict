@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 type CountdownProps = {
 	targetTime: number; // future timestamp in ms
 	textSize?: string;
+	onExpire?: () => void;
 };
 
 function formatTime(ms: number) {
@@ -24,11 +25,28 @@ function formatTime(ms: number) {
 		.join(":");
 }
 
+function formatDateTime(timestamp: number) {
+	return new Intl.DateTimeFormat(undefined, {
+		month: "short",
+		day: "2-digit",
+		hour: "2-digit",
+		minute: "2-digit",
+	}).format(timestamp);
+}
+
 export function Countdown({
 	targetTime,
 	textSize = "text-sm",
+	onExpire,
 }: Readonly<CountdownProps>) {
 	const [timeLeft, setTimeLeft] = useState(targetTime - Date.now());
+	const showDateTime = timeLeft > 13 * 60 * 60 * 1000;
+	const displayValue =
+		timeLeft > 0
+			? showDateTime
+				? formatDateTime(targetTime)
+				: formatTime(timeLeft)
+			: "00:00:00";
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -37,13 +55,16 @@ export function Countdown({
 			if (diff <= 0) {
 				clearInterval(interval);
 				setTimeLeft(0);
+				if (onExpire) {
+					onExpire();
+				}
 			} else {
 				setTimeLeft(diff);
 			}
 		}, 1000);
 
 		return () => clearInterval(interval);
-	}, [targetTime]);
+	}, [targetTime, onExpire]);
 
 	return (
 		<HoverCard openDelay={1000} closeDelay={100}>
@@ -55,7 +76,7 @@ export function Countdown({
 						className={`flex items-center gap-1.5 rounded-lg bg-secondary/80 px-3 py-1.5 font-mono ${textSize} font-bold text-rose-400`}
 					>
 						<ZapIcon />
-						{timeLeft > 0 ? formatTime(timeLeft) : "00:00:00"}
+						{displayValue}
 					</Badge>
 				</div>
 			</HoverCardTrigger>

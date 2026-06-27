@@ -1,4 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+	createBrowserRouter,
+	Navigate,
+	RouterProvider,
+} from "react-router-dom";
 import { HomePage } from "@/pages/home/HomePage";
 import { LeaderboardPage } from "@/pages/LeaderboardPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
@@ -18,61 +22,72 @@ import RoomDashboard from "./pages/room/RoomDashboard";
 
 const queryClient = new QueryClient();
 
-function AppRoutes() {
-	return (
-		<BrowserRouter>
-			<Routes>
-				{/* Public auth routes */}
-				<Route path='/login' element={<LoginPage />} />
-				<Route path='/signup' element={<SignupPage />} />
-				<Route
-					path='/forgot-password'
-					element={<ForgotPasswordPage />}
-				/>
-				<Route path='/reset-password' element={<ResetPasswordPage />} />
-
-				{/* Protected routes */}
-				<Route element={<ProtectedRoute />}>
-					<Route path='/' element={<HomePage />} />
-					<Route path='/create-player' element={<CreatePlayer />} />
-
-					<Route path='/rooms/:roomCode' element={<RoomLayout />}>
-						{/* This renders at /rooms/:roomCode */}
-						<Route index element={<RoomDashboard />} />
-
-						{/* This renders at /rooms/:roomCode/predictions/:predictionId */}
-						<Route
-							path='predictions/:predictionId'
-							element={<PredictionPage />}
-						/>
-
-						{/* This renders at /rooms/:roomCode/predictions/new */}
-						<Route
-							path='predictions/new'
-							element={<PredictionNew />}
-						/>
-
-						{/* This renders at /rooms/:roomCode/leaderboard */}
-						<Route
-							path='leaderboard'
-							element={<LeaderboardPage />}
-						/>
-					</Route>
-				</Route>
-
-				{/* Fallback */}
-				<Route path='/404' element={<NotFoundPage />} />
-				<Route path='*' element={<Navigate to='/404' replace />} />
-			</Routes>
-		</BrowserRouter>
-	);
-}
+const router = createBrowserRouter([
+	{ path: "/login", element: <LoginPage /> },
+	{ path: "/signup", element: <SignupPage /> },
+	{ path: "/forgot-password", element: <ForgotPasswordPage /> },
+	{ path: "/reset-password", element: <ResetPasswordPage /> },
+	{
+		element: <ProtectedRoute />,
+		children: [
+			{ path: "/", element: <HomePage /> },
+			{ path: "/create-player", element: <CreatePlayer /> },
+			{
+				path: "/rooms/:roomCode",
+				element: <RoomLayout />,
+				children: [
+					{
+						index: true,
+						element: <RoomDashboard />,
+						handle: {
+							header: {
+								leftAction: "home",
+							},
+						},
+					},
+					{
+						path: "predictions/new",
+						element: <PredictionNew />,
+						handle: {
+							header: {
+								leftAction: "back",
+								title: "Create Prediction",
+							},
+						},
+					},
+					{
+						path: "predictions/:predictionId",
+						element: <PredictionPage />,
+						handle: {
+							header: {
+								leftAction: "back",
+								title: "Prediction",
+							},
+						},
+					},
+					{
+						path: "leaderboard",
+						element: <LeaderboardPage />,
+						handle: {
+							header: {
+								leftAction: "back",
+								title: "Leaderboard",
+							},
+						},
+					},
+				],
+			},
+		],
+	},
+	{ path: "/404", element: <NotFoundPage /> },
+	{ path: "*", element: <Navigate to='/404' replace /> },
+]);
 
 export default function App() {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<AuthProvider>
-				<AppRoutes />
+				<RouterProvider router={router} />
 				<Toaster />
 			</AuthProvider>
 		</QueryClientProvider>

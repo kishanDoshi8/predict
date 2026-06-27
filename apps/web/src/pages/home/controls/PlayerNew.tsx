@@ -59,7 +59,7 @@ export default function PlayerNew({
 				}
 
 				if (navigateTo) {
-					navigate(navigateTo);
+					navigate(navigateTo, { replace: true });
 				}
 				setIsOpen(false);
 			},

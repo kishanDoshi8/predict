@@ -116,7 +116,9 @@ export default function PredictionNew() {
 				},
 				{
 					onSuccess: () => {
-						navigate("/rooms/" + room.code);
+						navigate("/rooms/" + room.code, {
+							replace: true,
+						});
 					},
 					onError: (error) => {
 						toast("Failed to create prediction.", {

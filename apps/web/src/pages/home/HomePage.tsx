@@ -22,7 +22,7 @@ export function HomePage() {
 
 	useEffect(() => {
 		if (!isPlayerLoading && !player) {
-			navigate("/create-player");
+			navigate("/create-player", { replace: true });
 		} else if (player) {
 			claimWeeklyPoints();
 		}

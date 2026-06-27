@@ -33,7 +33,7 @@ export function SignupPage() {
 		setIsLoading(true);
 		try {
 			await signUp(email, password);
-			navigate("/create-player");
+			navigate("/create-player", { replace: true });
 		} catch (err) {
 			setError(
 				err instanceof Error

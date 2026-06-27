@@ -1,5 +1,6 @@
 import {
 	Outlet,
+	useMatches,
 	useNavigate,
 	useOutletContext,
 	useParams,
@@ -17,9 +18,13 @@ import { useRoomRealtime } from "@/hooks/useRoomRealtime";
 
 export default function RoomLayout() {
 	const navigate = useNavigate();
+	const matches = useMatches();
+	const activeMatch = matches[matches.length - 1];
 	const { data: player, isPending: isPlayerLoading } = usePlayer();
 	const { roomCode } = useParams<{ roomCode: string }>();
 	const { data: room, isPending, isError } = useRoom(roomCode);
+	const headerConfig = (activeMatch?.handle as RoomRouteHandle | undefined)
+		?.header;
 
 	useRoomRealtime(room?.id ?? null);
 
@@ -35,7 +40,7 @@ export default function RoomLayout() {
 		}
 
 		if (!isPlayerLoading && !player) {
-			navigate("/create-player");
+			navigate("/create-player", { replace: true });
 		}
 	}, [player, isPlayerLoading, navigate]);
 
@@ -63,9 +68,34 @@ export default function RoomLayout() {
 		return null;
 	}
 
+	const handleHeaderLeftAction = () => {
+		const leftAction = headerConfig?.leftAction ?? "home";
+
+		if (leftAction === "none") {
+			return;
+		}
+
+		if (leftAction === "home") {
+			navigate(`/`, { replace: true });
+			return;
+		}
+
+		if (window.history.length > 1) {
+			navigate(-1);
+			return;
+		}
+
+		navigate(`/rooms/${room.code}`, { replace: true });
+	};
+
 	return (
 		<div className='min-h-dvh flex flex-col'>
-			<RoomHeader room={room} />
+			<RoomHeader
+				room={room}
+				leftAction={headerConfig?.leftAction ?? "home"}
+				title={headerConfig?.title}
+				onLeftAction={handleHeaderLeftAction}
+			/>
 
 			<main className='max-w-280 w-full mx-auto flex-1 flex flex-col'>
 				<Outlet context={{ room, roomCode }} />
@@ -82,6 +112,15 @@ export default function RoomLayout() {
 export type RoomOutletContext = {
 	room: Room;
 	roomCode: string;
+};
+
+type RoomHeaderHandle = {
+	leftAction: "home" | "back" | "none";
+	title?: string;
+};
+
+type RoomRouteHandle = {
+	header?: RoomHeaderHandle;
 };
 
 export const useRoomContext = () => {

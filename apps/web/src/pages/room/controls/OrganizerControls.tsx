@@ -4,7 +4,7 @@ import { useRoomContext } from "@/pages/room/RoomLayout";
 import { usePlayer } from "@/store/player";
 import { useActivePredictions } from "@/store/prediction";
 import { Rocket } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type CreatePredictionButtonProps = {
 	className?: string;
@@ -14,12 +14,13 @@ function CreatePredictionButton({
 	className,
 }: Readonly<CreatePredictionButtonProps>) {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { room } = useRoomContext();
 	const { data: predictions = [] } = useActivePredictions(room.id);
 	const { data: player } = usePlayer();
 
 	if (!room) {
-		navigate("/404");
+		navigate("/404", { replace: true });
 		return null;
 	}
 
@@ -48,7 +49,11 @@ function CreatePredictionButton({
 					`w-full mx-auto font-bold shadow-lg text-foreground`,
 					className,
 				)}
-				onClick={() => navigate(`/rooms/${room.code}/predictions/new`)}
+				onClick={() =>
+					navigate(`/rooms/${room.code}/predictions/new`, {
+						state: { from: location.pathname },
+					})
+				}
 			>
 				<Rocket className={`ml-2`} />
 				Create Prediction

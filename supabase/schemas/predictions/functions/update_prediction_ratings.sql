@@ -97,7 +97,7 @@ begin
 
     v_experience := least(
       1.0::numeric,
-      v_member.rated_predictions_count::numeric / 100.0
+      v_member.rated_predictions_count::numeric / 10.0
     );
 
     v_effective_k := v_config.base_k * (0.25 + (0.75 * v_experience));

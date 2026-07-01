@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { roomKeys } from "@/store/_keys";
+import { playerQueryKey } from "@/store/player";
 
 export function useRoomRealtime(roomId: string | null) {
     const queryClient = useQueryClient();
@@ -101,6 +102,62 @@ export function useRoomBetRealtime(roomId: string, predictionId: string | null) 
                     queryKey: roomKeys.prediction(roomId, predictionId),
                 });
             }
+
+            export function usePredictionDuelRealtime(
+            	roomId: string,
+            	predictionId: string | null,
+            ) {
+            	const queryClient = useQueryClient();
+
+            	useEffect(() => {
+            		if (!predictionId) return;
+
+            		const client = supabase as unknown as {
+            			channel: (name: string) => any;
+            			removeChannel: (channel: unknown) => void;
+            		};
+
+            		const channel = client
+            			.channel(`duels:${predictionId}`)
+            			.on(
+            				"postgres_changes",
+            				{
+            					event: "*",
+            					schema: "public",
+            					table: "duels",
+            					filter: `prediction_id=eq.${predictionId}`,
+            				},
+            				() => {
+            					queryClient.invalidateQueries({
+            						queryKey: roomKeys.duels(roomId, predictionId),
+            					});
+            					queryClient.invalidateQueries({
+            						queryKey: playerQueryKey,
+            					});
+            				},
+            			)
+            			.on(
+            				"postgres_changes",
+            				{
+            					event: "*",
+            					schema: "public",
+            					table: "duel_queue",
+            				},
+            				() => {
+            					queryClient.invalidateQueries({
+            						queryKey: roomKeys.duels(roomId, predictionId),
+            					});
+            				},
+            			)
+            			.subscribe((status: string) => {
+            				console.log("Realtime duel status:", status);
+            			});
+
+            		return () => {
+            			client.removeChannel(channel);
+            		};
+            	}, [predictionId, queryClient, roomId]);
+            }
         )
         .subscribe((status) => {
             console.log("Realtime bet status:", status);
@@ -111,4 +168,3 @@ export function useRoomBetRealtime(roomId: string, predictionId: string | null) 
         };
     }, [roomId, predictionId, queryClient]);
 }
-

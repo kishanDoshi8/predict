@@ -1,0 +1,83 @@
+import { createDuel, getPredictionDuels } from "@/lib/api";
+import { Duel, DuelSummary } from "@/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { roomKeys } from "./_keys";
+import { playerQueryKey } from "./player";
+
+const ACTIVE_DUEL_STATUSES = new Set<Duel["status"]>([
+	"created",
+	"queued",
+	"matched",
+]);
+
+export function getDuelSummary(duels: Duel[]): DuelSummary {
+	const activeDuels = duels.filter((duel) =>
+		ACTIVE_DUEL_STATUSES.has(duel.status),
+	);
+	const stakes = activeDuels.map((duel) => duel.stake_amount);
+
+	return {
+		activeDuelsCount: activeDuels.length,
+		minStake: stakes.length > 0 ? Math.min(...stakes) : null,
+		maxStake: stakes.length > 0 ? Math.max(...stakes) : null,
+		queuePlayersCount: activeDuels.reduce(
+			(total, duel) => total + duel.queue_count,
+			0,
+		),
+		openDuelsAvailable: activeDuels.some((duel) =>
+			duel.status === "created" || duel.status === "queued",
+		),
+	};
+}
+
+export const usePredictionDuels = (roomId: string, predictionId?: string) => {
+	return useQuery({
+		queryKey: roomKeys.duels(roomId, predictionId ?? ""),
+		queryFn: () => getPredictionDuels(predictionId ?? ""),
+		enabled: !!predictionId,
+	});
+};
+
+type CreateDuelParams = {
+	roomId: string;
+	predictionId: string;
+	challengerPlayerId: string;
+	betId: string;
+	stakeAmount: number;
+};
+
+export const useCreateDuel = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			predictionId,
+			challengerPlayerId,
+			betId,
+			stakeAmount,
+		}: CreateDuelParams) =>
+			createDuel(
+				predictionId,
+				challengerPlayerId,
+				betId,
+				stakeAmount,
+			),
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: roomKeys.duels(
+					variables.roomId,
+					variables.predictionId,
+				),
+			});
+			queryClient.invalidateQueries({
+				queryKey: playerQueryKey,
+			});
+			queryClient.invalidateQueries({
+				queryKey: roomKeys.bets(
+					variables.roomId,
+					variables.predictionId,
+				),
+			});
+		},
+	});
+};

@@ -1,4 +1,4 @@
-import { Player, Prediction, PredictionStatus, Room, PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats } from '@/types'
+import { Player, Prediction, PredictionStatus, Room, PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats, Duel, DuelStatus } from '@/types'
 import type { Json } from '@/types/supabase'
 import { supabase } from './supabase'
 
@@ -49,6 +49,13 @@ function assertOk<T>(data: T | null, error: unknown): T {
   if (data === null) throw new Error('No data returned')
   return data
 }
+
+type UntypedSupabaseClient = {
+  from: (table: string) => any
+  rpc: (fn: string, params?: Record<string, unknown>) => Promise<{ data: unknown | null; error: unknown }>
+}
+
+const untypedSupabase = supabase as unknown as UntypedSupabaseClient
 
 // #region Players & Session
 // -------------------------------------------------------
@@ -578,6 +585,68 @@ export async function getMyBet(predictionId: string, playerId: string) {
   return data
 }
 // #endregion Bets
+
+// #region Duels
+// -------------------------------------------------------
+type DuelRow = Omit<Duel, 'queue_count' | 'status'> & {
+  status: string
+}
+
+function mapDuelRow(row: DuelRow, queueCount: number): Duel {
+  return {
+    ...row,
+    status: row.status as DuelStatus,
+    queue_count: queueCount,
+  }
+}
+
+export async function getPredictionDuels(predictionId: string): Promise<Duel[]> {
+  const { data, error } = await untypedSupabase
+    .from('duels')
+    .select(
+      `id,prediction_id,challenger_player_id,challenger_bet_id,stake_amount,fee_amount,status,matched_opponent_player_id,matched_opponent_bet_id,created_at,matched_at,resolved_at`,
+    )
+    .eq('prediction_id', predictionId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  const duels = (data ?? []) as DuelRow[]
+  if (duels.length === 0) return []
+
+  const duelIds = duels.map((duel) => duel.id)
+  const { data: queueData, error: queueError } = await untypedSupabase
+    .from('duel_queue')
+    .select('duel_id')
+    .in('duel_id', duelIds)
+
+  if (queueError) throw queueError
+
+  const queueCountByDuel = new Map<string, number>()
+  for (const queueRow of (queueData ?? []) as { duel_id: string }[]) {
+    const previousCount = queueCountByDuel.get(queueRow.duel_id) ?? 0
+    queueCountByDuel.set(queueRow.duel_id, previousCount + 1)
+  }
+
+  return duels.map((duel) => mapDuelRow(duel, queueCountByDuel.get(duel.id) ?? 0))
+}
+
+export async function createDuel(
+  predictionId: string,
+  challengerPlayerId: string,
+  betId: string,
+  stakeAmount: number,
+): Promise<Duel> {
+  const { data, error } = await untypedSupabase.rpc('create_duel', {
+    p_prediction_id: predictionId,
+    p_challenger_player_id: challengerPlayerId,
+    p_bet_id: betId,
+    p_stake_amount: stakeAmount,
+  })
+
+  const duel = assertOk(data, error) as DuelRow
+  return mapDuelRow(duel, 0)
+}
+// #endregion Duels
 
 // #region Leaderboard
 export async function getRoomLeaderboard(

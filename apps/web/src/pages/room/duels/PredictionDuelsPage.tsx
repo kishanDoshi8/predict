@@ -1,11 +1,9 @@
 import { Badge, Button, Skeleton } from "@/components";
 import { usePredictionDuelRealtime } from "@/hooks/useRoomRealtime";
-import { useBets } from "@/store/bet";
 import { usePredictionDuels } from "@/store/duel";
 import { usePrediction } from "@/store/prediction";
 import { useRoomContext } from "../RoomLayout";
 import { Link, useParams } from "react-router-dom";
-import { Duel } from "@/types";
 import { DuelCard } from "./components/DuelCard";
 import { SwordsIcon } from "lucide-react";
 import { usePlayer } from "@/store/player";
@@ -20,20 +18,13 @@ export function PredictionDuelsPage() {
 		room.id,
 		predictionId,
 	);
-	const { data: bets = [] } = useBets(room.id, predictionId);
 
 	usePredictionDuelRealtime(room.id, predictionId ?? null);
 
-	const getPlayerLabel = (playerId: string | null) => {
-		if (!playerId) return null;
-		return (
-			room.members.find((member) => member.player_id === playerId)?.player
-				.username ?? "Unknown player"
-		);
-	};
-
 	const hasDuel = duels.some(
-		(duel) => duel.challenger_player_id === player?.id,
+		(duel) =>
+			duel.challenger_player_id === player?.id &&
+			duel.status !== "cancelled",
 	);
 
 	const isDuelOpen = prediction?.status === "draft";

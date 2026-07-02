@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, Button } from "@/components";
+import { Avatar, AvatarFallback } from "@/components";
 import { cn } from "@/lib/utils";
 import { usePlayer } from "@/store/player";
 import { Duel } from "@/types";
@@ -29,7 +29,13 @@ export function DuelCard({ duel }: Readonly<DuelCardProps>) {
 
 	return (
 		<div
-			className={`rounded-xl border border-border bg-linear-to-br ${isSelf ? "from-win/15 border border-win/30" : "from-cyan-500/15"} to-card/20 p-4`}
+			className={`rounded-xl border border-border bg-linear-to-br ${
+				duel.status === "cancelled"
+					? "from-destructive/15 border-destructive/50"
+					: isSelf
+						? "from-win/15 border-win/30"
+						: "from-cyan-500/15"
+			} to-card/20 p-4`}
 		>
 			<div className={`flex items-center gap-2`}>
 				<Avatar size='lg' className={cn(isSelf && "ring-1 ring-win")}>
@@ -60,20 +66,18 @@ export function DuelCard({ duel }: Readonly<DuelCardProps>) {
 			</div>
 
 			<div>
-				{(duel.status === "created" || duel.status === "queued") && (
-					<div
-						className={`flex items-center p-2 mt-4 bg-card border rounded-lg`}
+				<div
+					className={`flex items-center p-2 mt-4 bg-card border rounded-lg`}
+				>
+					<p className='text-sm'>{STATUS_LABEL[duel.status]}</p>
+					<Link
+						to={duel.id}
+						className={`flex items-center text-accent text-sm ml-auto`}
 					>
-						<p className='text-sm'>{STATUS_LABEL[duel.status]}</p>
-						<Link
-							to='/'
-							className={`flex items-center text-accent text-sm ml-auto`}
-						>
-							View Duel{" "}
-							<ChevronRightIcon className={`w-4 h-4 ml-1`} />
-						</Link>
-					</div>
-				)}
+						View Duel{" "}
+						<ChevronRightIcon className={`w-4 h-4 ml-1`} />
+					</Link>
+				</div>
 			</div>
 		</div>
 	);

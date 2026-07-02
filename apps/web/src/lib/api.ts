@@ -724,6 +724,77 @@ export async function createDuel(
 
   return mapDuelRow(duel, playerUsernameById, [])
 }
+
+export async function joinDuelQueue(
+  duelId: string,
+  playerId: string,
+  betId: string,
+): Promise<Duel> {
+  const { data, error } = await untypedSupabase.rpc('join_duel_queue', {
+    p_duel_id: duelId,
+    p_player_id: playerId,
+    p_bet_id: betId,
+  })
+
+  const duel = assertOk(data, error) as DuelRow
+  const playerIds = [duel.challenger_player_id, duel.matched_opponent_player_id]
+    .filter((id): id is string => Boolean(id))
+
+  const playerUsernameById = new Map<string, string>()
+  if (playerIds.length > 0) {
+    const { data: playerRows, error: playerError } = await untypedSupabase
+      .from('players')
+      .select('id,username')
+      .in('id', playerIds)
+
+    if (playerError) throw playerError
+
+    for (const playerRow of (playerRows ?? []) as { id: string; username: string }[]) {
+      playerUsernameById.set(playerRow.id, playerRow.username)
+    }
+  }
+
+  const { data: queueData, error: queueError } = await untypedSupabase
+    .from('duel_queue')
+    .select('player_id')
+    .eq('duel_id', duel.id)
+    .order('created_at', { ascending: true })
+
+  if (queueError) throw queueError
+
+  const queuePlayerIds = ((queueData ?? []) as { player_id: string }[]).map((row) => row.player_id)
+  return mapDuelRow(duel, playerUsernameById, queuePlayerIds)
+}
+
+export async function cancelDuel(
+  duelId: string,
+  playerId: string,
+): Promise<Duel> {
+  const { data, error } = await untypedSupabase.rpc('cancel_duel', {
+    p_duel_id: duelId,
+    p_player_id: playerId,
+  })
+
+  const duel = assertOk(data, error) as DuelRow
+  const playerIds = [duel.challenger_player_id, duel.matched_opponent_player_id]
+    .filter((id): id is string => Boolean(id))
+
+  const playerUsernameById = new Map<string, string>()
+  if (playerIds.length > 0) {
+    const { data: playerRows, error: playerError } = await untypedSupabase
+      .from('players')
+      .select('id,username')
+      .in('id', playerIds)
+
+    if (playerError) throw playerError
+
+    for (const playerRow of (playerRows ?? []) as { id: string; username: string }[]) {
+      playerUsernameById.set(playerRow.id, playerRow.username)
+    }
+  }
+
+  return mapDuelRow(duel, playerUsernameById, [])
+}
 // #endregion Duels
 
 // #region Leaderboard

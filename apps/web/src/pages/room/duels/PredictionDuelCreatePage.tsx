@@ -22,6 +22,7 @@ import {
 	ShieldXIcon,
 	UsersIcon,
 } from "lucide-react";
+import { StakeBreakdown } from "./PredictionDuelDetailPage";
 
 const MIN_DUEL_STAKE = 100;
 
@@ -266,7 +267,7 @@ export function PredictionDuelCreatePage() {
 				</div>
 			</div>
 
-			<div className='rounded-xl border border-border bg-card p-4 space-y-2'>
+			{/* <div className='rounded-xl border border-border bg-card p-4 space-y-2'>
 				<div className={`flex items-center`}>
 					<p className={`flex-1 text-muted-foreground`}>
 						Into escrow
@@ -286,7 +287,12 @@ export function PredictionDuelCreatePage() {
 					<p className={`flex-1`}>Potential win</p>
 					<p className={`text-win`}>+{stakeAmount} PTS</p>
 				</div>
-			</div>
+			</div> */}
+			<StakeBreakdown
+				stake={stakeAmount}
+				fee={feeAmount}
+				pot={stakeAmount}
+			/>
 
 			<Alert className={`mb-20`}>
 				<UsersIcon color={"var(--primary)"} />

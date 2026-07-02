@@ -1,4 +1,4 @@
-import { createDuel, getPredictionDuels } from "@/lib/api";
+import { cancelDuel, createDuel, getPredictionDuels, joinDuelQueue } from "@/lib/api";
 import { Duel, DuelSummary } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "./_keys";
@@ -77,6 +77,61 @@ export const useCreateDuel = () => {
 					variables.roomId,
 					variables.predictionId,
 				),
+			});
+		},
+	});
+};
+
+type JoinDuelQueueParams = {
+	roomId: string;
+	predictionId: string;
+	duelId: string;
+	playerId: string;
+	betId: string;
+};
+
+export const useJoinDuelQueue = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ duelId, playerId, betId }: JoinDuelQueueParams) =>
+			joinDuelQueue(duelId, playerId, betId),
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: roomKeys.duels(variables.roomId, variables.predictionId),
+			});
+			queryClient.invalidateQueries({
+				queryKey: playerQueryKey,
+			});
+			queryClient.invalidateQueries({
+				queryKey: roomKeys.bets(variables.roomId, variables.predictionId),
+			});
+		},
+	});
+};
+
+type CancelDuelParams = {
+	roomId: string;
+	predictionId: string;
+	duelId: string;
+	playerId: string;
+};
+
+export const useCancelDuel = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ duelId, playerId }: CancelDuelParams) =>
+			cancelDuel(duelId, playerId),
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: roomKeys.duels(variables.roomId, variables.predictionId),
+			});
+			queryClient.invalidateQueries({
+				queryKey: playerQueryKey,
+			});
+			queryClient.invalidateQueries({
+				queryKey: roomKeys.bets(variables.roomId, variables.predictionId),
 			});
 		},
 	});

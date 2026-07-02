@@ -21,6 +21,7 @@ import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
 import RoomDashboard from "./pages/room/RoomDashboard";
 import { PredictionDuelsPage } from "./pages/room/duels/PredictionDuelsPage";
 import { PredictionDuelCreatePage } from "./pages/room/duels/PredictionDuelCreatePage";
+import { PredictionDuelDetailPage } from "./pages/room/duels/PredictionDuelDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,16 @@ const router = createBrowserRouter([
 							header: {
 								leftAction: "back",
 								title: "Create Duel",
+							},
+						},
+					},
+					{
+						path: "predictions/:predictionId/duels/:duelId",
+						element: <PredictionDuelDetailPage />,
+						handle: {
+							header: {
+								leftAction: "back",
+								title: "Duel",
 							},
 						},
 					},

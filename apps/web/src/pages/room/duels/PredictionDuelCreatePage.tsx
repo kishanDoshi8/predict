@@ -1,4 +1,11 @@
-import { Button, Input, Spinner } from "@/components";
+import {
+	Alert,
+	AlertAction,
+	AlertDescription,
+	AlertTitle,
+	Button,
+	Spinner,
+} from "@/components";
 import { useCreateDuel } from "@/store/duel";
 import { usePrediction } from "@/store/prediction";
 import { usePlayer } from "@/store/player";
@@ -7,8 +14,15 @@ import { useMyBet } from "@/store/bet";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import {
+	InfoIcon,
+	MinusIcon,
+	PlusIcon,
+	ShieldIcon,
+	ShieldXIcon,
+	UsersIcon,
+} from "lucide-react";
 
-const PRESET_STAKES = [100, 200, 300, 500, 1000];
 const MIN_DUEL_STAKE = 100;
 
 function getDuelFee(stakeAmount: number) {
@@ -22,14 +36,22 @@ export function PredictionDuelCreatePage() {
 
 	const { data: prediction } = usePrediction(room.id, predictionId);
 	const { data: player } = usePlayer();
-	const { data: myBet } = useMyBet(room.id, predictionId ?? "", player?.id ?? "");
+	const { data: myBet } = useMyBet(
+		room.id,
+		predictionId ?? "",
+		player?.id ?? "",
+	);
 	const { mutate: createDuel, isPending: isCreatingDuel } = useCreateDuel();
 
 	const [stakeAmount, setStakeAmount] = useState<number>(MIN_DUEL_STAKE);
 
 	const availableBalance = useMemo(() => {
 		if (!player) return 0;
-		return player.points_balance - player.points_in_escrow + (myBet?.amount ?? 0);
+		return (
+			player.points_balance -
+			player.points_in_escrow +
+			(myBet?.amount ?? 0)
+		);
 	}, [myBet?.amount, player]);
 
 	const maxStakeFromBet = myBet?.amount ?? 0;
@@ -66,7 +88,9 @@ export function PredictionDuelCreatePage() {
 			{
 				onSuccess: () => {
 					toast.success("Duel created.");
-					navigate(`/rooms/${room.code}/predictions/${predictionId}/duels`);
+					navigate(
+						`/rooms/${room.code}/predictions/${predictionId}/duels`,
+					);
 				},
 				onError: (error) => {
 					toast.error("Failed to create duel.", {
@@ -78,120 +102,229 @@ export function PredictionDuelCreatePage() {
 	};
 
 	return (
-		<div className='max-w-md mx-auto px-4 pb-6 space-y-4'>
-			<div className='rounded-xl border border-border bg-card p-4 space-y-2'>
-				<h2 className='text-2xl font-semibold'>Create Duel</h2>
-				<p className='text-sm text-muted-foreground'>
-					You will be matched with the first valid opponent.
-				</p>
-			</div>
+		<div className='max-w-md mx-auto px-4 pb-6 pt-4 space-y-4'>
+			{!isCreateDisabled && (
+				<Alert>
+					<ShieldIcon color={"var(--accent)"} />
+					<AlertTitle>Your pick stays hidden</AlertTitle>
+					<AlertDescription>
+						Revealed only when the match locks. No one sees your
+						side.
+					</AlertDescription>
+				</Alert>
+			)}
+
+			{!isPredictionOpen && (
+				<Alert variant='destructive'>
+					<ShieldXIcon color={"var(--loss)"} />
+					<AlertTitle>Too late for this duel</AlertTitle>
+					<AlertDescription>
+						This matchup has already locked.
+					</AlertDescription>
+				</Alert>
+			)}
+			{!hasValidBet && (
+				<Alert variant='destructive'>
+					<ShieldXIcon color={"var(--loss)"} />
+					<AlertTitle>You need a stronger pick</AlertTitle>
+					<AlertDescription>
+						<p className='text-sm text-loss mb-2'>
+							Place at least 100 points to start a duel.
+						</p>
+						<Button
+							variant='secondary'
+							size='sm'
+							onClick={() =>
+								navigate(
+									`/rooms/${room.code}/predictions/${predictionId}`,
+								)
+							}
+						>
+							Place a bet
+						</Button>
+					</AlertDescription>
+					<AlertAction></AlertAction>
+				</Alert>
+			)}
+			{stakeAmount < MIN_DUEL_STAKE && (
+				<Alert variant='destructive'>
+					<ShieldXIcon color={"var(--loss)"} />
+					<AlertTitle>Raise the challenge amount</AlertTitle>
+					<AlertDescription>
+						<p className='text-sm text-loss'>
+							Make it at least {MIN_DUEL_STAKE} points.
+						</p>
+					</AlertDescription>
+				</Alert>
+			)}
+			{!canAffordStake && (
+				<Alert variant='destructive'>
+					<ShieldXIcon color={"var(--loss)"} />
+					<AlertTitle>Not enough points</AlertTitle>
+					<AlertDescription>
+						<p className='text-sm text-loss'>
+							You don’t have enough for the stake and fee.
+						</p>
+					</AlertDescription>
+				</Alert>
+			)}
 
 			<div className='rounded-xl border border-border bg-card p-4 space-y-3'>
-				<p className='text-sm'>
-					<span className='text-muted-foreground'>Your bet:</span>{" "}
-					{myBet ? `${myBet.amount.toLocaleString()} PTS` : "No valid bet"}
-				</p>
-				<p className='text-sm'>
-					<span className='text-muted-foreground'>Available balance:</span>{" "}
-					{availableBalance.toLocaleString()} PTS
-				</p>
-				<p className='text-sm'>
-					<span className='text-muted-foreground'>Maximum duel stake:</span>{" "}
-					{maxStakeFromBet.toLocaleString()} PTS
-				</p>
-
-				<div className='space-y-2'>
-					<p className='text-sm font-medium'>Stake amount</p>
-					<div className='flex flex-wrap gap-2'>
-						{PRESET_STAKES.map((presetStake) => (
-							<Button
-								key={presetStake}
-								type='button'
-								size='sm'
-								variant={
-									stakeAmount === presetStake ? "default" : "outline"
-								}
-								disabled={presetStake > maxStakeFromBet}
-								onClick={() => setStakeAmount(presetStake)}
-							>
-								{presetStake}
-							</Button>
-						))}
+				<div
+					className={`flex flex-col items-center justify-center gap-4`}
+				>
+					<h2>Challenge Amount</h2>
+					<div className={`flex gap-4`}>
+						<Button
+							size='icon-lg'
+							variant='secondary'
+							disabled={stakeAmount <= MIN_DUEL_STAKE}
+							onClick={() =>
+								setStakeAmount((prev) =>
+									Math.max(prev - 100, MIN_DUEL_STAKE),
+								)
+							}
+						>
+							<MinusIcon className='h-4 w-4' />
+						</Button>
+						<p
+							className={`flex flex-col items-center justify-center`}
+						>
+							<span className={`text-5xl font-bold text-primary`}>
+								{stakeAmount}
+							</span>
+							<span className={`text-sm`}>POINTS</span>
+						</p>
+						<Button
+							size='icon-lg'
+							variant='secondary'
+							disabled={stakeAmount >= maxStakeFromBet}
+							onClick={() =>
+								setStakeAmount((prev) =>
+									Math.min(prev + 100, maxStakeFromBet),
+								)
+							}
+						>
+							<PlusIcon className='h-4 w-4' />
+						</Button>
 					</div>
-					<Input
-						type='number'
-						min={MIN_DUEL_STAKE}
-						step={100}
-						value={stakeAmount}
-						onChange={(event) =>
-							setStakeAmount(Number(event.target.value || 0))
-						}
-					/>
-				</div>
-
-				<div className='rounded-lg border border-border bg-background p-3 space-y-2 text-sm'>
-					<p>
-						<span className='text-muted-foreground'>Confidence cost (fee):</span>{" "}
-						{feeAmount} PTS
-					</p>
-					<p>
-						<span className='text-muted-foreground'>Escrow reserve:</span>{" "}
-						{stakeAmount} PTS
-					</p>
-					<p className='text-muted-foreground'>
-						Your stake points are reserved in escrow while the duel is
-						active.
-					</p>
-				</div>
-
-				<div className='rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground'>
-					Opponent selection: OPEN (V1)
-				</div>
-
-				{!isPredictionOpen && (
-					<p className='text-sm text-loss'>
-						Duel creation is closed because this prediction is no longer
-						live.
-					</p>
-				)}
-				{!hasValidBet && (
-					<p className='text-sm text-loss'>
-						You need a valid prediction bet of at least 100 points to create
-						a duel.
-					</p>
-				)}
-				{stakeAmount < MIN_DUEL_STAKE && (
-					<p className='text-sm text-loss'>
-						Minimum duel stake is {MIN_DUEL_STAKE} points.
-					</p>
-				)}
-				{!canAffordStake && (
-					<p className='text-sm text-loss'>
-						Insufficient available balance for stake + confidence fee.
-					</p>
-				)}
-
-				<div className='flex gap-2'>
-					<Button
-						variant='outline'
-						className='flex-1'
-						onClick={() =>
-							navigate(
-								`/rooms/${room.code}/predictions/${predictionId}/duels`,
+					<div
+						className={`flex gap-2 justify-around *:flex-1 flex-wrap w-full`}
+					>
+						<Button
+							variant={
+								stakeAmount === 100 ? "default" : "secondary"
+							}
+							disabled={maxStakeFromBet < 100}
+							className={`border`}
+							onClick={() => setStakeAmount(100)}
+						>
+							100
+						</Button>
+						<Button
+							variant={
+								stakeAmount === 200 ? "default" : "secondary"
+							}
+							disabled={maxStakeFromBet < 200}
+							className={`border`}
+							onClick={() => setStakeAmount(200)}
+						>
+							200
+						</Button>
+						<Button
+							variant={
+								stakeAmount === 300 ? "default" : "secondary"
+							}
+							disabled={maxStakeFromBet < 300}
+							className={`border`}
+							onClick={() => setStakeAmount(300)}
+						>
+							300
+						</Button>
+						<Button
+							variant={
+								stakeAmount === maxStakeFromBet
+									? "default"
+									: "secondary"
+							}
+							disabled={maxStakeFromBet < 500}
+							className={`border`}
+							onClick={() => setStakeAmount(maxStakeFromBet)}
+						>
+							MAX
+						</Button>
+					</div>
+					<div>
+						<InfoIcon
+							className={`inline-block h-3 w-3 mr-2 text-muted-foreground`}
+						/>
+						<span className={`text-xs text-muted-foreground`}>
+							Multiples of 100 · max = your bet ({maxStakeFromBet}
 							)
-						}
-					>
-						Cancel
-					</Button>
-					<Button
-						className='flex-1'
-						onClick={onCreateDuel}
-						disabled={isCreateDisabled || isCreatingDuel}
-					>
-						{isCreatingDuel && <Spinner />}
-						Create Duel
-					</Button>
+						</span>
+					</div>
 				</div>
+			</div>
+
+			<div className='rounded-xl border border-border bg-card p-4 space-y-2'>
+				<div className={`flex items-center`}>
+					<p className={`flex-1 text-muted-foreground`}>
+						Into escrow
+					</p>
+					<p className={`font-semibold`}>{stakeAmount} PTS</p>
+				</div>
+				<div className={`flex items-center`}>
+					<p className={`flex-1 text-muted-foreground`}>
+						Confidence fee
+					</p>
+					<p className={`font-semibold text-destructive`}>
+						-{feeAmount} PTS
+					</p>
+				</div>
+				<hr />
+				<div className={`flex items-center font-semibold text-lg`}>
+					<p className={`flex-1`}>Potential win</p>
+					<p className={`text-win`}>+{stakeAmount} PTS</p>
+				</div>
+			</div>
+
+			<Alert className={`mb-20`}>
+				<UsersIcon color={"var(--primary)"} />
+				<AlertDescription>
+					Players queue to face you. The{" "}
+					<span
+						className={`text-foreground inline-flex font-semibold`}
+					>
+						first with a different pick
+					</span>{" "}
+					becomes your opponent — everyone else is refunded
+					automatically.
+				</AlertDescription>
+			</Alert>
+
+			{/* Footer */}
+			<div className='flex gap-2 fixed inset-x-0 bottom-0 z-50 p-4 bg-card'>
+				<Button
+					variant='outline'
+					className='flex-1'
+					disabled={isCreatingDuel || isCreateDisabled}
+					onClick={() =>
+						navigate(
+							`/rooms/${room.code}/predictions/${predictionId}/duels`,
+						)
+					}
+				>
+					Cancel
+				</Button>
+				<Button
+					className='flex-1'
+					variant='linear'
+					onClick={onCreateDuel}
+					disabled={isCreateDisabled || isCreatingDuel}
+				>
+					{isCreatingDuel && <Spinner />}
+					Create Duel
+				</Button>
 			</div>
 		</div>
 	);

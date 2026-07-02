@@ -2,7 +2,6 @@ import { usePrediction } from "@/store/prediction";
 import { useState } from "react";
 import { PredictionPhaseView } from "./predictions/PredictionPhaseView";
 import { useRoomContext } from "./RoomLayout";
-import PredictionHeader from "./components/PredictionHeader";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePredictionDuels, getDuelSummary } from "@/store/duel";
 import { DuelSummaryCard } from "./duels/components/DuelSummaryCard";
@@ -33,10 +32,6 @@ export function PredictionPage() {
 
 	return (
 		<div>
-			<div className={`px-4`}>
-				<PredictionHeader />
-			</div>
-
 			<div className={`p-4`}>
 				{prediction && (
 					<div className='mb-4 max-w-md mx-auto'>

@@ -588,15 +588,36 @@ export async function getMyBet(predictionId: string, playerId: string) {
 
 // #region Duels
 // -------------------------------------------------------
-type DuelRow = Omit<Duel, 'queue_count' | 'status'> & {
+type DuelRow = Omit<
+  Duel,
+  | 'queue_count'
+  | 'status'
+  | 'challenger_username'
+  | 'matched_opponent_username'
+  | 'queued_player_usernames'
+> & {
   status: string
 }
 
-function mapDuelRow(row: DuelRow, queueCount: number): Duel {
+function mapDuelRow(
+  row: DuelRow,
+  playerUsernameById: Map<string, string>,
+  queuePlayerIds: string[],
+): Duel {
+  const challengerUsername = playerUsernameById.get(row.challenger_player_id) ?? null
+  const matchedOpponentUsername = row.matched_opponent_player_id
+    ? (playerUsernameById.get(row.matched_opponent_player_id) ?? null)
+    : null
+
   return {
     ...row,
     status: row.status as DuelStatus,
-    queue_count: queueCount,
+    challenger_username: challengerUsername,
+    matched_opponent_username: matchedOpponentUsername,
+    queue_count: queuePlayerIds.length,
+    queued_player_usernames: queuePlayerIds
+      .map((playerId) => playerUsernameById.get(playerId))
+      .filter((username): username is string => Boolean(username)),
   }
 }
 
@@ -616,18 +637,60 @@ export async function getPredictionDuels(predictionId: string): Promise<Duel[]> 
   const duelIds = duels.map((duel) => duel.id)
   const { data: queueData, error: queueError } = await untypedSupabase
     .from('duel_queue')
-    .select('duel_id')
+    .select('duel_id,player_id')
     .in('duel_id', duelIds)
+    .order('created_at', { ascending: true })
 
   if (queueError) throw queueError
 
-  const queueCountByDuel = new Map<string, number>()
-  for (const queueRow of (queueData ?? []) as { duel_id: string }[]) {
-    const previousCount = queueCountByDuel.get(queueRow.duel_id) ?? 0
-    queueCountByDuel.set(queueRow.duel_id, previousCount + 1)
+  const queueRows = (queueData ?? []) as { duel_id: string; player_id: string }[]
+  const queuePlayerIdsByDuel = new Map<string, string[]>()
+  for (const queueRow of queueRows) {
+    const existingQueue = queuePlayerIdsByDuel.get(queueRow.duel_id)
+    if (existingQueue) {
+      existingQueue.push(queueRow.player_id)
+      continue
+    }
+
+    queuePlayerIdsByDuel.set(queueRow.duel_id, [queueRow.player_id])
   }
 
-  return duels.map((duel) => mapDuelRow(duel, queueCountByDuel.get(duel.id) ?? 0))
+  const playerIds = Array.from(
+    new Set(
+      [
+        ...duels.map((duel) => duel.challenger_player_id),
+        ...duels
+          .map((duel) => duel.matched_opponent_player_id)
+          .filter((playerId): playerId is string => Boolean(playerId)),
+        ...queueRows.map((queueRow) => queueRow.player_id),
+      ],
+    ),
+  )
+
+  const playerUsernameById = new Map<string, string>()
+  if (playerIds.length > 0) {
+    const { data: playerRows, error: playerError } = await untypedSupabase
+      .from('players')
+      .select('id,username')
+      .in('id', playerIds)
+
+    if (playerError) throw playerError
+
+    for (const playerRow of (playerRows ?? []) as {
+      id: string
+      username: string
+    }[]) {
+      playerUsernameById.set(playerRow.id, playerRow.username)
+    }
+  }
+
+  return duels.map((duel) =>
+    mapDuelRow(
+      duel,
+      playerUsernameById,
+      queuePlayerIdsByDuel.get(duel.id) ?? [],
+    ),
+  )
 }
 
 export async function createDuel(
@@ -644,7 +707,22 @@ export async function createDuel(
   })
 
   const duel = assertOk(data, error) as DuelRow
-  return mapDuelRow(duel, 0)
+  const playerUsernameById = new Map<string, string>()
+  const { data: challengerData, error: challengerError } = await untypedSupabase
+    .from('players')
+    .select('id,username')
+    .eq('id', duel.challenger_player_id)
+    .maybeSingle()
+
+  if (challengerError) throw challengerError
+  if (challengerData) {
+    playerUsernameById.set(
+      challengerData.id as string,
+      challengerData.username as string,
+    )
+  }
+
+  return mapDuelRow(duel, playerUsernameById, [])
 }
 // #endregion Duels
 

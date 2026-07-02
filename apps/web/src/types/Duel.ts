@@ -10,16 +10,19 @@ export interface Duel {
 	id: string;
 	prediction_id: string;
 	challenger_player_id: string;
+	challenger_username: string | null;
 	challenger_bet_id: string;
 	stake_amount: number;
 	fee_amount: number;
 	status: DuelStatus;
 	matched_opponent_player_id: string | null;
+	matched_opponent_username: string | null;
 	matched_opponent_bet_id: string | null;
 	created_at: string;
 	matched_at: string | null;
 	resolved_at: string | null;
 	queue_count: number;
+	queued_player_usernames: string[];
 }
 
 export interface DuelSummary {

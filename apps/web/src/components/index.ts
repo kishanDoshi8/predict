@@ -29,6 +29,7 @@ export { ScrollArea, ScrollBar } from './ui/scroll-area'
 export { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 export { Carousel, CarouselItem } from './ui/carousel'
 export { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
+export { Marker, MarkerIcon, MarkerContent, markerVariants } from './ui/marker'
 
 // -- charts --
 export { ChartContainer, ChartTooltipContent, ChartTooltip, ChartStyle, ChartLegendContent, ChartLegend, type ChartConfig } from './ui/charts'

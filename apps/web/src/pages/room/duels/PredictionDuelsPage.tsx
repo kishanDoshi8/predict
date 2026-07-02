@@ -7,21 +7,15 @@ import { useRoomContext } from "../RoomLayout";
 import { Link, useParams } from "react-router-dom";
 import { Duel } from "@/types";
 import { DuelCard } from "./components/DuelCard";
-
-function getPredictionStatusLabel(status?: string) {
-	if (status === "draft") return "Live";
-	if (status === "locked") return "Locked";
-	return "Resolved";
-}
+import { SwordsIcon } from "lucide-react";
+import { usePlayer } from "@/store/player";
 
 export function PredictionDuelsPage() {
 	const { predictionId } = useParams<{ predictionId: string }>();
 	const { room } = useRoomContext();
+	const { data: player } = usePlayer();
 
-	const { data: prediction, isPending: isPredictionLoading } = usePrediction(
-		room.id,
-		predictionId,
-	);
+	const { data: prediction } = usePrediction(room.id, predictionId);
 	const { data: duels = [], isPending: isDuelsLoading } = usePredictionDuels(
 		room.id,
 		predictionId,
@@ -38,87 +32,96 @@ export function PredictionDuelsPage() {
 		);
 	};
 
-	const getOutcomeLabel = (duel: Duel) => {
-		if (duel.status !== "resolved") return null;
-		if (!prediction || prediction.status !== "revealed") {
-			return "No winner (prediction did not reveal a winning option)";
-		}
-
-		const challengerBet = bets.find((bet) => bet.id === duel.challenger_bet_id);
-		const opponentBet = bets.find(
-			(bet) => bet.id === duel.matched_opponent_bet_id,
-		);
-
-		if (!challengerBet || !opponentBet || !prediction.winning_option_id) {
-			return "Resolved";
-		}
-
-		if (challengerBet.option_id === prediction.winning_option_id) {
-			return `${getPlayerLabel(duel.challenger_player_id) ?? "Challenger"} won`;
-		}
-
-		return `${getPlayerLabel(duel.matched_opponent_player_id) ?? "Opponent"} won`;
-	};
+	const hasDuel = duels.some(
+		(duel) => duel.challenger_player_id === player?.id,
+	);
 
 	const isDuelOpen = prediction?.status === "draft";
 
-	return (
-		<div className='max-w-md mx-auto px-4 pb-6 space-y-4'>
-			<div className='rounded-xl border border-border bg-card p-4 space-y-2'>
-				<div className='flex items-center justify-between'>
-					<h2 className='text-2xl font-semibold'>Duels</h2>
-					<Badge variant={isDuelOpen ? "default" : "secondary"}>
-						{isDuelOpen ? "Active" : "Closed"}
-					</Badge>
-				</div>
-				<p className='text-sm text-muted-foreground'>
-					Challenge other players using your prediction bets.
-				</p>
-				<p className='text-sm'>
-					<span className='text-muted-foreground'>Prediction status:</span>{" "}
-					{isPredictionLoading
-						? "Loading..."
-						: getPredictionStatusLabel(prediction?.status)}
-				</p>
-				<div>
-					<Button asChild size='sm' disabled={!isDuelOpen}>
-						<Link to='create'>Create Duel</Link>
-					</Button>
-				</div>
-			</div>
+	const duelListContent = (() => {
+		if (isDuelsLoading) {
+			return (
+				<>
+					<Skeleton className='h-32 w-full' />
+					<Skeleton className='h-32 w-full' />
+				</>
+			);
+		}
 
-			<section className='space-y-3'>
-				<h3 className='text-lg font-semibold'>Duel List</h3>
-				{isDuelsLoading ? (
-					<>
-						<Skeleton className='h-32 w-full' />
-						<Skeleton className='h-32 w-full' />
-					</>
-				) : duels.length === 0 ? (
-					<div className='rounded-xl border border-border bg-card p-4'>
+		if (duels.length === 0) {
+			return (
+				<div className='rounded-xl border border-dashed border-border bg-card p-5 text-center space-y-3'>
+					<div className='mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-accent/10'>
+						<SwordsIcon className='h-5 w-5 text-accent' />
+					</div>
+					<div className='space-y-1'>
+						<p className='text-sm font-medium'>
+							{isDuelOpen
+								? "No open duels yet"
+								: "Duels are closed"}
+						</p>
 						<p className='text-sm text-muted-foreground'>
-							No duels yet for this prediction.
+							{isDuelOpen
+								? "Be the first to challenge someone on this prediction."
+								: "This prediction is no longer accepting new duels."}
 						</p>
 					</div>
-				) : (
-					duels.map((duel) => (
-						<DuelCard
-							key={duel.id}
-							duel={duel}
-							challengerLabel={
-								duel.status === "created" || duel.status === "queued"
-									? "Anonymous Challenger"
-									: (getPlayerLabel(duel.challenger_player_id) ??
-										"Unknown")
-							}
-							opponentLabel={getPlayerLabel(
-								duel.matched_opponent_player_id,
-							)}
-							outcomeLabel={getOutcomeLabel(duel)}
-						/>
-					))
-				)}
-			</section>
+					{isDuelOpen && (
+						<Button variant='outline' asChild className='w-full'>
+							<Link to='create'>Create the first duel</Link>
+						</Button>
+					)}
+				</div>
+			);
+		}
+
+		return duels.map((duel) => <DuelCard key={duel.id} duel={duel} />);
+	})();
+
+	return (
+		<div className='max-w-md mx-auto'>
+			<div className={`px-4 pb-6 pt-4 space-y-4`}>
+				<div className='rounded-xl border border-border bg-card p-4 space-y-2'>
+					<div className='flex items-center justify-between'>
+						<div className={`flex items-center gap-2`}>
+							<SwordsIcon className='h-6 w-6 text-accent' />
+							<h2 className='text-2xl font-semibold'>Duels</h2>
+						</div>
+						<Badge variant={isDuelOpen ? "default" : "secondary"}>
+							{isDuelOpen ? "Active" : "Closed"}
+						</Badge>
+					</div>
+					<p className='text-sm text-muted-foreground'>
+						Challenge other players head-to-head.
+					</p>
+					<p className='text-sm text-muted-foreground'>
+						Winner takes the full pot when the match resolves.
+					</p>
+				</div>
+
+				<section className='space-y-3 pb-20'>
+					<h3 className='text-lg font-semibold'>Open Duels</h3>
+					{duelListContent}
+				</section>
+			</div>
+
+			{isDuelOpen && !hasDuel && (
+				<div className='fixed inset-x-0 bottom-0 z-50 p-4 bg-card'>
+					<div className='w-full max-w-md mx-auto'>
+						<Button
+							variant='linear'
+							size='lg'
+							asChild
+							className='w-full mx-auto font-bold shadow-lg text-foreground'
+						>
+							<Link to='create'>
+								<SwordsIcon className='ml-2' />
+								Create Duel
+							</Link>
+						</Button>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

@@ -1,11 +1,12 @@
-import { Badge } from "@/components";
+import { Avatar, AvatarFallback, Button } from "@/components";
+import { cn } from "@/lib/utils";
+import { usePlayer } from "@/store/player";
 import { Duel } from "@/types";
+import { ChevronRightIcon, UsersIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 type DuelCardProps = {
 	duel: Duel;
-	challengerLabel: string;
-	opponentLabel: string | null;
-	outcomeLabel: string | null;
 };
 
 const STATUS_LABEL: Record<Duel["status"], string> = {
@@ -17,46 +18,61 @@ const STATUS_LABEL: Record<Duel["status"], string> = {
 	expired: "Expired",
 };
 
-export function DuelCard({
-	duel,
-	challengerLabel,
-	opponentLabel,
-	outcomeLabel,
-}: Readonly<DuelCardProps>) {
+export function DuelCard({ duel }: Readonly<DuelCardProps>) {
+	const { data: player } = usePlayer();
+	if (!player) return null;
+
+	const isSelf = duel.challenger_player_id === player.id;
+	const initials = duel.challenger_username
+		? duel.challenger_username.slice(0, 2).toUpperCase()
+		: "??";
+
 	return (
-		<div className='rounded-xl border border-border bg-card p-4'>
-			<div className='flex items-center justify-between gap-2'>
-				<p className='text-sm text-muted-foreground'>Duel</p>
-				<Badge variant='secondary'>{STATUS_LABEL[duel.status]}</Badge>
+		<div
+			className={`rounded-xl border border-border bg-linear-to-br ${isSelf ? "from-win/15 border border-win/30" : "from-cyan-500/15"} to-card/20 p-4`}
+		>
+			<div className={`flex items-center gap-2`}>
+				<Avatar size='lg' className={cn(isSelf && "ring-1 ring-win")}>
+					<AvatarFallback className='text-xs'>
+						{initials}
+					</AvatarFallback>
+				</Avatar>
+				<div className={`flex-1`}>
+					<p className='text-foreground font-semibold'>
+						{duel.challenger_username ?? "Anonymous Challenger"}
+					</p>
+					<p
+						className={`flex gap-1 items-center text-muted-foreground text-sm`}
+					>
+						<UsersIcon className={`h-3 w-3`} />
+						<span>{duel.queue_count}</span>
+						<span>queued</span>
+					</p>
+				</div>
+				<div>
+					<p
+						className={`text-2xl font-semibold text-primary text-right`}
+					>
+						{duel.stake_amount.toLocaleString()}
+					</p>
+					<p className={`text-sm text-muted-foreground`}>STAKE</p>
+				</div>
 			</div>
-			<div className='mt-2 space-y-1 text-sm'>
-				<p>
-					<span className='text-muted-foreground'>Challenger:</span>{" "}
-					{challengerLabel}
-				</p>
-				<p>
-					<span className='text-muted-foreground'>Stake:</span>{" "}
-					{duel.stake_amount.toLocaleString()} PTS
-				</p>
-				<p>
-					<span className='text-muted-foreground'>Queue status:</span>{" "}
-					{STATUS_LABEL[duel.status]}
-				</p>
-				<p>
-					<span className='text-muted-foreground'>Players in queue:</span>{" "}
-					{duel.queue_count}
-				</p>
-				{opponentLabel && (
-					<p>
-						<span className='text-muted-foreground'>Opponent:</span>{" "}
-						{opponentLabel}
-					</p>
-				)}
-				{outcomeLabel && (
-					<p>
-						<span className='text-muted-foreground'>Outcome:</span>{" "}
-						{outcomeLabel}
-					</p>
+
+			<div>
+				{(duel.status === "created" || duel.status === "queued") && (
+					<div
+						className={`flex items-center p-2 mt-4 bg-card border rounded-lg`}
+					>
+						<p className='text-sm'>{STATUS_LABEL[duel.status]}</p>
+						<Link
+							to='/'
+							className={`flex items-center text-accent text-sm ml-auto`}
+						>
+							View Duel{" "}
+							<ChevronRightIcon className={`w-4 h-4 ml-1`} />
+						</Link>
+					</div>
 				)}
 			</div>
 		</div>

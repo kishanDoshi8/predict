@@ -1,6 +1,6 @@
 import { Badge } from "@/components";
 import { DuelSummary } from "@/types";
-import { Swords } from "lucide-react";
+import { Swords, UsersIcon } from "lucide-react";
 
 type DuelSummaryCardProps = {
 	summary: DuelSummary;
@@ -11,22 +11,25 @@ export function DuelSummaryCard({
 	summary,
 	onClick,
 }: Readonly<DuelSummaryCardProps>) {
-	const stakeRangeLabel =
-		summary.minStake !== null && summary.maxStake !== null
-			? `${summary.minStake} - ${summary.maxStake} PTS`
-			: "No active stake range";
+	let stakeRangeLabel = "-";
+
+	if (summary.minStake !== null && summary.maxStake !== null) {
+		if (summary.minStake === summary.maxStake) {
+			stakeRangeLabel = `${summary.minStake} PTS`;
+		} else {
+			stakeRangeLabel = `${summary.minStake} - ${summary.maxStake} PTS`;
+		}
+	}
 
 	return (
 		<button
 			type='button'
 			onClick={onClick}
-			className='w-full text-left rounded-2xl border border-primary/30 bg-linear-to-br from-primary/20 via-card to-accent/10 p-4 transition hover:border-primary/50 hover:bg-primary/10'
+			className='w-full text-left rounded-2xl transition p-5 border border-accent/20 bg-[rgba(40,40,40,0.70)] shadow-[2px_4px_16px_0px_rgba(248,248,248,0.06)_inset]'
 		>
 			<div className='flex items-start justify-between gap-3'>
 				<div>
-					<p className='text-xs text-muted-foreground'>
-						Duel Layer
-					</p>
+					<p className='text-xs text-muted-foreground'>Duel Layer</p>
 					<p className='text-lg font-semibold'>Prediction Duels</p>
 				</div>
 				<Badge className='bg-primary/20 text-primary'>
@@ -34,13 +37,15 @@ export function DuelSummaryCard({
 					{summary.activeDuelsCount} Active
 				</Badge>
 			</div>
-			<div className='mt-3 grid grid-cols-2 gap-3 text-sm'>
-				<div className='rounded-lg border border-border bg-card p-3'>
+			<div className='mt-3 flex text-sm items-end gap-4'>
+				<div className='mt-4 flex-1'>
 					<p className='text-muted-foreground text-xs'>Stake Range</p>
 					<p className='font-medium'>{stakeRangeLabel}</p>
 				</div>
-				<div className='rounded-lg border border-border bg-card p-3'>
-					<p className='text-muted-foreground text-xs'>Queue Players</p>
+				<div className='flex gap-2 items-center mt-4'>
+					<p className='text-muted-foreground text-xs'>
+						<UsersIcon className='inline-block h-3 w-3' />
+					</p>
 					<p className='font-medium'>
 						{summary.queuePlayersCount.toLocaleString()}
 					</p>

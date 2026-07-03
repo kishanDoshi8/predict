@@ -18,6 +18,15 @@ const STATUS_LABEL: Record<Duel["status"], string> = {
 	expired: "Expired",
 };
 
+const STATUS_BADGE_STYLE: Record<Duel["status"], string> = {
+	created: "bg-primary/15 text-primary border-primary/30",
+	queued: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
+	matched: "bg-violet-500/15 text-violet-400 border-violet-500/30",
+	resolved: "bg-win/15 text-win border-win/30",
+	cancelled: "bg-destructive/15 text-destructive border-destructive/30",
+	expired: "bg-muted text-muted-foreground border-border",
+};
+
 export function DuelCard({ duel }: Readonly<DuelCardProps>) {
 	const { data: player } = usePlayer();
 	if (!player) return null;
@@ -65,19 +74,22 @@ export function DuelCard({ duel }: Readonly<DuelCardProps>) {
 				</div>
 			</div>
 
-			<div>
-				<div
-					className={`flex items-center p-2 mt-4 bg-card border rounded-lg`}
+			<div className='mt-4 flex items-center justify-between gap-3 rounded-lg border bg-card/30 p-2'>
+				<span
+					className={cn(
+						"inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium tracking-wide",
+						STATUS_BADGE_STYLE[duel.status],
+					)}
 				>
-					<p className='text-sm'>{STATUS_LABEL[duel.status]}</p>
-					<Link
-						to={duel.id}
-						className={`flex items-center text-accent text-sm ml-auto`}
-					>
-						View Duel{" "}
-						<ChevronRightIcon className={`w-4 h-4 ml-1`} />
-					</Link>
-				</div>
+					{STATUS_LABEL[duel.status]}
+				</span>
+				<Link
+					to={duel.id}
+					className='ml-auto inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium text-accent transition-colors hover:bg-accent/20'
+				>
+					View Duel
+					<ChevronRightIcon className='ml-1 h-4 w-4' />
+				</Link>
 			</div>
 		</div>
 	);

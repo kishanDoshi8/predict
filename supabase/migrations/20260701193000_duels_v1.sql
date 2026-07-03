@@ -128,9 +128,9 @@ begin
     raise exception 'Challenger bet must be at least 100 points to enable duels' using errcode = 'P0001';
   end if;
 
-  if NEW.stake_amount > v_challenger_bet.amount then
-    raise exception 'Duel stake cannot exceed challenger bet amount' using errcode = 'P0001';
-  end if;
+  -- if NEW.stake_amount > v_challenger_bet.amount then
+  --   raise exception 'Duel stake cannot exceed challenger bet amount' using errcode = 'P0001';
+  -- end if;
 
   if NEW.matched_opponent_bet_id is not null then
     select * into v_opponent_bet
@@ -153,9 +153,9 @@ begin
       raise exception 'Opponent bet must be at least 100 points to duel' using errcode = 'P0001';
     end if;
 
-    if NEW.stake_amount > v_opponent_bet.amount then
-      raise exception 'Duel stake cannot exceed opponent bet amount' using errcode = 'P0001';
-    end if;
+    -- if NEW.stake_amount > v_opponent_bet.amount then
+    --   raise exception 'Duel stake cannot exceed opponent bet amount' using errcode = 'P0001';
+    -- end if;
 
     if v_opponent_bet.option_id = v_challenger_bet.option_id then
       raise exception 'Matched opponent must be on opposite option' using errcode = 'P0001';
@@ -208,9 +208,9 @@ begin
     raise exception 'Bet must be at least 100 points to join duel queue' using errcode = 'P0001';
   end if;
 
-  if v_duel.stake_amount > v_bet.amount then
-    raise exception 'Duel stake cannot exceed queued bet amount' using errcode = 'P0001';
-  end if;
+  -- if v_duel.stake_amount > v_bet.amount then
+  --   raise exception 'Duel stake cannot exceed queued bet amount' using errcode = 'P0001';
+  -- end if;
 
   return NEW;
 end;
@@ -329,9 +329,9 @@ begin
     raise exception 'Minimum bet is 100 points to create duels' using errcode = 'P0001';
   end if;
 
-  if p_stake_amount > v_bet.amount then
-    raise exception 'Duel stake cannot exceed bet amount' using errcode = 'P0001';
-  end if;
+  -- if p_stake_amount > v_bet.amount then
+  --   raise exception 'Duel stake cannot exceed bet amount' using errcode = 'P0001';
+  -- end if;
 
   if exists (
     select 1
@@ -619,9 +619,9 @@ begin
     raise exception 'Minimum bet is 100 points to join duel queue' using errcode = 'P0001';
   end if;
 
-  if v_duel.stake_amount > v_bet.amount then
-    raise exception 'Duel stake cannot exceed your bet amount' using errcode = 'P0001';
-  end if;
+  -- if v_duel.stake_amount > v_bet.amount then
+  --   raise exception 'Duel stake cannot exceed your bet amount' using errcode = 'P0001';
+  -- end if;
 
   select * into v_player
   from public.players

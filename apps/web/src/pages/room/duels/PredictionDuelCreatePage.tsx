@@ -297,7 +297,7 @@ export function PredictionDuelCreatePage() {
 			<Alert className={`mb-20`}>
 				<UsersIcon color={"var(--primary)"} />
 				<AlertDescription>
-					Players queue to face you. The{" "}
+					Players queue to face you. After the prediction locks, the{" "}
 					<span
 						className={`text-foreground inline-flex font-semibold`}
 					>

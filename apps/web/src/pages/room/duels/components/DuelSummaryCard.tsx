@@ -29,8 +29,10 @@ export function DuelSummaryCard({
 		>
 			<div className='flex items-start justify-between gap-3'>
 				<div>
-					<p className='text-xs text-muted-foreground'>Duel Layer</p>
-					<p className='text-lg font-semibold'>Prediction Duels</p>
+					<p className='text-lg font-semibold'>Duels</p>
+					<p className='text-xs text-muted-foreground'>
+						Duels auto resolve when prediction is resolved
+					</p>
 				</div>
 				<Badge className='bg-primary/20 text-primary'>
 					<Swords className='h-3 w-3 mr-1' />

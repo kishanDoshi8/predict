@@ -25,8 +25,8 @@ import {
 	Swords,
 	Trophy,
 	UserCheckIcon,
+	UserIcon,
 	Users,
-	X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -133,14 +133,6 @@ function getPickLabel(
 	return bet?.option?.label ?? fallbackLabel;
 }
 
-function getPickOptionId(
-	betId: string | null | undefined,
-	betsById: Map<string, BetWithOption>,
-) {
-	if (!betId) return null;
-	return betsById.get(betId)?.option_id ?? null;
-}
-
 function PickChip({
 	label,
 	hidden = false,
@@ -215,6 +207,7 @@ function VsMatchup({
 	rightRing = false,
 	stake,
 	rightEmptyLabel,
+	rightEmptyLabel2 = "No Match",
 }: Readonly<{
 	leftName: string | null | undefined;
 	rightName: string | null | undefined;
@@ -226,6 +219,7 @@ function VsMatchup({
 	rightRing?: boolean;
 	stake: number;
 	rightEmptyLabel?: string;
+	rightEmptyLabel2?: string;
 }>) {
 	return (
 		<div className='rounded-2xl border border-border bg-card p-5'>
@@ -258,7 +252,7 @@ function VsMatchup({
 				<div className='flex flex-col items-center gap-2 text-center'>
 					{rightEmptyLabel ? (
 						<div className='grid size-14 place-items-center rounded-2xl border border-dashed border-border bg-secondary/50 text-muted-foreground'>
-							<X className='size-4' aria-hidden='true' />
+							<UserIcon className='size-6' aria-hidden='true' />
 						</div>
 					) : (
 						<DuelAvatarTile
@@ -273,7 +267,7 @@ function VsMatchup({
 					</p>
 					{rightEmptyLabel ? (
 						<span className='inline-flex items-center rounded-full border border-border bg-secondary px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground'>
-							No match
+							{rightEmptyLabel2}
 						</span>
 					) : (
 						<PickChip
@@ -309,28 +303,19 @@ function EscrowCard({
 			</div>
 			<ul className='space-y-2 text-sm text-muted-foreground *:flex *:gap-2 *:items-start'>
 				<li>
-					<UserCheckIcon className={`text-primary w-5 h-5`} />
+					<UserCheckIcon className={`text-primary size-4 mt-1`} />
 					<p className={`flex-1/6`}>
 						You're only matched if your pick differs from your
 						opponent's pick.
 					</p>
 				</li>
 				<li>
-					<HourglassIcon className={`text-accent w-5 h-5`} />
+					<HourglassIcon className={`text-accent size-4 mt-1`} />
 					<p className={`flex-1/6`}>
 						If someone ahead of you matches first, your escrow is
 						refunded.
 					</p>
 				</li>
-				{/* {lines.map((line) => (
-					<li key={line} className='flex items-start gap-2'>
-						<span
-							aria-hidden='true'
-							className='mt-1 size-1.5 rounded-full bg-accent'
-						/>
-						<span>{line}</span>
-					</li>
-				))} */}
 			</ul>
 		</div>
 	);
@@ -468,11 +453,6 @@ export function PredictionDuelDetailPage() {
 			)?.label ?? "My pick")
 		: "My pick";
 
-	const challengerPickOptionId = duel
-		? getPickOptionId(duel.challenger_bet_id, betsById)
-		: null;
-	const myPickOptionId = myBet?.option_id ?? null;
-
 	const detailEligibility = duel?.eligibility;
 	const inferredEligible =
 		!detailEligibility &&
@@ -491,11 +471,7 @@ export function PredictionDuelDetailPage() {
 			? "Place a qualifying bet before joining this duel."
 			: isCurrentUserChallenger
 				? "You cannot join your own duel."
-				: challengerPickOptionId &&
-					  myPickOptionId &&
-					  challengerPickOptionId === myPickOptionId
-					? "You must have a different pick from the challenger to match."
-					: "This duel is not currently joinable.");
+				: "This duel is not currently joinable.");
 
 	const queuePreview =
 		duel?.queue_preview_usernames ?? duel?.queued_player_usernames ?? [];
@@ -605,10 +581,12 @@ export function PredictionDuelDetailPage() {
 			<>
 				<VsMatchup
 					leftName={duel.challenger_username}
-					rightName={player.username}
-					leftPickLabel={challengerPickLabel}
+					leftPickLabel={"Challenger"}
+					leftPickHidden={false}
+					rightName={"TBD"}
+					rightEmptyLabel='TBD'
+					rightEmptyLabel2='Opponent'
 					rightPickLabel={myPickLabel}
-					leftPickHidden
 					rightRing
 					stake={duel.stake_amount}
 				/>
@@ -668,7 +646,7 @@ export function PredictionDuelDetailPage() {
 							) : null}
 						</div>
 						<span className='rounded-full border border-border bg-secondary px-2 py-1 font-mono text-xs tabular-nums'>
-							#{queuePosition}
+							next in at #{queuePosition}
 						</span>
 					</div>
 				</div>

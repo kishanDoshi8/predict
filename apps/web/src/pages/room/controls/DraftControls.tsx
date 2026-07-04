@@ -17,6 +17,7 @@ import { useRoomContext } from "../RoomLayout";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { localStorageKeys } from "@/store/_keys";
 import { Counter, FadeContent } from "@/components";
+import { usePredictionDuels } from "@/store/duel";
 
 type Props = {
 	player: Player;
@@ -33,6 +34,7 @@ export default function DraftControls({
 }: Readonly<Props>) {
 	const { room } = useRoomContext();
 	const { mutate: placeBet, isPending: isPlacingBet } = usePlaceBet();
+	const { data: duels } = usePredictionDuels(room.id, predictionId);
 	const { data: myBet, isPending: isMyBetLoading } = useMyBet(
 		room.id,
 		predictionId,
@@ -110,6 +112,28 @@ export default function DraftControls({
 
 	const handleCancelBet = () => {
 		if (!player || !predictionId) return;
+
+		const hasDuelInProgress = duels?.some((duel) => {
+			const hasChallenged =
+				duel.challenger.id === player.id && duel.status !== "cancelled";
+			const hasQueued = duel.queue.some(
+				(queueEntry) => queueEntry.player.id === player.id,
+			);
+
+			return hasChallenged || hasQueued;
+		});
+
+		if (hasDuelInProgress) {
+			toast.error(
+				"You cannot cancel your bet while you have an active duel or are queued for a duel.",
+				{
+					position: "top-center",
+					duration: Infinity,
+				},
+			);
+			return;
+		}
+
 		cancelBet(
 			{
 				roomId: room.id,

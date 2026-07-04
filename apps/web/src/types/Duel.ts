@@ -19,6 +19,18 @@ export interface MinimalPlayer {
 	username: string;
 }
 
+export type DuelQueueStatus =
+	| "waiting"
+	| "matched"
+	| "refunded"
+	| "cancelled";
+
+export interface DuelQueueEntry {
+	player: MinimalPlayer;
+	status: DuelQueueStatus;
+	joinedAt: string;
+}
+
 export interface RivalrySummary {
 	totalDuels: number;
 	wins: number;
@@ -35,7 +47,7 @@ export interface Duel {
 	feeAmount: number;
 	totalPot: number;
 	queueCount: number;
-	queuedPlayers: MinimalPlayer[];
+	queue: DuelQueueEntry[];
 	currentPlayerState: DuelCurrentPlayerState;
 	currentPlayerQueued: boolean;
 	totalReserved: number;

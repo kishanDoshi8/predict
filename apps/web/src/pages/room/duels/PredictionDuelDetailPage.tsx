@@ -3,12 +3,13 @@ import { cn } from "@/lib/utils";
 import { useBets, useMyBet } from "@/store/bet";
 import {
 	useCancelDuel,
+	useCancelDuelQueue,
 	useJoinDuelQueue,
 	usePredictionDuels,
 } from "@/store/duel";
 import { usePlayer } from "@/store/player";
 import { usePrediction } from "@/store/prediction";
-import { Duel } from "@/types";
+import { Duel, DuelQueueStatus } from "@/types";
 import {
 	Ban,
 	Check,
@@ -18,7 +19,6 @@ import {
 	Crown,
 	Flame,
 	Hourglass,
-	HourglassIcon,
 	Info,
 	Lock,
 	LockIcon,
@@ -27,15 +27,14 @@ import {
 	Sparkles,
 	Swords,
 	Trophy,
-	UserCheckIcon,
 	UserIcon,
-	Users,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useRoomContext } from "../RoomLayout";
 import { Countdown } from "../widgets/CountDown";
+import DuelPredictionHeader from "./components/DuelPredictionHeader";
 
 type DuelVisualState =
 	| "join"
@@ -43,16 +42,6 @@ type DuelVisualState =
 	| "resolved"
 	| "expired"
 	| "cancelled";
-
-type DuelQueueRowStatus = "matched" | "refunded" | "waiting";
-
-type DuelQueueRow = {
-	position: number;
-	username: string;
-	player_id?: string | null;
-	status: DuelQueueRowStatus;
-	is_you?: boolean;
-};
 
 function toVisualState(duel: Duel): DuelVisualState {
 	if (duel.status === "matched") return "matched";
@@ -75,6 +64,56 @@ function fmtPts(value: number | null | undefined) {
 function signedPts(value: number) {
 	if (value === 0) return "0";
 	return value > 0 ? `+${fmtPts(value)}` : `-${fmtPts(Math.abs(value))}`;
+}
+
+function queueStatusLabel(status: DuelQueueStatus) {
+	switch (status) {
+		case "matched":
+			return "Matched";
+		case "refunded":
+			return "Refunded";
+		case "cancelled":
+			return "Cancelled";
+		default:
+			return "Waiting";
+	}
+}
+
+function queueStatusTone(status: DuelQueueStatus) {
+	switch (status) {
+		case "matched":
+			return "bg-primary/20 text-primary";
+		case "refunded":
+			return "bg-secondary text-muted-foreground";
+		case "cancelled":
+			return "bg-destructive/10 text-destructive";
+		default:
+			return "bg-secondary text-muted-foreground";
+	}
+}
+
+function queueStatusIcon(status: DuelQueueStatus) {
+	if (status === "matched") {
+		return <Check className='size-3' aria-hidden='true' />;
+	}
+	if (status === "refunded") {
+		return <RotateCw className='size-3' aria-hidden='true' />;
+	}
+	if (status === "cancelled") {
+		return <Ban className='size-3' aria-hidden='true' />;
+	}
+	return <Hourglass className='size-3 animate-pulse' aria-hidden='true' />;
+}
+
+function formatJoinedAt(joinedAt: string) {
+	const parsed = new Date(joinedAt);
+	if (Number.isNaN(parsed.getTime())) return "";
+	return parsed.toLocaleString(undefined, {
+		month: "short",
+		day: "numeric",
+		hour: "numeric",
+		minute: "2-digit",
+	});
 }
 
 function PickChip({
@@ -351,6 +390,8 @@ export function PredictionDuelDetailPage() {
 		player?.id ?? "",
 	);
 	const { mutate: joinDuelQueue, isPending: isJoining } = useJoinDuelQueue();
+	const { mutate: cancelDuelQueue, isPending: isLeavingQueue } =
+		useCancelDuelQueue();
 	const { mutate: cancelDuel, isPending: isCancelling } = useCancelDuel();
 
 	const duel = useMemo(
@@ -414,33 +455,25 @@ export function PredictionDuelDetailPage() {
 		: isCurrentUserChallenger
 			? "You cannot join your own duel."
 			: duel?.currentPlayerQueued
-				? "You are already queued for this duel."
+				? "You are currently waiting in this queue."
 				: "This duel is not currently joinable.";
 
-	const queuePreview =
-		duel?.queuedPlayers.map((queuedPlayer) => queuedPlayer.username) ?? [];
-	const queuePosition = duel?.queueCount ? duel.queueCount + 1 : 1;
-
-	const queueRows: DuelQueueRow[] = (duel?.queuedPlayers ?? []).map(
-		(queuedPlayer, index) => ({
-			position: index + 1,
-			username: queuedPlayer.username,
-			player_id: queuedPlayer.id,
-			status: "waiting",
-			is_you: queuedPlayer.id === currentUserId,
-		}),
-	);
+	const queueRows = duel?.queue ?? [];
+	const currentUserWaitingQueueEntry =
+		queueRows.find(
+			(queueEntry) =>
+				queueEntry.player.id === currentUserId &&
+				queueEntry.status === "waiting",
+		) ?? null;
+	const canLeaveQueue =
+		!!currentUserWaitingQueueEntry &&
+		duel?.status !== "matched" &&
+		duel?.status !== "resolved" &&
+		duel?.status !== "cancelled" &&
+		duel?.status !== "expired" &&
+		prediction?.status === "draft";
 
 	const rival = duel?.rivalry;
-
-	const payoutForCurrentUser =
-		duel && duel.status === "resolved" && currentUserId
-			? duel.currentPlayerState === "winner"
-				? (duel.payout ?? duel.totalPot)
-				: duel.currentPlayerState === "loser"
-					? -duel.stakeAmount
-					: 0
-			: 0;
 	const isWin = duel?.currentPlayerState === "winner";
 
 	const [showWinBurst, setShowWinBurst] = useState(false);
@@ -513,6 +546,91 @@ export function PredictionDuelDetailPage() {
 		);
 	};
 
+	const onCancelQueue = () => {
+		if (!player || !duel) return;
+		cancelDuelQueue(
+			{
+				roomId: room.id,
+				predictionId: prediction.id,
+				duelId: duel.id,
+				playerId: player.id,
+			},
+			{
+				onSuccess: () => {
+					toast.success("Left duel queue.");
+				},
+				onError: (error) => {
+					toast.error("Could not leave duel queue.", {
+						description: error.message,
+					});
+				},
+			},
+		);
+	};
+
+	const renderQueueHistoryCard = () => {
+		return (
+			<div className='rounded-2xl border border-border bg-card p-4'>
+				<div className='flex items-center justify-between'>
+					<SectionLabel>Queue</SectionLabel>
+					<span className='rounded-full border border-border bg-secondary px-2 py-1 text-xs text-muted-foreground'>
+						Next in at #{duel.queueCount + 1}
+					</span>
+				</div>
+				<div className='mt-3 space-y-2'>
+					{queueRows.length === 0 ? (
+						<div className='rounded-xl border border-dashed border-border bg-secondary/40 p-3 text-sm text-muted-foreground'>
+							No queue entries yet.
+						</div>
+					) : (
+						queueRows
+							.filter((row) => row.status !== "cancelled")
+							.map((row, index) => {
+								const isYou = row.player.id === currentUserId;
+								return (
+									<div
+										key={`${row.player.id}-${row.joinedAt}-${index}`}
+										className='flex items-center gap-2 rounded-xl border border-border bg-secondary/30 p-2'
+									>
+										<span className='w-9 text-center font-mono text-xs tabular-nums text-muted-foreground'>
+											#{index + 1}
+										</span>
+										<DuelAvatarTile
+											name={row.player.username}
+											size='sm'
+											ring={isYou}
+										/>
+										<div className='min-w-0 flex-1'>
+											<p className='truncate text-sm font-medium'>
+												{row.player.username}
+											</p>
+											<p className='text-[11px] text-muted-foreground'>
+												{formatJoinedAt(row.joinedAt)}
+											</p>
+										</div>
+										{isYou ? (
+											<span className='rounded-full border border-border bg-card px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground'>
+												You
+											</span>
+										) : null}
+										<span
+											className={cn(
+												"inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wider",
+												queueStatusTone(row.status),
+											)}
+										>
+											{queueStatusIcon(row.status)}
+											{queueStatusLabel(row.status)}
+										</span>
+									</div>
+								);
+							})
+					)}
+				</div>
+			</div>
+		);
+	};
+
 	const renderJoin = () => {
 		return (
 			<>
@@ -569,37 +687,7 @@ export function PredictionDuelDetailPage() {
 					</div>
 				) : null}
 
-				<div className='rounded-2xl border border-border bg-card p-4'>
-					<div className={`flex justify-between items-center`}>
-						<SectionLabel>Challenger queue</SectionLabel>
-						<span className='rounded-full border border-border bg-secondary px-2 py-1 font-mono text-xs tabular-nums'>
-							next in at #{queuePosition}
-						</span>
-					</div>
-					<p className={`text-[12px] mt-1 text-muted-foreground`}>
-						First different pick wins the seat
-					</p>
-					<div className='mt-3 flex items-center justify-between'>
-						<div className='flex -space-x-2'>
-							{queuePreview.slice(0, 4).map((name) => (
-								<DuelAvatarTile
-									key={`${name}`}
-									name={name}
-									size='sm'
-								/>
-							))}
-							{queuePreview.length === 0 ? (
-								<div className='inline-flex items-center gap-2 rounded-full border border-dashed border-border px-3 py-1 text-xs text-muted-foreground'>
-									<Users
-										className='size-3'
-										aria-hidden='true'
-									/>
-									No one queued yet
-								</div>
-							) : null}
-						</div>
-					</div>
-				</div>
+				{renderQueueHistoryCard()}
 
 				{eligible ? null : (
 					<div className='rounded-2xl border border-border bg-secondary/50 p-4 text-sm text-muted-foreground'>
@@ -628,26 +716,44 @@ export function PredictionDuelDetailPage() {
 				) : null}
 
 				<StickyActionBar>
-					<Button
-						className={cn(
-							"w-full bg-linear-to-r from-primary to-accent uppercase tracking-wider shadow-lg shadow-primary/20",
-							(!eligible ||
+					{canLeaveQueue ? (
+						<Button
+							variant='outline'
+							className='w-full uppercase tracking-wider'
+							onClick={onCancelQueue}
+							disabled={isLeavingQueue}
+						>
+							{isLeavingQueue ? (
+								<Spinner />
+							) : (
+								<Ban className='size-4' />
+							)}
+							Leave Queue
+						</Button>
+					) : (
+						<Button
+							className={cn(
+								"w-full bg-linear-to-r from-primary to-accent uppercase tracking-wider shadow-lg shadow-primary/20",
+								(!eligible ||
+									isJoining ||
+									isCurrentUserChallenger) &&
+									"shadow-none cursor-not-allowed",
+							)}
+							onClick={onCommitEscrow}
+							disabled={
+								!eligible ||
 								isJoining ||
-								isCurrentUserChallenger) &&
-								"shadow-none cursor-not-allowed",
-						)}
-						onClick={onCommitEscrow}
-						disabled={
-							!eligible || isJoining || isCurrentUserChallenger
-						}
-					>
-						{isJoining ? (
-							<Spinner />
-						) : (
-							<Swords className='size-4' />
-						)}
-						Commit {fmtPts(duel.stakeAmount)} pts to Escrow
-					</Button>
+								isCurrentUserChallenger
+							}
+						>
+							{isJoining ? (
+								<Spinner />
+							) : (
+								<Swords className='size-4' />
+							)}
+							Commit {fmtPts(duel.stakeAmount)} pts to Escrow
+						</Button>
+					)}
 				</StickyActionBar>
 			</>
 		);
@@ -682,76 +788,7 @@ export function PredictionDuelDetailPage() {
 					stake={duel.stakeAmount}
 				/>
 
-				<div className='rounded-2xl border border-border bg-card p-4'>
-					<SectionLabel>Challenger Queue</SectionLabel>
-					<div className='mt-3 space-y-2'>
-						{queueRows.length === 0 ? (
-							<div className='rounded-xl border border-dashed border-border bg-secondary/40 p-3 text-sm text-muted-foreground'>
-								Queue has been cleared after matching.
-							</div>
-						) : (
-							queueRows.map((row) => {
-								const statusClass =
-									row.status === "matched"
-										? "bg-primary/20 text-primary"
-										: row.status === "refunded"
-											? "bg-secondary text-muted-foreground"
-											: "bg-secondary text-muted-foreground";
-								const statusIcon =
-									row.status === "matched" ? (
-										<Check
-											className='size-3'
-											aria-hidden='true'
-										/>
-									) : row.status === "refunded" ? (
-										<RotateCw
-											className='size-3'
-											aria-hidden='true'
-										/>
-									) : (
-										<Hourglass
-											className='size-3 animate-pulse'
-											aria-hidden='true'
-										/>
-									);
-								return (
-									<div
-										key={`${row.position}-${row.username}`}
-										className='flex items-center gap-2 rounded-xl border border-border bg-secondary/30 p-2'
-									>
-										<span className='w-9 text-center font-mono text-xs tabular-nums text-muted-foreground'>
-											#{row.position}
-										</span>
-										<DuelAvatarTile
-											name={row.username}
-											size='sm'
-											ring={!!row.is_you}
-										/>
-										<div className='min-w-0 flex-1'>
-											<p className='truncate text-sm font-medium'>
-												{row.username}
-											</p>
-										</div>
-										{row.is_you ? (
-											<span className='rounded-full border border-border bg-card px-2 py-1 text-[10px] uppercase tracking-wider text-muted-foreground'>
-												You
-											</span>
-										) : null}
-										<span
-											className={cn(
-												"inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-wider",
-												statusClass,
-											)}
-										>
-											{statusIcon}
-											{row.status}
-										</span>
-									</div>
-								);
-							})
-						)}
-					</div>
-				</div>
+				{renderQueueHistoryCard()}
 
 				<StickyActionBar>
 					<Button
@@ -781,6 +818,28 @@ export function PredictionDuelDetailPage() {
 	};
 
 	const renderResolved = () => {
+		const winnerId = duel.winner?.id ?? null;
+		const winnerName =
+			winnerId === duel.challenger.id
+				? duel.challenger.username
+				: winnerId === duel.opponent?.id
+					? (duel.opponent?.username ?? "Winner")
+					: (duel.winner?.username ?? "Winner");
+		const winnerPick =
+			winnerId === duel.challenger.id
+				? challengerPickLabel
+				: winnerId === duel.opponent?.id
+					? opponentPickLabel
+					: "Winning pick";
+		const loserName =
+			winnerId === duel.challenger.id
+				? (duel.opponent?.username ?? "Opponent")
+				: duel.challenger.username;
+		const loserPick =
+			winnerId === duel.challenger.id
+				? opponentPickLabel
+				: challengerPickLabel;
+
 		return (
 			<>
 				<div className='relative'>
@@ -809,29 +868,43 @@ export function PredictionDuelDetailPage() {
 								/>
 							) : (
 								<Trophy
-									className='size-5 text-muted-foreground'
+									className='size-5 text-rank-1'
 									aria-hidden='true'
 								/>
 							)
 						}
-						title={isWin ? "You won the duel" : "Duel resolved"}
-						subtitle={
-							isWin
-								? "Winner payout has been applied."
-								: "Outcome is final and payout is settled."
+						title={
+							winnerName
+								? `${winnerName} won the duel`
+								: "Duel resolved"
 						}
+						subtitle={"Outcome is final and payout is settled."}
 						variant={isWin ? "win" : "neutral"}
 						extra={
-							<p
-								className={cn(
-									"font-mono text-4xl font-semibold tabular-nums",
-									isWin
-										? "text-win"
-										: "text-muted-foreground",
-								)}
-							>
-								{signedPts(payoutForCurrentUser)}
-							</p>
+							<div className='rounded-xl border border-win/40 bg-win/10 px-4 py-3'>
+								<p className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
+									Winner
+								</p>
+								<div className='mt-1 flex items-center gap-3'>
+									<DuelAvatarTile
+										name={winnerName}
+										size='sm'
+										ring
+									/>
+									<div className='min-w-0 flex-1'>
+										<p className='truncate text-sm font-semibold text-foreground'>
+											{winnerName}
+										</p>
+										<PickChip label={winnerPick} />
+									</div>
+
+									<span
+										className={`text-2xl text-win font-semibold`}
+									>
+										+{duel.totalPot}
+									</span>
+								</div>
+							</div>
 						}
 					/>
 				</div>
@@ -840,92 +913,46 @@ export function PredictionDuelDetailPage() {
 					<div
 						className={cn(
 							"rounded-2xl border p-4 transition-all duration-300",
-							isWin
-								? "border-win/40 bg-win/10"
-								: "border-border bg-card",
+							"border-win/40 bg-win/10",
 						)}
 					>
-						<SectionLabel>{isWin ? "Winner" : "Lost"}</SectionLabel>
+						<SectionLabel>Winner</SectionLabel>
 						<div className='mt-2 flex items-center gap-2'>
-							<DuelAvatarTile
-								name={
-									isWin
-										? player.username
-										: duel.challenger.id === player.id
-											? duel.opponent?.username
-											: duel.challenger.username
-								}
-								size='md'
-								ring={isWin}
-							/>
+							<DuelAvatarTile name={winnerName} size='md' ring />
 							<div className='min-w-0'>
 								<p className='truncate text-sm font-semibold'>
-									{isWin
-										? "You"
-										: duel.challenger.id === player.id
-											? duel.opponent?.username
-											: duel.challenger.username}
+									{winnerName}
 								</p>
-								<PickChip
-									label={
-										isWin
-											? myPickLabel
-											: duel.challenger.id === player.id
-												? opponentPickLabel
-												: challengerPickLabel
-									}
-								/>
+								<PickChip label={winnerPick} />
 							</div>
 						</div>
 					</div>
 					<div
 						className={cn(
 							"rounded-2xl border p-4 transition-all duration-300",
-							!isWin
-								? "border-win/40 bg-secondary/40"
-								: "border-border bg-card",
+							"border-border bg-card",
 						)}
 					>
-						<SectionLabel>{isWin ? "Lost" : "Winner"}</SectionLabel>
+						<SectionLabel>Next time</SectionLabel>
 						<div className='mt-2 flex items-center gap-2'>
 							<DuelAvatarTile
-								name={
-									isWin
-										? duel.challenger.id === player.id
-											? duel.opponent?.username
-											: duel.challenger.username
-										: player.username
-								}
+								name={loserName}
 								size='md'
-								ring={!isWin}
+								ring={false}
 							/>
 							<div className='min-w-0'>
 								<p className='truncate text-sm font-semibold'>
-									{isWin
-										? duel.challenger.id === player.id
-											? duel.opponent?.username
-											: duel.challenger.username
-										: "You"}
+									{loserName}
 								</p>
-								<PickChip
-									label={
-										isWin
-											? duel.challenger.id === player.id
-												? opponentPickLabel
-												: challengerPickLabel
-											: myPickLabel
-									}
-								/>
+								<PickChip label={loserPick} />
 							</div>
 						</div>
 					</div>
 				</div>
 
-				{/* <StakeBreakdown stake={duel.stakeAmount} fee={duel.feeAmount} pot={pot} potLabel='Pot won' /> */}
-
 				{rival ? (
-					<div className='rounded-2xl border border-border bg-primary/10 p-4 text-sm'>
-						<div className='mb-2 flex items-center gap-2 text-primary'>
+					<div className='rounded-2xl border border-border bg-accent/10 p-4 text-sm'>
+						<div className='mb-2 flex items-center gap-2 text-accent'>
 							<Flame className='size-4' aria-hidden='true' />
 							<SectionLabel>Series Update</SectionLabel>
 						</div>
@@ -937,17 +964,7 @@ export function PredictionDuelDetailPage() {
 					</div>
 				) : null}
 
-				{duel.queueCount > 0 ? (
-					<div className='rounded-2xl border border-border bg-secondary/40 p-4 text-sm text-muted-foreground'>
-						<div className='mb-2 flex items-center gap-2'>
-							<RotateCw className='size-4' aria-hidden='true' />
-							<SectionLabel>Refunds</SectionLabel>
-						</div>
-						<p>
-							{`${duel.queueCount} queued players were refunded automatically.`}
-						</p>
-					</div>
-				) : null}
+				{renderQueueHistoryCard()}
 
 				<StickyActionBar>
 					<Button
@@ -1000,6 +1017,8 @@ export function PredictionDuelDetailPage() {
 					rightEmptyLabel='No match'
 				/>
 
+				{renderQueueHistoryCard()}
+
 				<StickyActionBar>
 					<Button
 						variant='outline'
@@ -1047,6 +1066,8 @@ export function PredictionDuelDetailPage() {
 					</div>
 				</div>
 
+				{renderQueueHistoryCard()}
+
 				<StickyActionBar>
 					<Button
 						variant='outline'
@@ -1064,6 +1085,9 @@ export function PredictionDuelDetailPage() {
 	return (
 		<div className='mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-md flex-col'>
 			<div className='flex-1 space-y-4 overflow-y-auto px-4 pb-20 pt-4'>
+				<div className={`mb-4`}>
+					<DuelPredictionHeader room={room} prediction={prediction} />
+				</div>
 				{visualState === "join" ? renderJoin() : null}
 				{visualState === "matched" ? renderMatched() : null}
 				{visualState === "resolved" ? renderResolved() : null}

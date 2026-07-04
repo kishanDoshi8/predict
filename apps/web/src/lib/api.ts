@@ -643,6 +643,17 @@ export async function cancelDuel(
   })
   return assertOk(data, error) as Duel
 }
+
+export async function cancelDuelQueue(
+  duelId: string,
+  playerId: string,
+): Promise<Duel> {
+  const { data, error } = await untypedSupabase.rpc('cancel_duel_queue_view', {
+    p_duel_id: duelId,
+    p_player_id: playerId,
+  })
+  return assertOk(data, error) as Duel
+}
 // #endregion Duels
 
 // #region Leaderboard

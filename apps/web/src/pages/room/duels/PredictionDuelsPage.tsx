@@ -6,6 +6,7 @@ import { useRoomContext } from "../RoomLayout";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { DuelCard } from "./components/DuelCard";
 import { SwordsIcon, ZapIcon } from "lucide-react";
+import DuelPredictionHeader from "./components/DuelPredictionHeader";
 
 export function PredictionDuelsPage() {
 	const { predictionId } = useParams<{ predictionId: string }>();
@@ -71,16 +72,8 @@ export function PredictionDuelsPage() {
 	return (
 		<div className='max-w-md mx-auto'>
 			<div className={`px-4 pb-6 pt-4 space-y-4`}>
-				<Alert variant={"info"}>
-					<ZapIcon className='text-accent' />
-					<AlertDescription>
-						Duels on{" "}
-						<span className='font-semibold text-foreground'>
-							{prediction?.title ?? "loading prediction..."}
-						</span>
-					</AlertDescription>
-				</Alert>
-				<div className='rounded-xl border border-border bg-card p-4 space-y-2'>
+				<DuelPredictionHeader room={room} prediction={prediction} />
+				<div className='mt-4 rounded-xl border border-border bg-card p-4 space-y-2'>
 					<div className='flex items-center justify-between'>
 						<div className={`flex items-center gap-2`}>
 							<SwordsIcon className='h-6 w-6 text-accent' />

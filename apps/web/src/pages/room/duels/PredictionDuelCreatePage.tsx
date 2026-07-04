@@ -96,6 +96,7 @@ export function PredictionDuelCreatePage() {
 					toast.success("Duel created.");
 					navigate(
 						`/rooms/${room.code}/predictions/${predictionId}/duels`,
+						{ replace: true },
 					);
 				},
 				onError: (error) => {
@@ -143,6 +144,7 @@ export function PredictionDuelCreatePage() {
 							onClick={() =>
 								navigate(
 									`/rooms/${room.code}/predictions/${predictionId}`,
+									{ replace: true },
 								)
 							}
 						>
@@ -301,6 +303,7 @@ export function PredictionDuelCreatePage() {
 					onClick={() =>
 						navigate(
 							`/rooms/${room.code}/predictions/${predictionId}/duels`,
+							{ replace: true },
 						)
 					}
 				>

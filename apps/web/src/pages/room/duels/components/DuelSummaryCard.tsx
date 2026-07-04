@@ -63,43 +63,16 @@ export function DuelSummaryCard({
 						>
 							{summary.uniqueParticipants}
 						</Stat>
-
-						{summary.activeDuels > 0 && (
-							<Stat
-								icon={
-									<SwordsIcon
-										size={16}
-										className={`text-cyan-500`}
-									/>
-								}
-							>
-								{summary.activeDuels}
-							</Stat>
-						)}
-						{summary.matchedDuels > 0 && (
-							<Stat
-								icon={
-									<SwordsIcon
-										size={16}
-										className={`text-primary`}
-									/>
-								}
-							>
-								{summary.matchedDuels}
-							</Stat>
-						)}
-						{summary.resolvedDuels > 0 && (
-							<Stat
-								icon={
-									<TrophyIcon
-										size={16}
-										className={`text-green-500`}
-									/>
-								}
-							>
-								{summary.resolvedDuels}
-							</Stat>
-						)}
+						<Stat
+							icon={
+								<SwordsIcon
+									size={16}
+									className={`text-primary`}
+								/>
+							}
+						>
+							{summary.activeDuels}
+						</Stat>
 					</div>
 				</div>
 				<p className='mt-1 text-xs text-muted-foreground text-left'>
@@ -114,11 +87,21 @@ export function DuelSummaryCard({
 						value={summary.totalStake}
 					/>
 
-					<SummaryBox
-						icon={<LandmarkIcon className='text-cyan-400 size-5' />}
-						label='Escrow'
-						value={summary.totalEscrow}
-					/>
+					{predictionStatus === "revealed" ? (
+						<SummaryBox
+							icon={<TrophyIcon className='text-win size-5' />}
+							label='Resolved'
+							value={summary.resolvedDuels}
+						/>
+					) : (
+						<SummaryBox
+							icon={
+								<LandmarkIcon className='text-cyan-400 size-5' />
+							}
+							label='Escrow'
+							value={summary.totalEscrow}
+						/>
+					)}
 				</div>
 
 				{/* divider */}

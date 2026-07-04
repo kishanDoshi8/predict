@@ -1,4 +1,5 @@
 import {
+	cancelDuelQueue,
 	cancelDuel,
 	createDuel,
 	getPredictionDuelSummary,
@@ -90,6 +91,39 @@ export const useJoinDuelQueue = () => {
 	return useMutation({
 		mutationFn: ({ duelId, playerId, betId }: JoinDuelQueueParams) =>
 			joinDuelQueue(duelId, playerId, betId),
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: roomKeys.duels(variables.roomId, variables.predictionId),
+			});
+			queryClient.invalidateQueries({
+				queryKey: roomKeys.duelSummary(
+					variables.roomId,
+					variables.predictionId,
+				),
+			});
+			queryClient.invalidateQueries({
+				queryKey: playerQueryKey,
+			});
+			queryClient.invalidateQueries({
+				queryKey: roomKeys.bets(variables.roomId, variables.predictionId),
+			});
+		},
+	});
+};
+
+type CancelDuelQueueParams = {
+	roomId: string;
+	predictionId: string;
+	duelId: string;
+	playerId: string;
+};
+
+export const useCancelDuelQueue = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ duelId, playerId }: CancelDuelQueueParams) =>
+			cancelDuelQueue(duelId, playerId),
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({
 				queryKey: roomKeys.duels(variables.roomId, variables.predictionId),

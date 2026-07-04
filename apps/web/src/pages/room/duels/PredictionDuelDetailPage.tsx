@@ -1,6 +1,6 @@
 import { Button, Spinner } from "@/components";
 import { cn } from "@/lib/utils";
-import { useMyBet } from "@/store/bet";
+import { useBets, useMyBet } from "@/store/bet";
 import {
 	useCancelDuel,
 	useJoinDuelQueue,
@@ -128,7 +128,7 @@ function DuelAvatarTile({
 	);
 }
 
-function SectionLabel({ children }: Readonly<{ children: string }>) {
+function SectionLabel({ children }: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<p className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>
 			{children}
@@ -245,9 +245,13 @@ function EscrowCard({
 				{lines.map((line, index) => (
 					<li key={`${line.slice(0, 24)}-${index}`}>
 						{index === 0 ? (
-							<UserCheckIcon className={`text-primary size-4 mt-1`} />
+							<UserCheckIcon
+								className={`text-primary size-4 mt-1`}
+							/>
 						) : (
-							<HourglassIcon className={`text-accent size-4 mt-1`} />
+							<HourglassIcon
+								className={`text-accent size-4 mt-1`}
+							/>
 						)}
 						<p className={`flex-1/6`}>{line}</p>
 					</li>
@@ -350,6 +354,7 @@ export function PredictionDuelDetailPage() {
 	const { data: player } = usePlayer();
 	const { data: prediction } = usePrediction(room.id, predictionId);
 	const { data: duels = [] } = usePredictionDuels(room.id, predictionId);
+	const { data: bets = [] } = useBets(room.id, predictionId);
 	const { data: myBet } = useMyBet(
 		room.id,
 		predictionId ?? "",
@@ -359,8 +364,7 @@ export function PredictionDuelDetailPage() {
 	const { mutate: cancelDuel, isPending: isCancelling } = useCancelDuel();
 
 	const duel = useMemo(
-		() =>
-			duels.find((item) => item.id === duelId),
+		() => duels.find((item) => item.id === duelId),
 		[duelId, duels],
 	);
 
@@ -369,8 +373,35 @@ export function PredictionDuelDetailPage() {
 		currentUserId != null && duel?.challenger.id === currentUserId;
 	const visualState = duel ? toVisualState(duel) : null;
 
-	const challengerPickLabel = "Challenger";
-	const opponentPickLabel = "Opponent";
+	const challengerPickLabel = duel
+		? (() => {
+				if (duel.status == "resolved" || duel.status == "matched") {
+					const challengerBet = bets.find(
+						(bet) => bet.player_id === duel.challenger.id,
+					);
+					const optionLabel = prediction?.prediction_options.find(
+						(option) => option.id === challengerBet?.option_id,
+					)?.label;
+					return optionLabel ?? "Challenger";
+				}
+				return "Challenger";
+			})()
+		: "Challenger";
+	const opponentPickLabel = duel
+		? (() => {
+				if (!duel.opponent?.id) return "Opponent";
+				if (duel.status == "resolved" || duel.status == "matched") {
+					const opponentBet = bets.find(
+						(bet) => bet.player_id === duel.opponent?.id,
+					);
+					const optionLabel = prediction?.prediction_options.find(
+						(option) => option.id === opponentBet?.option_id,
+					)?.label;
+					return optionLabel ?? "Opponent";
+				}
+				return "Opponent";
+			})()
+		: "Opponent";
 	const myPickLabel = myBet?.option_id
 		? (prediction?.prediction_options.find(
 				(opt) => opt.id === myBet.option_id,
@@ -388,30 +419,31 @@ export function PredictionDuelDetailPage() {
 		!duel.currentPlayerQueued &&
 		!isCurrentUserChallenger &&
 		prediction?.status === "draft";
-	const ineligibleReason =
-		!myBet
-			? "Place a qualifying bet before joining this duel."
-			: isCurrentUserChallenger
-				? "You cannot join your own duel."
-				: duel?.currentPlayerQueued
-					? "You are already queued for this duel."
-					: "This duel is not currently joinable.";
+	const ineligibleReason = !myBet
+		? "Place a qualifying bet before joining this duel."
+		: isCurrentUserChallenger
+			? "You cannot join your own duel."
+			: duel?.currentPlayerQueued
+				? "You are already queued for this duel."
+				: "This duel is not currently joinable.";
 
-	const queuePreview = duel?.queuedPlayers.map((queuedPlayer) => queuedPlayer.username) ?? [];
-	const queuePosition = (duel?.queueCount ? duel.queueCount + 1 : 1);
+	const queuePreview =
+		duel?.queuedPlayers.map((queuedPlayer) => queuedPlayer.username) ?? [];
+	const queuePosition = duel?.queueCount ? duel.queueCount + 1 : 1;
 
-	const queueRows: DuelQueueRow[] =
-		(duel?.queuedPlayers ?? []).map((queuedPlayer, index) => ({
+	const queueRows: DuelQueueRow[] = (duel?.queuedPlayers ?? []).map(
+		(queuedPlayer, index) => ({
 			position: index + 1,
 			username: queuedPlayer.username,
 			player_id: queuedPlayer.id,
 			status: "waiting",
 			is_you: queuedPlayer.id === currentUserId,
-		}));
+		}),
+	);
 
 	const rival = duel?.rivalry;
 	const escrowBullets = [
-		"👥 Match happens only when the opponent pick differs from the challenger.",
+		"Match happens only when the opponent pick differs from the challenger.",
 		" If someone ahead in queue matches first, held points are refunded automatically.",
 	];
 
@@ -429,8 +461,8 @@ export function PredictionDuelDetailPage() {
 	useEffect(() => {
 		if (visualState !== "resolved" || !isWin) return;
 		setShowWinBurst(true);
-		const timer = window.setTimeout(() => setShowWinBurst(false), 1500);
-		return () => window.clearTimeout(timer);
+		const timer = globalThis.setTimeout(() => setShowWinBurst(false), 1500);
+		return () => globalThis.clearTimeout(timer);
 	}, [isWin, visualState]);
 
 	if (!duel || !player || !prediction || !visualState) {
@@ -445,7 +477,9 @@ export function PredictionDuelDetailPage() {
 	}
 
 	const onBack = () => {
-		navigate(`/rooms/${room.code}/predictions/${predictionId}/duels`);
+		navigate(`/rooms/${room.code}/predictions/${predictionId}/duels`, {
+			replace: true,
+		});
 	};
 
 	const onCommitEscrow = () => {
@@ -498,11 +532,11 @@ export function PredictionDuelDetailPage() {
 			<>
 				<VsMatchup
 					leftName={duel.challenger.username}
-					leftPickLabel={"Challenger"}
+					leftPickLabel={challengerPickLabel}
 					leftPickHidden={false}
 					rightName={"TBD"}
 					rightEmptyLabel='TBD'
-					rightEmptyLabel2='Opponent'
+					rightEmptyLabel2={opponentPickLabel}
 					rightPickLabel={myPickLabel}
 					rightRing
 					stake={duel.stakeAmount}
@@ -515,7 +549,8 @@ export function PredictionDuelDetailPage() {
 							<SectionLabel>Rivalry</SectionLabel>
 						</div>
 						<p className='text-sm font-semibold'>
-							{rival.wins}-{rival.losses} in {rival.totalDuels} duel
+							{rival.wins}-{rival.losses} in {rival.totalDuels}{" "}
+							duel
 							{rival.totalDuels === 1 ? "" : "s"}
 						</p>
 						<p className='text-sm text-muted-foreground'>
@@ -527,7 +562,12 @@ export function PredictionDuelDetailPage() {
 				<EscrowCard amount={duel.stakeAmount} lines={escrowBullets} />
 
 				<div className='rounded-2xl border border-border bg-card p-4'>
-					<SectionLabel>Queue Preview</SectionLabel>
+					<div className={`flex justify-between items-center`}>
+						<SectionLabel>Queue Preview</SectionLabel>
+						<span className='rounded-full border border-border bg-secondary px-2 py-1 font-mono text-xs tabular-nums'>
+							next in at #{queuePosition}
+						</span>
+					</div>
 					<div className='mt-3 flex items-center justify-between'>
 						<div className='flex -space-x-2'>
 							{queuePreview.slice(0, 4).map((name) => (
@@ -547,13 +587,8 @@ export function PredictionDuelDetailPage() {
 								</div>
 							) : null}
 						</div>
-						<span className='rounded-full border border-border bg-secondary px-2 py-1 font-mono text-xs tabular-nums'>
-							next in at #{queuePosition}
-						</span>
 					</div>
 				</div>
-
-				{/* <StakeBreakdown stake={duel.stakeAmount} fee={duel.feeAmount} pot={duel.totalPot} potLabel='Potential win' /> */}
 
 				{eligible ? null : (
 					<div className='rounded-2xl border border-border bg-secondary/50 p-4 text-sm text-muted-foreground'>
@@ -810,8 +845,7 @@ export function PredictionDuelDetailPage() {
 								name={
 									isWin
 										? player.username
-										: duel.challenger.id ===
-											  player.id
+										: duel.challenger.id === player.id
 											? duel.opponent?.username
 											: duel.challenger.username
 								}
@@ -822,8 +856,7 @@ export function PredictionDuelDetailPage() {
 								<p className='truncate text-sm font-semibold'>
 									{isWin
 										? "You"
-										: duel.challenger.id ===
-											  player.id
+										: duel.challenger.id === player.id
 											? duel.opponent?.username
 											: duel.challenger.username}
 								</p>
@@ -831,8 +864,7 @@ export function PredictionDuelDetailPage() {
 									label={
 										isWin
 											? myPickLabel
-											: duel.challenger.id ===
-												  player.id
+											: duel.challenger.id === player.id
 												? opponentPickLabel
 												: challengerPickLabel
 									}
@@ -853,8 +885,7 @@ export function PredictionDuelDetailPage() {
 							<DuelAvatarTile
 								name={
 									isWin
-										? duel.challenger.id ===
-											player.id
+										? duel.challenger.id === player.id
 											? duel.opponent?.username
 											: duel.challenger.username
 										: player.username
@@ -865,8 +896,7 @@ export function PredictionDuelDetailPage() {
 							<div className='min-w-0'>
 								<p className='truncate text-sm font-semibold'>
 									{isWin
-										? duel.challenger.id ===
-											player.id
+										? duel.challenger.id === player.id
 											? duel.opponent?.username
 											: duel.challenger.username
 										: "You"}
@@ -874,8 +904,7 @@ export function PredictionDuelDetailPage() {
 								<PickChip
 									label={
 										isWin
-											? duel.challenger.id ===
-												player.id
+											? duel.challenger.id === player.id
 												? opponentPickLabel
 												: challengerPickLabel
 											: myPickLabel
@@ -895,7 +924,9 @@ export function PredictionDuelDetailPage() {
 							<SectionLabel>Series Update</SectionLabel>
 						</div>
 						<p className='text-muted-foreground'>
-							Record: {rival.wins}-{rival.losses} ({rival.totalDuels} total duels), net {signedPts(rival.netPoints)}
+							Record: {rival.wins}-{rival.losses} (
+							{rival.totalDuels} total duels), net{" "}
+							{signedPts(rival.netPoints)}
 						</p>
 					</div>
 				) : null}
@@ -958,7 +989,7 @@ export function PredictionDuelDetailPage() {
 					rightName={null}
 					leftPickLabel={challengerPickLabel}
 					rightPickLabel='No match'
-					leftPickHidden
+					leftPickHidden={false}
 					stake={duel.stakeAmount}
 					rightEmptyLabel='No match'
 				/>
@@ -978,7 +1009,8 @@ export function PredictionDuelDetailPage() {
 	};
 
 	const renderCancelled = () => {
-		const reason = "This duel was voided and all held stakes were returned.";
+		const reason =
+			"This duel was voided and all held stakes were returned.";
 
 		return (
 			<>

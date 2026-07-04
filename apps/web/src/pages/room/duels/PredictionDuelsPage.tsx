@@ -1,15 +1,16 @@
-import { Badge, Button, Skeleton } from "@/components";
+import { Alert, AlertDescription, Badge, Button, Skeleton } from "@/components";
 import { usePredictionDuelRealtime } from "@/hooks/useRoomRealtime";
 import { usePredictionDuelSummary, usePredictionDuels } from "@/store/duel";
 import { usePrediction } from "@/store/prediction";
 import { useRoomContext } from "../RoomLayout";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { DuelCard } from "./components/DuelCard";
-import { SwordsIcon } from "lucide-react";
+import { SwordsIcon, ZapIcon } from "lucide-react";
 
 export function PredictionDuelsPage() {
 	const { predictionId } = useParams<{ predictionId: string }>();
 	const { room } = useRoomContext();
+	const navigate = useNavigate();
 
 	const { data: prediction } = usePrediction(room.id, predictionId);
 	const { data: duels = [], isPending: isDuelsLoading } = usePredictionDuels(
@@ -70,6 +71,15 @@ export function PredictionDuelsPage() {
 	return (
 		<div className='max-w-md mx-auto'>
 			<div className={`px-4 pb-6 pt-4 space-y-4`}>
+				<Alert variant={"info"}>
+					<ZapIcon className='text-accent' />
+					<AlertDescription>
+						Duels on{" "}
+						<span className='font-semibold text-foreground'>
+							{prediction?.title ?? "loading prediction..."}
+						</span>
+					</AlertDescription>
+				</Alert>
 				<div className='rounded-xl border border-border bg-card p-4 space-y-2'>
 					<div className='flex items-center justify-between'>
 						<div className={`flex items-center gap-2`}>
@@ -85,7 +95,6 @@ export function PredictionDuelsPage() {
 						the full pot when the match resolves.
 					</p>
 				</div>
-
 				<section className='space-y-3 pb-20'>
 					<h3 className='text-lg font-semibold'>Open Duels</h3>
 					{duelListContent}
@@ -109,6 +118,28 @@ export function PredictionDuelsPage() {
 					</div>
 				</div>
 			)}
+
+			{isDuelOpen &&
+				!canCreateDuel &&
+				!duelSummary?.currentPlayerHasCreatedDuel && (
+					<div className='fixed inset-x-0 bottom-0 z-50 p-4 bg-card'>
+						<div className='w-full max-w-md mx-auto'>
+							<Button
+								variant='outline'
+								size='lg'
+								onClick={() => {
+									navigate(
+										`/rooms/${room.code}/predictions/${predictionId}`,
+										{ replace: true },
+									);
+								}}
+								className='w-full mx-auto font-bold shadow-lg text-foreground'
+							>
+								Bet 100+ points to unlock duels
+							</Button>
+						</div>
+					</div>
+				)}
 		</div>
 	);
 }

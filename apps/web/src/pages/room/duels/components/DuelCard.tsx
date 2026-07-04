@@ -1,8 +1,13 @@
-import { Avatar, AvatarFallback } from "@/components";
+import { Avatar, AvatarFallback, Badge } from "@/components";
 import { cn } from "@/lib/utils";
 import { usePlayer } from "@/store/player";
 import { Duel } from "@/types";
-import { ChevronRightIcon, UsersIcon } from "lucide-react";
+import {
+	ChevronRightIcon,
+	LockIcon,
+	UserLockIcon,
+	UsersIcon,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 type DuelCardProps = {
@@ -53,16 +58,39 @@ export function DuelCard({ duel }: Readonly<DuelCardProps>) {
 					</AvatarFallback>
 				</Avatar>
 				<div className={`flex-1`}>
-					<p className='text-foreground font-semibold'>
+					<p className='flex items-center text-foreground font-semibold text-lg'>
 						{duel.challenger.username ?? "Anonymous Challenger"}
+						{duel.status === "resolved" &&
+							duel.winner?.id === duel.challenger.id && (
+								<Badge variant='success' className='ml-2'>
+									WON
+								</Badge>
+							)}
+						{duel.status === "resolved" &&
+							duel.winner?.id === duel.opponent?.id && (
+								<Badge variant='destructive' className='ml-2'>
+									LOST
+								</Badge>
+							)}
 					</p>
-					<p
-						className={`flex gap-1 items-center text-muted-foreground text-sm`}
-					>
-						<UsersIcon className={`h-3 w-3`} />
-						<span>{duel.queueCount}</span>
-						<span>queued</span>
-					</p>
+					{duel.opponent ? (
+						<p
+							className={`flex gap-1 items-center text-muted-foreground text-sm`}
+						>
+							<LockIcon className={`size-3`} />
+							<span>
+								{duel.opponent.username ?? "Anonymous Opponent"}
+							</span>
+						</p>
+					) : (
+						<p
+							className={`flex gap-1 items-center text-muted-foreground text-sm`}
+						>
+							<UsersIcon className={`size-3`} />
+							<span>{duel.queueCount}</span>
+							<span>queued</span>
+						</p>
+					)}
 				</div>
 				<div>
 					<p

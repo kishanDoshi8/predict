@@ -64,16 +64,30 @@ export function DuelSummaryCard({
 							{summary.uniqueParticipants}
 						</Stat>
 
-						<Stat
-							icon={
-								<SwordsIcon
-									size={16}
-									className={`text-primary`}
-								/>
-							}
-						>
-							{summary.totalDuels}
-						</Stat>
+						{summary.activeDuels > 0 && (
+							<Stat
+								icon={
+									<SwordsIcon
+										size={16}
+										className={`text-cyan-500`}
+									/>
+								}
+							>
+								{summary.activeDuels}
+							</Stat>
+						)}
+						{summary.matchedDuels > 0 && (
+							<Stat
+								icon={
+									<SwordsIcon
+										size={16}
+										className={`text-primary`}
+									/>
+								}
+							>
+								{summary.matchedDuels}
+							</Stat>
+						)}
 						{summary.resolvedDuels > 0 && (
 							<Stat
 								icon={

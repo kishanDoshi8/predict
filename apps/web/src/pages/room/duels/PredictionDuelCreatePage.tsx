@@ -36,7 +36,10 @@ export function PredictionDuelCreatePage() {
 	const { room } = useRoomContext();
 
 	const { data: prediction } = usePrediction(room.id, predictionId);
-	const { data: duelSummary } = usePredictionDuelSummary(room.id, predictionId);
+	const { data: duelSummary } = usePredictionDuelSummary(
+		room.id,
+		predictionId,
+	);
 	const { data: player } = usePlayer();
 	const { data: myBet } = useMyBet(
 		room.id,
@@ -269,27 +272,6 @@ export function PredictionDuelCreatePage() {
 				</div>
 			</div>
 
-			{/* <div className='rounded-xl border border-border bg-card p-4 space-y-2'>
-				<div className={`flex items-center`}>
-					<p className={`flex-1 text-muted-foreground`}>
-						Into escrow
-					</p>
-					<p className={`font-semibold`}>{stakeAmount} PTS</p>
-				</div>
-				<div className={`flex items-center`}>
-					<p className={`flex-1 text-muted-foreground`}>
-						Confidence fee
-					</p>
-					<p className={`font-semibold text-destructive`}>
-						-{feeAmount} PTS
-					</p>
-				</div>
-				<hr />
-				<div className={`flex items-center font-semibold text-lg`}>
-					<p className={`flex-1`}>Potential win</p>
-					<p className={`text-win`}>+{stakeAmount} PTS</p>
-				</div>
-			</div> */}
 			<StakeBreakdown
 				stake={stakeAmount}
 				fee={feeAmount}

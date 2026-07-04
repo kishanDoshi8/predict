@@ -1,14 +1,18 @@
-import { Alert, AlertDescription, Badge, Button, Skeleton } from "@/components";
+import { Badge, Button, Skeleton } from "@/components";
 import { usePredictionDuelRealtime } from "@/hooks/useRoomRealtime";
 import { usePredictionDuelSummary, usePredictionDuels } from "@/store/duel";
 import { usePrediction } from "@/store/prediction";
 import { useRoomContext } from "../RoomLayout";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { DuelCard } from "./components/DuelCard";
-import { SwordsIcon, ZapIcon } from "lucide-react";
+import { CircleQuestionMarkIcon, SwordsIcon } from "lucide-react";
 import DuelPredictionHeader from "./components/DuelPredictionHeader";
+import DuelsHowItWorksDialog from "@/components/DuelsHowItWorksDialog";
+import React from "react";
 
 export function PredictionDuelsPage() {
+	const [isHowDuelsDialogOpen, setIsHowDuelsDialogOpen] =
+		React.useState(false);
 	const { predictionId } = useParams<{ predictionId: string }>();
 	const { room } = useRoomContext();
 	const navigate = useNavigate();
@@ -78,6 +82,15 @@ export function PredictionDuelsPage() {
 						<div className={`flex items-center gap-2`}>
 							<SwordsIcon className='h-6 w-6 text-accent' />
 							<h2 className='text-2xl font-semibold'>Duels</h2>
+							<button
+								type='button'
+								onClick={() => setIsHowDuelsDialogOpen(true)}
+								className='inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-help'
+								aria-label='How Duels Work'
+								title='How Duels Work'
+							>
+								<CircleQuestionMarkIcon className='h-4 w-4' />
+							</button>
 						</div>
 						<Badge variant={isDuelOpen ? "default" : "secondary"}>
 							{isDuelOpen ? "Active" : "Closed"}
@@ -133,6 +146,11 @@ export function PredictionDuelsPage() {
 						</div>
 					</div>
 				)}
+
+			<DuelsHowItWorksDialog
+				open={isHowDuelsDialogOpen}
+				onOpenChange={setIsHowDuelsDialogOpen}
+			/>
 		</div>
 	);
 }

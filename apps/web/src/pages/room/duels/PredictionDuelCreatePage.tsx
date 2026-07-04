@@ -6,7 +6,7 @@ import {
 	Button,
 	Spinner,
 } from "@/components";
-import { useCreateDuel } from "@/store/duel";
+import { useCreateDuel, usePredictionDuelSummary } from "@/store/duel";
 import { usePrediction } from "@/store/prediction";
 import { usePlayer } from "@/store/player";
 import { useRoomContext } from "../RoomLayout";
@@ -36,6 +36,7 @@ export function PredictionDuelCreatePage() {
 	const { room } = useRoomContext();
 
 	const { data: prediction } = usePrediction(room.id, predictionId);
+	const { data: duelSummary } = usePredictionDuelSummary(room.id, predictionId);
 	const { data: player } = usePlayer();
 	const { data: myBet } = useMyBet(
 		room.id,
@@ -72,6 +73,7 @@ export function PredictionDuelCreatePage() {
 		!player ||
 		!myBet ||
 		!isPredictionOpen ||
+		!(duelSummary?.currentPlayerCanCreate ?? true) ||
 		!hasValidBet ||
 		!isStakeValid;
 

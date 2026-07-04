@@ -1,4 +1,4 @@
-import { Player, Prediction, PredictionStatus, Room, PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats, Duel, DuelStatus } from '@/types'
+import { Player, Prediction, PredictionStatus, Room, PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats, Duel, DuelSummary } from '@/types'
 import type { Json } from '@/types/supabase'
 import { supabase } from './supabase'
 
@@ -52,7 +52,7 @@ function assertOk<T>(data: T | null, error: unknown): T {
 
 type UntypedSupabaseClient = {
   from: (table: string) => any
-  rpc: (fn: string, params?: Record<string, unknown>) => Promise<{ data: unknown | null; error: unknown }>
+  rpc: (fn: string, params?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>
 }
 
 const untypedSupabase = supabase as unknown as UntypedSupabaseClient
@@ -588,109 +588,21 @@ export async function getMyBet(predictionId: string, playerId: string) {
 
 // #region Duels
 // -------------------------------------------------------
-type DuelRow = Omit<
-  Duel,
-  | 'queue_count'
-  | 'status'
-  | 'challenger_username'
-  | 'matched_opponent_username'
-  | 'queued_player_usernames'
-> & {
-  status: string
-}
-
-function mapDuelRow(
-  row: DuelRow,
-  playerUsernameById: Map<string, string>,
-  queuePlayerIds: string[],
-): Duel {
-  const challengerUsername = playerUsernameById.get(row.challenger_player_id) ?? null
-  const matchedOpponentUsername = row.matched_opponent_player_id
-    ? (playerUsernameById.get(row.matched_opponent_player_id) ?? null)
-    : null
-
-  return {
-    ...row,
-    status: row.status as DuelStatus,
-    challenger_username: challengerUsername,
-    matched_opponent_username: matchedOpponentUsername,
-    queue_count: queuePlayerIds.length,
-    queued_player_usernames: queuePlayerIds
-      .map((playerId) => playerUsernameById.get(playerId))
-      .filter((username): username is string => Boolean(username)),
-  }
-}
 
 export async function getPredictionDuels(predictionId: string): Promise<Duel[]> {
-  const { data, error } = await untypedSupabase
-    .from('duels')
-    .select(
-      `id,prediction_id,challenger_player_id,challenger_bet_id,stake_amount,fee_amount,status,matched_opponent_player_id,matched_opponent_bet_id,created_at,matched_at,resolved_at`,
-    )
-    .eq('prediction_id', predictionId)
-    .order('created_at', { ascending: false })
+  const { data, error } = await untypedSupabase.rpc('get_prediction_duels_view', {
+    p_prediction_id: predictionId,
+  })
+  return assertOk(data, error) as Duel[]
+}
 
-  if (error) throw error
-  const duels = (data ?? []) as DuelRow[]
-  if (duels.length === 0) return []
-
-  const duelIds = duels.map((duel) => duel.id)
-  const { data: queueData, error: queueError } = await untypedSupabase
-    .from('duel_queue')
-    .select('duel_id,player_id')
-    .in('duel_id', duelIds)
-    .order('created_at', { ascending: true })
-
-  if (queueError) throw queueError
-
-  const queueRows = (queueData ?? []) as { duel_id: string; player_id: string }[]
-  const queuePlayerIdsByDuel = new Map<string, string[]>()
-  for (const queueRow of queueRows) {
-    const existingQueue = queuePlayerIdsByDuel.get(queueRow.duel_id)
-    if (existingQueue) {
-      existingQueue.push(queueRow.player_id)
-      continue
-    }
-
-    queuePlayerIdsByDuel.set(queueRow.duel_id, [queueRow.player_id])
-  }
-
-  const playerIds = Array.from(
-    new Set(
-      [
-        ...duels.map((duel) => duel.challenger_player_id),
-        ...duels
-          .map((duel) => duel.matched_opponent_player_id)
-          .filter((playerId): playerId is string => Boolean(playerId)),
-        ...queueRows.map((queueRow) => queueRow.player_id),
-      ],
-    ),
-  )
-
-  const playerUsernameById = new Map<string, string>()
-  if (playerIds.length > 0) {
-    const { data: playerRows, error: playerError } = await untypedSupabase
-      .from('players')
-      .select('id,username')
-      .in('id', playerIds)
-
-    if (playerError) throw playerError
-
-    for (const playerRow of (playerRows ?? []) as {
-      id: string
-      username: string
-    }[]) {
-      playerUsernameById.set(playerRow.id, playerRow.username)
-    }
-  }
-
-  return duels.map((duel) =>
-    mapDuelRow(
-      duel,
-      playerUsernameById,
-      queuePlayerIdsByDuel.get(duel.id) ?? [],
-    ),
-  )
+export async function getPredictionDuelSummary(
+  predictionId: string,
+): Promise<DuelSummary> {
+  const { data, error } = await untypedSupabase.rpc('get_prediction_duel_summary', {
+    p_prediction_id: predictionId,
+  })
+  return assertOk(data, error) as DuelSummary
 }
 
 export async function createDuel(
@@ -699,30 +611,13 @@ export async function createDuel(
   betId: string,
   stakeAmount: number,
 ): Promise<Duel> {
-  const { data, error } = await untypedSupabase.rpc('create_duel', {
+  const { data, error } = await untypedSupabase.rpc('create_duel_view', {
     p_prediction_id: predictionId,
     p_challenger_player_id: challengerPlayerId,
     p_bet_id: betId,
     p_stake_amount: stakeAmount,
   })
-
-  const duel = assertOk(data, error) as DuelRow
-  const playerUsernameById = new Map<string, string>()
-  const { data: challengerData, error: challengerError } = await untypedSupabase
-    .from('players')
-    .select('id,username')
-    .eq('id', duel.challenger_player_id)
-    .maybeSingle()
-
-  if (challengerError) throw challengerError
-  if (challengerData) {
-    playerUsernameById.set(
-      challengerData.id as string,
-      challengerData.username as string,
-    )
-  }
-
-  return mapDuelRow(duel, playerUsernameById, [])
+  return assertOk(data, error) as Duel
 }
 
 export async function joinDuelQueue(
@@ -730,70 +625,23 @@ export async function joinDuelQueue(
   playerId: string,
   betId: string,
 ): Promise<Duel> {
-  const { data, error } = await untypedSupabase.rpc('join_duel_queue', {
+  const { data, error } = await untypedSupabase.rpc('join_duel_queue_view', {
     p_duel_id: duelId,
     p_player_id: playerId,
     p_bet_id: betId,
   })
-
-  const duel = assertOk(data, error) as DuelRow
-  const playerIds = [duel.challenger_player_id, duel.matched_opponent_player_id]
-    .filter((id): id is string => Boolean(id))
-
-  const playerUsernameById = new Map<string, string>()
-  if (playerIds.length > 0) {
-    const { data: playerRows, error: playerError } = await untypedSupabase
-      .from('players')
-      .select('id,username')
-      .in('id', playerIds)
-
-    if (playerError) throw playerError
-
-    for (const playerRow of (playerRows ?? []) as { id: string; username: string }[]) {
-      playerUsernameById.set(playerRow.id, playerRow.username)
-    }
-  }
-
-  const { data: queueData, error: queueError } = await untypedSupabase
-    .from('duel_queue')
-    .select('player_id')
-    .eq('duel_id', duel.id)
-    .order('created_at', { ascending: true })
-
-  if (queueError) throw queueError
-
-  const queuePlayerIds = ((queueData ?? []) as { player_id: string }[]).map((row) => row.player_id)
-  return mapDuelRow(duel, playerUsernameById, queuePlayerIds)
+  return assertOk(data, error) as Duel
 }
 
 export async function cancelDuel(
   duelId: string,
   playerId: string,
 ): Promise<Duel> {
-  const { data, error } = await untypedSupabase.rpc('cancel_duel', {
+  const { data, error } = await untypedSupabase.rpc('cancel_duel_view', {
     p_duel_id: duelId,
     p_player_id: playerId,
   })
-
-  const duel = assertOk(data, error) as DuelRow
-  const playerIds = [duel.challenger_player_id, duel.matched_opponent_player_id]
-    .filter((id): id is string => Boolean(id))
-
-  const playerUsernameById = new Map<string, string>()
-  if (playerIds.length > 0) {
-    const { data: playerRows, error: playerError } = await untypedSupabase
-      .from('players')
-      .select('id,username')
-      .in('id', playerIds)
-
-    if (playerError) throw playerError
-
-    for (const playerRow of (playerRows ?? []) as { id: string; username: string }[]) {
-      playerUsernameById.set(playerRow.id, playerRow.username)
-    }
-  }
-
-  return mapDuelRow(duel, playerUsernameById, [])
+  return assertOk(data, error) as Duel
 }
 // #endregion Duels
 

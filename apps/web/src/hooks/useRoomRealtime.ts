@@ -142,6 +142,9 @@ export function usePredictionDuelRealtime(
 						queryKey: roomKeys.duels(roomId, predictionId),
 					});
 					queryClient.invalidateQueries({
+						queryKey: roomKeys.duelSummary(roomId, predictionId),
+					});
+					queryClient.invalidateQueries({
 						queryKey: playerQueryKey,
 					});
 				},
@@ -156,6 +159,9 @@ export function usePredictionDuelRealtime(
 				() => {
 					queryClient.invalidateQueries({
 						queryKey: roomKeys.duels(roomId, predictionId),
+					});
+					queryClient.invalidateQueries({
+						queryKey: roomKeys.duelSummary(roomId, predictionId),
 					});
 				},
 			)

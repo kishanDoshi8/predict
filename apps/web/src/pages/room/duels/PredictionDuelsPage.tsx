@@ -1,33 +1,31 @@
 import { Badge, Button, Skeleton } from "@/components";
 import { usePredictionDuelRealtime } from "@/hooks/useRoomRealtime";
-import { usePredictionDuels } from "@/store/duel";
+import { usePredictionDuelSummary, usePredictionDuels } from "@/store/duel";
 import { usePrediction } from "@/store/prediction";
 import { useRoomContext } from "../RoomLayout";
 import { Link, useParams } from "react-router-dom";
 import { DuelCard } from "./components/DuelCard";
 import { SwordsIcon } from "lucide-react";
-import { usePlayer } from "@/store/player";
 
 export function PredictionDuelsPage() {
 	const { predictionId } = useParams<{ predictionId: string }>();
 	const { room } = useRoomContext();
-	const { data: player } = usePlayer();
 
 	const { data: prediction } = usePrediction(room.id, predictionId);
 	const { data: duels = [], isPending: isDuelsLoading } = usePredictionDuels(
 		room.id,
 		predictionId,
 	);
+	const { data: duelSummary } = usePredictionDuelSummary(
+		room.id,
+		predictionId,
+	);
 
 	usePredictionDuelRealtime(room.id, predictionId ?? null);
 
-	const hasDuel = duels.some(
-		(duel) =>
-			duel.challenger_player_id === player?.id &&
-			duel.status !== "cancelled",
-	);
-
 	const isDuelOpen = prediction?.status === "draft";
+	const canCreateDuel =
+		isDuelOpen && (duelSummary?.currentPlayerCanCreate ?? true);
 
 	const duelListContent = (() => {
 		if (isDuelsLoading) {
@@ -57,7 +55,7 @@ export function PredictionDuelsPage() {
 								: "This prediction is no longer accepting new duels."}
 						</p>
 					</div>
-					{isDuelOpen && (
+					{canCreateDuel && (
 						<Button variant='outline' asChild className='w-full'>
 							<Link to='create'>Create the first duel</Link>
 						</Button>
@@ -83,10 +81,8 @@ export function PredictionDuelsPage() {
 						</Badge>
 					</div>
 					<p className='text-sm text-muted-foreground'>
-						Challenge other players head-to-head.
-					</p>
-					<p className='text-sm text-muted-foreground'>
-						Winner takes the full pot when the match resolves.
+						Head-to-head challenges with other players. Winner takes
+						the full pot when the match resolves.
 					</p>
 				</div>
 
@@ -96,7 +92,7 @@ export function PredictionDuelsPage() {
 				</section>
 			</div>
 
-			{isDuelOpen && !hasDuel && (
+			{canCreateDuel && (
 				<div className='fixed inset-x-0 bottom-0 z-50 p-4 bg-card'>
 					<div className='w-full max-w-md mx-auto'>
 						<Button

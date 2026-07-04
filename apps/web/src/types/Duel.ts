@@ -6,29 +6,60 @@ export type DuelStatus =
 	| "cancelled"
 	| "expired";
 
+export type DuelCurrentPlayerState =
+	| "none"
+	| "creator"
+	| "queued"
+	| "matched"
+	| "winner"
+	| "loser";
+
+export interface MinimalPlayer {
+	id: string;
+	username: string;
+}
+
+export interface RivalrySummary {
+	totalDuels: number;
+	wins: number;
+	losses: number;
+	netPoints: number;
+}
+
 export interface Duel {
 	id: string;
-	prediction_id: string;
-	challenger_player_id: string;
-	challenger_username: string | null;
-	challenger_bet_id: string;
-	stake_amount: number;
-	fee_amount: number;
 	status: DuelStatus;
-	matched_opponent_player_id: string | null;
-	matched_opponent_username: string | null;
-	matched_opponent_bet_id: string | null;
-	created_at: string;
-	matched_at: string | null;
-	resolved_at: string | null;
-	queue_count: number;
-	queued_player_usernames: string[];
+	challenger: MinimalPlayer;
+	opponent: MinimalPlayer | null;
+	stakeAmount: number;
+	feeAmount: number;
+	totalPot: number;
+	queueCount: number;
+	queuedPlayers: MinimalPlayer[];
+	currentPlayerState: DuelCurrentPlayerState;
+	currentPlayerQueued: boolean;
+	totalReserved: number;
+	rivalry: RivalrySummary | null;
+	winner: MinimalPlayer | null;
+	payout: number | null;
+	createdAt: string;
+	matchedAt: string | null;
+	resolvedAt: string | null;
 }
 
 export interface DuelSummary {
-	activeDuelsCount: number;
-	minStake: number | null;
-	maxStake: number | null;
-	queuePlayersCount: number;
-	openDuelsAvailable: boolean;
+	totalDuels: number;
+	activeDuels: number;
+	matchedDuels: number;
+	resolvedDuels: number;
+	totalStake: number;
+	totalEscrow: number;
+	largestStake: number | null;
+	medianStake: number | null;
+	uniqueParticipants: number;
+	queueEntries: number;
+	currentPlayerHasCreatedDuel: boolean;
+	currentPlayerCreatedDuelId: string | null;
+	currentPlayerQueuedCount: number;
+	currentPlayerCanCreate: boolean;
 }

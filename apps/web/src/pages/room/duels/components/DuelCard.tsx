@@ -31,20 +31,20 @@ export function DuelCard({ duel }: Readonly<DuelCardProps>) {
 	const { data: player } = usePlayer();
 	if (!player) return null;
 
-	const isSelf = duel.challenger_player_id === player.id;
-	const initials = duel.challenger_username
-		? duel.challenger_username.slice(0, 2).toUpperCase()
+	const isSelf = duel.challenger.id === player.id;
+	let backgroundClass = "from-cyan-500/15";
+	if (duel.status === "cancelled") {
+		backgroundClass = "from-destructive/15 border-destructive/50";
+	} else if (isSelf) {
+		backgroundClass = "from-win/15 border-win/30";
+	}
+	const initials = duel.challenger.username
+		? duel.challenger.username.slice(0, 2).toUpperCase()
 		: "??";
 
 	return (
 		<div
-			className={`rounded-xl border border-border bg-linear-to-br ${
-				duel.status === "cancelled"
-					? "from-destructive/15 border-destructive/50"
-					: isSelf
-						? "from-win/15 border-win/30"
-						: "from-cyan-500/15"
-			} to-card/20 p-4`}
+			className={`rounded-xl border border-border bg-linear-to-br ${backgroundClass} to-card/20 p-4`}
 		>
 			<div className={`flex items-center gap-2`}>
 				<Avatar size='lg' className={cn(isSelf && "ring-1 ring-win")}>
@@ -54,13 +54,13 @@ export function DuelCard({ duel }: Readonly<DuelCardProps>) {
 				</Avatar>
 				<div className={`flex-1`}>
 					<p className='text-foreground font-semibold'>
-						{duel.challenger_username ?? "Anonymous Challenger"}
+						{duel.challenger.username ?? "Anonymous Challenger"}
 					</p>
 					<p
 						className={`flex gap-1 items-center text-muted-foreground text-sm`}
 					>
 						<UsersIcon className={`h-3 w-3`} />
-						<span>{duel.queue_count}</span>
+						<span>{duel.queueCount}</span>
 						<span>queued</span>
 					</p>
 				</div>
@@ -68,7 +68,7 @@ export function DuelCard({ duel }: Readonly<DuelCardProps>) {
 					<p
 						className={`text-2xl font-semibold text-primary text-right`}
 					>
-						{duel.stake_amount.toLocaleString()}
+						{duel.stakeAmount.toLocaleString()}
 					</p>
 					<p className={`text-sm text-muted-foreground`}>STAKE</p>
 				</div>

@@ -3,9 +3,10 @@ import { useState } from "react";
 import { PredictionPhaseView } from "./predictions/PredictionPhaseView";
 import { useRoomContext } from "./RoomLayout";
 import { useNavigate, useParams } from "react-router-dom";
-import { usePredictionDuels, getDuelSummary } from "@/store/duel";
+import { usePredictionDuelSummary } from "@/store/duel";
 import { DuelSummaryCard } from "./duels/components/DuelSummaryCard";
 import { usePredictionDuelRealtime } from "@/hooks/useRoomRealtime";
+import { Skeleton } from "@/components";
 
 // // ============================================================
 // // PredictionPage
@@ -22,9 +23,11 @@ export function PredictionPage() {
 		room.id,
 		predictionId,
 	);
-	const { data: duels = [] } = usePredictionDuels(room.id, predictionId);
+	const { data: duelSummary } = usePredictionDuelSummary(
+		room.id,
+		predictionId,
+	);
 	const [selectedOption, setSelectedOption] = useState<string | null>(null);
-	const duelSummary = getDuelSummary(duels);
 
 	usePredictionDuelRealtime(room.id, predictionId ?? null);
 
@@ -33,10 +36,11 @@ export function PredictionPage() {
 	return (
 		<div>
 			<div className={`p-4`}>
-				{prediction && (
+				{prediction && duelSummary ? (
 					<div className='mb-4 max-w-md mx-auto'>
 						<DuelSummaryCard
 							summary={duelSummary}
+							predictionStatus={prediction.status}
 							onClick={() =>
 								navigate(
 									`/rooms/${room.code}/predictions/${prediction.id}/duels`,
@@ -44,6 +48,9 @@ export function PredictionPage() {
 							}
 						/>
 					</div>
+				) : (
+					// loading state
+					<Skeleton className='mb-4 h-52 w-full max-w-md mx-auto rounded-2xl' />
 				)}
 				<PredictionPhaseView
 					isLoading={isPredictionLoading}

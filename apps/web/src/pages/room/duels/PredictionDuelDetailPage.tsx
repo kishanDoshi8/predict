@@ -1,6 +1,6 @@
 import { Button, Spinner } from "@/components";
 import { cn } from "@/lib/utils";
-import { useMyBet, useBets } from "@/store/bet";
+import { useMyBet } from "@/store/bet";
 import {
 	useCancelDuel,
 	useJoinDuelQueue,
@@ -50,57 +50,7 @@ type DuelQueueRow = {
 	is_you?: boolean;
 };
 
-type DuelResolutionMeta = {
-	winner_player_id?: string | null;
-	payout_for_current_user?: number | null;
-	pot_amount?: number | null;
-	queued_refunded_count?: number | null;
-	rivalry_update?: string | null;
-	refund_note?: string | null;
-	has_result?: boolean;
-};
-
-type DuelRivalryMeta = {
-	label?: string | null;
-	record?: string | null;
-	nth_duel?: string | null;
-	note?: string | null;
-};
-
-type DuelEligibilityMeta = {
-	eligible: boolean;
-	reason?: string | null;
-};
-
-type DuelDetailExtras = {
-	ui_state?: DuelVisualState;
-	eligibility?: DuelEligibilityMeta;
-	ineligibility_reason?: string | null;
-	rivalry?: DuelRivalryMeta | null;
-	escrow_bullets?: string[];
-	queue_preview_usernames?: string[];
-	queue_position_for_current_user?: number;
-	queue_rows?: DuelQueueRow[];
-	cancellation_reason?: string | null;
-	resolved?: DuelResolutionMeta | null;
-};
-
-type DuelWithDetail = Duel & DuelDetailExtras;
-
-type BetWithOption = {
-	id: string;
-	player_id: string;
-	option_id: string;
-	amount: number;
-	payout: number | null;
-	option?: {
-		id: string;
-		label: string;
-	} | null;
-};
-
-function toVisualState(duel: DuelWithDetail): DuelVisualState {
-	if (duel.ui_state) return duel.ui_state;
+function toVisualState(duel: Duel): DuelVisualState {
 	if (duel.status === "matched") return "matched";
 	if (duel.status === "resolved") return "resolved";
 	if (duel.status === "expired") return "expired";
@@ -121,16 +71,6 @@ function fmtPts(value: number | null | undefined) {
 function signedPts(value: number) {
 	if (value === 0) return "0";
 	return value > 0 ? `+${fmtPts(value)}` : `-${fmtPts(Math.abs(value))}`;
-}
-
-function getPickLabel(
-	betId: string | null | undefined,
-	betsById: Map<string, BetWithOption>,
-	fallbackLabel = "Pick",
-) {
-	if (!betId) return fallbackLabel;
-	const bet = betsById.get(betId);
-	return bet?.option?.label ?? fallbackLabel;
 }
 
 function PickChip({
@@ -302,20 +242,16 @@ function EscrowCard({
 				</p>
 			</div>
 			<ul className='space-y-2 text-sm text-muted-foreground *:flex *:gap-2 *:items-start'>
-				<li>
-					<UserCheckIcon className={`text-primary size-4 mt-1`} />
-					<p className={`flex-1/6`}>
-						You're only matched if your pick differs from your
-						opponent's pick.
-					</p>
-				</li>
-				<li>
-					<HourglassIcon className={`text-accent size-4 mt-1`} />
-					<p className={`flex-1/6`}>
-						If someone ahead of you matches first, your escrow is
-						refunded.
-					</p>
-				</li>
+				{lines.map((line, index) => (
+					<li key={`${line.slice(0, 24)}-${index}`}>
+						{index === 0 ? (
+							<UserCheckIcon className={`text-primary size-4 mt-1`} />
+						) : (
+							<HourglassIcon className={`text-accent size-4 mt-1`} />
+						)}
+						<p className={`flex-1/6`}>{line}</p>
+					</li>
+				))}
 			</ul>
 		</div>
 	);
@@ -414,7 +350,6 @@ export function PredictionDuelDetailPage() {
 	const { data: player } = usePlayer();
 	const { data: prediction } = usePrediction(room.id, predictionId);
 	const { data: duels = [] } = usePredictionDuels(room.id, predictionId);
-	const { data: bets = [] } = useBets(room.id, predictionId);
 	const { data: myBet } = useMyBet(
 		room.id,
 		predictionId ?? "",
@@ -425,88 +360,70 @@ export function PredictionDuelDetailPage() {
 
 	const duel = useMemo(
 		() =>
-			duels.find((item) => item.id === duelId) as
-				| DuelWithDetail
-				| undefined,
+			duels.find((item) => item.id === duelId),
 		[duelId, duels],
-	);
-
-	const betsById = useMemo(
-		() => new Map((bets as BetWithOption[]).map((bet) => [bet.id, bet])),
-		[bets],
 	);
 
 	const currentUserId = player?.id ?? null;
 	const isCurrentUserChallenger =
-		currentUserId != null && duel?.challenger_player_id === currentUserId;
+		currentUserId != null && duel?.challenger.id === currentUserId;
 	const visualState = duel ? toVisualState(duel) : null;
 
-	const challengerPickLabel = duel
-		? getPickLabel(duel.challenger_bet_id, betsById, "Challenger pick")
-		: "Challenger pick";
-	const opponentPickLabel = duel
-		? getPickLabel(duel.matched_opponent_bet_id, betsById, "Opponent pick")
-		: "Opponent pick";
+	const challengerPickLabel = "Challenger";
+	const opponentPickLabel = "Opponent";
 	const myPickLabel = myBet?.option_id
 		? (prediction?.prediction_options.find(
 				(opt) => opt.id === myBet.option_id,
 			)?.label ?? "My pick")
 		: "My pick";
 
-	const detailEligibility = duel?.eligibility;
-	const inferredEligible =
-		!detailEligibility &&
+	const eligible =
 		!!duel &&
 		!!player &&
 		!!myBet &&
+		duel.status !== "matched" &&
+		duel.status !== "resolved" &&
+		duel.status !== "cancelled" &&
+		duel.status !== "expired" &&
+		!duel.currentPlayerQueued &&
 		!isCurrentUserChallenger &&
 		prediction?.status === "draft";
-	const eligible = detailEligibility
-		? detailEligibility.eligible
-		: inferredEligible;
 	const ineligibleReason =
-		detailEligibility?.reason ??
-		duel?.ineligibility_reason ??
-		(!myBet
+		!myBet
 			? "Place a qualifying bet before joining this duel."
 			: isCurrentUserChallenger
 				? "You cannot join your own duel."
-				: "This duel is not currently joinable.");
+				: duel?.currentPlayerQueued
+					? "You are already queued for this duel."
+					: "This duel is not currently joinable.";
 
-	const queuePreview =
-		duel?.queue_preview_usernames ?? duel?.queued_player_usernames ?? [];
-	const queuePosition =
-		duel?.queue_position_for_current_user ??
-		(duel?.queue_count ? duel.queue_count + 1 : 1);
+	const queuePreview = duel?.queuedPlayers.map((queuedPlayer) => queuedPlayer.username) ?? [];
+	const queuePosition = (duel?.queueCount ? duel.queueCount + 1 : 1);
 
 	const queueRows: DuelQueueRow[] =
-		duel?.queue_rows ??
-		(duel?.queued_player_usernames ?? []).map((username, index) => ({
+		(duel?.queuedPlayers ?? []).map((queuedPlayer, index) => ({
 			position: index + 1,
-			username,
+			username: queuedPlayer.username,
+			player_id: queuedPlayer.id,
 			status: "waiting",
+			is_you: queuedPlayer.id === currentUserId,
 		}));
 
 	const rival = duel?.rivalry;
-	const escrowBullets = duel?.escrow_bullets ?? [
+	const escrowBullets = [
 		"👥 Match happens only when the opponent pick differs from the challenger.",
 		" If someone ahead in queue matches first, held points are refunded automatically.",
 	];
 
-	const resolvedMeta = duel?.resolved ?? null;
-	const inferredPot = duel ? duel.stake_amount * 2 : 0;
 	const payoutForCurrentUser =
-		resolvedMeta?.payout_for_current_user ??
-		(duel && duel.status === "resolved" && currentUserId
-			? resolvedMeta?.winner_player_id === currentUserId
-				? duel.stake_amount
-				: -duel.stake_amount
-			: 0);
-	const isWin = !!(
-		duel &&
-		currentUserId &&
-		resolvedMeta?.winner_player_id === currentUserId
-	);
+		duel && duel.status === "resolved" && currentUserId
+			? duel.currentPlayerState === "winner"
+				? (duel.payout ?? duel.totalPot)
+				: duel.currentPlayerState === "loser"
+					? -duel.stakeAmount
+					: 0
+			: 0;
+	const isWin = duel?.currentPlayerState === "winner";
 
 	const [showWinBurst, setShowWinBurst] = useState(false);
 	useEffect(() => {
@@ -580,7 +497,7 @@ export function PredictionDuelDetailPage() {
 		return (
 			<>
 				<VsMatchup
-					leftName={duel.challenger_username}
+					leftName={duel.challenger.username}
 					leftPickLabel={"Challenger"}
 					leftPickHidden={false}
 					rightName={"TBD"}
@@ -588,41 +505,26 @@ export function PredictionDuelDetailPage() {
 					rightEmptyLabel2='Opponent'
 					rightPickLabel={myPickLabel}
 					rightRing
-					stake={duel.stake_amount}
+					stake={duel.stakeAmount}
 				/>
 
-				{rival &&
-				(rival.label ||
-					rival.record ||
-					rival.nth_duel ||
-					rival.note) ? (
+				{rival ? (
 					<div className='rounded-2xl border border-border bg-primary/10 p-4'>
 						<div className='mb-2 flex items-center gap-2 text-primary'>
 							<Flame className='size-4' aria-hidden='true' />
 							<SectionLabel>Rivalry</SectionLabel>
 						</div>
 						<p className='text-sm font-semibold'>
-							{rival.label ?? "Head-to-head streak"}
+							{rival.wins}-{rival.losses} in {rival.totalDuels} duel
+							{rival.totalDuels === 1 ? "" : "s"}
 						</p>
-						{rival.record ? (
-							<p className='text-sm text-muted-foreground'>
-								{rival.record}
-							</p>
-						) : null}
-						{rival.nth_duel ? (
-							<p className='text-sm text-muted-foreground'>
-								{rival.nth_duel}
-							</p>
-						) : null}
-						{rival.note ? (
-							<p className='text-xs text-muted-foreground'>
-								{rival.note}
-							</p>
-						) : null}
+						<p className='text-sm text-muted-foreground'>
+							Net points: {signedPts(rival.netPoints)}
+						</p>
 					</div>
 				) : null}
 
-				<EscrowCard amount={duel.stake_amount} lines={escrowBullets} />
+				<EscrowCard amount={duel.stakeAmount} lines={escrowBullets} />
 
 				<div className='rounded-2xl border border-border bg-card p-4'>
 					<SectionLabel>Queue Preview</SectionLabel>
@@ -651,12 +553,7 @@ export function PredictionDuelDetailPage() {
 					</div>
 				</div>
 
-				{/* <StakeBreakdown
-					stake={duel.stake_amount}
-					fee={duel.fee_amount}
-					pot={duel.stake_amount}
-					potLabel='Potential win'
-				/> */}
+				{/* <StakeBreakdown stake={duel.stakeAmount} fee={duel.feeAmount} pot={duel.totalPot} potLabel='Potential win' /> */}
 
 				{eligible ? null : (
 					<div className='rounded-2xl border border-border bg-secondary/50 p-4 text-sm text-muted-foreground'>
@@ -703,7 +600,7 @@ export function PredictionDuelDetailPage() {
 						) : (
 							<Swords className='size-4' />
 						)}
-						Commit {fmtPts(duel.stake_amount)} pts to Escrow
+						Commit {fmtPts(duel.stakeAmount)} pts to Escrow
 					</Button>
 				</StickyActionBar>
 			</>
@@ -711,9 +608,7 @@ export function PredictionDuelDetailPage() {
 	};
 
 	const renderMatched = () => {
-		const resultReady = !!(
-			duel.resolved?.has_result || duel.status === "resolved"
-		);
+		const resultReady = duel.status === "resolved";
 
 		return (
 			<>
@@ -730,22 +625,20 @@ export function PredictionDuelDetailPage() {
 				/>
 
 				<EscrowCard
-					amount={duel.stake_amount}
+					amount={duel.stakeAmount}
 					lines={[
 						"Both duel stakes are now held until the prediction resolves.",
 					]}
 				/>
 
 				<VsMatchup
-					leftName={duel.challenger_username}
-					rightName={duel.matched_opponent_username}
+					leftName={duel.challenger.username}
+					rightName={duel.opponent?.username}
 					leftPickLabel={challengerPickLabel}
 					rightPickLabel={opponentPickLabel}
-					leftRing={currentUserId === duel.challenger_player_id}
-					rightRing={
-						currentUserId === duel.matched_opponent_player_id
-					}
-					stake={duel.stake_amount}
+					leftRing={currentUserId === duel.challenger.id}
+					rightRing={currentUserId === duel.opponent?.id}
+					stake={duel.stakeAmount}
 				/>
 
 				<div className='rounded-2xl border border-border bg-card p-4'>
@@ -847,8 +740,6 @@ export function PredictionDuelDetailPage() {
 	};
 
 	const renderResolved = () => {
-		const pot = resolvedMeta?.pot_amount ?? inferredPot;
-
 		return (
 			<>
 				<div className='relative'>
@@ -919,10 +810,10 @@ export function PredictionDuelDetailPage() {
 								name={
 									isWin
 										? player.username
-										: duel.challenger_player_id ===
+										: duel.challenger.id ===
 											  player.id
-											? duel.matched_opponent_username
-											: duel.challenger_username
+											? duel.opponent?.username
+											: duel.challenger.username
 								}
 								size='md'
 								ring={isWin}
@@ -931,16 +822,16 @@ export function PredictionDuelDetailPage() {
 								<p className='truncate text-sm font-semibold'>
 									{isWin
 										? "You"
-										: duel.challenger_player_id ===
+										: duel.challenger.id ===
 											  player.id
-											? duel.matched_opponent_username
-											: duel.challenger_username}
+											? duel.opponent?.username
+											: duel.challenger.username}
 								</p>
 								<PickChip
 									label={
 										isWin
 											? myPickLabel
-											: duel.challenger_player_id ===
+											: duel.challenger.id ===
 												  player.id
 												? opponentPickLabel
 												: challengerPickLabel
@@ -962,10 +853,10 @@ export function PredictionDuelDetailPage() {
 							<DuelAvatarTile
 								name={
 									isWin
-										? duel.challenger_player_id ===
+										? duel.challenger.id ===
 											player.id
-											? duel.matched_opponent_username
-											: duel.challenger_username
+											? duel.opponent?.username
+											: duel.challenger.username
 										: player.username
 								}
 								size='md'
@@ -974,16 +865,16 @@ export function PredictionDuelDetailPage() {
 							<div className='min-w-0'>
 								<p className='truncate text-sm font-semibold'>
 									{isWin
-										? duel.challenger_player_id ===
+										? duel.challenger.id ===
 											player.id
-											? duel.matched_opponent_username
-											: duel.challenger_username
+											? duel.opponent?.username
+											: duel.challenger.username
 										: "You"}
 								</p>
 								<PickChip
 									label={
 										isWin
-											? duel.challenger_player_id ===
+											? duel.challenger.id ===
 												player.id
 												? opponentPickLabel
 												: challengerPickLabel
@@ -995,35 +886,28 @@ export function PredictionDuelDetailPage() {
 					</div>
 				</div>
 
-				{/* <StakeBreakdown
-					stake={duel.stake_amount}
-					fee={duel.fee_amount}
-					pot={pot}
-					potLabel='Pot won'
-				/> */}
+				{/* <StakeBreakdown stake={duel.stakeAmount} fee={duel.feeAmount} pot={pot} potLabel='Pot won' /> */}
 
-				{resolvedMeta?.rivalry_update ? (
+				{rival ? (
 					<div className='rounded-2xl border border-border bg-primary/10 p-4 text-sm'>
 						<div className='mb-2 flex items-center gap-2 text-primary'>
 							<Flame className='size-4' aria-hidden='true' />
 							<SectionLabel>Series Update</SectionLabel>
 						</div>
 						<p className='text-muted-foreground'>
-							{resolvedMeta.rivalry_update}
+							Record: {rival.wins}-{rival.losses} ({rival.totalDuels} total duels), net {signedPts(rival.netPoints)}
 						</p>
 					</div>
 				) : null}
 
-				{typeof resolvedMeta?.queued_refunded_count === "number" ||
-				resolvedMeta?.refund_note ? (
+				{duel.queueCount > 0 ? (
 					<div className='rounded-2xl border border-border bg-secondary/40 p-4 text-sm text-muted-foreground'>
 						<div className='mb-2 flex items-center gap-2'>
 							<RotateCw className='size-4' aria-hidden='true' />
 							<SectionLabel>Refunds</SectionLabel>
 						</div>
 						<p>
-							{resolvedMeta?.refund_note ??
-								`${resolvedMeta?.queued_refunded_count ?? 0} queued players were refunded automatically.`}
+							{`${duel.queueCount} queued players were refunded automatically.`}
 						</p>
 					</div>
 				) : null}
@@ -1060,7 +944,7 @@ export function PredictionDuelDetailPage() {
 					<div className='flex items-center justify-between'>
 						<SectionLabel>Stake</SectionLabel>
 						<span className='font-mono tabular-nums'>
-							{fmtPts(duel.stake_amount)} pts
+							{fmtPts(duel.stakeAmount)} pts
 						</span>
 					</div>
 					<div className='mt-3 flex items-center gap-2 rounded-xl bg-secondary/40 p-3 text-sm text-win'>
@@ -1070,12 +954,12 @@ export function PredictionDuelDetailPage() {
 				</div>
 
 				<VsMatchup
-					leftName={duel.challenger_username}
+					leftName={duel.challenger.username}
 					rightName={null}
 					leftPickLabel={challengerPickLabel}
 					rightPickLabel='No match'
 					leftPickHidden
-					stake={duel.stake_amount}
+					stake={duel.stakeAmount}
 					rightEmptyLabel='No match'
 				/>
 
@@ -1094,9 +978,7 @@ export function PredictionDuelDetailPage() {
 	};
 
 	const renderCancelled = () => {
-		const reason =
-			duel.cancellation_reason ??
-			"This duel was voided and all held stakes were returned.";
+		const reason = "This duel was voided and all held stakes were returned.";
 
 		return (
 			<>
@@ -1122,7 +1004,7 @@ export function PredictionDuelDetailPage() {
 							Stake returned to participants
 						</div>
 						<span className='font-mono tabular-nums text-win'>
-							{fmtPts(duel.stake_amount)} pts
+							{fmtPts(duel.stakeAmount)} pts
 						</span>
 					</div>
 				</div>

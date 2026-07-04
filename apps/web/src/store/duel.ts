@@ -1,39 +1,27 @@
-import { cancelDuel, createDuel, getPredictionDuels, joinDuelQueue } from "@/lib/api";
-import { Duel, DuelSummary } from "@/types";
+import {
+	cancelDuel,
+	createDuel,
+	getPredictionDuelSummary,
+	getPredictionDuels,
+	joinDuelQueue,
+} from "@/lib/api";
+import { DuelSummary } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "./_keys";
 import { playerQueryKey } from "./player";
-
-const ACTIVE_DUEL_STATUSES = new Set<Duel["status"]>([
-	"created",
-	"queued",
-	"matched",
-]);
-
-export function getDuelSummary(duels: Duel[]): DuelSummary {
-	const activeDuels = duels.filter((duel) =>
-		ACTIVE_DUEL_STATUSES.has(duel.status),
-	);
-	const stakes = activeDuels.map((duel) => duel.stake_amount);
-
-	return {
-		activeDuelsCount: activeDuels.length,
-		minStake: stakes.length > 0 ? Math.min(...stakes) : null,
-		maxStake: stakes.length > 0 ? Math.max(...stakes) : null,
-		queuePlayersCount: activeDuels.reduce(
-			(total, duel) => total + duel.queue_count,
-			0,
-		),
-		openDuelsAvailable: activeDuels.some((duel) =>
-			duel.status === "created" || duel.status === "queued",
-		),
-	};
-}
 
 export const usePredictionDuels = (roomId: string, predictionId?: string) => {
 	return useQuery({
 		queryKey: roomKeys.duels(roomId, predictionId ?? ""),
 		queryFn: () => getPredictionDuels(predictionId ?? ""),
+		enabled: !!predictionId,
+	});
+};
+
+export const usePredictionDuelSummary = (roomId: string, predictionId?: string) => {
+	return useQuery<DuelSummary>({
+		queryKey: roomKeys.duelSummary(roomId, predictionId ?? ""),
+		queryFn: () => getPredictionDuelSummary(predictionId ?? ""),
 		enabled: !!predictionId,
 	});
 };
@@ -70,6 +58,12 @@ export const useCreateDuel = () => {
 				),
 			});
 			queryClient.invalidateQueries({
+				queryKey: roomKeys.duelSummary(
+					variables.roomId,
+					variables.predictionId,
+				),
+			});
+			queryClient.invalidateQueries({
 				queryKey: playerQueryKey,
 			});
 			queryClient.invalidateQueries({
@@ -101,6 +95,12 @@ export const useJoinDuelQueue = () => {
 				queryKey: roomKeys.duels(variables.roomId, variables.predictionId),
 			});
 			queryClient.invalidateQueries({
+				queryKey: roomKeys.duelSummary(
+					variables.roomId,
+					variables.predictionId,
+				),
+			});
+			queryClient.invalidateQueries({
 				queryKey: playerQueryKey,
 			});
 			queryClient.invalidateQueries({
@@ -126,6 +126,12 @@ export const useCancelDuel = () => {
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({
 				queryKey: roomKeys.duels(variables.roomId, variables.predictionId),
+			});
+			queryClient.invalidateQueries({
+				queryKey: roomKeys.duelSummary(
+					variables.roomId,
+					variables.predictionId,
+				),
 			});
 			queryClient.invalidateQueries({
 				queryKey: playerQueryKey,

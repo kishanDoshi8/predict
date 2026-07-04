@@ -1,4 +1,4 @@
-import { Player, Prediction, PredictionStatus, Room, PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats } from '@/types'
+import { Player, Prediction, PredictionStatus, Room, PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats, Duel, DuelSummary } from '@/types'
 import type { Json } from '@/types/supabase'
 import { supabase } from './supabase'
 
@@ -49,6 +49,13 @@ function assertOk<T>(data: T | null, error: unknown): T {
   if (data === null) throw new Error('No data returned')
   return data
 }
+
+type UntypedSupabaseClient = {
+  from: (table: string) => any
+  rpc: (fn: string, params?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>
+}
+
+const untypedSupabase = supabase as unknown as UntypedSupabaseClient
 
 // #region Players & Session
 // -------------------------------------------------------
@@ -578,6 +585,76 @@ export async function getMyBet(predictionId: string, playerId: string) {
   return data
 }
 // #endregion Bets
+
+// #region Duels
+// -------------------------------------------------------
+
+export async function getPredictionDuels(predictionId: string): Promise<Duel[]> {
+  const { data, error } = await untypedSupabase.rpc('get_prediction_duels_view', {
+    p_prediction_id: predictionId,
+  })
+  return assertOk(data, error) as Duel[]
+}
+
+export async function getPredictionDuelSummary(
+  predictionId: string,
+): Promise<DuelSummary> {
+  const { data, error } = await untypedSupabase.rpc('get_prediction_duel_summary', {
+    p_prediction_id: predictionId,
+  })
+  return assertOk(data, error) as DuelSummary
+}
+
+export async function createDuel(
+  predictionId: string,
+  challengerPlayerId: string,
+  betId: string,
+  stakeAmount: number,
+): Promise<Duel> {
+  const { data, error } = await untypedSupabase.rpc('create_duel_view', {
+    p_prediction_id: predictionId,
+    p_challenger_player_id: challengerPlayerId,
+    p_bet_id: betId,
+    p_stake_amount: stakeAmount,
+  })
+  return assertOk(data, error) as Duel
+}
+
+export async function joinDuelQueue(
+  duelId: string,
+  playerId: string,
+  betId: string,
+): Promise<Duel> {
+  const { data, error } = await untypedSupabase.rpc('join_duel_queue_view', {
+    p_duel_id: duelId,
+    p_player_id: playerId,
+    p_bet_id: betId,
+  })
+  return assertOk(data, error) as Duel
+}
+
+export async function cancelDuel(
+  duelId: string,
+  playerId: string,
+): Promise<Duel> {
+  const { data, error } = await untypedSupabase.rpc('cancel_duel_view', {
+    p_duel_id: duelId,
+    p_player_id: playerId,
+  })
+  return assertOk(data, error) as Duel
+}
+
+export async function cancelDuelQueue(
+  duelId: string,
+  playerId: string,
+): Promise<Duel> {
+  const { data, error } = await untypedSupabase.rpc('cancel_duel_queue_view', {
+    p_duel_id: duelId,
+    p_player_id: playerId,
+  })
+  return assertOk(data, error) as Duel
+}
+// #endregion Duels
 
 // #region Leaderboard
 export async function getRoomLeaderboard(

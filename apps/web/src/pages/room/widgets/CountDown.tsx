@@ -11,6 +11,7 @@ type CountdownProps = {
 	targetTime: number; // future timestamp in ms
 	textSize?: string;
 	onExpire?: () => void;
+	hideIcon?: boolean;
 };
 
 function formatTime(ms: number) {
@@ -38,6 +39,7 @@ export function Countdown({
 	targetTime,
 	textSize = "text-sm",
 	onExpire,
+	hideIcon = false,
 }: Readonly<CountdownProps>) {
 	const [timeLeft, setTimeLeft] = useState(targetTime - Date.now());
 	const showDateTime = timeLeft > 13 * 60 * 60 * 1000;
@@ -75,7 +77,7 @@ export function Countdown({
 					<Badge
 						className={`flex items-center gap-1.5 rounded-lg bg-secondary/80 px-3 py-1.5 font-mono ${textSize} font-bold text-rose-400`}
 					>
-						<ZapIcon />
+						{!hideIcon && <ZapIcon />}
 						{displayValue}
 					</Badge>
 				</div>

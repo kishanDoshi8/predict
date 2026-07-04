@@ -17,6 +17,7 @@ import { useRoomContext } from "../RoomLayout";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { localStorageKeys } from "@/store/_keys";
 import { Counter, FadeContent } from "@/components";
+import { usePredictionDuels } from "@/store/duel";
 
 type Props = {
 	player: Player;
@@ -33,6 +34,7 @@ export default function DraftControls({
 }: Readonly<Props>) {
 	const { room } = useRoomContext();
 	const { mutate: placeBet, isPending: isPlacingBet } = usePlaceBet();
+	const { data: duels } = usePredictionDuels(room.id, predictionId);
 	const { data: myBet, isPending: isMyBetLoading } = useMyBet(
 		room.id,
 		predictionId,
@@ -45,9 +47,23 @@ export default function DraftControls({
 		false,
 		localStorageKeys.userPreference.bettingContorls.collapsed,
 	);
+	const [canUpdateBet, setCanUpdateBet] = React.useState<boolean>(false);
 
 	const availableBalance =
 		player.points_balance - player.points_in_escrow + (myBet?.amount ?? 0);
+
+	useEffect(() => {
+		const hasDuelInProgress = duels?.some((duel) => {
+			const hasChallenged =
+				duel.challenger.id === player.id && duel.status !== "cancelled";
+			const hasQueued = duel.queue.some(
+				(queueEntry) => queueEntry.player.id === player.id,
+			);
+
+			return hasChallenged || hasQueued;
+		});
+		setCanUpdateBet(!hasDuelInProgress && !!myBet);
+	}, [duels, player.id, predictionId, room.id]);
 
 	useEffect(() => {
 		if (myBet) {
@@ -80,6 +96,11 @@ export default function DraftControls({
 	const handlePlaceBet = () => {
 		if (!player || !predictionId || !selectedOption) return;
 
+		if (!canUpdateBet && myBet) {
+			cannotBetMessage();
+			return;
+		}
+
 		placeBet(
 			{
 				roomId: room.id,
@@ -100,6 +121,18 @@ export default function DraftControls({
 		);
 	};
 
+	const cannotBetMessage = () => {
+		setBetAmount(myBet?.amount ?? 0);
+		toast.error(
+			"You cannot update your bet while you have an active duel or are queued for a duel.",
+			{
+				position: "top-center",
+				duration: Infinity,
+			},
+		);
+		return;
+	};
+
 	const handleResetBetAmount = () => {
 		if (myBet) {
 			setBetAmount(myBet.amount);
@@ -110,6 +143,12 @@ export default function DraftControls({
 
 	const handleCancelBet = () => {
 		if (!player || !predictionId) return;
+
+		if (!canUpdateBet) {
+			cannotBetMessage();
+			return;
+		}
+
 		cancelBet(
 			{
 				roomId: room.id,

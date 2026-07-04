@@ -2,12 +2,7 @@ import { Avatar, AvatarFallback, Badge } from "@/components";
 import { cn } from "@/lib/utils";
 import { usePlayer } from "@/store/player";
 import { Duel } from "@/types";
-import {
-	ChevronRightIcon,
-	LockIcon,
-	UserLockIcon,
-	UsersIcon,
-} from "lucide-react";
+import { ChevronRightIcon, LockIcon, UsersIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 type DuelCardProps = {

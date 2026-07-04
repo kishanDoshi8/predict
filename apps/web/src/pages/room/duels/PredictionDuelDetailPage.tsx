@@ -14,13 +14,16 @@ import {
 	Check,
 	ChevronLeft,
 	Clock,
+	ClockIcon,
 	Crown,
 	Flame,
 	Hourglass,
 	HourglassIcon,
 	Info,
 	Lock,
+	LockIcon,
 	RotateCw,
+	ShieldIcon,
 	Sparkles,
 	Swords,
 	Trophy,
@@ -32,6 +35,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useRoomContext } from "../RoomLayout";
+import { Countdown } from "../widgets/CountDown";
 
 type DuelVisualState =
 	| "join"
@@ -221,42 +225,28 @@ function VsMatchup({
 	);
 }
 
-function EscrowCard({
-	amount,
-	lines,
-}: Readonly<{ amount: number; lines: string[] }>) {
+function EscrowCard({ amount }: Readonly<{ amount: number }>) {
 	return (
 		<div className='rounded-2xl border border-border bg-secondary/40 p-4'>
-			<div className='mb-3 flex items-center justify-between'>
-				<SectionLabel>You commit to escrow</SectionLabel>
-				<span className='rounded-full bg-secondary px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-accent'>
+			<div className={`flex gap-4 items-center`}>
+				<div
+					className={`bg-accent/30 rounded-2xl border border-accent p-3`}
+				>
+					<ShieldIcon className={`text-accent`} />
+				</div>
+				<div className={`flex-1`}>
+					<p
+						className={`text-sm text-muted-foreground tracking-wider uppercase`}
+					>
+						In Escrow
+					</p>
+					<p className={`text-2xl font-bold`}>{fmtPts(amount)} pts</p>
+				</div>
+				<span className='flex items-center gap-2 rounded-full bg-secondary px-2 py-1 font-semibold text-sm tracking-wider text-accent'>
+					<LockIcon size={14} />
 					Held
 				</span>
 			</div>
-			<div className='mb-3 flex items-end gap-1'>
-				<p className='font-mono text-2xl font-semibold tabular-nums text-foreground'>
-					{fmtPts(amount)}
-				</p>
-				<p className='pb-1 text-xs uppercase tracking-wider text-muted-foreground'>
-					pts
-				</p>
-			</div>
-			<ul className='space-y-2 text-sm text-muted-foreground *:flex *:gap-2 *:items-start'>
-				{lines.map((line, index) => (
-					<li key={`${line.slice(0, 24)}-${index}`}>
-						{index === 0 ? (
-							<UserCheckIcon
-								className={`text-primary size-4 mt-1`}
-							/>
-						) : (
-							<HourglassIcon
-								className={`text-accent size-4 mt-1`}
-							/>
-						)}
-						<p className={`flex-1/6`}>{line}</p>
-					</li>
-				))}
-			</ul>
 		</div>
 	);
 }
@@ -442,10 +432,6 @@ export function PredictionDuelDetailPage() {
 	);
 
 	const rival = duel?.rivalry;
-	const escrowBullets = [
-		"Match happens only when the opponent pick differs from the challenger.",
-		" If someone ahead in queue matches first, held points are refunded automatically.",
-	];
 
 	const payoutForCurrentUser =
 		duel && duel.status === "resolved" && currentUserId
@@ -530,6 +516,30 @@ export function PredictionDuelDetailPage() {
 	const renderJoin = () => {
 		return (
 			<>
+				<EscrowCard amount={duel.totalReserved} />
+
+				<div
+					className={`flex flex-col gap-4 items-center justify-center p-4 bg-card rounded-2xl ring-1 ring-primary/50 text-center`}
+				>
+					<span
+						className={`text-muted-foreground tracking-wider uppercase`}
+					>
+						<ClockIcon
+							className='size-4 inline-block mr-2 text-primary/70'
+							aria-hidden='true'
+						/>
+						Lock in before
+					</span>
+					<Countdown
+						targetTime={new Date(prediction.deadline).getTime()}
+						textSize='text-2xl'
+						hideIcon={true}
+					/>
+					<span className={`text-xs text-muted-foreground`}>
+						Picks stay hidden until the match locks
+					</span>
+				</div>
+
 				<VsMatchup
 					leftName={duel.challenger.username}
 					leftPickLabel={challengerPickLabel}
@@ -559,15 +569,16 @@ export function PredictionDuelDetailPage() {
 					</div>
 				) : null}
 
-				<EscrowCard amount={duel.stakeAmount} lines={escrowBullets} />
-
 				<div className='rounded-2xl border border-border bg-card p-4'>
 					<div className={`flex justify-between items-center`}>
-						<SectionLabel>Queue Preview</SectionLabel>
+						<SectionLabel>Challenger queue</SectionLabel>
 						<span className='rounded-full border border-border bg-secondary px-2 py-1 font-mono text-xs tabular-nums'>
 							next in at #{queuePosition}
 						</span>
 					</div>
+					<p className={`text-[12px] mt-1 text-muted-foreground`}>
+						First different pick wins the seat
+					</p>
 					<div className='mt-3 flex items-center justify-between'>
 						<div className='flex -space-x-2'>
 							{queuePreview.slice(0, 4).map((name) => (
@@ -647,6 +658,8 @@ export function PredictionDuelDetailPage() {
 
 		return (
 			<>
+				<EscrowCard amount={duel.totalPot} />
+
 				<StatusBanner
 					icon={
 						<Lock
@@ -657,13 +670,6 @@ export function PredictionDuelDetailPage() {
 					title='Duel Locked'
 					subtitle='Picks revealed - opponent matched.'
 					variant='primary'
-				/>
-
-				<EscrowCard
-					amount={duel.stakeAmount}
-					lines={[
-						"Both duel stakes are now held until the prediction resolves.",
-					]}
 				/>
 
 				<VsMatchup

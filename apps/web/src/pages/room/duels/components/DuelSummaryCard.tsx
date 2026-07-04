@@ -71,7 +71,7 @@ export function DuelSummaryCard({
 								/>
 							}
 						>
-							{summary.activeDuels}
+							{summary.totalDuels}
 						</Stat>
 					</div>
 				</div>

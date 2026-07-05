@@ -91,6 +91,13 @@ const resultBadgeMeta = {
 	},
 } as const;
 
+const getRankBadgeClassName = (rank?: number) => {
+	if (rank === 1) return "bg-rank-1 text-background font-bold";
+	if (rank === 2) return "bg-rank-2 text-background font-bold";
+	if (rank === 3) return "bg-rank-3 text-background font-bold";
+	return "bg-secondary text-secondary-foreground";
+};
+
 function StatsSkeleton() {
 	return (
 		<div className='grid grid-cols-2 gap-4'>
@@ -233,13 +240,35 @@ export function PlayerProfileDialog({
 										delay={200}
 										className='rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'
 									>
-										<p className='text-xs text-muted-foreground'>
+										<p className='flex justify-between text-xs text-muted-foreground'>
 											{label}
+											{label === "Points Won" && (
+												<span
+													className={`text-xs font-bold tracking-wider px-2 rounded-md ${getRankBadgeClassName(
+														stats.points_rank,
+													)}`}
+												>
+													#{stats.points_rank}
+												</span>
+											)}
+											{label === "Current Rating" && (
+												<span
+													className={`text-xs font-bold tracking-wider px-2 rounded-md ${getRankBadgeClassName(
+														stats.rating_rank,
+													)}`}
+												>
+													#{stats.rating_rank}
+												</span>
+											)}
 										</p>
 										<p className='font-semibold tabular-nums flex items-center gap-2'>
 											{icon}
 											<span className={`text-2xl`}>
-												{stats[key]}
+												{key === "current_points"
+													? stats[
+															key
+														]?.toLocaleString()
+													: stats[key]}
 											</span>
 										</p>
 									</FadeContent>

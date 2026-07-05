@@ -146,7 +146,9 @@ function SummaryBox({ icon, label, value }: Readonly<SummaryBoxProps>) {
 			<div className='flex items-center justify-center gap-2'>
 				{icon}
 
-				<span className='text-xl font-semibold'>{value}</span>
+				<span className='text-xl font-semibold'>
+					{value.toLocaleString()}
+				</span>
 			</div>
 
 			<p className='mt-1 text-xs uppercase tracking-wide text-muted-foreground'>

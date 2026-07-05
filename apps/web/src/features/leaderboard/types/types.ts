@@ -69,8 +69,10 @@ export type RoomMemberStats = {
   player_id: string
   username: string
   current_points: number
+  points_rank: number
   current_rating: number
   peak_rating: number
+  rating_rank: number
   total_predictions: number
   winning_predictions: number
   total_rated_predictions: number

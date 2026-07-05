@@ -703,9 +703,9 @@ export async function getRoomPredictionHistory({
   const { data, error } = await supabase.rpc('get_room_prediction_history', {
     p_room_id: roomId,
     p_limit:   limit,
-    p_cursor_created_at: cursorCreatedAt,
-    p_cursor_id: cursorId,
-    p_search: search,
+    p_cursor_created_at: cursorCreatedAt ?? undefined,
+    p_cursor_id: cursorId ?? undefined,
+    p_search: search ?? undefined,
     p_filter: filter,
   })
   return assertOk(data, error) as PredictionHistoryPage

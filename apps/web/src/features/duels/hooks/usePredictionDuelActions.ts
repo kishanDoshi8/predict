@@ -2,8 +2,8 @@ import {
     useCancelDuel,
     useCancelDuelQueue,
     useJoinDuelQueue,
+    Duel
 } from "@/features/duels";
-import { Duel } from "@/features/duels";
 import { Prediction } from "@/features/predictions";
 import { toast } from "sonner";
 

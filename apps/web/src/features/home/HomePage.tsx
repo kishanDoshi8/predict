@@ -5,8 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { usePlayer } from "@/features/home";
-import { useWeeklyClaim } from "@/features/home";
+import { usePlayer, useWeeklyClaim } from "@/features/home";
 import { Loading } from "@/shared/ui";
 
 export function HomePage() {

@@ -1,4 +1,8 @@
-import { Player, Prediction, PredictionStatus, Room, PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats, Duel, DuelSummary } from '@/entities'
+import { Duel, DuelSummary } from "@/features/duels";
+import { Player } from "@/features/home";
+import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats } from "@/features/leaderboard";
+import { Prediction, PredictionStatus } from "@/features/predictions";
+import { Room } from "@/features/rooms";
 import type { Json } from '@/shared/lib/supabase.types'
 import { supabase } from './supabase'
 

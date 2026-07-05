@@ -4,7 +4,7 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Spinner } from "@/shared/ui/spinner";
-import Brand from "@/features/dashboard/home/components/Brand";
+import Brand from "@/features/home";
 
 export function SignupPage() {
 	const { signUp } = useAuth();

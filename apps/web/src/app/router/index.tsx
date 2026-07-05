@@ -1,20 +1,18 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { HomePage } from "@/features/dashboard/home/HomePage";
-import { LeaderboardPage } from "@/features/dashboard/pages/LeaderboardPage";
+import { CreatePlayer, HomePage } from "@/features/home";
+import { LeaderboardPage } from "@/features/leaderboard";
 import { NotFoundPage } from "@/app/router/NotFoundPage";
-import { PredictionPage } from "@/features/prediction-details/pages/PredictionPage";
-import PredictionNew from "@/features/create-prediction/pages/New";
+import { PredictionNew, PredictionPage } from "@/features/predictions";
 import RoomLayout from "@/app/layouts/RoomLayout";
-import CreatePlayer from "@/features/dashboard/home/components/CreatePlayer";
-import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
-import { LoginPage } from "@/features/auth/pages/LoginPage";
-import { SignupPage } from "@/features/auth/pages/SignupPage";
-import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
-import { ResetPasswordPage } from "@/features/auth/pages/ResetPasswordPage";
-import RoomDashboard from "@/features/dashboard/pages/RoomDashboard";
-import { PredictionDuelsPage } from "@/features/duel-details/pages/PredictionDuelsPage";
-import { PredictionDuelCreatePage } from "@/features/create-duel/pages/PredictionDuelCreatePage";
-import { PredictionDuelDetailPage } from "@/features/duel-details/pages/PredictionDuelDetailPage";
+import { ProtectedRoute } from "@/features/auth";
+import { LoginPage } from "@/features/auth";
+import { SignupPage } from "@/features/auth";
+import { ForgotPasswordPage } from "@/features/auth";
+import { ResetPasswordPage } from "@/features/auth";
+import { RoomDashboard } from "@/features/rooms";
+import { PredictionDuelsPage } from "@/features/duels";
+import { PredictionDuelCreatePage } from "@/features/duels";
+import { PredictionDuelDetailPage } from "@/features/duels";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },

@@ -5,16 +5,16 @@ import {
 	useOutletContext,
 	useParams,
 } from "react-router-dom";
-import { useRoom } from "@/entities/room/hooks/room";
-import { Room } from "@/entities";
-import { RoomHeader } from "@/features/prediction-details/components/RoomHeader";
+import { useRoom } from "@/features/rooms";
+import { Room } from "@/features/rooms";
+import { RoomHeader } from "@/features/predictions";
 import { useEffect, useState } from "react";
-import { usePlayer } from "@/entities/player/hooks/player";
-import { useWeeklyClaim } from "@/entities/player/hooks/useWeeklyClaim";
-import { usePreferences, useMarkHowToPlaySeen } from "@/entities/player/hooks/preferences";
-import HowToPlayModal from "@/features/onboarding/components/HowToPlayModal";
+import { usePlayer } from "@/features/home";
+import { useWeeklyClaim } from "@/features/home";
+import { usePreferences, useMarkHowToPlaySeen } from "@/features/preferences";
+import HowToPlayModal from "@/features/onboarding";
 import { Loading } from "@/shared/ui";
-import { useRoomRealtime } from "@/entities/room/hooks/useRoomRealtime";
+import { useRoomRealtime } from "@/features/rooms";
 
 export default function RoomLayout() {
 	const navigate = useNavigate();

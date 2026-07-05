@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import {
 	InputOTP,
 	InputOTPGroup,
@@ -27,8 +27,9 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "@/shared/ui";
-import { HowToPlayModal } from "@/features/onboarding";
 import { Link, useNavigate } from "react-router-dom";
+
+const HowToPlayModal = lazy(() => import("@/features/onboarding/components/HowToPlayModal"));
 
 type Props = {
 	roomCode: string;
@@ -99,10 +100,14 @@ export default function Home({
 				</Button>
 			</div>
 
-			<HowToPlayModal
-				open={openHowToPlay}
-				onClose={() => setOpenHowToPlay(false)}
-			/>
+			{openHowToPlay ? (
+				<Suspense fallback={null}>
+					<HowToPlayModal
+						open={openHowToPlay}
+						onClose={() => setOpenHowToPlay(false)}
+					/>
+				</Suspense>
+			) : null}
 		</div>
 	);
 }

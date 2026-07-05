@@ -19,7 +19,7 @@ import { useRoomRealtime } from "@/entities/room/hooks/useRoomRealtime";
 export default function RoomLayout() {
 	const navigate = useNavigate();
 	const matches = useMatches();
-	const activeMatch = matches[matches.length - 1];
+	const activeMatch = matches.at(-1);
 	const { data: player, isPending: isPlayerLoading } = usePlayer();
 	const { roomCode } = useParams<{ roomCode: string }>();
 	const { data: room, isPending, isError } = useRoom(roomCode);
@@ -80,7 +80,7 @@ export default function RoomLayout() {
 			return;
 		}
 
-		if (window.history.length > 1) {
+		if (globalThis.history.length > 1) {
 			navigate(-1);
 			return;
 		}

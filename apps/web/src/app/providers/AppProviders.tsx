@@ -5,13 +5,13 @@ import type { ReactNode } from "react";
 
 const queryClient = new QueryClient();
 
-export function AppProviders({ children }: { children: ReactNode }) {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        {children}
-        <Toaster />
-      </AuthProvider>
-    </QueryClientProvider>
-  );
+export function AppProviders({ children }: Readonly<{ children: ReactNode }>) {
+	return (
+		<QueryClientProvider client={queryClient}>
+			<AuthProvider>
+				{children}
+				<Toaster />
+			</AuthProvider>
+		</QueryClientProvider>
+	);
 }

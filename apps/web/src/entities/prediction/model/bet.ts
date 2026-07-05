@@ -1,5 +1,3 @@
-
-
 export interface Bet {
   id:            string
   prediction_id: string

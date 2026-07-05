@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 export type NotificationPermissionState = "granted" | "default" | "denied";
 
 const getBrowserNotificationPermission = (): NotificationPermissionState => {
-	if (typeof globalThis.window === "undefined") return "denied";
+	if (globalThis.window === undefined) return "denied";
 	if (!("Notification" in globalThis.window)) return "denied";
 	return Notification.permission;
 };
@@ -17,7 +17,7 @@ export function useNotificationPermission() {
 	}, []);
 
 	const requestPermission = useCallback(async () => {
-		if (typeof globalThis.window === "undefined") {
+		if (globalThis.window === undefined) {
 			setPermission("denied");
 			return "denied" as const;
 		}

@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import App from "./App.tsx";
-import "@/assests/styles/global.css";
+import App from "@/app/App";
+import "@/shared/assets/styles/global.css";
 
 if ("serviceWorker" in navigator) {
 	void navigator.serviceWorker

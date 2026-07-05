@@ -1,5 +1,3 @@
-
-
 export type PredictionStatus = 'draft' | 'locked' | 'revealed' | 'cancelled' | 'no_result'
 
 export interface PredictionOption {

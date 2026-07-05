@@ -22,7 +22,7 @@ import {
 	ShieldXIcon,
 	UsersIcon,
 } from "lucide-react";
-import { StakeBreakdown } from "@/features/duel-details/pages/PredictionDuelDetailPage";
+import { StakeBreakdown } from "@/features/duel-details/components/StakeBreakdown";
 
 const MIN_DUEL_STAKE = 100;
 

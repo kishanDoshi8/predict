@@ -32,9 +32,9 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { useRoomContext } from "../RoomLayout";
-import { Countdown } from "../widgets/CountDown";
-import DuelPredictionHeader from "./components/DuelPredictionHeader";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
+import { Countdown } from "@/features/prediction-details/widgets/CountDown";
+import DuelPredictionHeader from "@/features/duel-details/components/DuelPredictionHeader";
 
 type DuelVisualState =
 	| "join"

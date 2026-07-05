@@ -9,7 +9,7 @@ import {
 import { useCreateDuel, usePredictionDuelSummary } from "@/entities/duel/hooks/duel";
 import { usePrediction } from "@/entities/prediction/hooks/prediction";
 import { usePlayer } from "@/entities/player/hooks/player";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useMyBet } from "@/entities/prediction/hooks/bet";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -22,7 +22,7 @@ import {
 	ShieldXIcon,
 	UsersIcon,
 } from "lucide-react";
-import { StakeBreakdown } from "./PredictionDuelDetailPage";
+import { StakeBreakdown } from "@/features/duel-details/pages/PredictionDuelDetailPage";
 
 const MIN_DUEL_STAKE = 100;
 

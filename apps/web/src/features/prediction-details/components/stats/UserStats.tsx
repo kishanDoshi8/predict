@@ -19,7 +19,7 @@ import {
 	TrophyIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useRoomContext } from "../../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/entities/player/hooks/player";
 import {
 	useRoomLeaderboard,

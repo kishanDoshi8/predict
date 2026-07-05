@@ -6,31 +6,31 @@ import {
 	Clock,
 	Flame,
 } from "lucide-react";
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/shared/ui/button";
 import {
 	Field,
 	FieldGroup,
 	FieldLabel,
 	FieldSet,
-} from "../../../components/ui/field";
-import { Input } from "../../../components/ui/input";
-import { Textarea } from "../../../components/ui/textarea";
+} from "@/shared/ui/field";
+import { Input } from "@/shared/ui/input";
+import { Textarea } from "@/shared/ui/textarea";
 import { useEffect, useState } from "react";
 import {
 	ToggleGroup,
 	ToggleGroupItem,
-} from "../../../components/ui/toggle-group";
-import { Alert, AlertDescription } from "../../../components/ui/alert";
+} from "@/shared/ui/toggle-group";
+import { Alert, AlertDescription } from "@/shared/ui/alert";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from "../../../components/ui/popover";
-import { Calendar as UICalendar } from "../../../components/ui/calendar";
+} from "@/shared/ui/popover";
+import { Calendar as UICalendar } from "@/shared/ui/calendar";
 import { format } from "date-fns";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { Spinner } from "../../../components/ui/spinner";
+import { Spinner } from "@/shared/ui/spinner";
 import { useCreatePrediction } from "@/entities/prediction/hooks/prediction";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 

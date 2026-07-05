@@ -2,12 +2,12 @@ import { Badge, Button, Skeleton } from "@/shared/ui";
 import { usePredictionDuelRealtime } from "@/entities/room/hooks/useRoomRealtime";
 import { usePredictionDuelSummary, usePredictionDuels } from "@/entities/duel/hooks/duel";
 import { usePrediction } from "@/entities/prediction/hooks/prediction";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { DuelCard } from "./components/DuelCard";
+import { DuelCard } from "@/features/duel-details/components/DuelCard";
 import { CircleQuestionMarkIcon, SwordsIcon } from "lucide-react";
-import DuelPredictionHeader from "./components/DuelPredictionHeader";
-import DuelsHowItWorksDialog from "@/shared/ui/DuelsHowItWorksDialog";
+import DuelPredictionHeader from "@/features/duel-details/components/DuelPredictionHeader";
+import DuelsHowItWorksDialog from "@/features/onboarding/components/DuelsHowItWorksDialog";
 import React from "react";
 
 export function PredictionDuelsPage() {

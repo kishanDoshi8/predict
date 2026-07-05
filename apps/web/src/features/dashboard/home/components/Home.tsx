@@ -4,9 +4,9 @@ import {
 	InputOTPGroup,
 	InputOTPSeparator,
 	InputOTPSlot,
-} from "../../../components/ui/input-otp";
-import { Button } from "../../../components/ui/button";
-import { Spinner } from "../../../components/ui/spinner";
+} from "@/shared/ui/input-otp";
+import { Button } from "@/shared/ui/button";
+import { Spinner } from "@/shared/ui/spinner";
 import {
 	ChevronRightIcon,
 	CircleQuestionMark,
@@ -27,7 +27,7 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "@/shared/ui";
-import HowToPlayModal from "@/shared/ui/HowToPlayModal";
+import HowToPlayModal from "@/features/onboarding/components/HowToPlayModal";
 import { Link, useNavigate } from "react-router-dom";
 
 type Props = {

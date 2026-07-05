@@ -1,4 +1,4 @@
-import StepperTipsDialog from "@/shared/ui/StepperTipsDialog";
+import StepperTipsDialog from "@/features/onboarding/components/StepperTipsDialog";
 import { CoinsIcon, ZapIcon } from "lucide-react";
 
 type LeaderboardTipsDialogProps = {

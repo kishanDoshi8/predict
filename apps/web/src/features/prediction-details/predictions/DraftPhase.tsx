@@ -1,14 +1,14 @@
 import React from "react";
-import { Badge } from "../../../components/ui/badge";
+import { Badge } from "@/shared/ui/badge";
 import { Prediction } from "@/entities";
 import { usePlayer } from "@/entities/player/hooks/player";
-import { Skeleton } from "../../../components/ui/skeleton";
+import { Skeleton } from "@/shared/ui/skeleton";
 import PredictionOptions from "../widgets/PredictionOptions";
 import DraftControls from "../controls/DraftControls";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useRoomBetRealtime } from "@/entities/room/hooks/useRoomRealtime";
 import PredictionTitle from "../components/PredictionTitle";
-import { Countdown } from "../widgets/CountDown";
+import { Countdown } from "@/features/prediction-details/widgets/CountDown";
 import PredictionData from "./PredictionData";
 
 type Props = {

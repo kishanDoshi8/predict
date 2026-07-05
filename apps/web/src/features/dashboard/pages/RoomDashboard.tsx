@@ -1,8 +1,8 @@
-import InPlayPredictions from "./components/InPlayPredictions";
-import PredictionHeader from "./components/PredictionHeader";
-import { CreatePredictionButton } from "./controls/OrganizerControls";
-import HistoryFeed from "./components/HistoryFeed";
-import UserStats from "./components/stats/UserStats";
+import InPlayPredictions from "@/features/prediction-details/components/InPlayPredictions";
+import PredictionHeader from "@/features/prediction-details/components/PredictionHeader";
+import { CreatePredictionButton } from "@/features/prediction-details/controls/OrganizerControls";
+import HistoryFeed from "@/features/prediction-details/components/HistoryFeed";
+import UserStats from "@/features/prediction-details/components/stats/UserStats";
 
 function RoomDashboard() {
 	return (

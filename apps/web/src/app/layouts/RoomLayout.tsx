@@ -7,12 +7,12 @@ import {
 } from "react-router-dom";
 import { useRoom } from "@/entities/room/hooks/room";
 import { Room } from "@/entities";
-import { RoomHeader } from "./components/RoomHeader";
+import { RoomHeader } from "@/features/prediction-details/components/RoomHeader";
 import { useEffect, useState } from "react";
 import { usePlayer } from "@/entities/player/hooks/player";
 import { useWeeklyClaim } from "@/entities/player/hooks/useWeeklyClaim";
 import { usePreferences, useMarkHowToPlaySeen } from "@/entities/player/hooks/preferences";
-import HowToPlayModal from "@/shared/ui/HowToPlayModal";
+import HowToPlayModal from "@/features/onboarding/components/HowToPlayModal";
 import { Loading } from "@/shared/ui";
 import { useRoomRealtime } from "@/entities/room/hooks/useRoomRealtime";
 

@@ -1,6 +1,6 @@
 import { useActivePredictions } from "@/entities/prediction/hooks/prediction";
 import { motion } from "framer-motion";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import {
 	Badge,
 	CountUp,
@@ -16,7 +16,7 @@ import {
 	CarouselContent,
 	CarouselItem,
 } from "@/shared/ui/carousel";
-import { Countdown } from "../widgets/CountDown";
+import { Countdown } from "@/features/prediction-details/widgets/CountDown";
 import { useBets } from "@/entities/prediction/hooks/bet";
 import { useOptionBgColor } from "@/shared/hooks/useOptionColor";
 import {

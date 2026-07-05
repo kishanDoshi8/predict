@@ -1,22 +1,22 @@
 "use client";
 
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/shared/ui/button";
 import {
 	Drawer,
 	DrawerContent,
 	DrawerHeader,
 	DrawerTitle,
-} from "../../../components/ui/drawer";
+} from "@/shared/ui/drawer";
 import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-} from "../../../components/ui/dialog";
-import { Input } from "../../../components/ui/input";
-import { FieldDescription } from "../../../components/ui/field";
+} from "@/shared/ui/dialog";
+import { Input } from "@/shared/ui/input";
+import { FieldDescription } from "@/shared/ui/field";
 import React from "react";
-import { Spinner } from "../../../components/ui/spinner";
+import { Spinner } from "@/shared/ui/spinner";
 import { TriangleAlert } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCreatePlayer } from "@/entities/player/hooks/player";

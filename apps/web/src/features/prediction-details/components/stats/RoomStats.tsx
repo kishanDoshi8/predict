@@ -1,5 +1,5 @@
 import { useRoomStatCards } from "@/entities/room/hooks/room";
-import { useRoomContext } from "../../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { RoomStatRenderer } from "../RoomStatRenderer";
 import { Skeleton } from "@/shared/ui";
 

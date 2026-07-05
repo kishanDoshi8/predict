@@ -1,5 +1,5 @@
 import { usePlayer } from "@/entities/player/hooks/player";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import {
 	Alert,
 	AlertDescription,

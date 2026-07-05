@@ -1,10 +1,10 @@
 import { usePrediction } from "@/entities/prediction/hooks/prediction";
 import { useState } from "react";
-import { PredictionPhaseView } from "./predictions/PredictionPhaseView";
-import { useRoomContext } from "./RoomLayout";
+import { PredictionPhaseView } from "@/features/prediction-details/predictions/PredictionPhaseView";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePredictionDuelSummary } from "@/entities/duel/hooks/duel";
-import { DuelSummaryCard } from "./duels/components/DuelSummaryCard";
+import { DuelSummaryCard } from "@/features/duel-details/components/DuelSummaryCard";
 import { usePredictionDuelRealtime } from "@/entities/room/hooks/useRoomRealtime";
 import { Skeleton } from "@/shared/ui";
 

@@ -12,7 +12,7 @@ import PredictionTitle from "../components/PredictionTitle";
 import PredictionOptions from "../widgets/PredictionOptions";
 import { BicepsFlexed, CheckIcon, CrownIcon, FrownIcon } from "lucide-react";
 import { useBets } from "@/entities/prediction/hooks/bet";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/entities/player/hooks/player";
 import { useRoomBetRealtime } from "@/entities/room/hooks/useRoomRealtime";
 import PredictionData from "./PredictionData";

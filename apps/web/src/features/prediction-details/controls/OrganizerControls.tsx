@@ -1,4 +1,4 @@
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/entities/player/hooks/player";

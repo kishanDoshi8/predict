@@ -24,7 +24,7 @@ import {
 import { BellIcon, BellOffIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
-import { NotificationPermissionBlockedDialog } from "./NotificationPermissionBlockedDialog";
+import { NotificationPermissionBlockedDialog } from "@/features/prediction-details/components/NotificationPermissionBlockedDialog";
 
 type Props = {
 	roomId: string;

@@ -1,20 +1,20 @@
-import { useRoomContext } from "./room/RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/entities/player/hooks/player";
 import {
 	useRoomLeaderboard,
 	useRoomWeeklyLeaderboard,
 } from "@/entities/leaderboard/hooks/leaderboard";
-import { LeaderboardList } from "./room/leaderboard/LeaderboardList";
+import { LeaderboardList } from "@/features/prediction-details/leaderboard/LeaderboardList";
 import { cn } from "@/shared/lib/utils";
-import { TopThreePodium } from "./room/leaderboard/TopThreePodium";
+import { TopThreePodium } from "@/features/prediction-details/leaderboard/TopThreePodium";
 import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
 import { ArrowDown10Icon, CircleQuestionMarkIcon } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui";
-import LeaderboardTipsDialog from "@/shared/ui/LeaderboardTipsDialog";
+import LeaderboardTipsDialog from "@/features/onboarding/components/LeaderboardTipsDialog";
 import { useMarkRatingsTipSeen, usePreferences } from "@/entities/player/hooks/preferences";
 import React from "react";
-import { PlayerProfileDialog } from "./room/player/PlayerProfileDialog";
+import { PlayerProfileDialog } from "@/features/prediction-details/player/PlayerProfileDialog";
 
 const LEADERBOARD_TABS = ["this_week", "all_time"] as const;
 type LeaderboardTab = (typeof LEADERBOARD_TABS)[number];

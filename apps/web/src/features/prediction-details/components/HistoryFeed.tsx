@@ -1,6 +1,6 @@
 import { PredictionHistoryFeed } from "../leaderboard/PredictionHistoryFeed";
 import { usePredictionHistory } from "@/entities/leaderboard/hooks/leaderboard";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Input, Button } from "@/shared/ui";
 import { PredictionHistoryFilter } from "@/entities";

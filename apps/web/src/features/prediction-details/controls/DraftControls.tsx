@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import { Slider } from "../../../components/ui/slider";
-import { Button } from "../../../components/ui/button";
+import { Slider } from "@/shared/ui/slider";
+import { Button } from "@/shared/ui/button";
 import {
 	ChevronDown,
 	Coins,
@@ -11,9 +11,9 @@ import {
 } from "lucide-react";
 import { Player } from "@/entities";
 import { useCancelBet, useMyBet, usePlaceBet } from "@/entities/prediction/hooks/bet";
-import { Spinner } from "../../../components/ui/spinner";
+import { Spinner } from "@/shared/ui/spinner";
 import { toast } from "sonner";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
 import { Counter, FadeContent } from "@/shared/ui";

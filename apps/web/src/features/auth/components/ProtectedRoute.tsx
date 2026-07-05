@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import { Loading } from "./ui/spinner";
+import { Loading } from "@/shared/ui/spinner";
 
 export function ProtectedRoute() {
 	const { user, isLoading } = useAuth();

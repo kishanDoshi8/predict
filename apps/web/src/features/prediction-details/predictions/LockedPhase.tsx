@@ -2,7 +2,7 @@ import { Badge, FadeContent, Skeleton } from "@/shared/ui";
 import { Prediction } from "@/entities";
 import PredictionTitle from "../components/PredictionTitle";
 import PredictionOptions from "../widgets/PredictionOptions";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useBets } from "@/entities/prediction/hooks/bet";
 import { useEffect } from "react";
 import { usePlayer } from "@/entities/player/hooks/player";

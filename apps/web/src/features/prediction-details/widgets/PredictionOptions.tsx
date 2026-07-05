@@ -13,7 +13,7 @@ import {
 import { useBets, useMyBet } from "@/entities/prediction/hooks/bet";
 import { Prediction } from "@/entities";
 import React from "react";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/entities/player/hooks/player";
 import { useOptionColor } from "@/shared/hooks/useOptionColor";
 

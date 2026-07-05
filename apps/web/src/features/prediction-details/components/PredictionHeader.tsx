@@ -1,8 +1,8 @@
 import { Button } from "@/shared/ui";
 import { Copy, CopyCheck, TrophyIcon } from "lucide-react";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useState } from "react";
-import { RoomPreferencesDialog } from "./RoomPreferencesDialog";
+import { RoomPreferencesDialog } from "@/features/preferences/components/RoomPreferencesDialog";
 import { Link } from "react-router-dom";
 
 export default function PredictionHeader() {

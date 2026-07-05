@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertTitle, Skeleton } from "@/shared/ui";
 import { InfoIcon } from "lucide-react";
 import { useBets } from "@/entities/prediction/hooks/bet";
 import { useOptionColor } from "@/shared/hooks/useOptionColor";
-import { useRoomContext } from "../RoomLayout";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/entities/player/hooks/player";
 
 type Props = {

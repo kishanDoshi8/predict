@@ -8,13 +8,16 @@ import {
 import { useRoom } from "@/features/rooms";
 import { Room } from "@/features/rooms";
 import { RoomHeader } from "@/features/predictions";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { usePlayer } from "@/features/home";
 import { useWeeklyClaim } from "@/features/home";
 import { usePreferences, useMarkHowToPlaySeen } from "@/features/preferences";
-import { HowToPlayModal } from "@/features/onboarding";
 import { Loading } from "@/shared/ui";
 import { useRoomRealtime } from "@/features/rooms";
+
+const HowToPlayModal = lazy(
+	() => import("@/features/onboarding/components/HowToPlayModal"),
+);
 
 export default function RoomLayout() {
 	const navigate = useNavigate();
@@ -101,10 +104,14 @@ export default function RoomLayout() {
 				<Outlet context={{ room, roomCode }} />
 			</main>
 
-			<HowToPlayModal
-				open={showHowToPlay}
-				onClose={handleHowToPlayClose}
-			/>
+			{showHowToPlay ? (
+				<Suspense fallback={null}>
+					<HowToPlayModal
+						open={showHowToPlay}
+						onClose={handleHowToPlayClose}
+					/>
+				</Suspense>
+			) : null}
 		</div>
 	);
 }

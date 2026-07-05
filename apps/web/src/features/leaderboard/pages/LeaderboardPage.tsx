@@ -4,6 +4,7 @@ import {
 	useRoomLeaderboard,
 	useRoomWeeklyLeaderboard,
 } from "@/features/leaderboard";
+import type { SortByOption } from "@/features/leaderboard/types/types";
 import { LeaderboardList } from "@/features/leaderboard";
 import { cn } from "@/shared/lib/utils";
 import { TopThreePodium } from "@/features/leaderboard";
@@ -11,16 +12,20 @@ import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
 import { ArrowDown10Icon, CircleQuestionMarkIcon } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui";
-import { LeaderboardTipsDialog } from "@/features/onboarding";
 import { useMarkRatingsTipSeen, usePreferences } from "@/features/preferences";
-import React from "react";
-import { PlayerProfileDialog } from "@/features/leaderboard";
+import React, { Suspense, lazy } from "react";
+
+const LeaderboardTipsDialog = lazy(
+	() => import("@/features/onboarding/components/LeaderboardTipsDialog"),
+);
+const PlayerProfileDialog = lazy(() =>
+	import("@/features/leaderboard/components/player/PlayerProfileDialog").then(
+		(module) => ({ default: module.PlayerProfileDialog }),
+	),
+);
 
 const LEADERBOARD_TABS = ["this_week", "all_time"] as const;
 type LeaderboardTab = (typeof LEADERBOARD_TABS)[number];
-
-const SORT_BY_OPTIONS = ["points", "ratings"] as const;
-export type SortByOption = (typeof SORT_BY_OPTIONS)[number];
 
 export function LeaderboardPage() {
 	const { room } = useRoomContext();
@@ -181,20 +186,28 @@ export function LeaderboardPage() {
 				/>
 			</div>
 
-			<PlayerProfileDialog
-				roomId={room.id}
-				playerId={selectedPlayerId}
-				open={isProfileDialogOpen}
-				onOpenChange={(open) => {
-					setIsProfileDialogOpen(open);
-					if (!open) setSelectedPlayerId(null);
-				}}
-			/>
+			{isProfileDialogOpen ? (
+				<Suspense fallback={null}>
+					<PlayerProfileDialog
+						roomId={room.id}
+						playerId={selectedPlayerId}
+						open={isProfileDialogOpen}
+						onOpenChange={(open) => {
+							setIsProfileDialogOpen(open);
+							if (!open) setSelectedPlayerId(null);
+						}}
+					/>
+				</Suspense>
+			) : null}
 
-			<LeaderboardTipsDialog
-				open={isTipsDialogOpen}
-				onOpenChange={handleTipsDialogOpenChange}
-			/>
+			{isTipsDialogOpen ? (
+				<Suspense fallback={null}>
+					<LeaderboardTipsDialog
+						open={isTipsDialogOpen}
+						onOpenChange={handleTipsDialogOpenChange}
+					/>
+				</Suspense>
+			) : null}
 		</div>
 	);
 }

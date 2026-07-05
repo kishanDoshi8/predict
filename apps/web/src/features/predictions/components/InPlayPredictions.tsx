@@ -1,4 +1,9 @@
-import { useActivePredictions } from "@/features/predictions";
+import {
+	Countdown,
+	Prediction,
+	useActivePredictions,
+	useBets,
+} from "@/features/predictions";
 import { motion } from "framer-motion";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import {
@@ -16,8 +21,6 @@ import {
 	CarouselContent,
 	CarouselItem,
 } from "@/shared/ui/carousel";
-import { Countdown } from "@/features/predictions";
-import { useBets } from "@/features/predictions";
 import { useOptionBgColor } from "@/shared/hooks/useOptionColor";
 import {
 	CheckIcon,
@@ -30,7 +33,6 @@ import {
 	UsersIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Prediction } from "@/features/predictions";
 import React from "react";
 import { usePlayer } from "@/features/home";
 

@@ -18,7 +18,7 @@ import {
 	FlameIcon,
 	TrophyIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
 import {
@@ -31,8 +31,13 @@ import { twColor } from "@/shared/lib/utils";
 import { Link } from "react-router-dom";
 import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
-import { SortByOption } from "@/features/leaderboard";
-import { PlayerProfileDialog } from "@/features/leaderboard";
+import type { SortByOption } from "@/features/leaderboard/types/types";
+
+const PlayerProfileDialog = lazy(() =>
+	import("@/features/leaderboard/components/player/PlayerProfileDialog").then(
+		(module) => ({ default: module.PlayerProfileDialog }),
+	),
+);
 
 type LeaderboardTab = "this_week" | "all_time";
 
@@ -501,15 +506,19 @@ function LeaderboardMiniRows({
 				<ChevronRightIcon className={`w-3 h-3 inline-block ml-1`} />
 			</Link>
 
-			<PlayerProfileDialog
-				roomId={room.id}
-				playerId={selectedPlayerId}
-				open={isProfileDialogOpen}
-				onOpenChange={(open) => {
-					setIsProfileDialogOpen(open);
-					if (!open) setSelectedPlayerId(null);
-				}}
-			/>
+			{isProfileDialogOpen ? (
+				<Suspense fallback={null}>
+					<PlayerProfileDialog
+						roomId={room.id}
+						playerId={selectedPlayerId}
+						open={isProfileDialogOpen}
+						onOpenChange={(open) => {
+							setIsProfileDialogOpen(open);
+							if (!open) setSelectedPlayerId(null);
+						}}
+					/>
+				</Suspense>
+			) : null}
 		</div>
 	);
 }

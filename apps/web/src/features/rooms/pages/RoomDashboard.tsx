@@ -1,8 +1,10 @@
-import { InPlayPredictions } from "@/features/predictions";
-import { PredictionHeader } from "@/features/predictions";
-import { CreatePredictionButton } from "@/features/predictions";
-import { HistoryFeed } from "@/features/predictions";
-import { UserStats } from "@/features/predictions";
+import {
+	CreatePredictionButton,
+	HistoryFeed,
+	InPlayPredictions,
+	PredictionHeader,
+	UserStats,
+} from "@/features/predictions";
 
 function RoomDashboard() {
 	return (

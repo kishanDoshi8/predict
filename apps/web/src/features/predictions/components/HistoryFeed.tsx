@@ -1,9 +1,11 @@
-import { PredictionHistoryFeed } from "@/features/leaderboard";
-import { usePredictionHistory } from "@/features/leaderboard";
+import {
+	PredictionHistoryFeed,
+	usePredictionHistory,
+	PredictionHistoryFilter,
+} from "@/features/leaderboard";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Input, Button } from "@/shared/ui";
-import { PredictionHistoryFilter } from "@/features/leaderboard";
 import { Skeleton } from "@/shared/ui/skeleton";
 
 const FILTERS: Array<{ label: string; value: PredictionHistoryFilter }> = [

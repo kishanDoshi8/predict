@@ -55,6 +55,8 @@ export type PredictionHistoryEntry = {
 
 export type PredictionHistoryFilter = "all" | "wins" | "losses" | "my_bets"
 
+export type SortByOption = "points" | "ratings"
+
 export type PredictionHistoryPage = {
   items: PredictionHistoryEntry[]
   next_cursor_created_at: string | null

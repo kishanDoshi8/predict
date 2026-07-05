@@ -422,12 +422,18 @@ begin
       );
 
       update public.players
-      set points_balance = points_balance + v_duel.stake_amount
+      set points_balance = points_balance + v_duel.stake_amount,
+          total_won = total_won + v_duel.stake_amount
       where id = v_winner_player_id;
 
       update public.players
       set points_balance = points_balance - v_duel.stake_amount
       where id = v_loser_player_id;
+
+      update public.room_members
+      set total_won_in_room = total_won_in_room + v_duel.stake_amount
+      where room_id = v_prediction.room_id
+        and player_id = v_winner_player_id;
 
       perform private.log_duel_event(
         v_duel.id,

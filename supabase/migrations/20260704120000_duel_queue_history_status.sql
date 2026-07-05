@@ -1075,20 +1075,10 @@ begin
   current_player_active_participation as (
     select exists (
       select 1
-      from public.duels d
-      where d.prediction_id = p_prediction_id
-        and d.status in ('created', 'queued', 'matched')
-        and (
-          d.challenger_player_id = v_auth_player_id
-          or d.matched_opponent_player_id = v_auth_player_id
-          or exists (
-            select 1
-            from public.duel_queue dq
-            where dq.duel_id = d.id
-              and dq.player_id = v_auth_player_id
-              and dq.status in ('waiting', 'matched')
-          )
-        )
+      from public.duels
+      where prediction_id = p_prediction_id
+        and challenger_player_id = v_auth_player_id
+        and status in ('created', 'queued', 'matched')
     ) as has_active_participation
   ),
   current_player_qualifying_bet as (

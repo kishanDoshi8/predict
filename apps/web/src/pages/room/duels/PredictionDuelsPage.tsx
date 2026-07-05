@@ -127,7 +127,8 @@ export function PredictionDuelsPage() {
 
 			{isDuelOpen &&
 				!canCreateDuel &&
-				!duelSummary?.currentPlayerHasCreatedDuel && (
+				duelSummary &&
+				!duelSummary.currentPlayerHasCreatedDuel && (
 					<div className='fixed inset-x-0 bottom-0 z-50 p-4 bg-card'>
 						<div className='w-full max-w-md mx-auto'>
 							<Button
@@ -146,6 +147,25 @@ export function PredictionDuelsPage() {
 						</div>
 					</div>
 				)}
+
+			{duelSummary?.currentPlayerHasCreatedDuel && (
+				<div className='fixed inset-x-0 bottom-0 z-50 p-4 bg-card'>
+					<div className='w-full max-w-md mx-auto'>
+						<Button
+							variant='outline'
+							size='lg'
+							onClick={() => {
+								navigate(
+									`/rooms/${room.code}/predictions/${predictionId}/duels/${duelSummary.currentPlayerCreatedDuelId}`,
+								);
+							}}
+							className='w-full mx-auto font-bold shadow-lg text-foreground'
+						>
+							View Your Duel
+						</Button>
+					</div>
+				</div>
+			)}
 
 			<DuelsHowItWorksDialog
 				open={isHowDuelsDialogOpen}

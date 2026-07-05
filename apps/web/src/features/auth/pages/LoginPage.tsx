@@ -4,7 +4,7 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Spinner } from "@/shared/ui/spinner";
-import Brand from "@/features/home";
+import { Brand } from "@/features/home";
 
 export function LoginPage() {
 	const { signIn } = useAuth();

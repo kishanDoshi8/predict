@@ -11,7 +11,7 @@ import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
 import { ArrowDown10Icon, CircleQuestionMarkIcon } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/shared/ui";
-import LeaderboardTipsDialog from "@/features/onboarding";
+import { LeaderboardTipsDialog } from "@/features/onboarding";
 import { useMarkRatingsTipSeen, usePreferences } from "@/features/preferences";
 import React from "react";
 import { PlayerProfileDialog } from "@/features/leaderboard";

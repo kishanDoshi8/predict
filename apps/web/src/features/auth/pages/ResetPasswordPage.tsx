@@ -4,7 +4,7 @@ import { supabase } from "@/shared/lib/supabase";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Spinner } from "@/shared/ui/spinner";
-import Brand from "@/features/home";
+import { Brand } from "@/features/home";
 
 export function ResetPasswordPage() {
 	const navigate = useNavigate();

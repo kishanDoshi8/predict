@@ -6,7 +6,7 @@ import { usePrediction } from "@/features/predictions";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import DuelPredictionHeader from "@/features/duels";
+import { DuelPredictionHeader } from "@/features/duels";
 import DuelJoinView from "@/features/duels/components/detail/DuelJoinView";
 import DuelMatchedView from "@/features/duels/components/detail/DuelMatchedView";
 import DuelResolvedView from "@/features/duels/components/detail/DuelResolvedView";

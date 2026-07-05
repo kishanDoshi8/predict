@@ -32,7 +32,7 @@ import { Link } from "react-router-dom";
 import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
 import { SortByOption } from "@/features/leaderboard";
-import { PlayerProfileDialog } from "../../player/PlayerProfileDialog";
+import { PlayerProfileDialog } from "@/features/leaderboard";
 
 type LeaderboardTab = "this_week" | "all_time";
 

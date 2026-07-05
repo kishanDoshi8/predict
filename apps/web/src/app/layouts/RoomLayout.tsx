@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { usePlayer } from "@/features/home";
 import { useWeeklyClaim } from "@/features/home";
 import { usePreferences, useMarkHowToPlaySeen } from "@/features/preferences";
-import HowToPlayModal from "@/features/onboarding";
+import { HowToPlayModal } from "@/features/onboarding";
 import { Loading } from "@/shared/ui";
 import { useRoomRealtime } from "@/features/rooms";
 

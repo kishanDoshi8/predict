@@ -27,7 +27,7 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "@/shared/ui";
-import HowToPlayModal from "@/features/onboarding";
+import { HowToPlayModal } from "@/features/onboarding";
 import { Link, useNavigate } from "react-router-dom";
 
 type Props = {

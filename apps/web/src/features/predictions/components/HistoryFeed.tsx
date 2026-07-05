@@ -1,4 +1,4 @@
-import { PredictionHistoryFeed } from "../leaderboard/PredictionHistoryFeed";
+import { PredictionHistoryFeed } from "@/features/leaderboard";
 import { usePredictionHistory } from "@/features/leaderboard";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useEffect, useMemo, useRef, useState } from "react";

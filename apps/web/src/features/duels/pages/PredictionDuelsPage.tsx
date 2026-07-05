@@ -6,8 +6,8 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { DuelCard } from "@/features/duels";
 import { CircleQuestionMarkIcon, SwordsIcon } from "lucide-react";
-import DuelPredictionHeader from "@/features/duels";
-import DuelsHowItWorksDialog from "@/features/onboarding";
+import { DuelPredictionHeader } from "@/features/duels";
+import { DuelsHowItWorksDialog } from "@/features/onboarding";
 import React from "react";
 
 export function PredictionDuelsPage() {

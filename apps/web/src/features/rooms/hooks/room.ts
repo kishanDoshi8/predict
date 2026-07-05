@@ -1,6 +1,7 @@
 import { createRoom, getPlayerRooms, getRoomStatCards, joinRoom, spectateRoom } from "@/shared/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "@/shared/constants/queryKeys";
+import { playerQueryKey } from "@/features/home";
 
 export const useRoom = (roomCode?: string) => {
     return useQuery({
@@ -31,6 +32,12 @@ export const useJoinRoom = () => {
         mutationFn: ({ roomCode }: { roomCode: string }) => joinRoom(roomCode),
         onSuccess: (data) => {
             queryClient.setQueryData(roomKeys.byCode(data.code), data);
+            void Promise.all([
+                queryClient.invalidateQueries({
+                    predicate: (query) => query.queryKey[0] === roomKeys.all[0],
+                }),
+                queryClient.invalidateQueries({ queryKey: playerQueryKey }),
+            ]);
         },
     });
 }

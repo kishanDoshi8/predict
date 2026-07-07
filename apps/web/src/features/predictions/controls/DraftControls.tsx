@@ -45,7 +45,7 @@ export default function DraftControls({
 	const [betAmount, setBetAmount] = React.useState<number>(1);
 	const [collapseControls, setCollapseControls] = useLocalStorage<boolean>(
 		false,
-		localStorageKeys.userPreference.bettingContorls.collapsed,
+		localStorageKeys.userPreference.bettingControls.collapsed,
 	);
 	const [canUpdateBet, setCanUpdateBet] = React.useState<boolean>(false);
 
@@ -62,7 +62,7 @@ export default function DraftControls({
 
 			return hasChallenged || hasQueued;
 		});
-		setCanUpdateBet(!hasDuelInProgress && !!myBet);
+		setCanUpdateBet(!hasDuelInProgress);
 	}, [duels, player.id, predictionId, room.id]);
 
 	useEffect(() => {
@@ -130,7 +130,6 @@ export default function DraftControls({
 				duration: Infinity,
 			},
 		);
-		return;
 	};
 
 	const handleResetBetAmount = () => {

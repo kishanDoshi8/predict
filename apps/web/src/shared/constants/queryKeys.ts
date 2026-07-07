@@ -63,7 +63,7 @@ export const localStorageKeys = {
       active_leaderboard_tab: "active_leaderboard_tab",
       sort_by: "sort_by",
     },
-    bettingContorls: {
+    bettingControls: {
       collapsed: "bettingControls.collapsed",
     }
   }

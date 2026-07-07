@@ -1,9 +1,9 @@
 import { Loader2Icon } from "lucide-react";
 import { chaoticOrbit, ping } from "ldrs";
+import { cn } from "@/shared/lib/utils";
+
 ping.register();
 chaoticOrbit.register();
-
-import { cn } from "@/shared/lib/utils";
 
 function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
 	return (

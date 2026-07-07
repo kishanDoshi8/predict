@@ -1,5 +1,5 @@
 import { usePrediction, PredictionPhaseView } from "@/features/predictions";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePredictionDuelSummary, DuelSummaryCard } from "@/features/duels";
@@ -16,6 +16,8 @@ export function PredictionPage() {
 	const { predictionId } = useParams<{ predictionId: string }>();
 	const navigate = useNavigate();
 
+	const [showDuelSummary, setShowDuelSummary] = useState(true);
+
 	const { room } = useRoomContext();
 	const {
 		data: prediction,
@@ -28,6 +30,15 @@ export function PredictionPage() {
 	);
 	const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
+	useEffect(() => {
+		const hideDuelSummary =
+			prediction?.status !== "draft" &&
+			duelSummary?.totalDuels === 0 &&
+			duelSummary?.totalStake === 0 &&
+			duelSummary?.uniqueParticipants === 0;
+		setShowDuelSummary(!hideDuelSummary);
+	}, [prediction, duelSummary]);
+
 	usePredictionDuelRealtime(room.id, predictionId ?? null);
 
 	if (!room) return null; // This should never happen because RoomLayout already checks for room and redirects to 404 if not found
@@ -35,21 +46,25 @@ export function PredictionPage() {
 	return (
 		<div>
 			<div className={`p-4`}>
-				{prediction && duelSummary ? (
-					<div className='mb-4 max-w-md mx-auto'>
-						<DuelSummaryCard
-							summary={duelSummary}
-							predictionStatus={prediction.status}
-							onClick={() =>
-								navigate(
-									`/rooms/${room.code}/predictions/${prediction.id}/duels`,
-								)
-							}
-						/>
-					</div>
-				) : (
-					// loading state
-					<Skeleton className='mb-4 h-52 w-full max-w-md mx-auto rounded-2xl' />
+				{showDuelSummary && (
+					<>
+						{prediction && duelSummary ? (
+							<div className='mb-4 max-w-md mx-auto'>
+								<DuelSummaryCard
+									summary={duelSummary}
+									predictionStatus={prediction.status}
+									onClick={() =>
+										navigate(
+											`/rooms/${room.code}/predictions/${prediction.id}/duels`,
+										)
+									}
+								/>
+							</div>
+						) : (
+							// loading state
+							<Skeleton className='mb-4 h-52 w-full max-w-md mx-auto rounded-2xl' />
+						)}
+					</>
 				)}
 				<PredictionPhaseView
 					isLoading={isPredictionLoading}

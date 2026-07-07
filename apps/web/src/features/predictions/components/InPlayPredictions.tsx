@@ -78,6 +78,13 @@ function PredictionCard({
 		borderClass = "border-accent";
 	}
 
+	const getOptionLabel = (optionId: string) => {
+		const option = prediction.prediction_options.find(
+			(opt) => opt.id === optionId,
+		);
+		return option ? option.label : "in";
+	};
+
 	return (
 		<motion.div
 			animate={{ height: "auto", opacity: 1 }}
@@ -281,7 +288,7 @@ function PredictionCard({
 						className={`flex items-center justify-end text-sm text-foreground text-right mt-6`}
 					>
 						{myBet
-							? `${myBet.amount.toLocaleString()} pts riding on ${prediction.prediction_options.find((opt) => opt.id === myBet.option_id)?.label}`
+							? `${myBet.amount.toLocaleString()} pts riding on ${getOptionLabel(myBet.option_id)}`
 							: "Place your bet now!"}
 						<ChevronRightIcon className={`inline-block ml-1`} />
 					</span>
@@ -291,7 +298,7 @@ function PredictionCard({
 						className={`text-sm text-muted-foreground text-right mt-6 block`}
 					>
 						{myBet
-							? "Locked in — fingers crossed!"
+							? `Locked ${getOptionLabel(myBet.option_id)}  — fingers crossed!`
 							: "Market closed. Watching live..."}
 					</span>
 				)}

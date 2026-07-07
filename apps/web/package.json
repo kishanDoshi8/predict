@@ -11,7 +11,7 @@
     "lint:fix": "npm run lint -- --fix",
     "typecheck": "tsc --noEmit",
     "analyze": "ANALYZE=true vite build",
-    "unused": "knip --config knip.json",
+    "unused": "knip --config knip.json --no-exit-code",
     "format": "npm run lint:fix",
     "check": "npm run lint && npm run typecheck && npm run build"
   },

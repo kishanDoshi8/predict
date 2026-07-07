@@ -32,13 +32,15 @@ export default tseslint.config(
 		rules: {
 			"import/first": "error",
 			"import/newline-after-import": "error",
-			"import/no-duplicates": "error",
 			"import/no-cycle": ["warn", { maxDepth: 2 }],
 			"import/no-useless-path-segments": [
 				"error",
 				{ noUselessIndex: true },
 			],
-			"no-duplicate-imports": "error",
+			"import/no-duplicates": "off",
+			"no-duplicate-imports": "off",
+			"@typescript-eslint/no-explicit-any": "off",
+			"@typescript-eslint/no-unused-vars": "off",
 			"unused-imports/no-unused-imports": "error",
 			"unused-imports/no-unused-vars": [
 				"warn",

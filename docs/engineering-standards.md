@@ -111,6 +111,20 @@ Optional:
   - intentional keepers (tooling/CLI/dev ergonomics)
 - Do not auto-delete uncertain files or dependencies.
 
+### Current baseline findings (from `npm run unused`)
+
+- Unused files (6):
+  - `src/features/home/controls/PlayerNew.tsx`
+  - `src/features/predictions/components/RoomStatRenderer.tsx`
+  - `src/features/predictions/components/stats/DefaultStatCard.tsx`
+  - `src/features/predictions/components/stats/PodiumStatCard.tsx`
+  - `src/features/predictions/components/stats/RoomStats.tsx`
+  - `src/shared/ui/animations/background-gradient.tsx`
+- Unused dependencies flagged: `@fontsource-variable/fira-code`, `tailwindcss`
+- Unused devDependencies flagged: `eslint`, `shadcn`, `tw-animate-css`
+- Unlisted dependency usage flagged: `react-router`, `@radix-ui/react-separator`
+- Action: triage each item before removal; do not auto-delete based on a single tool result.
+
 ## 11. Definition of Done for future pull requests
 
 - [ ] Imports follow alias and feature public API rules.

@@ -22,16 +22,16 @@ import { Suspense, lazy, useEffect, useState } from "react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
 import {
+	LeaderboardEntry,
+	type SortByOption,
 	useRoomLeaderboard,
 	useRoomWeeklyLeaderboard,
 } from "@/features/leaderboard";
-import { LeaderboardEntry } from "@/features/leaderboard";
 import { Room } from "@/features/rooms";
 import { twColor } from "@/shared/lib/utils";
 import { Link } from "react-router-dom";
 import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
-import type { SortByOption } from "@/features/leaderboard/types/types";
 
 const PlayerProfileDialog = lazy(() =>
 	import("@/features/leaderboard/components/player/PlayerProfileDialog").then(

@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge } from "@/shared/ui/badge";
-import { Prediction } from "@/features/predictions";
+import { Prediction, Countdown } from "@/features/predictions";
 import { usePlayer } from "@/features/home";
 import { Skeleton } from "@/shared/ui/skeleton";
 import PredictionOptions from "../widgets/PredictionOptions";
@@ -8,11 +8,11 @@ import DraftControls from "../controls/DraftControls";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useRoomBetRealtime } from "@/features/rooms";
 import PredictionTitle from "../components/PredictionTitle";
-import { Countdown } from "@/features/predictions";
 import PredictionData from "./PredictionData";
 
 type Props = {
 	prediction: Prediction | null | undefined;
+	refetchPrediction: () => void;
 	selectedOption: string | null;
 	setSelectedOption: React.Dispatch<React.SetStateAction<string | null>>;
 };
@@ -26,6 +26,7 @@ const contentDelays = {
 
 export default function DraftPhase({
 	prediction,
+	refetchPrediction,
 	selectedOption,
 	setSelectedOption,
 }: Readonly<Props>) {
@@ -66,6 +67,7 @@ export default function DraftPhase({
 										prediction.deadline,
 									).getTime()}
 									textSize='text-2xl'
+									onExpire={refetchPrediction}
 								/>
 							)}
 					</>

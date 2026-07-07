@@ -1,10 +1,8 @@
-import { usePrediction } from "@/features/predictions";
+import { usePrediction, PredictionPhaseView } from "@/features/predictions";
 import { useState } from "react";
-import { PredictionPhaseView } from "@/features/predictions";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useNavigate, useParams } from "react-router-dom";
-import { usePredictionDuelSummary } from "@/features/duels";
-import { DuelSummaryCard } from "@/features/duels";
+import { usePredictionDuelSummary, DuelSummaryCard } from "@/features/duels";
 import { usePredictionDuelRealtime } from "@/features/rooms";
 import { Skeleton } from "@/shared/ui";
 
@@ -19,10 +17,11 @@ export function PredictionPage() {
 	const navigate = useNavigate();
 
 	const { room } = useRoomContext();
-	const { data: prediction, isPending: isPredictionLoading } = usePrediction(
-		room.id,
-		predictionId,
-	);
+	const {
+		data: prediction,
+		isPending: isPredictionLoading,
+		refetch: refetchPrediction,
+	} = usePrediction(room.id, predictionId);
 	const { data: duelSummary } = usePredictionDuelSummary(
 		room.id,
 		predictionId,
@@ -55,6 +54,7 @@ export function PredictionPage() {
 				<PredictionPhaseView
 					isLoading={isPredictionLoading}
 					prediction={prediction}
+					refetchPrediction={refetchPrediction}
 					selectedOption={selectedOption}
 					setSelectedOption={setSelectedOption}
 				/>

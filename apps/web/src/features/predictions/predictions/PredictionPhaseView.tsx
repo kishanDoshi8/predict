@@ -7,6 +7,7 @@ import NoResult from "./NoResult";
 type Props = {
 	prediction: Prediction | null | undefined;
 	isLoading: boolean;
+	refetchPrediction: () => void;
 	selectedOption: string | null;
 	setSelectedOption: React.Dispatch<React.SetStateAction<string | null>>;
 };

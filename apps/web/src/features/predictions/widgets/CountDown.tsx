@@ -5,7 +5,7 @@ import {
 	HoverCardTrigger,
 } from "@/shared/ui";
 import { ZapIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type CountdownProps = {
 	targetTime: number; // future timestamp in ms
@@ -42,28 +42,34 @@ export function Countdown({
 	hideIcon = false,
 }: Readonly<CountdownProps>) {
 	const [timeLeft, setTimeLeft] = useState(targetTime - Date.now());
+	const hasExpiredRef = useRef(false);
 	const showDateTime = timeLeft > 13 * 60 * 60 * 1000;
-	const displayValue =
-		timeLeft > 0
-			? showDateTime
-				? formatDateTime(targetTime)
-				: formatTime(timeLeft)
-			: "00:00:00";
+	let displayValue = "00:00:00";
+	if (timeLeft > 0) {
+		displayValue = showDateTime
+			? formatDateTime(targetTime)
+			: formatTime(timeLeft);
+	}
 
 	useEffect(() => {
-		const interval = setInterval(() => {
+		hasExpiredRef.current = false;
+
+		const updateCountdown = () => {
 			const diff = targetTime - Date.now();
 
 			if (diff <= 0) {
-				clearInterval(interval);
 				setTimeLeft(0);
-				if (onExpire) {
+				if (!hasExpiredRef.current && onExpire) {
+					hasExpiredRef.current = true;
 					onExpire();
 				}
 			} else {
 				setTimeLeft(diff);
 			}
-		}, 1000);
+		};
+
+		updateCountdown();
+		const interval = setInterval(updateCountdown, 1000);
 
 		return () => clearInterval(interval);
 	}, [targetTime, onExpire]);

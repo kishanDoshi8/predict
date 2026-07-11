@@ -5,15 +5,12 @@ import {
 	useOutletContext,
 	useParams,
 } from "react-router-dom";
-import { useRoom } from "@/features/rooms";
-import { Room } from "@/features/rooms";
+import { useRoom, Room, useRoomRealtime } from "@/features/rooms";
 import { RoomHeader } from "@/features/predictions";
 import { Suspense, lazy, useEffect, useState } from "react";
-import { usePlayer } from "@/features/home";
-import { useWeeklyClaim } from "@/features/home";
+import { usePlayer, useWeeklyClaim } from "@/features/home";
 import { usePreferences, useMarkHowToPlaySeen } from "@/features/preferences";
 import { Loading } from "@/shared/ui";
-import { useRoomRealtime } from "@/features/rooms";
 
 const HowToPlayModal = lazy(
 	() => import("@/features/onboarding/components/HowToPlayModal"),

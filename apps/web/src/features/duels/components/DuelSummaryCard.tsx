@@ -9,6 +9,7 @@ import {
 	TrophyIcon,
 	UsersIcon,
 } from "lucide-react";
+import { BackgroundGradient } from "@/shared/ui/animations/background-gradient";
 
 type DuelSummaryCardProps = {
 	summary: DuelSummary;
@@ -26,7 +27,9 @@ export function DuelSummaryCard({
 		predictionStatus,
 	);
 
-	return (
+	const hasActiveDuels = summary.activeDuels > 0;
+
+	const cardContent = (
 		<button
 			type='button'
 			onClick={onClick}
@@ -118,6 +121,12 @@ export function DuelSummaryCard({
 			</div>
 		</button>
 	);
+
+	if (hasActiveDuels) {
+		return <BackgroundGradient animate>{cardContent}</BackgroundGradient>;
+	}
+
+	return cardContent;
 }
 
 interface StatProps {

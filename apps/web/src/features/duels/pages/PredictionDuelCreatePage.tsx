@@ -30,6 +30,23 @@ function getDuelFee(stakeAmount: number) {
 	return Math.max(Math.ceil(stakeAmount * 0.02), 5);
 }
 
+function getMaxAffordableStake(availableBalance: number) {
+	if (availableBalance < MIN_DUEL_STAKE) return 0;
+
+	let affordableStake = 0;
+	for (
+		let candidateStake = MIN_DUEL_STAKE;
+		candidateStake <= availableBalance;
+		candidateStake += 100
+	) {
+		const fee = getDuelFee(candidateStake);
+		if (candidateStake + fee > availableBalance) break;
+		affordableStake = candidateStake;
+	}
+
+	return affordableStake;
+}
+
 export function PredictionDuelCreatePage() {
 	const { predictionId } = useParams<{ predictionId: string }>();
 	const navigate = useNavigate();
@@ -59,7 +76,14 @@ export function PredictionDuelCreatePage() {
 		);
 	}, [myBet?.amount, player]);
 
-	const maxStakeFromBet = myBet?.amount ?? 0;
+	const maxAffordableStake = useMemo(
+		() => getMaxAffordableStake(availableBalance),
+		[availableBalance],
+	);
+	const stakeFromBet = Math.floor((myBet?.amount ?? 0) / 100) * 100;
+	const canAffordStakeFromBet =
+		stakeFromBet >= MIN_DUEL_STAKE &&
+		stakeFromBet + getDuelFee(stakeFromBet) <= availableBalance;
 	const feeAmount = getDuelFee(stakeAmount);
 	const canAffordStake = availableBalance >= stakeAmount + feeAmount;
 
@@ -67,7 +91,6 @@ export function PredictionDuelCreatePage() {
 	const hasValidBet = !!myBet && myBet.amount >= MIN_DUEL_STAKE;
 	const isStakeValid =
 		stakeAmount >= MIN_DUEL_STAKE &&
-		stakeAmount <= maxStakeFromBet &&
 		stakeAmount % 100 === 0 &&
 		canAffordStake;
 
@@ -206,10 +229,13 @@ export function PredictionDuelCreatePage() {
 						<Button
 							size='icon-lg'
 							variant='secondary'
-							disabled={stakeAmount >= maxStakeFromBet}
+							disabled={
+								maxAffordableStake < MIN_DUEL_STAKE ||
+								stakeAmount >= maxAffordableStake
+							}
 							onClick={() =>
 								setStakeAmount((prev) =>
-									Math.min(prev + 100, maxStakeFromBet),
+									Math.min(prev + 100, maxAffordableStake),
 								)
 							}
 						>
@@ -223,7 +249,7 @@ export function PredictionDuelCreatePage() {
 							variant={
 								stakeAmount === 100 ? "default" : "secondary"
 							}
-							disabled={maxStakeFromBet < 100}
+							disabled={maxAffordableStake < 100}
 							className={`border`}
 							onClick={() => setStakeAmount(100)}
 						>
@@ -233,7 +259,7 @@ export function PredictionDuelCreatePage() {
 							variant={
 								stakeAmount === 200 ? "default" : "secondary"
 							}
-							disabled={maxStakeFromBet < 200}
+							disabled={maxAffordableStake < 200}
 							className={`border`}
 							onClick={() => setStakeAmount(200)}
 						>
@@ -243,7 +269,7 @@ export function PredictionDuelCreatePage() {
 							variant={
 								stakeAmount === 300 ? "default" : "secondary"
 							}
-							disabled={maxStakeFromBet < 300}
+							disabled={maxAffordableStake < 300}
 							className={`border`}
 							onClick={() => setStakeAmount(300)}
 						>
@@ -251,15 +277,15 @@ export function PredictionDuelCreatePage() {
 						</Button>
 						<Button
 							variant={
-								stakeAmount === maxStakeFromBet
+								stakeAmount === stakeFromBet
 									? "default"
 									: "secondary"
 							}
-							disabled={maxStakeFromBet < 500}
+							disabled={!canAffordStakeFromBet}
 							className={`border`}
-							onClick={() => setStakeAmount(maxStakeFromBet)}
+							onClick={() => setStakeAmount(stakeFromBet)}
 						>
-							MAX
+							BET
 						</Button>
 					</div>
 					<div>
@@ -267,8 +293,8 @@ export function PredictionDuelCreatePage() {
 							className={`inline-block h-3 w-3 mr-2 text-muted-foreground`}
 						/>
 						<span className={`text-xs text-muted-foreground`}>
-							Multiples of 100 · max = your bet ({maxStakeFromBet}
-							)
+							Multiples of 100 · quick BET = your prediction bet (
+							{stakeFromBet})
 						</span>
 					</div>
 				</div>

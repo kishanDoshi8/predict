@@ -72,7 +72,7 @@ function HistoryFeed() {
 					hasNextPage &&
 					!isFetchingNextPage
 				) {
-					void fetchNextPage();
+					fetchNextPage();
 				}
 			},
 			{
@@ -85,7 +85,7 @@ function HistoryFeed() {
 	}, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
 	return (
-		<div className={`flex flex-col gap-4 py-4 max-w-lg mx-auto w-full`}>
+		<div className={`flex flex-col gap-4 p-4 max-w-lg mx-auto w-full`}>
 			{/* Section heading */}
 			<div>
 				<h2 className='text-lg font-semibold'>Blast from the Past</h2>

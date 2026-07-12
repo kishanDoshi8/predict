@@ -29,7 +29,7 @@ export function RoomFloatingActionButton() {
 
 	return (
 		<div
-			className='fixed right-4 z-50'
+			className='fixed right-4 z-50 mb-4'
 			style={{
 				bottom: "calc(4.5rem + env(safe-area-inset-bottom))",
 			}}

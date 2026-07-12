@@ -5,7 +5,6 @@ import {
 	HistoryIcon,
 	LayoutDashboardIcon,
 	TrophyIcon,
-	UserCircleIcon,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -30,11 +29,6 @@ const navItems = [
 		segment: "activities",
 		icon: ActivitySquareIcon,
 	},
-	{
-		label: "Profile",
-		segment: "profile",
-		icon: UserCircleIcon,
-	},
 ] as const;
 
 export function RoomBottomNavigation() {
@@ -42,12 +36,12 @@ export function RoomBottomNavigation() {
 
 	return (
 		<nav
-			className='fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur-sm'
+			className='fixed bottom-0 left-0 right-0 z-40 backdrop-blur-sm'
 			style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
 			aria-label='Room navigation'
 		>
-			<div className='max-w-md mx-auto w-full'>
-				<ul className='grid grid-cols-5 h-16'>
+			<div className='max-w-md mx-auto w-full bg-card/80 border border-t rounded-t-lg'>
+				<ul className='flex justify-around h-16'>
 					{navItems.map(({ label, segment, icon: Icon }) => {
 						const to = segment
 							? `/rooms/${room.code}/${segment}`
@@ -65,8 +59,8 @@ export function RoomBottomNavigation() {
 										)
 									}
 								>
-									<Icon className='h-4 w-4' />
-									<span>{label}</span>
+									<Icon size={18} />
+									{/* <span>{label}</span> */}
 								</NavLink>
 							</li>
 						);

@@ -28,8 +28,12 @@ const ResetPasswordPage = lazy(() =>
 		default: module.ResetPasswordPage,
 	})),
 );
-const CreatePlayer = lazy(() => import("@/features/home/components/CreatePlayer"));
-const RoomDashboard = lazy(() => import("@/features/rooms/pages/RoomDashboard"));
+const CreatePlayer = lazy(
+	() => import("@/features/home/components/CreatePlayer"),
+);
+const RoomDashboard = lazy(
+	() => import("@/features/rooms/pages/RoomDashboard"),
+);
 const RoomHistoryPage = lazy(
 	() => import("@/features/rooms/pages/RoomHistoryPage"),
 );
@@ -56,14 +60,18 @@ const PredictionDuelsPage = lazy(() =>
 	})),
 );
 const PredictionDuelCreatePage = lazy(() =>
-	import("@/features/duels/pages/PredictionDuelCreatePage").then((module) => ({
-		default: module.PredictionDuelCreatePage,
-	})),
+	import("@/features/duels/pages/PredictionDuelCreatePage").then(
+		(module) => ({
+			default: module.PredictionDuelCreatePage,
+		}),
+	),
 );
 const PredictionDuelDetailPage = lazy(() =>
-	import("@/features/duels/pages/PredictionDuelDetailPage").then((module) => ({
-		default: module.PredictionDuelDetailPage,
-	})),
+	import("@/features/duels/pages/PredictionDuelDetailPage").then(
+		(module) => ({
+			default: module.PredictionDuelDetailPage,
+		}),
+	),
 );
 const LeaderboardPage = lazy(() =>
 	import("@/features/leaderboard/pages/LeaderboardPage").then((module) => ({
@@ -127,7 +135,9 @@ export const router = createBrowserRouter([
 										children: [
 											{
 												index: true,
-												element: withSuspense(<RoomDashboard />),
+												element: withSuspense(
+													<RoomDashboard />,
+												),
 												handle: {
 													header: {
 														leftAction: "home",
@@ -136,33 +146,55 @@ export const router = createBrowserRouter([
 											},
 											{
 												path: "leaderboard",
-												element: withSuspense(<LeaderboardPage />),
+												element: withSuspense(
+													<LeaderboardPage />,
+												),
 												handle: {
-													header: { title: "Leaderboard" },
+													header: {
+														title: "Leaderboard",
+													},
 												},
 											},
 											{
 												path: "history",
-												element: withSuspense(<RoomHistoryPage />),
-												handle: { header: { title: "History" } },
+												element: withSuspense(
+													<RoomHistoryPage />,
+												),
+												handle: {
+													header: {
+														title: "History",
+													},
+												},
 											},
 											{
 												path: "activities",
-												element: withSuspense(<RoomActivitiesPage />),
+												element: withSuspense(
+													<RoomActivitiesPage />,
+												),
 												handle: {
-													header: { title: "Activities" },
+													header: {
+														title: "Activities",
+													},
 												},
 											},
 											{
 												path: "profile",
-												element: withSuspense(<RoomProfilePage />),
-												handle: { header: { title: "Profile" } },
+												element: withSuspense(
+													<RoomProfilePage />,
+												),
+												handle: {
+													header: {
+														title: "Profile",
+													},
+												},
 											},
 										],
 									},
 									{
 										path: "predictions/new",
-										element: withSuspense(<PredictionNew />),
+										element: withSuspense(
+											<PredictionNew />,
+										),
 										handle: {
 											header: {
 												leftAction: "back",
@@ -172,27 +204,51 @@ export const router = createBrowserRouter([
 									},
 									{
 										path: "predictions/:predictionId",
-										element: withSuspense(<PredictionPage />),
+										element: withSuspense(
+											<PredictionPage />,
+										),
 										handle: {
-											header: { leftAction: "back", title: "Prediction" },
+											header: {
+												leftAction: "back",
+												title: "Prediction",
+											},
 										},
 									},
 									{
 										path: "predictions/:predictionId/duels",
-										element: withSuspense(<PredictionDuelsPage />),
-										handle: { header: { leftAction: "back", title: "Duels" } },
+										element: withSuspense(
+											<PredictionDuelsPage />,
+										),
+										handle: {
+											header: {
+												leftAction: "back",
+												title: "Duels",
+											},
+										},
 									},
 									{
 										path: "predictions/:predictionId/duels/create",
-										element: withSuspense(<PredictionDuelCreatePage />),
+										element: withSuspense(
+											<PredictionDuelCreatePage />,
+										),
 										handle: {
-											header: { leftAction: "back", title: "Create Duel" },
+											header: {
+												leftAction: "back",
+												title: "Create Duel",
+											},
 										},
 									},
 									{
 										path: "predictions/:predictionId/duels/:duelId",
-										element: withSuspense(<PredictionDuelDetailPage />),
-										handle: { header: { leftAction: "back", title: "Duel" } },
+										element: withSuspense(
+											<PredictionDuelDetailPage />,
+										),
+										handle: {
+											header: {
+												leftAction: "back",
+												title: "Duel",
+											},
+										},
 									},
 								],
 							},
@@ -207,5 +263,5 @@ export const router = createBrowserRouter([
 		element: withSuspense(<NotFoundPage />),
 		errorElement: <RouteErrorBoundary />,
 	},
-	{ path: "*", element: <Navigate to="/404" replace /> },
+	{ path: "*", element: <Navigate to='/404' replace /> },
 ]);

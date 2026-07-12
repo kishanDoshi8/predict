@@ -1,6 +1,4 @@
 import {
-	CreatePredictionButton,
-	HistoryFeed,
 	InPlayPredictions,
 	PredictionHeader,
 	UserStats,
@@ -19,13 +17,7 @@ function RoomDashboard() {
 				<div className={`mt-6`}>
 					<UserStats />
 				</div>
-
-				<div className={`mt-4`}>
-					<HistoryFeed />
-				</div>
 			</div>
-
-			<CreatePredictionButton />
 		</div>
 	);
 }

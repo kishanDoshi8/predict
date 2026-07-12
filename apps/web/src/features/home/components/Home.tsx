@@ -29,7 +29,9 @@ import {
 } from "@/shared/ui";
 import { Link, useNavigate } from "react-router-dom";
 
-const HowToPlayModal = lazy(() => import("@/features/onboarding/components/HowToPlayModal"));
+const HowToPlayModal = lazy(
+	() => import("@/features/onboarding/components/HowToPlayModal"),
+);
 
 type Props = {
 	roomCode: string;
@@ -147,7 +149,7 @@ function YourRooms() {
 						<Link
 							to={`/rooms/${room.code}`}
 							key={room.id}
-							className='w-full flex justify-between items-center p-4 border rounded-lg cursor-pointer hover:border-primary/50'
+							className='w-full flex justify-between items-center p-4 rounded-lg cursor-pointer bg-card hover:border-primary/50'
 						>
 							<div className={`flex flex-col`}>
 								<span className='text-lg font-semibold'>

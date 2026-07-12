@@ -6,11 +6,14 @@ import {
 	Button,
 	Spinner,
 } from "@/shared/ui";
-import { useCreateDuel, usePredictionDuelSummary } from "@/features/duels";
-import { usePrediction } from "@/features/predictions";
+import {
+	useCreateDuel,
+	usePredictionDuelSummary,
+	StakeBreakdown,
+} from "@/features/duels";
+import { usePrediction, useMyBet } from "@/features/predictions";
 import { usePlayer } from "@/features/home";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import { useMyBet } from "@/features/predictions";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -22,7 +25,6 @@ import {
 	ShieldXIcon,
 	UsersIcon,
 } from "lucide-react";
-import { StakeBreakdown } from "@/features/duels";
 
 const MIN_DUEL_STAKE = 100;
 

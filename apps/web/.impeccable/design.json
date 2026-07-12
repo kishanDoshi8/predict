@@ -1,0 +1,274 @@
+{
+	"schemaVersion": 2,
+	"generatedAt": "2026-07-12T00:00:00.000Z",
+	"title": "Design System: Verdict",
+	"extensions": {
+		"colorMeta": {
+			"primary-live-rose": {
+				"role": "primary",
+				"displayName": "Live Signal Rose",
+				"canonical": "oklch(0.645 0.246 16.439)",
+				"tonalRamp": [
+					"oklch(0.22 0.08 16.439)",
+					"oklch(0.30 0.11 16.439)",
+					"oklch(0.38 0.14 16.439)",
+					"oklch(0.46 0.18 16.439)",
+					"oklch(0.56 0.21 16.439)",
+					"oklch(0.65 0.246 16.439)",
+					"oklch(0.74 0.20 16.439)",
+					"oklch(0.88 0.08 16.439)"
+				]
+			},
+			"accent-ember-orange": {
+				"role": "secondary",
+				"displayName": "Ember Accent Orange",
+				"canonical": "oklch(0.769 0.188 70.08)",
+				"tonalRamp": [
+					"oklch(0.22 0.06 70.08)",
+					"oklch(0.30 0.08 70.08)",
+					"oklch(0.38 0.11 70.08)",
+					"oklch(0.48 0.14 70.08)",
+					"oklch(0.58 0.17 70.08)",
+					"oklch(0.68 0.18 70.08)",
+					"oklch(0.77 0.188 70.08)",
+					"oklch(0.90 0.08 70.08)"
+				]
+			},
+			"bg-paper": {
+				"role": "neutral",
+				"displayName": "Paper Background",
+				"canonical": "oklch(1 0 0)",
+				"tonalRamp": [
+					"oklch(0.12 0 0)",
+					"oklch(0.24 0 0)",
+					"oklch(0.36 0 0)",
+					"oklch(0.48 0 0)",
+					"oklch(0.60 0 0)",
+					"oklch(0.72 0 0)",
+					"oklch(0.86 0 0)",
+					"oklch(1 0 0)"
+				]
+			},
+			"bg-night": {
+				"role": "neutral",
+				"displayName": "Night Surface",
+				"canonical": "oklch(0.21 0.006 285.885)",
+				"tonalRamp": [
+					"oklch(0.10 0.004 285.885)",
+					"oklch(0.16 0.005 285.885)",
+					"oklch(0.21 0.006 285.885)",
+					"oklch(0.28 0.006 285.885)",
+					"oklch(0.36 0.006 285.885)",
+					"oklch(0.48 0.006 285.885)",
+					"oklch(0.66 0.005 285.885)",
+					"oklch(0.84 0.004 285.885)"
+				]
+			},
+			"success-win": {
+				"role": "semantic",
+				"displayName": "Win",
+				"canonical": "oklch(0.723 0.191 142.542)",
+				"tonalRamp": [
+					"oklch(0.18 0.05 142.542)",
+					"oklch(0.26 0.07 142.542)",
+					"oklch(0.34 0.10 142.542)",
+					"oklch(0.44 0.13 142.542)",
+					"oklch(0.56 0.16 142.542)",
+					"oklch(0.66 0.18 142.542)",
+					"oklch(0.723 0.191 142.542)",
+					"oklch(0.88 0.08 142.542)"
+				]
+			},
+			"danger-loss": {
+				"role": "semantic",
+				"displayName": "Loss",
+				"canonical": "oklch(0.645 0.246 16.439)",
+				"tonalRamp": [
+					"oklch(0.22 0.08 16.439)",
+					"oklch(0.30 0.11 16.439)",
+					"oklch(0.38 0.14 16.439)",
+					"oklch(0.46 0.18 16.439)",
+					"oklch(0.56 0.21 16.439)",
+					"oklch(0.65 0.246 16.439)",
+					"oklch(0.74 0.20 16.439)",
+					"oklch(0.88 0.08 16.439)"
+				]
+			}
+		},
+		"typographyMeta": {
+			"display": {
+				"displayName": "Display",
+				"purpose": "Primary page-level titles and high-priority competitive headings."
+			},
+			"headline": {
+				"displayName": "Headline",
+				"purpose": "Section framing and dialog-level title hierarchy."
+			},
+			"title": {
+				"displayName": "Title",
+				"purpose": "Card and panel titles in dense interaction zones."
+			},
+			"body": {
+				"displayName": "Body",
+				"purpose": "Default copy and metadata with compact readability."
+			},
+			"label": {
+				"displayName": "Label",
+				"purpose": "Badges, helper labels, and small semantic annotations."
+			}
+		},
+		"shadows": [
+			{
+				"name": "micro-lift",
+				"value": "0 1px 2px rgba(0, 0, 0, 0.06)",
+				"purpose": "Subtle affordance for outlined controls and resting fields."
+			},
+			{
+				"name": "interactive-lift",
+				"value": "0 2px 6px rgba(0, 0, 0, 0.1)",
+				"purpose": "Active segmented controls and state-selected tabs."
+			},
+			{
+				"name": "modal-lift",
+				"value": "0 10px 25px rgba(0, 0, 0, 0.18)",
+				"purpose": "Dialog isolation over full-screen overlay."
+			}
+		],
+		"motion": [
+			{
+				"name": "duration-fast",
+				"value": "150ms",
+				"purpose": "Hover and micro-feedback transitions."
+			},
+			{
+				"name": "duration-standard",
+				"value": "200ms",
+				"purpose": "Dialog open/close and focus transition baseline."
+			},
+			{
+				"name": "ease-standard",
+				"value": "cubic-bezier(0.4, 0, 0.2, 1)",
+				"purpose": "Default state transition easing for controls and overlays."
+			}
+		],
+		"breakpoints": [
+			{
+				"name": "sm",
+				"value": "640px"
+			},
+			{
+				"name": "md",
+				"value": "768px"
+			},
+			{
+				"name": "lg",
+				"value": "1024px"
+			}
+		]
+	},
+	"components": [
+		{
+			"name": "Primary Button",
+			"kind": "button",
+			"refersTo": "button-primary",
+			"description": "Primary action control for decisive game actions.",
+			"html": "<button class=\"ds-btn-primary\">Place Bet</button>",
+			"css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; height: 2.25rem; padding: 0.5rem 1rem; border: 1px solid transparent; border-radius: 0.5rem; background: oklch(0.645 0.246 16.439); color: oklch(0.984 0.003 247.858); font-family: \"Fira Code Variable\", ui-monospace, monospace; font-size: 0.875rem; font-weight: 500; line-height: 1; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1), transform 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background: oklch(0.605 0.236 16.439); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.645 0.246 16.439 / 0.35); }"
+		},
+		{
+			"name": "Outline Button",
+			"kind": "button",
+			"refersTo": "button-outline",
+			"description": "Secondary action with explicit neutral boundary.",
+			"html": "<button class=\"ds-btn-outline\">Later</button>",
+			"css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; height: 2.25rem; padding: 0.5rem 1rem; border: 1px solid oklch(0.929 0.013 255.508); border-radius: 0.5rem; background: transparent; color: oklch(0.129 0.042 264.695); font-family: \"Fira Code Variable\", ui-monospace, monospace; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), border-color 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-outline:hover { background: oklch(0.968 0.007 247.896); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.645 0.246 16.439 / 0.2); }"
+		},
+		{
+			"name": "Text Input",
+			"kind": "input",
+			"refersTo": "input-default",
+			"description": "Compact field for high-frequency form entry.",
+			"html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Type your prediction\" />",
+			"css": ".ds-input { width: 100%; min-width: 0; height: 2.25rem; padding: 0.25rem 0.75rem; border: 1px solid oklch(0.929 0.013 255.508); border-radius: 0.5rem; background: transparent; color: oklch(0.129 0.042 264.695); font-family: \"Fira Code Variable\", ui-monospace, monospace; font-size: 0.875rem; line-height: 1.4; transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-input::placeholder { color: oklch(0.554 0.046 257.417); } .ds-input:hover { border-color: oklch(0.879 0.013 255.508); } .ds-input:focus-visible { outline: none; border-color: oklch(0.645 0.246 16.439); box-shadow: 0 0 0 3px oklch(0.645 0.246 16.439 / 0.22); }"
+		},
+		{
+			"name": "Success Badge",
+			"kind": "chip",
+			"refersTo": "badge-success",
+			"description": "Positive-state chip for win and streak cues.",
+			"html": "<span class=\"ds-badge-success\">+12 pts</span>",
+			"css": ".ds-badge-success { display: inline-flex; align-items: center; justify-content: center; gap: 0.25rem; width: fit-content; padding: 0.125rem 0.5rem; border: 1px solid oklch(0.723 0.191 142.542 / 0.3); border-radius: 9999px; background: oklch(0.723 0.191 142.542 / 0.1); color: oklch(0.723 0.191 142.542); font-family: \"Fira Code Variable\", ui-monospace, monospace; font-size: 0.75rem; font-weight: 500; line-height: 1.2; white-space: nowrap; }"
+		},
+		{
+			"name": "Tabs Navigation",
+			"kind": "nav",
+			"refersTo": "tabs-trigger-active",
+			"description": "Segmented tab navigation for section-level context switching.",
+			"html": "<div class=\"ds-tabs\"><button class=\"ds-tab\">Overview</button><button class=\"ds-tab is-active\">Leaderboard</button><button class=\"ds-tab\">History</button></div>",
+			"css": ".ds-tabs { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem; border-radius: 0.625rem; background: oklch(0.968 0.007 247.896); } .ds-tab { position: relative; display: inline-flex; align-items: center; justify-content: center; height: 2rem; padding: 0.25rem 0.75rem; border: 1px solid transparent; border-radius: 0.5rem; background: transparent; color: oklch(0.129 0.042 264.695 / 0.6); font-family: \"Fira Code Variable\", ui-monospace, monospace; font-size: 0.875rem; font-weight: 700; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-tab:hover { color: oklch(0.129 0.042 264.695); } .ds-tab.is-active { background: oklch(1 0 0); color: oklch(0.129 0.042 264.695); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06); } .ds-tab:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.645 0.246 16.439 / 0.22); }"
+		},
+		{
+			"name": "Dialog Surface",
+			"kind": "custom",
+			"refersTo": "surface-soft",
+			"description": "Modal shell with compact heading + body hierarchy.",
+			"html": "<div class=\"ds-dialog-overlay\"><section class=\"ds-dialog\"><h2 class=\"ds-dialog-title\">Resolve Prediction</h2><p class=\"ds-dialog-copy\">Confirm the winning option and publish payout updates.</p></section></div>",
+			"css": ".ds-dialog-overlay { position: relative; display: grid; place-items: center; width: 100%; min-height: 220px; padding: 1rem; border-radius: 0.625rem; background: rgba(0, 0, 0, 0.5); } .ds-dialog { width: min(34rem, 100%); padding: 1.5rem; border: 1px solid oklch(0.929 0.013 255.508); border-radius: 0.625rem; background: oklch(1 0 0); color: oklch(0.129 0.042 264.695); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18); } .ds-dialog-title { margin: 0 0 0.5rem; font-family: \"Fira Code Variable\", ui-monospace, monospace; font-size: 1.125rem; font-weight: 600; line-height: 1.2; } .ds-dialog-copy { margin: 0; font-family: \"Fira Code Variable\", ui-monospace, monospace; font-size: 0.875rem; line-height: 1.5; color: oklch(0.554 0.046 257.417); }"
+		}
+	],
+	"narrative": {
+		"northStar": "Friendly Matchday Ledger",
+		"overview": "Verdict’s interface behaves like a fast, trustworthy score desk for friend-group competition. It keeps social energy visible, but it never sacrifices legibility or game-rule clarity for spectacle. The visual rhythm is compact, direct, and state-explicit, so players can make decisions quickly and verify outcomes without friction.\n\nThe voice is calm precision with competitive energy: sharp information hierarchy, disciplined color semantics, and interaction states that always declare intent. Primary color appears as signal, not decoration. Surfaces stay neutral so scoring cues, rank cues, and outcome cues remain cognitively immediate.",
+		"keyCharacteristics": [
+			"Compact spacing and explicit state signaling over decorative layout density.",
+			"Monospace-forward typography for scoreboarding clarity and numerical stability.",
+			"Restrained base surfaces with high-contrast competitive accents.",
+			"Interaction-first depth: motion and elevation only when state changes."
+		],
+		"rules": [
+			{
+				"name": "The Signal Scarcity Rule",
+				"body": "Primary and accent are signaling tools, not atmosphere paint. If everything is loud, nothing is readable.",
+				"section": "colors"
+			},
+			{
+				"name": "The Outcome Color Rule",
+				"body": "Win/loss colors communicate game state only. They never stand in for neutral UI semantics.",
+				"section": "colors"
+			},
+			{
+				"name": "The Numeric Stability Rule",
+				"body": "Any score, payout, streak, or rank value uses title/body weights that favor readability over stylistic contrast.",
+				"section": "typography"
+			},
+			{
+				"name": "The One-Family Rule",
+				"body": "Use one type family with weight shifts, not mixed display/body families, to keep high-density UI coherent.",
+				"section": "typography"
+			},
+			{
+				"name": "The Flat-By-Default Rule",
+				"body": "No persistent decorative depth on passive surfaces.",
+				"section": "elevation"
+			},
+			{
+				"name": "The State-Driven Depth Rule",
+				"body": "Shadow exists to confirm interaction state, not to stylize containers.",
+				"section": "elevation"
+			}
+		],
+		"dos": [
+			"Do keep primary/accent usage intentional and tied to action or competitive status.",
+			"Do preserve compact control heights and spacing for high-frequency interaction flows.",
+			"Do keep focus-visible rings explicit (3px ring treatment) on all interactive primitives.",
+			"Do use win/loss/rank tokens only for game semantics and leaderboard interpretation."
+		],
+		"donts": [
+			"Don't resemble casino or gambling dark-pattern products.",
+			"Don't resemble noisy, overloaded gamer interfaces where visual aggression overwhelms clarity and task flow.",
+			"Don't use side-stripe borders (border-left or border-right accents above 1px) as decorative emphasis.",
+			"Don't use gradient text or decorative glassmorphism as default UI treatments.",
+			"Don't ship inconsistent button/input/tab vocabulary across screens; consistency is part of trust."
+		]
+	}
+}

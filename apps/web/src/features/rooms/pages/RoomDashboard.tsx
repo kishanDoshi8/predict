@@ -1,5 +1,4 @@
 import {
-	CreatePredictionButton,
 	HistoryFeed,
 	InPlayPredictions,
 	PredictionHeader,
@@ -24,8 +23,6 @@ function RoomDashboard() {
 					<HistoryFeed />
 				</div>
 			</div>
-
-			<CreatePredictionButton />
 		</div>
 	);
 }

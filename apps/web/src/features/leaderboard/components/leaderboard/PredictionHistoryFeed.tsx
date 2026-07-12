@@ -12,6 +12,7 @@ import {
 import Dot from "@/shared/ui/dot";
 import { Link } from "react-router-dom";
 import { FadeContent } from "@/shared/ui";
+import { useRoomContext } from "@/app/layouts/RoomLayout";
 
 // ─── PredictionHistoryCard ────────────────────────────────────────────────────
 
@@ -40,6 +41,7 @@ type CardProps = {
 };
 
 function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
+	const { room } = useRoomContext();
 	const meta = statusMeta(entry.status);
 	const total =
 		entry.options?.reduce((s, o) => s + o.total_bet, 0) ?? entry.total_pool;
@@ -100,7 +102,7 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 
 	return (
 		<Link
-			to={`predictions/${entry.prediction_id}`}
+			to={`/rooms/${room.code}/predictions/${entry.prediction_id}`}
 			className={`border-2 rounded-xl p-3 flex flex-col gap-2 hover:bg-secondary/50 transition-colors ${borderClass}`}
 		>
 			{/* Header row */}

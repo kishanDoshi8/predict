@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/features/auth";
 import { RouteFallback } from "@/app/router/RouteFallback";
 import { RouteErrorBoundary } from "@/app/router/RouteErrorBoundary";
 import RoomLayout from "@/app/layouts/RoomLayout";
+import RoomTabsLayout from "@/app/layouts/RoomTabsLayout";
 import { RequireRoomMember } from "@/features/rooms";
 
 const LoginPage = lazy(() =>
@@ -29,6 +30,15 @@ const ResetPasswordPage = lazy(() =>
 );
 const CreatePlayer = lazy(() => import("@/features/home/components/CreatePlayer"));
 const RoomDashboard = lazy(() => import("@/features/rooms/pages/RoomDashboard"));
+const RoomHistoryPage = lazy(
+	() => import("@/features/rooms/pages/RoomHistoryPage"),
+);
+const RoomActivitiesPage = lazy(
+	() => import("@/features/rooms/pages/RoomActivitiesPage"),
+);
+const RoomProfilePage = lazy(
+	() => import("@/features/rooms/pages/RoomProfilePage"),
+);
 const JoinRoomPage = lazy(() =>
 	import("@/features/rooms/pages/JoinRoomPage").then((module) => ({
 		default: module.JoinRoomPage,
@@ -113,9 +123,42 @@ export const router = createBrowserRouter([
 								errorElement: <RouteErrorBoundary />,
 								children: [
 									{
-										index: true,
-										element: withSuspense(<RoomDashboard />),
-										handle: { header: { leftAction: "home" } },
+										element: <RoomTabsLayout />,
+										children: [
+											{
+												index: true,
+												element: withSuspense(<RoomDashboard />),
+												handle: {
+													header: {
+														leftAction: "home",
+													},
+												},
+											},
+											{
+												path: "leaderboard",
+												element: withSuspense(<LeaderboardPage />),
+												handle: {
+													header: { title: "Leaderboard" },
+												},
+											},
+											{
+												path: "history",
+												element: withSuspense(<RoomHistoryPage />),
+												handle: { header: { title: "History" } },
+											},
+											{
+												path: "activities",
+												element: withSuspense(<RoomActivitiesPage />),
+												handle: {
+													header: { title: "Activities" },
+												},
+											},
+											{
+												path: "profile",
+												element: withSuspense(<RoomProfilePage />),
+												handle: { header: { title: "Profile" } },
+											},
+										],
 									},
 									{
 										path: "predictions/new",
@@ -150,13 +193,6 @@ export const router = createBrowserRouter([
 										path: "predictions/:predictionId/duels/:duelId",
 										element: withSuspense(<PredictionDuelDetailPage />),
 										handle: { header: { leftAction: "back", title: "Duel" } },
-									},
-									{
-										path: "leaderboard",
-										element: withSuspense(<LeaderboardPage />),
-										handle: {
-											header: { leftAction: "back", title: "Leaderboard" },
-										},
 									},
 								],
 							},

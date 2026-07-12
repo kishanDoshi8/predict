@@ -63,7 +63,8 @@ begin
     set status      = v_effective_outcome,
       no_result_reason = nullif(trim(p_no_result_reason), ''),
       resolved_at = now()
-    where id = p_prediction_id;
+    where id = p_prediction_id
+    returning * into v_prediction;
 
     perform public.update_player_stats_after_resolution(
       p_room_id,
@@ -77,6 +78,22 @@ begin
       p_prediction_id,
       null,
       v_effective_outcome
+    );
+
+    perform private.create_room_activity(
+      p_room_id := p_room_id,
+      p_activity_type := case
+        when v_effective_outcome = 'cancelled' then 'prediction_cancelled'
+        else 'prediction_no_result'
+      end,
+      p_activity_tier := 1,
+      p_metadata := private.build_prediction_activity_metadata(p_prediction_id),
+      p_click_action := jsonb_build_object(
+        'type', 'prediction',
+        'predictionId', p_prediction_id
+      ),
+      p_created_by_player_id := v_player_id,
+      p_dedupe_key := 'prediction_' || v_effective_outcome || ':' || p_prediction_id::text
     );
 
     return json_build_object(
@@ -118,7 +135,8 @@ begin
           'Only one option had bets — all refunded'
         ),
         resolved_at = now()
-    where id = p_prediction_id;
+    where id = p_prediction_id
+    returning * into v_prediction;
 
     perform public.update_player_stats_after_resolution(
       p_room_id,
@@ -132,6 +150,19 @@ begin
       p_prediction_id,
       null,
       'no_result'
+    );
+
+    perform private.create_room_activity(
+      p_room_id := p_room_id,
+      p_activity_type := 'prediction_no_result',
+      p_activity_tier := 1,
+      p_metadata := private.build_prediction_activity_metadata(p_prediction_id),
+      p_click_action := jsonb_build_object(
+        'type', 'prediction',
+        'predictionId', p_prediction_id
+      ),
+      p_created_by_player_id := v_player_id,
+      p_dedupe_key := 'prediction_no_result:' || p_prediction_id::text
     );
 
     return json_build_object(
@@ -154,7 +185,8 @@ begin
           'Nobody bet on the winning option — all refunded'
         ),
         resolved_at = now()
-    where id = p_prediction_id;
+    where id = p_prediction_id
+    returning * into v_prediction;
 
     perform public.update_player_stats_after_resolution(
       p_room_id,
@@ -168,6 +200,19 @@ begin
       p_prediction_id,
       null,
       'no_result'
+    );
+
+    perform private.create_room_activity(
+      p_room_id := p_room_id,
+      p_activity_type := 'prediction_no_result',
+      p_activity_tier := 1,
+      p_metadata := private.build_prediction_activity_metadata(p_prediction_id),
+      p_click_action := jsonb_build_object(
+        'type', 'prediction',
+        'predictionId', p_prediction_id
+      ),
+      p_created_by_player_id := v_player_id,
+      p_dedupe_key := 'prediction_no_result:' || p_prediction_id::text
     );
 
     return json_build_object(
@@ -260,7 +305,8 @@ begin
   set status            = 'revealed',
       winning_option_id = p_winning_option_id,
       resolved_at       = now()
-  where id = p_prediction_id;
+  where id = p_prediction_id
+  returning * into v_prediction;
 
   perform public.update_prediction_ratings(
     p_room_id,
@@ -280,6 +326,19 @@ begin
     p_prediction_id,
     p_winning_option_id,
     'win'
+  );
+
+  perform private.create_room_activity(
+    p_room_id := p_room_id,
+    p_activity_type := 'prediction_revealed',
+    p_activity_tier := 1,
+    p_metadata := private.build_prediction_activity_metadata(p_prediction_id),
+    p_click_action := jsonb_build_object(
+      'type', 'prediction',
+      'predictionId', p_prediction_id
+    ),
+    p_created_by_player_id := v_player_id,
+    p_dedupe_key := 'prediction_revealed:' || p_prediction_id::text
   );
 
   return json_build_object(

@@ -3,6 +3,7 @@ import { Player } from "@/features/home";
 import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats } from "@/features/leaderboard";
 import { Prediction, PredictionStatus } from "@/features/predictions";
 import { Room } from "@/features/rooms";
+import type { ActivityFilter, RoomActivitiesPage } from "@/features/activities/types/types";
 import type { Json } from '@/shared/lib/supabase.types'
 import { supabase } from './supabase'
 
@@ -709,6 +710,32 @@ export async function getRoomPredictionHistory({
     p_filter: filter,
   })
   return assertOk(data, error) as PredictionHistoryPage
+}
+
+type GetRoomActivitiesParams = {
+  roomId: string
+  limit?: number
+  cursorCreatedAt?: string | null
+  cursorId?: string | null
+  filter?: ActivityFilter
+}
+
+export async function getRoomActivities({
+  roomId,
+  limit = 20,
+  cursorCreatedAt = null,
+  cursorId = null,
+  filter = 'all',
+}: GetRoomActivitiesParams) {
+  const { data, error } = await untypedSupabase.rpc('get_room_activities', {
+    p_room_id: roomId,
+    p_limit: limit,
+    p_cursor_created_at: cursorCreatedAt ?? undefined,
+    p_cursor_id: cursorId ?? undefined,
+    p_filter: filter,
+  })
+
+  return assertOk(data, error) as RoomActivitiesPage
 }
 
 

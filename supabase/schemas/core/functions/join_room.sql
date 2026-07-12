@@ -11,6 +11,7 @@ declare
   v_player    public.players%rowtype;
   v_room      public.rooms%rowtype;
   v_member    public.room_members%rowtype;
+  v_was_inserted boolean := false;
 begin
   v_player_id := private.get_player_id_from_auth();
 
@@ -31,11 +32,32 @@ begin
 
   insert into public.room_members (room_id, player_id, is_organizer)
   values (v_room.id, v_player_id, false)
-  on conflict (room_id, player_id) do nothing;
+  on conflict (room_id, player_id) do nothing
+  returning * into v_member;
 
-  select * into v_member
-  from public.room_members
-  where room_id = v_room.id and player_id = v_player_id;
+  if found then
+    v_was_inserted := true;
+  else
+    select * into v_member
+    from public.room_members
+    where room_id = v_room.id and player_id = v_player_id;
+  end if;
+
+  if v_was_inserted then
+    perform private.create_room_activity(
+      p_room_id := v_room.id,
+      p_activity_type := 'room_joined',
+      p_activity_tier := 2,
+      p_metadata := jsonb_build_object(
+        'member', jsonb_build_object(
+          'id', v_player.id,
+          'username', v_player.username
+        )
+      ),
+      p_created_by_player_id := v_player.id,
+      p_dedupe_key := 'room_joined:' || v_room.id::text || ':' || v_player.id::text
+    );
+  end if;
 
   return json_build_object(
     'id',           v_room.id,

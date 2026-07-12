@@ -1,10 +1,97 @@
+import { useRoomContext } from "@/app/layouts/RoomLayout";
+import { useRoomActivities, ActivityFilter } from "@/features/activities";
+import { RoomActivitiesFeed } from "@/features/activities/components";
+import { Button, Skeleton } from "@/shared/ui";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+const FILTERS: Array<{ label: string; value: ActivityFilter }> = [
+	{ label: "All", value: "all" },
+];
+
 export default function RoomActivitiesPage() {
+	const { room } = useRoomContext();
+	const [filter, setFilter] = useState<ActivityFilter>("all");
+	const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+	const {
+		data,
+		isPending,
+		isError,
+		error,
+		hasNextPage,
+		isFetchingNextPage,
+		fetchNextPage,
+	} = useRoomActivities(room.id, filter);
+
+	const activities = useMemo(
+		() => data?.pages.flatMap((page) => page.items) ?? [],
+		[data],
+	);
+
+	useEffect(() => {
+		const node = loadMoreRef.current;
+		if (!node || !hasNextPage) {
+			return;
+		}
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const first = entries[0];
+				if (
+					first?.isIntersecting &&
+					hasNextPage &&
+					!isFetchingNextPage
+				) {
+					fetchNextPage();
+				}
+			},
+			{ rootMargin: "200px 0px" },
+		);
+
+		observer.observe(node);
+		return () => observer.disconnect();
+	}, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
 	return (
-		<div className='p-4 max-w-lg mx-auto w-full'>
-			<h2 className='text-lg font-semibold'>Activities</h2>
-			<p className='text-sm text-muted-foreground mt-2'>
-				Room activity feed will appear here soon.
-			</p>
+		<div className='mx-auto w-full max-w-lg space-y-4 p-4'>
+			<div>
+				<h2 className='text-lg font-semibold'>Activities</h2>
+				<p className='mt-1 text-sm text-muted-foreground'>
+					The social timeline of everything meaningful happening in this
+					room.
+				</p>
+			</div>
+
+			<div className='flex flex-wrap gap-2'>
+				{FILTERS.map((item) => (
+					<Button
+						key={item.value}
+						size='sm'
+						variant={filter === item.value ? "default" : "outline"}
+						onClick={() => setFilter(item.value)}
+					>
+						{item.label}
+					</Button>
+				))}
+			</div>
+
+			<RoomActivitiesFeed
+				activities={activities}
+				roomCode={room.code}
+				isLoading={isPending}
+				isError={isError}
+				errorMessage={error instanceof Error ? error.message : undefined}
+			/>
+
+			<div ref={loadMoreRef} className='h-4' />
+
+			{isFetchingNextPage ? (
+				<div className='space-y-3'>
+					{Array.from({ length: 2 }).map((_, index) => (
+						<Skeleton key={index} className='h-24 w-full rounded-2xl' />
+					))}
+				</div>
+			) : null}
 		</div>
 	);
 }

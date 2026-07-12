@@ -1,3 +1,8 @@
+-- ============================================================
+-- Migration: weekly_first_claim_bonus
+-- Description: Award 500 points on a player's first weekly claim, then 100 afterwards.
+-- ============================================================
+
 create or replace function public.claim_weekly_points(
   p_auto_claimed boolean default false
 )
@@ -7,13 +12,13 @@ security definer
 set search_path = public, private
 as $$
 declare
-  v_player          public.players%rowtype;
-  v_week_key        text;
-  v_prev_week_key   text;
-  v_new_streak      integer;
-  v_already_claimed boolean;
+  v_player             public.players%rowtype;
+  v_week_key           text;
+  v_prev_week_key      text;
+  v_new_streak         integer;
+  v_already_claimed    boolean;
   v_has_previous_claim boolean;
-  v_reward_points   integer;
+  v_reward_points      integer;
 begin
   select * into v_player
   from public.players

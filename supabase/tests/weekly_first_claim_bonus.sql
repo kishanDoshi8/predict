@@ -1,6 +1,6 @@
 begin;
 
-select plan(19);
+select plan(18);
 
 create or replace function public._test_create_player_with_auth_user(
   p_user_id uuid,

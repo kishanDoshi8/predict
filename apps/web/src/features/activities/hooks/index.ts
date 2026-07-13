@@ -1,0 +1,1 @@
+export { useRoomActivities } from "./useRoomActivities";

@@ -45,6 +45,23 @@ export function useRoomRealtime(roomId: string | null) {
 				{
 					event: "*",
 					schema: "public",
+					table: "room_activities",
+					filter: `room_id=eq.${roomId}`,
+				},
+				() => {
+					queryClient.invalidateQueries({
+						predicate: (query) =>
+							query.queryKey[0] === roomKeys.all[0] &&
+							query.queryKey[1] === roomId &&
+							query.queryKey[2] === "activities",
+					});
+				},
+			)
+			.on(
+				"postgres_changes",
+				{
+					event: "*",
+					schema: "public",
 					table: "room_stats",
 					filter: `room_id=eq.${roomId}`,
 				},

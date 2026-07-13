@@ -94,6 +94,19 @@ begin
     v_i := v_i + 1;
   end loop;
 
+  perform private.create_room_activity(
+    p_room_id := p_room_id,
+    p_activity_type := 'prediction_created',
+    p_activity_tier := 2,
+    p_metadata := private.build_prediction_activity_metadata(v_prediction.id),
+    p_click_action := jsonb_build_object(
+      'type', 'prediction',
+      'predictionId', v_prediction.id
+    ),
+    p_created_by_player_id := v_player_id,
+    p_dedupe_key := 'prediction_created:' || v_prediction.id::text
+  );
+
   return json_build_object(
     'prediction_id', v_prediction.id,
     'title',         v_prediction.title,

@@ -41,6 +41,19 @@ begin
   where id = v_prediction.id
   returning * into v_prediction;
 
+  perform private.create_room_activity(
+    p_room_id := v_prediction.room_id,
+    p_activity_type := 'prediction_locked',
+    p_activity_tier := 1,
+    p_metadata := private.build_prediction_activity_metadata(v_prediction.id),
+    p_click_action := jsonb_build_object(
+      'type', 'prediction',
+      'predictionId', v_prediction.id
+    ),
+    p_created_by_player_id := v_player_id,
+    p_dedupe_key := 'prediction_locked:' || v_prediction.id::text
+  );
+
   return json_build_object(
     'locked',        true,
     'prediction_id', v_prediction.id

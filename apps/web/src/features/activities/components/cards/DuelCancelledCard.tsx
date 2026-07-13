@@ -16,6 +16,10 @@ export function DuelCancelledCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<XCircleIcon className='size-4' />}
+			typeLabel='Duel'
+			tone='danger'
+			actorLabel={metadata.challenger.username}
+			contextLabel='Cancelled'
 			title='Duel cancelled'
 			description={`${metadata.challenger.username}'s duel was cancelled`}
 			timestamp={formatActivityTimestamp(activity.createdAt)}

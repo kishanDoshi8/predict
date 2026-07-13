@@ -17,6 +17,9 @@ export function PredictionCreatedCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<SparklesIcon className='size-4' />}
+			typeLabel='Prediction'
+			tone='prediction'
+			contextLabel='Created'
 			title='Prediction created'
 			description={metadata.title}
 			summary={`${metadata.totalBets} bets · ${formatPoints(metadata.totalWagered)} pts wagered`}

@@ -18,6 +18,9 @@ export function PredictionRevealedCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<TrophyIcon className='size-4' />}
+			typeLabel='Prediction'
+			tone='success'
+			contextLabel='Resolved'
 			title='Prediction revealed'
 			description={metadata.title}
 			summary={`${winnerLabel} · ${formatPoints(metadata.totalWagered)} pts pool`}

@@ -3,6 +3,7 @@ name: Verdict
 description: Private-first prediction UI for friend groups with compact, state-explicit interaction design.
 colors:
     primary-live-rose: "oklch(0.645 0.246 16.439)"
+    activity-cyan: "oklch(0.715 0.129 215.221)"
     accent-ember-orange: "oklch(0.769 0.188 70.08)"
     bg-paper: "oklch(1 0 0)"
     bg-night: "oklch(0.21 0.006 285.885)"
@@ -105,7 +106,7 @@ The voice is calm precision with competitive energy: sharp information hierarchy
 
 ## 2. Colors
 
-The palette is a restrained product system where neutral architecture carries reading comfort and the rose/orange pair carries competition energy.
+The palette is a restrained product system where neutral architecture carries reading comfort, rose/orange carry competition energy, and cyan carries activity-feed interaction context.
 
 ### Primary
 
@@ -114,6 +115,10 @@ The palette is a restrained product system where neutral architecture carries re
 ### Secondary
 
 - **Ember Accent Orange** (oklch(0.769 0.188 70.08)): Used for supporting emphasis, hot-state cues, and secondary action highlighting where urgency is directional, not critical.
+
+### Activity Signal
+
+- **Activity Cyan** (oklch(0.715 0.129 215.221)): Reserved for activity cards and timeline interaction cues where we want clarity without implying destructive intent.
 
 ### Tertiary
 

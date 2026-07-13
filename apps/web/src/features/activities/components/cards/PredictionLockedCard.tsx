@@ -17,6 +17,9 @@ export function PredictionLockedCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<LockIcon className='size-4' />}
+			typeLabel='Prediction'
+			tone='warning'
+			contextLabel='Locked'
 			title='Prediction locked'
 			description={metadata.title}
 			summary={`${metadata.totalBets} bets · ${formatPoints(metadata.totalWagered)} pts wagered`}

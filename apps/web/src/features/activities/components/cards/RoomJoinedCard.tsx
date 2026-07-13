@@ -11,6 +11,9 @@ export function RoomJoinedCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<UserPlusIcon className='size-4' />}
+			typeLabel='Member'
+			tone='member'
+			actorLabel={activity.metadata.member.username}
 			title={`${activity.metadata.member.username} joined the room`}
 			timestamp={formatActivityTimestamp(activity.createdAt)}
 		/>

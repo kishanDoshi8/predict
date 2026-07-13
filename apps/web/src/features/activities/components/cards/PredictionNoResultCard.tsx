@@ -16,6 +16,9 @@ export function PredictionNoResultCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<MinusCircleIcon className='size-4' />}
+			typeLabel='Prediction'
+			tone='warning'
+			contextLabel='No result'
 			title='Prediction settled with no result'
 			description={metadata.title}
 			summary={metadata.noResultReason ?? "All bets were refunded."}

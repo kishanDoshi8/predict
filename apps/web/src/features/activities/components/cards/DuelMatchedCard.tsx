@@ -21,6 +21,10 @@ export function DuelMatchedCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<HandshakeIcon className='size-4' />}
+			typeLabel='Duel'
+			tone='duel'
+			actorLabel={metadata.challenger.username}
+			contextLabel='Matched'
 			title='Duel matched'
 			description={matchup}
 			summary={`${formatPoints(metadata.stakeAmount)} pts each`}

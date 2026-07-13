@@ -16,6 +16,9 @@ export function PredictionCancelledCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<BanIcon className='size-4' />}
+			typeLabel='Prediction'
+			tone='danger'
+			contextLabel='Cancelled'
 			title='Prediction cancelled'
 			description={metadata.title}
 			summary={metadata.noResultReason ?? "All bets were refunded."}

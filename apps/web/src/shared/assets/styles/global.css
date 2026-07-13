@@ -66,6 +66,8 @@
     --color-win: var(--win);
     --color-loss: var(--loss);
     --color-live: var(--live);
+    --color-activity: var(--activity);
+    --color-activity-foreground: var(--activity-foreground);
     --color-hot: var(--hot);
     --color-rank-1: var(--rank-1);
     --color-rank-2: var(--rank-2);
@@ -134,6 +136,10 @@
     /* Rose-500 #f43f5e */
     --live: oklch(0.645 0.246 16.439);
     /* Rose-500 (pulsing live) */
+    --activity: oklch(0.715 0.129 215.221);
+    /* Cyan-leaning activity signal */
+    --activity-foreground: oklch(0.294 0.075 236.824);
+    /* Cyan ink for light backgrounds */
     --hot: oklch(0.769 0.188 70.08);
     /* Orange-400 #fb923c */
     --rank-1: oklch(0.828 0.189 84.429);
@@ -218,6 +224,10 @@
     /* Rose-500 #f43f5e */
     --live: oklch(0.645 0.246 16.439);
     /* Rose-500 */
+    --activity: oklch(0.785 0.125 212.104);
+    /* Bright cyan for dark surfaces */
+    --activity-foreground: oklch(0.21 0.006 285.885);
+    /* Dark ink on cyan backgrounds */
     --hot: oklch(0.769 0.188 70.08);
     /* Orange-400 #fb923c */
     --rank-1: oklch(0.828 0.189 84.429);

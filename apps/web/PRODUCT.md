@@ -45,6 +45,12 @@ Do not resemble casino or gambling dark-pattern products. Do not resemble noisy,
 5. Inclusive Competitive Play
    Core competition cues must remain usable with high contrast, keyboard navigation, reduced motion preferences, and color-safe signaling.
 
+## Color Semantics
+
+- Keep `primary` rose as the global action signal.
+- Use activity cyan for timeline/card interaction context to avoid destructive ambiguity in activity feeds.
+- Keep win/loss colors scoped to outcome semantics only.
+
 ## Accessibility & Inclusion
 
 Baseline target is WCAG 2.2 AA with explicit reduced-motion support. Interaction and status design should preserve clarity for keyboard users and for users who rely on high contrast or color-safe interpretation of win/loss and rank indicators.

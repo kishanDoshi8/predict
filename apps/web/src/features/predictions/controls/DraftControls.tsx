@@ -247,7 +247,7 @@ export default function DraftControls({
 						</p>
 						<p className={`${selectedOption ? "text-right" : ""}`}>
 							<span className={`text-xl font-semibold`}>
-								{availableBalance} pts
+								{availableBalance.toLocaleString()} pts
 							</span>
 						</p>
 					</div>

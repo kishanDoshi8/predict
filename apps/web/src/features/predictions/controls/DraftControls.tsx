@@ -57,7 +57,9 @@ export default function DraftControls({
 			const hasChallenged =
 				duel.challenger.id === player.id && duel.status !== "cancelled";
 			const hasQueued = duel.queue.some(
-				(queueEntry) => queueEntry.player.id === player.id,
+				(queueEntry) =>
+					queueEntry.player.id === player.id &&
+					queueEntry.status !== "cancelled",
 			);
 
 			return hasChallenged || hasQueued;

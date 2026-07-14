@@ -206,18 +206,19 @@ export function PlayerProfileDialog({
 						{stats?.username ?? "Player profile"}
 					</TitleComponent>
 					<DescriptionComponent className={`flex gap-2`}>
-						{stats?.highest_win_streak && (
-							<div className={`inline-block`}>
-								<Badge
-									className={`flex gap-0 items-center justify-center bg-accent/20 text-accent text-xs`}
-								>
-									<FlameIcon
-										className={`w-2 h-2 text-rank-3`}
-									/>
-									{stats.highest_win_streak}
-								</Badge>
-							</div>
-						)}
+						{stats?.highest_win_streak !== undefined &&
+							stats.highest_win_streak !== 0 && (
+								<div className={`inline-block`}>
+									<Badge
+										className={`flex gap-0 items-center justify-center bg-accent/20 text-accent text-xs`}
+									>
+										<FlameIcon
+											className={`w-2 h-2 text-rank-3`}
+										/>
+										{stats.highest_win_streak}
+									</Badge>
+								</div>
+							)}
 						{stats?.current_rating !== undefined && (
 							<RatingBadge rating={stats.current_rating ?? 0} />
 						)}
@@ -289,17 +290,23 @@ export function PlayerProfileDialog({
 												size={20}
 											/>
 											<span>
-												{stats?.largest_win_payout.toLocaleString()}{" "}
+												{(
+													stats?.largest_win_payout ??
+													0
+												).toLocaleString()}{" "}
 												pts
 											</span>
 										</p>
 										<p className='text-xs text-muted-foreground'>
 											Bet{" "}
-											{stats?.largest_win_bet.toLocaleString()}{" "}
+											{(
+												stats?.largest_win_bet ?? 0
+											).toLocaleString()}{" "}
 											•{" "}
-											{stats?.largest_win_multiplier.toFixed(
-												2,
-											)}
+											{(
+												stats?.largest_win_multiplier ??
+												0
+											).toFixed(2)}
 											x return
 										</p>
 									</div>

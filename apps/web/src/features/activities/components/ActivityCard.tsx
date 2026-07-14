@@ -35,18 +35,6 @@ const TIER_STYLES: Record<ActivityTier, string> = {
 	3: "border-border/70 bg-muted/30",
 };
 
-const TIER_LABELS: Record<ActivityTier, string> = {
-	1: "High",
-	2: "Normal",
-	3: "Low",
-};
-
-const TIER_BADGE_STYLES: Record<ActivityTier, string> = {
-	1: "border-activity/30 bg-activity/15 text-activity",
-	2: "border-border bg-background/80 text-foreground/80",
-	3: "border-border/70 bg-muted/70 text-muted-foreground",
-};
-
 const TONE_STYLES: Record<
 	ActivityTone,
 	{
@@ -94,8 +82,8 @@ const TONE_STYLES: Record<
 	},
 	warning: {
 		shell: "bg-accent/10 border-accent/35",
-		icon: "border-accent/40 bg-accent/20 text-accent-foreground",
-		typeBadge: "border-accent/35 bg-accent/20 text-accent-foreground",
+		icon: "border-accent/40 bg-accent/20 text-accent",
+		typeBadge: "border-accent/35 bg-accent/20 text-accent",
 		summary: "border-accent/35 bg-accent/15 text-foreground/90",
 		openPill: "border-accent/35 bg-accent/15 text-foreground/90",
 	},
@@ -154,15 +142,6 @@ export function ActivityCard({
 							)}
 						>
 							{typeLabel}
-						</Badge>
-						<Badge
-							variant='outline'
-							className={cn(
-								"h-5 rounded-full px-2 text-[11px] font-medium",
-								TIER_BADGE_STYLES[tier],
-							)}
-						>
-							{TIER_LABELS[tier]}
 						</Badge>
 					</div>
 					<p className='mt-2 text-base font-semibold leading-snug text-foreground'>

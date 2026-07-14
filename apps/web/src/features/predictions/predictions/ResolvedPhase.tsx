@@ -7,15 +7,16 @@ import {
 	FadeContent,
 	Skeleton,
 } from "@/shared/ui";
-import { Prediction } from "@/features/predictions";
+import { Prediction, useBets } from "@/features/predictions";
 import PredictionTitle from "../components/PredictionTitle";
 import PredictionOptions from "../widgets/PredictionOptions";
 import { BicepsFlexed, CheckIcon, CrownIcon, FrownIcon } from "lucide-react";
-import { useBets } from "@/features/predictions";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
 import { useRoomBetRealtime } from "@/features/rooms";
 import PredictionData from "./PredictionData";
+import { PlayerProfileDialog } from "@/features/leaderboard";
+import { useState } from "react";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -38,6 +39,11 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 		room.id,
 		prediction.id,
 	);
+
+	const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(
+		null,
+	);
+	const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 
 	useRoomBetRealtime(room.id, prediction?.id ?? null);
 
@@ -184,15 +190,21 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 						className={`rounded-xl overflow-hidden border border-border`}
 					>
 						{bets?.map((bet) => (
-							<div
+							<button
 								key={bet.id}
-								className={`flex justify-between border-b border-secondary bg-card hover:bg-secondary p-4`}
+								className={`flex justify-between border-b border-secondary bg-card hover:bg-secondary p-4 w-full`}
+								onClick={() => {
+									setSelectedPlayerId(bet.player_id);
+									setIsProfileDialogOpen(true);
+								}}
 							>
 								<div>
-									<p className={`text-lg font-semibold`}>
+									<p
+										className={`text-lg font-semibold text-left`}
+									>
 										{getPlayerName(bet.player_id)}
 									</p>
-									<p className={`text-sm`}>
+									<p className={`text-sm text-left`}>
 										<span
 											className={`text-muted-foreground`}
 										>
@@ -221,11 +233,18 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 										</p>
 									)}
 								</div>
-							</div>
+							</button>
 						))}
 					</FadeContent>
 				)}
 			</div>
+
+			<PlayerProfileDialog
+				playerId={selectedPlayerId}
+				open={isProfileDialogOpen}
+				onOpenChange={setIsProfileDialogOpen}
+				roomId={room.id}
+			/>
 		</div>
 	);
 }

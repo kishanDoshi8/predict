@@ -137,14 +137,14 @@ export function ActivityCard({
 						<Badge
 							variant='outline'
 							className={cn(
-								"h-5 rounded-full px-2 text-[11px] font-semibold",
+								"h-5 rounded-full px-2 text-xs font-semibold",
 								toneStyles.typeBadge,
 							)}
 						>
 							{typeLabel}
 						</Badge>
 					</div>
-					<p className='mt-2 text-base font-semibold leading-snug text-foreground'>
+					<p className='mt-2 text-lg font-semibold leading-snug text-foreground'>
 						{title}
 					</p>
 					{hasDescription ? (
@@ -155,7 +155,7 @@ export function ActivityCard({
 					{hasSummary ? (
 						<div
 							className={cn(
-								"mt-2.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium leading-4",
+								"mt-2.5 rounded-lg border px-2.5 py-1.5 text-sm font-medium leading-5",
 								toneStyles.summary,
 							)}
 						>
@@ -174,7 +174,7 @@ export function ActivityCard({
 							{actorLabel ? (
 								<Badge
 									variant='outline'
-									className='h-5 max-w-full rounded-full border-border/70 bg-background/70 px-2 text-[11px] font-medium text-foreground/80'
+									className='h-5 max-w-full rounded-full border-border/70 bg-background/70 px-2 text-xs font-medium text-foreground/90'
 								>
 									<span className='truncate'>
 										{actorLabel}
@@ -184,7 +184,7 @@ export function ActivityCard({
 							{contextLabel ? (
 								<Badge
 									variant='outline'
-									className='h-5 max-w-full rounded-full border-border/70 bg-muted/60 px-2 text-[11px] font-medium text-muted-foreground'
+									className='h-5 max-w-full rounded-full border-border/70 bg-muted/60 px-2 text-xs font-medium text-foreground/80'
 								>
 									<span className='truncate'>
 										{contextLabel}
@@ -192,7 +192,7 @@ export function ActivityCard({
 								</Badge>
 							) : null}
 						</div>
-						<div className='shrink-0 text-xs font-medium text-muted-foreground'>
+						<div className='shrink-0 text-sm font-medium text-muted-foreground'>
 							{timestamp}
 						</div>
 					</div>
@@ -202,7 +202,7 @@ export function ActivityCard({
 				<div className='mt-2 flex justify-end'>
 					<span
 						className={cn(
-							"inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium",
+							"inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
 							toneStyles.openPill,
 						)}
 					>

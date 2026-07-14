@@ -20,8 +20,8 @@ export function PredictionLockedCard({
 			typeLabel='Prediction'
 			tone='warning'
 			contextLabel='Locked'
-			title='Prediction locked'
-			description={metadata.title}
+			title={metadata.title}
+			description='Prediction locked'
 			summary={`${metadata.totalBets} bets · ${formatPoints(metadata.totalWagered)} pts wagered`}
 			timestamp={formatActivityTimestamp(activity.createdAt)}
 			href={resolveActivityHref(activity, roomCode)}

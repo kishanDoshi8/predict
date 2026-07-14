@@ -20,8 +20,8 @@ export function PredictionCreatedCard({
 			typeLabel='Prediction'
 			tone='prediction'
 			contextLabel='Created'
-			title='Prediction created'
-			description={metadata.title}
+			title={metadata.title}
+			description='Prediction created'
 			summary={`${metadata.totalBets} bets · ${formatPoints(metadata.totalWagered)} pts wagered`}
 			timestamp={formatActivityTimestamp(activity.createdAt)}
 			href={resolveActivityHref(activity, roomCode)}

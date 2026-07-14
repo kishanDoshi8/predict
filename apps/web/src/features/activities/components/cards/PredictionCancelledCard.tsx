@@ -19,8 +19,8 @@ export function PredictionCancelledCard({
 			typeLabel='Prediction'
 			tone='danger'
 			contextLabel='Cancelled'
-			title='Prediction cancelled'
-			description={metadata.title}
+			title={metadata.title}
+			description='Prediction cancelled'
 			summary={metadata.noResultReason ?? "All bets were refunded."}
 			timestamp={formatActivityTimestamp(activity.createdAt)}
 			href={resolveActivityHref(activity, roomCode)}

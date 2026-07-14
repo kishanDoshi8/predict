@@ -34,3 +34,28 @@ begin
   on conflict (room_id, dedupe_key) do nothing;
 end;
 $$;
+
+create or replace function private.create_room_activity(
+  p_room_id uuid,
+  p_activity_type text,
+  p_activity_tier integer,
+  p_metadata jsonb default '{}'::jsonb,
+  p_click_action jsonb default null,
+  p_created_by_player_id uuid default null,
+  p_dedupe_key text default null
+)
+returns void
+language sql
+security definer
+set search_path = public, private
+as $$
+  select private.create_room_activity(
+    p_room_id := p_room_id,
+    p_activity_type := p_activity_type,
+    p_activity_tier := p_activity_tier::smallint,
+    p_metadata := p_metadata,
+    p_click_action := p_click_action,
+    p_created_by_player_id := p_created_by_player_id,
+    p_dedupe_key := p_dedupe_key
+  );
+$$;

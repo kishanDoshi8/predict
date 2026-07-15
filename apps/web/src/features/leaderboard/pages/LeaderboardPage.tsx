@@ -3,11 +3,11 @@ import { usePlayer } from "@/features/home";
 import {
 	useRoomLeaderboard,
 	useRoomWeeklyLeaderboard,
+	LeaderboardList,
+	TopThreePodium,
 } from "@/features/leaderboard";
 import type { SortByOption } from "@/features/leaderboard/types/types";
-import { LeaderboardList } from "@/features/leaderboard";
 import { cn } from "@/shared/lib/utils";
-import { TopThreePodium } from "@/features/leaderboard";
 import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
 import { ArrowDown10Icon, CircleQuestionMarkIcon } from "lucide-react";

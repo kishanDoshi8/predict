@@ -54,12 +54,19 @@ export function RoomBottomNavigation() {
 									end={segment.length === 0}
 									className={({ isActive }) =>
 										cn(
-											"w-full h-full flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted-foreground",
+											"relative w-full h-full flex flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted-foreground",
 											isActive && "text-primary",
 										)
 									}
 								>
 									<Icon size={18} />
+									{segment === "activities" &&
+									room.has_unseen_activities ? (
+										<span
+											className='absolute top-5 -right-1 h-3 w-3 rounded-full bg-destructive border-2 border-card'
+											aria-hidden='true'
+										/>
+									) : null}
 									{/* <span>{label}</span> */}
 								</NavLink>
 							</li>

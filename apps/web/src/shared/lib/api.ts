@@ -147,11 +147,13 @@ export async function spectateRoom(roomCode: string): Promise<Room> {
 
   if (error) throw error
   const members = await getRoomMembers(data.id)
+  const hasUnseenActivities = await getRoomHasUnseenActivities(data.id)
 
   return {
     ...data,
     code: data.room_code,
     members,
+    has_unseen_activities: hasUnseenActivities,
   }
 }
 
@@ -736,6 +738,25 @@ export async function getRoomActivities({
   })
 
   return assertOk(data, error) as RoomActivitiesPage
+}
+
+export async function getRoomHasUnseenActivities(roomId: string) {
+  const { data, error } = await untypedSupabase.rpc(
+    'get_room_has_unseen_activities',
+    {
+      p_room_id: roomId,
+    },
+  )
+
+  return assertOk(data, error) as boolean
+}
+
+export async function markRoomActivitiesSeen(roomId: string) {
+  const { error } = await untypedSupabase.rpc('mark_room_activities_seen', {
+    p_room_id: roomId,
+  })
+
+  if (error) throw error
 }
 
 

@@ -19,6 +19,7 @@ export interface Room {
   status:            string
   created_at:        string
   members:           RoomMember[]
+  has_unseen_activities?: boolean
   // Max concurrent active (draft/locked) predictions. Read-only from the app layer.
   predictions_limit: number
 

@@ -1,5 +1,6 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useRoomActivities, ActivityFilter } from "@/features/activities";
+import { useMarkRoomActivitiesSeen } from "@/features/rooms";
 import { RoomActivitiesFeed } from "@/features/activities/components";
 import { Button, Skeleton } from "@/shared/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -12,6 +13,11 @@ export default function RoomActivitiesPage() {
 	const { room } = useRoomContext();
 	const [filter, setFilter] = useState<ActivityFilter>("all");
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
+	const hasScheduledSeenRef = useRef(false);
+	const { mutate: markActivitiesSeen } = useMarkRoomActivitiesSeen(
+		room.code,
+		room.id,
+	);
 
 	const {
 		data,
@@ -27,6 +33,28 @@ export default function RoomActivitiesPage() {
 		() => data?.pages.flatMap((page) => page.items) ?? [],
 		[data],
 	);
+
+	useEffect(() => {
+		if (
+			!room.id ||
+			isPending ||
+			isError ||
+			!data ||
+			hasScheduledSeenRef.current
+		) {
+			return;
+		}
+
+		hasScheduledSeenRef.current = true;
+
+		const timerId = globalThis.setTimeout(() => {
+			markActivitiesSeen();
+		}, 900);
+
+		return () => {
+			globalThis.clearTimeout(timerId);
+		};
+	}, [data, isError, isPending, markActivitiesSeen, room.id]);
 
 	useEffect(() => {
 		const node = loadMoreRef.current;

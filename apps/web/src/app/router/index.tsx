@@ -151,7 +151,7 @@ export const router = createBrowserRouter([
 												),
 												handle: {
 													header: {
-														title: "Leaderboard",
+														// title: "Leaderboard",
 													},
 												},
 											},
@@ -162,7 +162,7 @@ export const router = createBrowserRouter([
 												),
 												handle: {
 													header: {
-														title: "History",
+														// title: "History",
 													},
 												},
 											},
@@ -172,9 +172,7 @@ export const router = createBrowserRouter([
 													<RoomActivitiesPage />,
 												),
 												handle: {
-													header: {
-														title: "Activities",
-													},
+													header: {},
 												},
 											},
 											{
@@ -198,7 +196,6 @@ export const router = createBrowserRouter([
 										handle: {
 											header: {
 												leftAction: "back",
-												title: "Create Prediction",
 											},
 										},
 									},
@@ -210,7 +207,6 @@ export const router = createBrowserRouter([
 										handle: {
 											header: {
 												leftAction: "back",
-												title: "Prediction",
 											},
 										},
 									},
@@ -222,7 +218,6 @@ export const router = createBrowserRouter([
 										handle: {
 											header: {
 												leftAction: "back",
-												title: "Duels",
 											},
 										},
 									},
@@ -234,7 +229,6 @@ export const router = createBrowserRouter([
 										handle: {
 											header: {
 												leftAction: "back",
-												title: "Create Duel",
 											},
 										},
 									},
@@ -246,7 +240,6 @@ export const router = createBrowserRouter([
 										handle: {
 											header: {
 												leftAction: "back",
-												title: "Duel",
 											},
 										},
 									},

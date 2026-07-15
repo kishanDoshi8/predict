@@ -1,12 +1,10 @@
 import { Spinner } from "@/shared/ui";
-import { useBets, useMyBet } from "@/features/predictions";
-import { usePredictionDuels } from "@/features/duels";
+import { useBets, useMyBet, usePrediction } from "@/features/predictions";
+import { usePredictionDuels, DuelPredictionHeader } from "@/features/duels";
 import { usePlayer } from "@/features/home";
-import { usePrediction } from "@/features/predictions";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import { DuelPredictionHeader } from "@/features/duels";
 import DuelJoinView from "@/features/duels/components/detail/DuelJoinView";
 import DuelMatchedView from "@/features/duels/components/detail/DuelMatchedView";
 import DuelResolvedView from "@/features/duels/components/detail/DuelResolvedView";
@@ -139,6 +137,9 @@ export function PredictionDuelDetailPage() {
 	return (
 		<div className='mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-md flex-col'>
 			<div className='flex-1 space-y-4 overflow-y-auto px-4 pb-20 pt-4'>
+				<h2 className='flex gap-2 items-center text-lg font-semibold'>
+					Duel
+				</h2>
 				<div className='mb-4'>
 					<DuelPredictionHeader room={room} prediction={prediction} />
 				</div>

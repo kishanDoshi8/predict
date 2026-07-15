@@ -1,4 +1,4 @@
-import { createRoom, getPlayerRooms, getRoomStatCards, joinRoom, spectateRoom } from "@/shared/lib/api";
+import { createRoom, getPlayerRooms, getRoomStatCards, joinRoom, markRoomActivitiesSeen, spectateRoom } from "@/shared/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "@/shared/constants/queryKeys";
 import { playerQueryKey } from "@/features/home";
@@ -56,5 +56,20 @@ export const useRoomStatCards = (roomId?: string, limit = 5) => {
         queryKey: roomKeys.stats(roomId ?? ""),
         queryFn: () => getRoomStatCards(roomId ?? "", limit),
         enabled: !!roomId,
+    });
+}
+
+export const useMarkRoomActivitiesSeen = (roomCode?: string, roomId?: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: () => markRoomActivitiesSeen(roomId ?? ""),
+        onSuccess: () => {
+            if (roomCode) {
+                void queryClient.invalidateQueries({
+                    queryKey: roomKeys.byCode(roomCode),
+                });
+            }
+        },
     });
 }

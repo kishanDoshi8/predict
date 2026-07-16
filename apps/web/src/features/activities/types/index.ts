@@ -3,6 +3,8 @@ export type {
 	ActivityFilter,
 	ActivityTier,
 	ActivityType,
+	AchievementRatingTierReachedActivity,
+	AchievementStreakMilestoneActivity,
 	DuelActivityMetadata,
 	RoomActivitiesPage,
 	RoomActivity,

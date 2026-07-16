@@ -1,5 +1,7 @@
 export type ActivityType =
 	| "room_joined"
+	| "achievement_rating_tier_reached"
+	| "achievement_streak_milestone"
 	| "prediction_created"
 	| "prediction_locked"
 	| "prediction_revealed"
@@ -76,6 +78,19 @@ export type RoomJoinedMetadata = {
 	member: ActivityPlayer;
 };
 
+export type AchievementRatingTierReachedMetadata = {
+	member: ActivityPlayer;
+	rating?: number | null;
+	reachedTierMinRating?: number | null;
+	reachedTierLabel?: string | null;
+};
+
+export type AchievementStreakMilestoneMetadata = {
+	member: ActivityPlayer;
+	streak: number;
+	milestone?: number | null;
+};
+
 export type RoomActivityBase<
 	TType extends ActivityType,
 	TMetadata,
@@ -91,6 +106,14 @@ export type RoomActivityBase<
 export type RoomJoinedActivity = RoomActivityBase<
 	"room_joined",
 	RoomJoinedMetadata
+>;
+export type AchievementRatingTierReachedActivity = RoomActivityBase<
+	"achievement_rating_tier_reached",
+	AchievementRatingTierReachedMetadata
+>;
+export type AchievementStreakMilestoneActivity = RoomActivityBase<
+	"achievement_streak_milestone",
+	AchievementStreakMilestoneMetadata
 >;
 
 export type PredictionCreatedActivity = RoomActivityBase<
@@ -137,6 +160,8 @@ export type DuelExpiredActivity = RoomActivityBase<
 
 export type RoomActivity =
 	| RoomJoinedActivity
+	| AchievementRatingTierReachedActivity
+	| AchievementStreakMilestoneActivity
 	| PredictionCreatedActivity
 	| PredictionLockedActivity
 	| PredictionRevealedActivity

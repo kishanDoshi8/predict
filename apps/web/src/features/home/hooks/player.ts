@@ -1,5 +1,6 @@
-import { getPlayer, createPlayer } from "@/shared/lib/api";
+import { getPlayer, createPlayer, setLastVisitedRoom } from "@/shared/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Player } from "@/features/home/types/player";
 
 export const playerQueryKey = ["player"];
 
@@ -26,3 +27,18 @@ export const useCreatePlayer = () => {
         },
     })
 }
+
+export const useSetLastVisitedRoom = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (roomId: string) => setLastVisitedRoom(roomId),
+		onSuccess: (_, roomId) => {
+			queryClient.setQueryData(playerQueryKey, (currentPlayer: Player | undefined) =>
+				currentPlayer
+					? { ...currentPlayer, last_visited_room_id: roomId }
+					: currentPlayer,
+			);
+		},
+	});
+};

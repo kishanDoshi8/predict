@@ -335,6 +335,7 @@ export type Database = {
           current_streak: number
           id: string
           last_claim_at: string | null
+          last_visited_room_id: string | null
           longest_streak: number
           player_token: string
           points_balance: number
@@ -348,6 +349,7 @@ export type Database = {
           current_streak?: number
           id?: string
           last_claim_at?: string | null
+          last_visited_room_id?: string | null
           longest_streak?: number
           player_token: string
           points_balance?: number
@@ -361,6 +363,7 @@ export type Database = {
           current_streak?: number
           id?: string
           last_claim_at?: string | null
+          last_visited_room_id?: string | null
           longest_streak?: number
           player_token?: string
           points_balance?: number
@@ -369,7 +372,15 @@ export type Database = {
           user_id?: string | null
           username?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "players_last_visited_room_id_fkey"
+            columns: ["last_visited_room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       prediction_options: {
         Row: {
@@ -1066,6 +1077,10 @@ export type Database = {
       }
       register_player: { Args: { p_username: string }; Returns: Json }
       reset_room_preferences: { Args: { p_room_id: string }; Returns: Json }
+      set_last_visited_room: {
+        Args: { p_room_id: string }
+        Returns: undefined
+      }
       resolve_duels_for_prediction: {
         Args: { p_prediction_id: string }
         Returns: Json

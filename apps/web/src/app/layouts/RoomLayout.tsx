@@ -5,10 +5,10 @@ import {
 	useOutletContext,
 	useParams,
 } from "react-router-dom";
-import { useRoom, Room, useRoomRealtime } from "@/features/rooms";
+import { useRoom, Room, RoomSwitcherDrawer, useRoomRealtime } from "@/features/rooms";
 import { RoomHeader } from "@/features/predictions";
 import { Suspense, lazy, useEffect, useState } from "react";
-import { usePlayer, useWeeklyClaim } from "@/features/home";
+import { usePlayer, useSetLastVisitedRoom, useWeeklyClaim } from "@/features/home";
 import { usePreferences, useMarkHowToPlaySeen } from "@/features/preferences";
 import { Loading } from "@/shared/ui";
 
@@ -32,7 +32,9 @@ export default function RoomLayout() {
 	const roomId = room?.id ?? "";
 	const { data: preferences } = usePreferences(roomId);
 	const { mutate: markSeen } = useMarkHowToPlaySeen(roomId || undefined);
+	const { mutate: setLastVisitedRoom } = useSetLastVisitedRoom();
 	const [showHowToPlay, setShowHowToPlay] = useState(false);
+	const [showRoomSwitcher, setShowRoomSwitcher] = useState(false);
 
 	useEffect(() => {
 		if (player) {
@@ -49,6 +51,14 @@ export default function RoomLayout() {
 			setShowHowToPlay(true);
 		}
 	}, [preferences]);
+
+	useEffect(() => {
+		if (!room?.id || player?.last_visited_room_id === room.id) {
+			return;
+		}
+
+		setLastVisitedRoom(room.id);
+	}, [room?.id, player?.last_visited_room_id, setLastVisitedRoom]);
 
 	const handleHowToPlayClose = () => {
 		setShowHowToPlay(false);
@@ -76,7 +86,7 @@ export default function RoomLayout() {
 		}
 
 		if (leftAction === "home") {
-			navigate(`/`, { replace: true });
+			setShowRoomSwitcher(true);
 			return;
 		}
 
@@ -100,6 +110,14 @@ export default function RoomLayout() {
 			<main className='max-w-280 w-full mx-auto flex-1 flex flex-col'>
 				<Outlet context={{ room, roomCode }} />
 			</main>
+
+			{player ? (
+				<RoomSwitcherDrawer
+					open={showRoomSwitcher}
+					onOpenChange={setShowRoomSwitcher}
+					playerId={player.id}
+				/>
+			) : null}
 
 			{showHowToPlay ? (
 				<Suspense fallback={null}>

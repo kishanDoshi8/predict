@@ -8,26 +8,22 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Spinner } from "@/shared/ui/spinner";
 import {
-	ChevronRightIcon,
 	CircleQuestionMark,
 	TriangleAlert,
-	UsersIcon,
-	ZapIcon,
 } from "lucide-react";
 import { usePlayer } from "@/features/home";
 import Brand from "./Brand";
-import { useCreateRoom, usePlayerRooms } from "@/features/rooms";
-import { toast } from "sonner";
+import { RoomCardsList } from "@/features/rooms/components/RoomCardsList";
+import { useCreateRoom } from "@/features/rooms/hooks/room";
+import type { Room } from "@/features/rooms/types/types";
 import {
-	Badge,
 	Input,
-	Skeleton,
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
 } from "@/shared/ui";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const HowToPlayModal = lazy(
 	() => import("@/features/onboarding/components/HowToPlayModal"),
@@ -40,7 +36,13 @@ type Props = {
 	setValidatedCode: (validated: boolean) => void;
 	isLoading: boolean;
 	handleEnterRoom: () => void;
+	defaultTab?: HomeTab;
+	playerRooms?: Room[];
+	isPlayerRoomsLoading?: boolean;
+	playerRoomsError?: Error | null;
 };
+
+export type HomeTab = "rooms" | "join" | "create";
 
 export default function Home({
 	roomCode,
@@ -49,9 +51,18 @@ export default function Home({
 	setValidatedCode,
 	isLoading,
 	handleEnterRoom,
+	defaultTab = "rooms",
+	playerRooms,
+	isPlayerRoomsLoading = false,
+	playerRoomsError = null,
 }: Readonly<Props>) {
 	const { data: player } = usePlayer();
 	const [openHowToPlay, setOpenHowToPlay] = React.useState(false);
+	const [activeTab, setActiveTab] = React.useState<HomeTab>(defaultTab);
+
+	React.useEffect(() => {
+		setActiveTab(defaultTab);
+	}, [defaultTab]);
 
 	return (
 		<div className={`p-8 mt-4 flex flex-col items-center gap-8`}>
@@ -65,14 +76,23 @@ export default function Home({
 			)}
 
 			<div className={`w-full max-w-md mx-auto`}>
-				<Tabs defaultValue='rooms'>
+				<Tabs
+					value={activeTab}
+					onValueChange={(value) => setActiveTab(value as HomeTab)}
+				>
 					<TabsList className={`w-full `}>
 						<TabsTrigger value='rooms'>Your Rooms</TabsTrigger>
 						<TabsTrigger value='join'># Join</TabsTrigger>
 						<TabsTrigger value='create'>Create Room</TabsTrigger>
 					</TabsList>
 					<TabsContent value='rooms'>
-						<YourRooms />
+						<div className={`mt-4`}>
+							<RoomCardsList
+								rooms={playerRooms}
+								isLoading={isPlayerRoomsLoading}
+								error={playerRoomsError}
+							/>
+						</div>
 					</TabsContent>
 					<TabsContent value='join'>
 						<JoinRoom
@@ -112,104 +132,6 @@ export default function Home({
 			) : null}
 		</div>
 	);
-}
-
-function YourRooms() {
-	const { data: player } = usePlayer();
-	const {
-		data: playerRooms,
-		isPending: isLoading,
-		error: playerRoomsError,
-	} = usePlayerRooms(player?.id ?? "");
-
-	if (playerRoomsError) {
-		toast.error("Failed to load your rooms. Please try again later.", {
-			description: playerRoomsError.message,
-			position: "top-center",
-		});
-	}
-
-	let content;
-	if (isLoading) {
-		content = (
-			<div className={`flex flex-col gap-2`}>
-				{[1, 2].map((i) => (
-					<Skeleton
-						key={i}
-						className={`w-full h-21 rounded-lg bg-secondary animate-pulse`}
-					/>
-				))}
-			</div>
-		);
-	} else if (playerRooms && playerRooms.length > 0) {
-		content = (
-			<div className={`flex flex-col gap-4 items-center`}>
-				<div className={`flex flex-col gap-2 w-full`}>
-					{playerRooms.map((room) => (
-						<Link
-							to={`/rooms/${room.code}`}
-							key={room.id}
-							className='w-full flex justify-between items-center p-4 rounded-lg cursor-pointer bg-card hover:border-primary/50'
-						>
-							<div className={`flex flex-col`}>
-								<span className='text-lg font-semibold'>
-									{room.name}
-								</span>
-								<div className={`flex items-center gap-4`}>
-									<Badge
-										variant={"secondary"}
-										className={`rounded-md text-muted-foreground`}
-									>
-										{room.code}
-									</Badge>
-									<div
-										className={`flex items-center gap-0.5 text-sm text-muted-foreground`}
-									>
-										<UsersIcon
-											className={`w-3 h-3 text-muted-foreground`}
-										/>
-										<span
-											className={`text-sm text-muted-foreground`}
-										></span>
-										{room.member_count ??
-											room.members.length}
-									</div>
-									{room.active_prediction_count !=
-										undefined &&
-										room.active_prediction_count > 0 && (
-											<div
-												className={`flex items-center gap-1 text-sm text-primary`}
-											>
-												<ZapIcon
-													className={`w-3 h-3`}
-												/>
-												<span className={`text-sm`}>
-													{
-														room.active_prediction_count
-													}
-												</span>
-												<span>live</span>
-											</div>
-										)}
-								</div>
-							</div>
-							<ChevronRightIcon
-								className={`w-6 h-6 text-muted-foreground`}
-							/>
-						</Link>
-					))}
-				</div>
-			</div>
-		);
-	} else {
-		content = (
-			<p className={`text-muted-foreground`}>
-				You have not joined any rooms yet.
-			</p>
-		);
-	}
-
-	return <div className={`mt-4`}>{content}</div>;
 }
 
 function JoinRoom({

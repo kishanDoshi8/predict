@@ -1,5 +1,6 @@
 grant execute on function public.register_player(text) to authenticated;
 grant execute on function public.get_player() to authenticated;
+grant execute on function public.set_last_visited_room(uuid) to authenticated;
 grant execute on function public.create_room(text) to authenticated;
 grant execute on function public.join_room(text) to authenticated;
 grant execute on function public.claim_weekly_points(boolean) to authenticated;

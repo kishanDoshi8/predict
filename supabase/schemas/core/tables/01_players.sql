@@ -8,6 +8,7 @@ create table if not exists public.players (
   current_streak integer not null default 0,
   longest_streak integer not null default 0,
   last_claim_at timestamptz,
+  last_visited_room_id uuid references public.rooms(id) on delete set null,
   created_at timestamptz not null default now(),
   user_id uuid unique references auth.users(id) on delete cascade,
   unique (username)
@@ -15,3 +16,4 @@ create table if not exists public.players (
 create index if not exists idx_players_total_won on public.players(total_won desc);
 create index if not exists idx_players_username on public.players(lower(username));
 create index if not exists idx_players_user_id on public.players(user_id);
+create index if not exists idx_players_last_visited_room_id on public.players(last_visited_room_id);

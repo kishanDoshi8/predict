@@ -85,7 +85,15 @@ export async function getPlayer(): Promise<Player> {
     current_streak: number
     longest_streak: number
     last_claim_at: string | null
+    last_visited_room_id: string | null
   }
+}
+
+export async function setLastVisitedRoom(roomId: string) {
+  const { error } = await supabase.rpc('set_last_visited_room', {
+    p_room_id: roomId,
+  })
+  if (error) throw error
 }
 
 // #endregion Players & Session

@@ -3,16 +3,26 @@ import { joinRoom } from "@/shared/lib/api";
 import { roomKeys } from "@/shared/constants/queryKeys";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { usePlayer, useWeeklyClaim } from "@/features/home";
+import { HomeTab } from "@/features/home/components/Home";
+import { usePlayerRooms } from "@/features/rooms";
 import { Loading } from "@/shared/ui";
 
 export function HomePage() {
 	const navigate = useNavigate();
+	const [searchParams] = useSearchParams();
 	const { data: player, isPending: isPlayerLoading } = usePlayer();
 	const { mutate: claimWeeklyPoints } = useWeeklyClaim();
 	const queryClient = useQueryClient();
+	const requestedTab = getHomeTab(searchParams.get("tab"));
+	const hasExplicitTab = requestedTab !== null;
+	const {
+		data: playerRooms,
+		isPending: isPlayerRoomsLoading,
+		error: playerRoomsError,
+	} = usePlayerRooms(player?.id ?? "");
 
 	const [roomCode, setRoomCode] = React.useState("");
 	const [validatedCode, setValidatedCode] = React.useState(false);
@@ -26,6 +36,33 @@ export function HomePage() {
 			claimWeeklyPoints();
 		}
 	}, [player, isPlayerLoading, claimWeeklyPoints, navigate]);
+
+	useEffect(() => {
+		if (!player || isPlayerLoading || isPlayerRoomsLoading || hasExplicitTab) {
+			return;
+		}
+
+		if (!playerRooms?.length || !player.last_visited_room_id) {
+			return;
+		}
+
+		const lastVisitedRoom = playerRooms.find(
+			(room) => room.id === player.last_visited_room_id,
+		);
+
+		if (!lastVisitedRoom) {
+			return;
+		}
+
+		navigate(`/rooms/${lastVisitedRoom.code}`, { replace: true });
+	}, [
+		player,
+		playerRooms,
+		isPlayerLoading,
+		isPlayerRoomsLoading,
+		hasExplicitTab,
+		navigate,
+	]);
 
 	useEffect(() => {
 		if (roomCode.length === 6) {
@@ -71,6 +108,17 @@ export function HomePage() {
 			setValidatedCode={setValidatedCode}
 			isLoading={isLoading}
 			handleEnterRoom={handleEnterRoom}
+			defaultTab={requestedTab ?? "rooms"}
+			playerRooms={playerRooms}
+			isPlayerRoomsLoading={isPlayerRoomsLoading}
+			playerRoomsError={playerRoomsError}
 		/>
 	);
+}
+
+function getHomeTab(tab: string | null): HomeTab | null {
+	if (tab === "rooms" || tab === "join" || tab === "create") {
+		return tab;
+	}
+	return null;
 }

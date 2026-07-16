@@ -9,4 +9,5 @@ export interface Player {
     current_streak:   number
     longest_streak:   number
     last_claim_at:    string | null
+    last_visited_room_id: string | null
 }

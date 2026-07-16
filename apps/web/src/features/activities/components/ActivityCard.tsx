@@ -61,8 +61,8 @@ const TONE_STYLES: Record<
 	},
 	prediction: {
 		shell: "bg-accent/10 border-accent/30",
-		icon: "border-accent/40 bg-accent/20 text-accent-foreground",
-		typeBadge: "border-accent/35 bg-accent/20 text-accent-foreground",
+		icon: "border-accent/40 bg-accent/20 text-accent",
+		typeBadge: "border-accent/35 bg-accent/20 text-accent",
 		summary: "border-accent/30 bg-accent/15 text-foreground/90",
 		openPill: "border-accent/35 bg-accent/15 text-foreground/90",
 	},
@@ -133,7 +133,7 @@ export function ActivityCard({
 					{icon}
 				</div>
 				<div className='min-w-0 flex-1'>
-					<div className='flex flex-wrap items-center gap-1.5'>
+					<div className='flex flex-wrap items-center justify-between gap-1.5'>
 						<Badge
 							variant='outline'
 							className={cn(
@@ -143,6 +143,9 @@ export function ActivityCard({
 						>
 							{typeLabel}
 						</Badge>
+						<div className='shrink-0 text-sm font-medium text-muted-foreground'>
+							{timestamp}
+						</div>
 					</div>
 					<p className='mt-2 text-lg font-semibold leading-snug text-foreground'>
 						{title}
@@ -191,9 +194,6 @@ export function ActivityCard({
 									</span>
 								</Badge>
 							) : null}
-						</div>
-						<div className='shrink-0 text-sm font-medium text-muted-foreground'>
-							{timestamp}
 						</div>
 					</div>
 				</div>

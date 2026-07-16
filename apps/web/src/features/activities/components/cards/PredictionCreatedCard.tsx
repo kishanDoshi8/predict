@@ -2,7 +2,6 @@ import { SparklesIcon } from "lucide-react";
 import { ActivityCard } from "@/features/activities/components/ActivityCard";
 import {
 	formatActivityTimestamp,
-	formatPoints,
 	resolveActivityHref,
 } from "@/features/activities/lib/activity";
 import { PredictionCreatedActivity } from "@/features/activities/types/types";
@@ -19,10 +18,8 @@ export function PredictionCreatedCard({
 			icon={<SparklesIcon className='size-4' />}
 			typeLabel='Prediction'
 			tone='prediction'
-			contextLabel='Created'
 			title={metadata.title}
 			description='Prediction created'
-			summary={`${metadata.totalBets} bets · ${formatPoints(metadata.totalWagered)} pts wagered`}
 			timestamp={formatActivityTimestamp(activity.createdAt)}
 			href={resolveActivityHref(activity, roomCode)}
 		/>

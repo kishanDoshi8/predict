@@ -1,6 +1,6 @@
 import { Button } from "@/shared/ui/button";
 import { Room } from "@/features/rooms";
-import { ChevronLeftIcon, CoinsIcon, HomeIcon } from "lucide-react";
+import { ChevronLeftIcon, CoinsIcon, ZapIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePlayer } from "@/features/home";
 
@@ -37,7 +37,7 @@ function RoomHeader({
 						{leftAction === "back" ? (
 							<ChevronLeftIcon />
 						) : (
-							<HomeIcon />
+							<ZapIcon />
 						)}
 					</Button>
 				)}

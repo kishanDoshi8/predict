@@ -7,7 +7,7 @@ import {
 	DrawerHeader,
 	DrawerTitle,
 } from "@/shared/ui";
-import { HouseIcon, PlusIcon, UsersIcon } from "lucide-react";
+import { CircleQuestionMarkIcon, PlusIcon, UsersIcon } from "lucide-react";
 import React, { Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { RoomCardsList } from "./RoomCardsList";
@@ -69,7 +69,7 @@ export function RoomSwitcherDrawer({
 
 					<DrawerFooter className='border-t'>
 						<Button
-							variant='outline'
+							variant='ghost'
 							className='w-full justify-start'
 							onClick={() => handleOpenTab("create")}
 						>
@@ -77,7 +77,7 @@ export function RoomSwitcherDrawer({
 							Create Room
 						</Button>
 						<Button
-							variant='outline'
+							variant='ghost'
 							className='w-full justify-start'
 							onClick={() => handleOpenTab("join")}
 						>
@@ -85,11 +85,11 @@ export function RoomSwitcherDrawer({
 							Join Room
 						</Button>
 						<Button
-							variant='outline'
+							variant='ghost'
 							className='w-full justify-start'
 							onClick={handleHowToPlay}
 						>
-							<HouseIcon />
+							<CircleQuestionMarkIcon />
 							How To Play
 						</Button>
 					</DrawerFooter>

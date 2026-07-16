@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { usePlayer, useWeeklyClaim } from "@/features/home";
 import { HomeTab } from "@/features/home/components/Home";
-import { usePlayerRooms } from "@/features/rooms";
+import { usePlayerRooms } from "@/features/rooms/hooks/room";
 import { Loading } from "@/shared/ui";
 
 export function HomePage() {

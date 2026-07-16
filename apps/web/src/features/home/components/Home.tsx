@@ -13,7 +13,9 @@ import {
 } from "lucide-react";
 import { usePlayer } from "@/features/home";
 import Brand from "./Brand";
-import { RoomCardsList, Room, useCreateRoom } from "@/features/rooms";
+import { RoomCardsList } from "@/features/rooms/components/RoomCardsList";
+import { useCreateRoom } from "@/features/rooms/hooks/room";
+import type { Room } from "@/features/rooms/types/types";
 import {
 	Input,
 	Tabs,

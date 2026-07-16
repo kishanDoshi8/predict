@@ -1,4 +1,4 @@
-import { Room } from "@/features/rooms";
+import type { Room } from "@/features/rooms/types/types";
 import { Badge, Skeleton } from "@/shared/ui";
 import { ChevronRightIcon, UsersIcon, ZapIcon } from "lucide-react";
 import { Link } from "react-router-dom";

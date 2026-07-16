@@ -1,4 +1,4 @@
-import { RoomCardsList, usePlayerRooms } from "@/features/rooms";
+import { usePlayerRooms } from "@/features/rooms/hooks/room";
 import {
 	Button,
 	Drawer,
@@ -10,6 +10,7 @@ import {
 import { HouseIcon, PlusIcon, UsersIcon } from "lucide-react";
 import React, { Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
+import { RoomCardsList } from "./RoomCardsList";
 
 const HowToPlayModal = lazy(
 	() => import("@/features/onboarding/components/HowToPlayModal"),

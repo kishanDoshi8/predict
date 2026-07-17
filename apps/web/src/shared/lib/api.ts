@@ -1,7 +1,7 @@
 import { Duel, DuelSummary } from "@/features/duels";
 import { Player } from "@/features/home";
 import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats } from "@/features/leaderboard";
-import { Prediction, PredictionStatus } from "@/features/predictions";
+import { Prediction, PredictionStatus, Series } from "@/features/predictions";
 import { Room } from "@/features/rooms";
 import type { ActivityFilter, RoomActivitiesPage } from "@/features/activities/types/types";
 import type { Json } from '@/shared/lib/supabase.types'
@@ -43,6 +43,29 @@ export type NotificationEventType =
   | 'result_revealed'
   | 'weekly_points_claim'
 
+type SeriesPayload = {
+  id: string
+  room_id: string
+  title: string
+  description: string | null
+  status: string
+  expected_games: number
+  prediction_count: number
+  completed_games: number
+  created_by: string
+  created_at: string
+  started_at: string | null
+  completed_at: string | null
+  archived_at: string | null
+}
+
+export type RoomSeriesCollection = {
+  draft: Series[]
+  active: Series[]
+  completed: Series[]
+  archived: Series[]
+}
+
 // ============================================================
 // API — thin wrappers around Supabase RPC functions
 // All functions throw on error so callers can catch uniformly.
@@ -53,6 +76,24 @@ function assertOk<T>(data: T | null, error: unknown): T {
   if (error) throw error
   if (data === null) throw new Error('No data returned')
   return data
+}
+
+function mapSeriesPayload(series: SeriesPayload): Series {
+  return {
+    id: series.id,
+    roomId: series.room_id,
+    title: series.title,
+    description: series.description,
+    status: series.status as Series["status"],
+    expectedGames: series.expected_games,
+    predictionCount: series.prediction_count,
+    completedGames: series.completed_games,
+    createdBy: series.created_by,
+    createdAt: series.created_at,
+    startedAt: series.started_at,
+    completedAt: series.completed_at,
+    archivedAt: series.archived_at,
+  }
 }
 
 type UntypedSupabaseClient = {
@@ -216,6 +257,78 @@ export async function getPlayerRooms(player_id: string): Promise<Room[]> {
 
 // #endregion Rooms
 
+// #region Series
+// -------------------------------------------------------
+
+export async function getRoomSeries(roomId: string): Promise<RoomSeriesCollection> {
+  const { data, error } = await supabase.rpc('get_room_series', {
+    p_room_id: roomId,
+  })
+
+  const seriesGroups = assertOk(data, error) as {
+    draft?: SeriesPayload[]
+    active?: SeriesPayload[]
+    completed?: SeriesPayload[]
+    archived?: SeriesPayload[]
+  }
+
+  return {
+    draft: (seriesGroups.draft ?? []).map(mapSeriesPayload),
+    active: (seriesGroups.active ?? []).map(mapSeriesPayload),
+    completed: (seriesGroups.completed ?? []).map(mapSeriesPayload),
+    archived: (seriesGroups.archived ?? []).map(mapSeriesPayload),
+  }
+}
+
+type SeriesUpsertPayload = {
+  title: string
+  description: string
+  expectedGames: number
+}
+
+export async function createSeries(roomId: string, payload: SeriesUpsertPayload): Promise<Series> {
+  const { data, error } = await supabase.rpc('create_series', {
+    p_room_id: roomId,
+    p_title: payload.title,
+    p_description: payload.description,
+    p_expected_games: payload.expectedGames,
+  })
+  return mapSeriesPayload(assertOk(data, error) as SeriesPayload)
+}
+
+export async function updateSeries(seriesId: string, payload: SeriesUpsertPayload): Promise<Series> {
+  const { data, error } = await supabase.rpc('update_series', {
+    p_series_id: seriesId,
+    p_title: payload.title,
+    p_description: payload.description,
+    p_expected_games: payload.expectedGames,
+  })
+  return mapSeriesPayload(assertOk(data, error) as SeriesPayload)
+}
+
+export async function activateSeries(seriesId: string): Promise<Series> {
+  const { data, error } = await supabase.rpc('activate_series', {
+    p_series_id: seriesId,
+  })
+  return mapSeriesPayload(assertOk(data, error) as SeriesPayload)
+}
+
+export async function completeSeries(seriesId: string): Promise<Series> {
+  const { data, error } = await supabase.rpc('complete_series', {
+    p_series_id: seriesId,
+  })
+  return mapSeriesPayload(assertOk(data, error) as SeriesPayload)
+}
+
+export async function archiveSeries(seriesId: string): Promise<Series> {
+  const { data, error } = await supabase.rpc('archive_series', {
+    p_series_id: seriesId,
+  })
+  return mapSeriesPayload(assertOk(data, error) as SeriesPayload)
+}
+
+// #endregion Series
+
 // #region Weekly Points
 // -------------------------------------------------------
 
@@ -348,12 +461,14 @@ export async function createPrediction(
   title: string,
   options: string[],
   deadline: Date,
+  seriesId?: string | null,
 ): Promise<Prediction> {
   const { data, error } = await supabase.rpc('create_prediction', {
     p_room_id: roomId,
     p_title: title,
     p_options: options,
     p_deadline: deadline.toISOString(),
+    p_series_id: seriesId ?? null,
   })
   const prediction = assertOk(data, error) as {
     prediction_id: string
@@ -363,6 +478,8 @@ export async function createPrediction(
     option_ids: string[]
     winning_option_id: string | null
     resolved_at: string | null
+    series_id: string | null
+    series_prediction_number: number | null
   }
 
   const predictionOptions = prediction.option_ids.map((optionId, index) => ({
@@ -386,10 +503,10 @@ export async function createPrediction(
     ...prediction,
     id: prediction.prediction_id,
     room_id: roomId,
-    series_id: null,
-    series_prediction_number: null,
-    seriesId: null,
-    seriesPredictionNumber: null,
+    series_id: prediction.series_id,
+    series_prediction_number: prediction.series_prediction_number,
+    seriesId: prediction.series_id,
+    seriesPredictionNumber: prediction.series_prediction_number,
     tags: [],
     winning_option_id: prediction.winning_option_id ?? null,
     resolved_at: prediction.resolved_at ?? null,

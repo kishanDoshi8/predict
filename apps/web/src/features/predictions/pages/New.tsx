@@ -33,9 +33,15 @@ import { toast } from "sonner";
 import { Spinner } from "@/shared/ui/spinner";
 import { useCreatePrediction } from "@/features/predictions";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
+import { useRoomSeries } from "@/features/rooms";
+import { useLocation } from "react-router-dom";
 
 export default function PredictionNew() {
 	const { room } = useRoomContext();
+	const location = useLocation();
+	const navigationState = location.state as { seriesId?: string } | null;
+	const { data: roomSeries } = useRoomSeries(room?.id);
+	const activeSeries = roomSeries?.active ?? [];
 	const { mutate: createPrediction, isPending: isLoading } =
 		useCreatePrediction();
 	const navigate = useNavigate();
@@ -55,6 +61,7 @@ export default function PredictionNew() {
 		new Date(Date.now() + 24 * 60 * 60 * 1000),
 	);
 	const [customTime, setCustomTime] = useState<string>("22:00:00");
+	const [selectedSeriesId, setSelectedSeriesId] = useState<string>("");
 	const [openCustomDatePicker, setOpenCustomDatePicker] = useState(false);
 
 	const [errors, setErrors] = useState<string[]>([]);
@@ -62,6 +69,24 @@ export default function PredictionNew() {
 	useEffect(() => {
 		calculateDeadline();
 	}, [customDate, customTime, biddingDeadline]);
+
+	useEffect(() => {
+		const preselectedSeriesId = navigationState?.seriesId;
+		if (
+			preselectedSeriesId &&
+			activeSeries.some((series) => series.id === preselectedSeriesId)
+		) {
+			setSelectedSeriesId(preselectedSeriesId);
+			return;
+		}
+
+		if (activeSeries.length === 1) {
+			setSelectedSeriesId(activeSeries[0].id);
+			return;
+		}
+
+		setSelectedSeriesId("");
+	}, [activeSeries, navigationState?.seriesId]);
 
 	useEffect(() => {
 		if (errors.includes("question") && question.trim()) {
@@ -113,6 +138,7 @@ export default function PredictionNew() {
 					title: question,
 					options: options.map((opt) => opt.text),
 					deadline: new Date(deadlineDate),
+					seriesId: selectedSeriesId || null,
 				},
 				{
 					onSuccess: () => {
@@ -282,6 +308,24 @@ export default function PredictionNew() {
 						<FieldLabel htmlFor='deadline' className={`mt-4`}>
 							Bidding deadline
 						</FieldLabel>
+						<FieldLabel htmlFor='series' className={`mt-4`}>
+							Series (optional)
+						</FieldLabel>
+						<select
+							id='series'
+							value={selectedSeriesId}
+							onChange={(event) =>
+								setSelectedSeriesId(event.target.value)
+							}
+							className='h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs'
+						>
+							<option value=''>None</option>
+							{activeSeries.map((series) => (
+								<option key={series.id} value={series.id}>
+									{series.title}
+								</option>
+							))}
+						</select>
 						<ToggleGroup
 							id='deadline'
 							type='single'

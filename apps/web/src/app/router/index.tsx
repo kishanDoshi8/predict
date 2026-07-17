@@ -182,7 +182,7 @@ export const router = createBrowserRouter([
 												),
 												handle: {
 													header: {
-														title: "Profile",
+														title: "Series",
 													},
 												},
 											},

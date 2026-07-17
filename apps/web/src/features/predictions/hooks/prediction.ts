@@ -25,13 +25,14 @@ type CreatePredictionParams = {
     title: string;
     options: string[];
     deadline: Date;
+    seriesId?: string | null;
 }
 
 export const useCreatePrediction = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreatePredictionParams) => createPrediction(data.roomId, data.title, data.options, data.deadline),
+        mutationFn: (data: CreatePredictionParams) => createPrediction(data.roomId, data.title, data.options, data.deadline, data.seriesId),
         onSuccess: (data) => {
             queryClient.invalidateQueries({
                 queryKey: roomKeys.activePrediction(data.room_id),

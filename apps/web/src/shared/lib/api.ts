@@ -468,7 +468,7 @@ export async function createPrediction(
     p_title: title,
     p_options: options,
     p_deadline: deadline.toISOString(),
-    p_series_id: seriesId ?? null,
+    p_series_id: seriesId ?? undefined,
   })
   const prediction = assertOk(data, error) as {
     prediction_id: string

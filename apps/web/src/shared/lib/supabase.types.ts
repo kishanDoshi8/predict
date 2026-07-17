@@ -417,6 +417,35 @@ export type Database = {
           },
         ]
       }
+      prediction_tags: {
+        Row: {
+          created_at: string
+          id: string
+          prediction_id: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          prediction_id: string
+          tag: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          prediction_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_tags_prediction_id_fkey"
+            columns: ["prediction_id"]
+            isOneToOne: false
+            referencedRelation: "predictions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       predictions: {
         Row: {
           affects_rating: boolean
@@ -428,6 +457,8 @@ export type Database = {
           notified_1h: boolean
           resolved_at: string | null
           room_id: string
+          series_id: string | null
+          series_prediction_number: number | null
           status: string
           title: string
           winning_option_id: string | null
@@ -442,6 +473,8 @@ export type Database = {
           notified_1h?: boolean
           resolved_at?: string | null
           room_id: string
+          series_id?: string | null
+          series_prediction_number?: number | null
           status?: string
           title: string
           winning_option_id?: string | null
@@ -456,6 +489,8 @@ export type Database = {
           notified_1h?: boolean
           resolved_at?: string | null
           room_id?: string
+          series_id?: string | null
+          series_prediction_number?: number | null
           status?: string
           title?: string
           winning_option_id?: string | null
@@ -487,6 +522,13 @@ export type Database = {
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predictions_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series"
             referencedColumns: ["id"]
           },
         ]
@@ -764,6 +806,7 @@ export type Database = {
       rooms: {
         Row: {
           created_at: string
+          description: string | null
           id: string
           name: string
           predictions_limit: number
@@ -772,6 +815,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
           name: string
           predictions_limit?: number
@@ -780,6 +824,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
           name?: string
           predictions_limit?: number
@@ -787,6 +832,76 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      series: {
+        Row: {
+          archived_at: string | null
+          completed_at: string | null
+          completed_games: number
+          created_at: string
+          created_by: string
+          description: string | null
+          expected_games: number
+          id: string
+          prediction_count: number
+          room_id: string
+          started_at: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          archived_at?: string | null
+          completed_at?: string | null
+          completed_games?: number
+          created_at?: string
+          created_by: string
+          description?: string | null
+          expected_games?: number
+          id?: string
+          prediction_count?: number
+          room_id: string
+          started_at?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          archived_at?: string | null
+          completed_at?: string | null
+          completed_games?: number
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          expected_games?: number
+          id?: string
+          prediction_count?: number
+          room_id?: string
+          started_at?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "series_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
+          },
+          {
+            foreignKeyName: "series_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_push_subscriptions: {
         Row: {

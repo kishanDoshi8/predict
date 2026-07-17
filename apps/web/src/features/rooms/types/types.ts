@@ -16,6 +16,7 @@ export interface Room {
   id:                string
   code:              string
   name:              string
+  description?:      string | null
   status:            string
   created_at:        string
   members:           RoomMember[]

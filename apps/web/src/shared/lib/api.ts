@@ -386,6 +386,11 @@ export async function createPrediction(
     ...prediction,
     id: prediction.prediction_id,
     room_id: roomId,
+    series_id: null,
+    series_prediction_number: null,
+    seriesId: null,
+    seriesPredictionNumber: null,
+    tags: [],
     winning_option_id: prediction.winning_option_id ?? null,
     resolved_at: prediction.resolved_at ?? null,
     status: prediction.status as PredictionStatus,
@@ -412,6 +417,9 @@ export async function getPrediction(predictionId: string) {
 
   return {
     ...data,
+    seriesId: data.series_id,
+    seriesPredictionNumber: data.series_prediction_number,
+    tags: [],
     status: data.status as PredictionStatus,
     prediction_options: predictionOptions ?? [],
   }
@@ -441,6 +449,9 @@ export async function getActivePrediction(roomId: string) {
 
   return {
     ...data,
+    seriesId: data.series_id,
+    seriesPredictionNumber: data.series_prediction_number,
+    tags: [],
     status: data.status as PredictionStatus,
     prediction_options: predictionOptions ?? [],
   }
@@ -469,6 +480,9 @@ export async function getActivePredictions(roomId: string): Promise<Prediction[]
         if (optsErr) throw optsErr
         return {
           ...row,
+          seriesId: row.series_id,
+          seriesPredictionNumber: row.series_prediction_number,
+          tags: [],
           status: row.status as PredictionStatus,
           prediction_options: opts ?? [],
         }
@@ -500,6 +514,9 @@ export async function getActivePredictions(roomId: string): Promise<Prediction[]
   return [
     {
       ...fallback,
+      seriesId: fallback.series_id,
+      seriesPredictionNumber: fallback.series_prediction_number,
+      tags: [],
       status: fallback.status as PredictionStatus,
       prediction_options: fallbackOpts ?? [],
     },

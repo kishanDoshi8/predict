@@ -1,0 +1,12 @@
+alter table public.series enable row level security;
+revoke all on public.series from anon;
+drop policy if exists "series_select" on public.series;
+create policy "series_select" on public.series for select using (true);
+drop policy if exists "series_no_direct_write" on public.series;
+create policy "series_no_direct_write" on public.series for insert with check (false);
+drop policy if exists "series_no_direct_update" on public.series;
+create policy "series_no_direct_update" on public.series for update using (false);
+drop policy if exists "series_no_direct_delete" on public.series;
+create policy "series_no_direct_delete" on public.series for delete using (false);
+grant select (id, room_id, title, description, status, expected_games, prediction_count, completed_games, created_by, created_at, started_at, completed_at, archived_at) on public.series to anon;
+grant select (id, room_id, title, description, status, expected_games, prediction_count, completed_games, created_by, created_at, started_at, completed_at, archived_at) on public.series to authenticated;

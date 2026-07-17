@@ -1,0 +1,12 @@
+alter table public.prediction_tags enable row level security;
+revoke all on public.prediction_tags from anon;
+drop policy if exists "prediction_tags_select" on public.prediction_tags;
+create policy "prediction_tags_select" on public.prediction_tags for select using (true);
+drop policy if exists "prediction_tags_no_direct_write" on public.prediction_tags;
+create policy "prediction_tags_no_direct_write" on public.prediction_tags for insert with check (false);
+drop policy if exists "prediction_tags_no_direct_update" on public.prediction_tags;
+create policy "prediction_tags_no_direct_update" on public.prediction_tags for update using (false);
+drop policy if exists "prediction_tags_no_direct_delete" on public.prediction_tags;
+create policy "prediction_tags_no_direct_delete" on public.prediction_tags for delete using (false);
+grant select (id, prediction_id, tag, created_at) on public.prediction_tags to anon;
+grant select (id, prediction_id, tag, created_at) on public.prediction_tags to authenticated;

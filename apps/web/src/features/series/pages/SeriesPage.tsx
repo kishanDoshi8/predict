@@ -270,6 +270,7 @@ export default function SeriesPage() {
 	return (
 		<SeriesDetailView
 			series={selectedSeries}
+			roomCode={room.code}
 			isOrganizer={isOrganizer}
 			isActionPending={isUpdatePending || isActionPending}
 			isUpdatePending={isUpdatePending}

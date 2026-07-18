@@ -18,6 +18,7 @@ type SeriesFormState = {
 
 type SeriesDetailViewProps = {
 	series: Series;
+	roomCode: string;
 	isOrganizer: boolean;
 	isActionPending: boolean;
 	isUpdatePending: boolean;
@@ -41,6 +42,7 @@ type SeriesDetailViewProps = {
 
 export function SeriesDetailView({
 	series,
+	roomCode,
 	isOrganizer,
 	isActionPending,
 	isUpdatePending,
@@ -103,6 +105,7 @@ export function SeriesDetailView({
 			<SeriesRecentActivitySection
 				activities={seriesActivities}
 				isLoading={isActivityLoading}
+				roomCode={roomCode}
 			/>
 
 			<section className='space-y-3'>

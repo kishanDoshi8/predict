@@ -73,6 +73,20 @@ export type RoomSeriesCollection = {
   archived: Series[]
 }
 
+export type RoomSeriesSelectorOption = {
+  id: string
+  title: string
+  status: Series["status"]
+  started_at: string | null
+  completed_at: string | null
+  created_at: string
+}
+
+export type RoomSeriesSelector = {
+  selected_series_id: string | null
+  series: RoomSeriesSelectorOption[]
+}
+
 // ============================================================
 // API — thin wrappers around Supabase RPC functions
 // All functions throw on error so callers can catch uniformly.
@@ -338,6 +352,18 @@ export async function archiveSeries(seriesId: string): Promise<Series> {
     p_series_id: seriesId,
   })
   return mapSeriesPayload(assertOk(data, error) as SeriesPayload)
+}
+
+export async function getRoomSeriesSelector(
+  roomId: string,
+  selectedSeriesId?: string | null,
+): Promise<RoomSeriesSelector> {
+  const { data, error } = await untypedSupabase.rpc('get_room_series_selector', {
+    p_room_id: roomId,
+    p_selected_series_id: selectedSeriesId ?? undefined,
+  })
+
+  return assertOk(data, error) as RoomSeriesSelector
 }
 
 // #endregion Series

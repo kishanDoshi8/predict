@@ -43,6 +43,18 @@ export const roomKeys = {
   leaderboard: (roomId: string, sortBy = "points") =>
     [...roomKeys.detail(roomId), "leaderboard", sortBy] as const,
 
+  seriesLeaderboard: (
+    roomId: string,
+    seriesId: string,
+    sortBy = "points",
+  ) => [...roomKeys.detail(roomId), "seriesLeaderboard", seriesId, sortBy] as const,
+
+  seriesLeaderboardSelector: (
+    roomId: string,
+    selectedSeriesId = "default",
+  ) =>
+    [...roomKeys.detail(roomId), "seriesLeaderboardSelector", selectedSeriesId] as const,
+
   stats: (roomId: string) =>
     [...roomKeys.detail(roomId), "stats"] as const,
 

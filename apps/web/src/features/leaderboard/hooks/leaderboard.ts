@@ -3,6 +3,8 @@ import {
     getRoomMemberRecentPredictions,
     getRoomMemberStats,
     getRoomPredictionHistory,
+    getRoomSeriesSelector,
+    getSeriesLeaderboard,
     getRoomWeeklyLeaderboard,
 } from '@/shared/lib/api'
 import { PredictionHistoryFilter, PredictionHistoryPage } from "@/features/leaderboard";
@@ -37,6 +39,32 @@ export const useRoomWeeklyLeaderboard = (
         queryFn: () =>
             getRoomWeeklyLeaderboard(roomId ?? '', toApiSortBy(sortBy)),
         enabled: !!roomId && enabled,
+    })
+}
+
+export const useRoomSeriesSelector = (
+    roomId?: string,
+    selectedSeriesId?: string | null,
+    enabled = true,
+) => {
+    return useQuery({
+        queryKey: roomKeys.seriesLeaderboardSelector(roomId ?? '', selectedSeriesId ?? 'default'),
+        queryFn: () => getRoomSeriesSelector(roomId ?? '', selectedSeriesId),
+        enabled: !!roomId && enabled,
+    })
+}
+
+export const useSeriesLeaderboard = (
+    roomId?: string,
+    seriesId?: string | null,
+    enabled = true,
+    sortBy: LeaderboardSortBy = 'points',
+) => {
+    return useQuery({
+        queryKey: roomKeys.seriesLeaderboard(roomId ?? '', seriesId ?? '', sortBy),
+        queryFn: () =>
+            getSeriesLeaderboard(roomId ?? '', seriesId ?? '', toApiSortBy(sortBy)),
+        enabled: !!roomId && !!seriesId && enabled,
     })
 }
 

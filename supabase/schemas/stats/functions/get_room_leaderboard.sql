@@ -31,24 +31,12 @@ begin
   end if;
 
   with stats as (
-    select
-      b.player_id,
-      count(*) as total_bets,
-      count(*) filter (where pred.status = 'revealed') as total_revealed_bets,
-      count(*) filter (
-        where pred.status = 'revealed'
-          and b.option_id = pred.winning_option_id
-      ) as winning_bets,
-      sum(b.amount) as total_wagered,
-      sum(coalesce(b.payout, 0)) as total_payout,
-      sum(greatest(coalesce(b.payout, 0) - b.amount, 0)) as total_profit,
-      sum(greatest(b.amount - coalesce(b.payout, 0), 0)) as total_loss,
-      sum(coalesce(b.payout, 0) - b.amount) as net_points
-    from public.bets b
-    join public.predictions pred on pred.id = b.prediction_id
-    where pred.room_id = p_room_id
-      and pred.status in ('revealed', 'cancelled', 'no_result')
-    group by b.player_id
+    select *
+    from private.get_leaderboard_player_stats(
+      p_room_id,
+      null,
+      true
+    )
   ),
   latest_snapshots as (
     select distinct on (s.player_id)
@@ -70,8 +58,8 @@ begin
     select
       rm.player_id,
       p.username,
-      coalesce(s.net_points, 0) as total_won_in_room,
-      coalesce(s.net_points, 0) as current_total_won_in_room,
+      coalesce(s.net_profit, 0) as total_won_in_room,
+      coalesce(s.net_profit, 0) as current_total_won_in_room,
       rm.joined_at,
       rm.is_organizer,
       rm.current_streak,
@@ -86,7 +74,7 @@ begin
       coalesce(s.total_payout, 0) as total_payout,
       coalesce(s.total_profit, 0) as total_profit,
       coalesce(s.total_loss, 0) as total_loss,
-      coalesce(s.net_points, 0) as net_points,
+      coalesce(s.net_profit, 0) as net_points,
       case
         when coalesce(s.total_revealed_bets, 0) > 0 then
           round((coalesce(s.winning_bets, 0)::numeric / s.total_revealed_bets) * 100, 1)
@@ -172,6 +160,8 @@ begin
       cr.total_wagered,
       cr.total_payout,
       cr.net_points,
+      cr.net_points as room_net_profit,
+      cr.net_points as net_profit,
       cr.win_percentage,
       cr.rank,
       pr.previous_rank,

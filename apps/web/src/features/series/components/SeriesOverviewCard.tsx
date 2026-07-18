@@ -25,7 +25,7 @@ export function SeriesOverviewCard({
 	const remainingGames = Math.max(expectedGames - completedGames, 0);
 	const progressValue =
 		expectedGames > 0
-			? Math.min((completedGames / expectedGames) * 100, 100)
+			? Math.round(Math.min((completedGames / expectedGames) * 100, 100))
 			: 0;
 
 	return (
@@ -57,15 +57,7 @@ export function SeriesOverviewCard({
 						<p className='text-xs text-muted-foreground mr-auto'>
 							{completedGames} / {expectedGames}
 						</p>
-						<p>
-							{expectedGames > 0
-								? Math.min(
-										(completedGames / expectedGames) * 100,
-										100,
-									)
-								: 0}
-							%
-						</p>
+						<p>{progressValue}%</p>
 					</FieldLabel>
 					<Progress
 						value={progressValue}

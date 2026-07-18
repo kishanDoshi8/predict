@@ -1,5 +1,5 @@
 import { Button } from "@/shared/ui";
-import { Copy, CopyCheck, TrophyIcon } from "lucide-react";
+import { Copy, CopyCheck, MedalIcon } from "lucide-react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useState } from "react";
 import { RoomPreferencesDialog } from "@/features/preferences";
@@ -53,7 +53,7 @@ export default function PredictionHeader() {
 						size='icon-lg'
 						className={`rounded-full`}
 					>
-						<TrophyIcon />
+						<MedalIcon />
 					</Button>
 				</Link>
 			</div>

@@ -1,27 +1,10 @@
 export type PredictionStatus = 'draft' | 'locked' | 'revealed' | 'cancelled' | 'no_result'
-export type SeriesStatus = 'draft' | 'active' | 'completed' | 'archived'
 
 export interface PredictionTag {
   id:            string
   prediction_id: string
   tag:           string
   created_at:    string
-}
-
-export interface Series {
-  id:               string
-  roomId:           string
-  title:            string
-  description:      string | null
-  status:           SeriesStatus
-  expectedGames:    number
-  predictionCount:  number
-  completedGames:   number
-  createdBy:        string
-  createdAt:        string
-  startedAt:        string | null
-  completedAt:      string | null
-  archivedAt:       string | null
 }
 
 export interface PredictionOption {

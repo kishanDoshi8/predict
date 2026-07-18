@@ -1046,6 +1046,7 @@ export type Database = {
         Args: { p_duel_id: string; p_player_id: string }
         Returns: Json
       }
+      complete_series: { Args: { p_series_id: string }; Returns: Json }
       claim_weekly_points: { Args: { p_auto_claimed?: boolean }; Returns: Json }
       create_duel: {
         Args: {
@@ -1088,6 +1089,16 @@ export type Database = {
         Args: {
           p_deadline: string
           p_options: string[]
+          p_room_id: string
+          p_series_id?: string
+          p_title: string
+        }
+        Returns: Json
+      }
+      create_series: {
+        Args: {
+          p_description?: string
+          p_expected_games?: number
           p_room_id: string
           p_title: string
         }
@@ -1151,6 +1162,7 @@ export type Database = {
         Args: { p_limit?: number; p_room_id: string }
         Returns: Json
       }
+      get_room_series: { Args: { p_room_id: string }; Returns: Json }
       get_room_weekly_leaderboard: {
         Args: { p_room_id: string; p_sort_by?: string }
         Returns: Json
@@ -1186,6 +1198,8 @@ export type Database = {
       lock_prediction: { Args: { p_prediction_id: string }; Returns: Json }
       mark_how_to_play_seen: { Args: never; Returns: undefined }
       mark_ratings_tip_seen: { Args: never; Returns: undefined }
+      activate_series: { Args: { p_series_id: string }; Returns: Json }
+      archive_series: { Args: { p_series_id: string }; Returns: Json }
       place_bet: {
         Args: { p_amount: number; p_option_id: string; p_prediction_id: string }
         Returns: Json
@@ -1247,6 +1261,15 @@ export type Database = {
           p_winning_option_id: string
         }
         Returns: undefined
+      }
+      update_series: {
+        Args: {
+          p_description?: string
+          p_expected_games?: number
+          p_series_id: string
+          p_title: string
+        }
+        Returns: Json
       }
       update_room_preferences: {
         Args: {

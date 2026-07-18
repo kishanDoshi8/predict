@@ -3,21 +3,27 @@ import { cn } from "@/shared/lib/utils";
 import {
 	ActivitySquareIcon,
 	HistoryIcon,
-	LayoutDashboardIcon,
+	MedalIcon,
 	TrophyIcon,
+	HomeIcon,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const navItems = [
 	{
-		label: "Dashboard",
+		label: "Home",
 		segment: "",
-		icon: LayoutDashboardIcon,
+		icon: HomeIcon,
+	},
+	{
+		label: "Series",
+		segment: "series",
+		icon: TrophyIcon,
 	},
 	{
 		label: "Leaderboard",
 		segment: "leaderboard",
-		icon: TrophyIcon,
+		icon: MedalIcon,
 	},
 	{
 		label: "History",
@@ -48,7 +54,7 @@ export function RoomBottomNavigation() {
 							: `/rooms/${room.code}`;
 
 						return (
-							<li key={label}>
+							<li key={label} className={`flex-1`}>
 								<NavLink
 									to={to}
 									end={segment.length === 0}
@@ -59,15 +65,19 @@ export function RoomBottomNavigation() {
 										)
 									}
 								>
-									<Icon size={18} />
-									{segment === "activities" &&
-									room.has_unseen_activities ? (
-										<span
-											className='absolute top-5 -right-1 h-3 w-3 rounded-full bg-destructive border-2 border-card'
-											aria-hidden='true'
-										/>
-									) : null}
-									{/* <span>{label}</span> */}
+									<span className={`relative`}>
+										<Icon size={18} />
+										{segment === "activities" &&
+										room.has_unseen_activities ? (
+											<span
+												className='absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive border-2 border-card'
+												aria-hidden='true'
+											/>
+										) : null}
+									</span>
+									{/* <span className={`text-[10px]`}>
+										{label}
+									</span> */}
 								</NavLink>
 							</li>
 						);

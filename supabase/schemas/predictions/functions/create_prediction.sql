@@ -2,7 +2,8 @@ create or replace function public.create_prediction(
   p_room_id  uuid,
   p_title    text,
   p_options  text[],
-  p_deadline timestamptz
+  p_deadline timestamptz,
+  p_series_id uuid default null
 )
 returns json
 language plpgsql
@@ -20,6 +21,8 @@ declare
   v_i               int;
   v_active_count    int;
   v_predictions_limit int;
+  v_series          public.series%rowtype;
+  v_series_prediction_number int;
 begin
   v_player_id := private.get_player_id_from_auth();
 
@@ -62,7 +65,7 @@ begin
   end if;
 
   -- Validate options count
-  if array_length(p_options, 1) < 2 or array_length(p_options, 1) > 6 then
+  if coalesce(array_length(p_options, 1), 0) < 2 or array_length(p_options, 1) > 6 then
     raise exception 'Predictions must have between 2 and 6 options' using errcode = 'P0001';
   end if;
 
@@ -74,10 +77,53 @@ begin
     raise exception 'Deadline must be in the future' using errcode = 'P0001';
   end if;
 
+  if p_series_id is not null then
+    select * into v_series
+    from public.series
+    where id = p_series_id
+      and room_id = p_room_id
+    for update;
+
+    if not found then
+      raise exception 'Series not found for this room' using errcode = 'P0002';
+    end if;
+
+    if v_series.status <> 'active' then
+      raise exception 'Predictions can only be assigned to active series' using errcode = 'P0001';
+    end if;
+
+    select coalesce(max(series_prediction_number), 0) + 1
+      into v_series_prediction_number
+    from public.predictions
+    where series_id = p_series_id;
+  else
+    v_series_prediction_number := null;
+  end if;
+
   -- Create the prediction
-  insert into public.predictions (room_id, created_by, title, deadline)
-  values (p_room_id, v_player_id, trim(p_title), p_deadline)
+  insert into public.predictions (
+    room_id,
+    series_id,
+    series_prediction_number,
+    created_by,
+    title,
+    deadline
+  )
+  values (
+    p_room_id,
+    p_series_id,
+    v_series_prediction_number,
+    v_player_id,
+    trim(p_title),
+    p_deadline
+  )
   returning * into v_prediction;
+
+  if p_series_id is not null then
+    update public.series
+    set prediction_count = prediction_count + 1
+    where id = p_series_id;
+  end if;
 
   -- Create options
   v_i := 1;
@@ -113,7 +159,9 @@ begin
     'status',        v_prediction.status,
     'deadline',      v_prediction.deadline,
     'option_ids',    v_option_ids,
-    'room_id',       p_room_id
+    'room_id',       p_room_id,
+    'series_id', v_prediction.series_id,
+    'series_prediction_number', v_prediction.series_prediction_number
   );
 end;
 $$;

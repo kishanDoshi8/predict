@@ -369,14 +369,29 @@ function SectionHeader({
 	);
 }
 
+type InPlayPredictionsProps = {
+	predictionsOverride?: Prediction[];
+	emptyMessage?: string;
+	showSectionHeader?: boolean;
+};
+
 // ── Main component ─────────────────────────────────────────────────────────
-function InPlayPredictions() {
+function InPlayPredictions({
+	predictionsOverride,
+	emptyMessage = "No predictions yet. The host will start one soon!",
+	showSectionHeader = true,
+}: Readonly<InPlayPredictionsProps> = {}) {
 	const { room } = useRoomContext();
 	const {
-		data: predictions = [],
-		isPending: isPredictionLoading,
-		refetch: refetchPredictions,
+		data: queriedPredictions = [],
+		isPending: isQueriedPredictionLoading,
+		refetch,
 	} = useActivePredictions(room.id);
+	const predictions = predictionsOverride ?? queriedPredictions;
+	const isPredictionLoading =
+		predictionsOverride === undefined ? isQueriedPredictionLoading : false;
+	const refetchPredictions =
+		predictionsOverride === undefined ? refetch : () => {};
 
 	const [api, setApi] = React.useState<CarouselApi>();
 	const [current, setCurrent] = React.useState(0);
@@ -447,7 +462,7 @@ function InPlayPredictions() {
 					className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full`}
 				>
 					<p className={`text-muted-foreground text-center py-4`}>
-						No predictions yet. The host will start one soon!
+						{emptyMessage}
 					</p>
 				</div>
 			</CarouselItem>
@@ -472,9 +487,11 @@ function InPlayPredictions() {
 				</div>
 			)}
 
-			{!isPredictionLoading && predictions.length > 0 && (
-				<SectionHeader predictions={predictions} />
-			)}
+			{showSectionHeader &&
+				!isPredictionLoading &&
+				predictions.length > 0 && (
+					<SectionHeader predictions={predictions} />
+				)}
 
 			<Carousel
 				opts={{ align: "start" }}

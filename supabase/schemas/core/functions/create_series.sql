@@ -41,6 +41,7 @@ begin
   insert into public.series (
     room_id,
     title,
+    status,
     description,
     expected_games,
     created_by
@@ -48,6 +49,7 @@ begin
   values (
     p_room_id,
     trim(p_title),
+    'active',
     nullif(trim(coalesce(p_description, '')), ''),
     p_expected_games,
     v_player_id

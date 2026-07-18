@@ -7,25 +7,13 @@ import {
 	Flame,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
-import {
-	Field,
-	FieldGroup,
-	FieldLabel,
-	FieldSet,
-} from "@/shared/ui/field";
+import { Field, FieldGroup, FieldLabel, FieldSet } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import { useEffect, useState } from "react";
-import {
-	ToggleGroup,
-	ToggleGroupItem,
-} from "@/shared/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/shared/ui/toggle-group";
 import { Alert, AlertDescription } from "@/shared/ui/alert";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/shared/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 import { Calendar as UICalendar } from "@/shared/ui/calendar";
 import { format } from "date-fns";
 import { useNavigate } from "react-router";
@@ -33,7 +21,7 @@ import { toast } from "sonner";
 import { Spinner } from "@/shared/ui/spinner";
 import { useCreatePrediction } from "@/features/predictions";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import { useRoomSeries } from "@/features/rooms";
+import { useRoomSeries } from "@/features/series";
 import { useLocation } from "react-router-dom";
 
 export default function PredictionNew() {

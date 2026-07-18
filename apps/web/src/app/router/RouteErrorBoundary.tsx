@@ -1,6 +1,10 @@
 import { AlertTriangleIcon } from "lucide-react";
 import { Button } from "@/shared/ui";
-import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router-dom";
+import {
+	isRouteErrorResponse,
+	useNavigate,
+	useRouteError,
+} from "react-router-dom";
 
 export function RouteErrorBoundary() {
 	const navigate = useNavigate();
@@ -20,6 +24,13 @@ export function RouteErrorBoundary() {
 			<p className='text-sm text-muted-foreground'>{description}</p>
 			<Button size='sm' variant='outline' onClick={() => navigate(-1)}>
 				Go back
+			</Button>
+			<Button
+				size='sm'
+				variant='secondary'
+				onClick={() => window.location.reload()}
+			>
+				Refresh
 			</Button>
 		</div>
 	);

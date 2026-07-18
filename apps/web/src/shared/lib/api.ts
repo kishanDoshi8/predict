@@ -1,7 +1,8 @@
 import { Duel, DuelSummary } from "@/features/duels";
 import { Player } from "@/features/home";
 import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats } from "@/features/leaderboard";
-import { Prediction, PredictionStatus, Series } from "@/features/predictions";
+import { Prediction, PredictionStatus } from "@/features/predictions";
+import { Series } from "@/features/series/types/series";
 import { Room } from "@/features/rooms";
 import type { ActivityFilter, RoomActivitiesPage } from "@/features/activities/types/types";
 import type { Json } from '@/shared/lib/supabase.types'

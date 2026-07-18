@@ -40,8 +40,15 @@ const RoomHistoryPage = lazy(
 const RoomActivitiesPage = lazy(
 	() => import("@/features/rooms/pages/RoomActivitiesPage"),
 );
-const RoomProfilePage = lazy(
-	() => import("@/features/rooms/pages/RoomProfilePage"),
+const RoomProfilePage = lazy(() =>
+	import("@/features/series").then((module) => ({
+		default: module.SeriesPage,
+	})),
+);
+const SeriesCreatePage = lazy(() =>
+	import("@/features/series").then((module) => ({
+		default: module.SeriesCreatePage,
+	})),
 );
 const JoinRoomPage = lazy(() =>
 	import("@/features/rooms/pages/JoinRoomPage").then((module) => ({
@@ -176,13 +183,35 @@ export const router = createBrowserRouter([
 												},
 											},
 											{
-												path: "profile",
+												path: "series",
 												element: withSuspense(
 													<RoomProfilePage />,
 												),
 												handle: {
 													header: {
-														title: "Series",
+														// title: "Series",
+													},
+												},
+											},
+											{
+												path: "series/new",
+												element: withSuspense(
+													<SeriesCreatePage />,
+												),
+												handle: {
+													header: {
+														leftAction: "back",
+													},
+												},
+											},
+											{
+												path: "series/:seriesId",
+												element: withSuspense(
+													<RoomProfilePage />,
+												),
+												handle: {
+													header: {
+														leftAction: "back",
 													},
 												},
 											},

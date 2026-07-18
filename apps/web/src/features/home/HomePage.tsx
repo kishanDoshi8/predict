@@ -1,4 +1,4 @@
-import Home from "@/features/home/components/Home";
+import Home, { HomeTab } from "@/features/home/components/Home";
 import { joinRoom } from "@/shared/lib/api";
 import { roomKeys } from "@/shared/constants/queryKeys";
 import { useQueryClient } from "@tanstack/react-query";
@@ -6,7 +6,6 @@ import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { usePlayer, useWeeklyClaim } from "@/features/home";
-import { HomeTab } from "@/features/home/components/Home";
 import { usePlayerRooms } from "@/features/rooms/hooks/room";
 import { Loading } from "@/shared/ui";
 
@@ -38,7 +37,12 @@ export function HomePage() {
 	}, [player, isPlayerLoading, claimWeeklyPoints, navigate]);
 
 	useEffect(() => {
-		if (!player || isPlayerLoading || isPlayerRoomsLoading || hasExplicitTab) {
+		if (
+			!player ||
+			isPlayerLoading ||
+			isPlayerRoomsLoading ||
+			hasExplicitTab
+		) {
 			return;
 		}
 
@@ -92,7 +96,7 @@ export function HomePage() {
 		}
 	};
 
-	if (isPlayerLoading) {
+	if (isPlayerLoading || player?.last_visited_room_id) {
 		return (
 			<div className='flex items-center justify-center h-dvh'>
 				<Loading className={`size-10 text-primary`} />

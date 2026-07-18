@@ -4,7 +4,8 @@ create or replace function public.get_room_prediction_history(
   p_cursor_created_at timestamptz default null,
   p_cursor_id uuid default null,
   p_search text default null,
-  p_filter text default 'all'
+  p_filter text default 'all',
+  p_series_id uuid default null
 )
 returns json
 language plpgsql
@@ -49,6 +50,8 @@ begin
       pred.resolved_at,
       pred.created_at,
       pred.winning_option_id,
+      pred.series_prediction_number,
+      s.title as series_title,
       user_bet.option_id  as selected_option_id,
       selected_opt.label  as selected_option_label,
       creator.username    as creator_username,
@@ -76,6 +79,7 @@ begin
         where po2.prediction_id = pred.id
       ) as options
     from public.predictions pred
+    left join public.series s on s.id = pred.series_id
     join public.players creator on creator.id = pred.created_by
     left join public.prediction_options winning_opt
       on winning_opt.id = pred.winning_option_id
@@ -113,7 +117,11 @@ begin
       group by b.prediction_id
     ) bs on bs.prediction_id = pred.id
     where pred.room_id = p_room_id
-      and pred.status in ('revealed', 'cancelled', 'no_result')
+      and (
+        (p_series_id is null and pred.status in ('revealed', 'cancelled', 'no_result'))
+        or (p_series_id is not null and pred.status in ('revealed', 'no_result'))
+      )
+      and (p_series_id is null or pred.series_id = p_series_id)
       and (
         p_cursor_created_at is null
         or p_cursor_id is null

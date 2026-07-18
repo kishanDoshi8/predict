@@ -20,8 +20,10 @@ export interface Prediction {
   room_id:           string
   series_id?:        string | null
   series_prediction_number?: number | null
+  series_title?:     string | null
   seriesId?:         string | null
   seriesPredictionNumber?: number | null
+  seriesTitle?:      string | null
   tags?:             PredictionTag[]
   title:             string
   status:            PredictionStatus

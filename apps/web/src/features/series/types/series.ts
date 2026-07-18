@@ -10,6 +10,12 @@ export interface Series {
   expectedGames:    number
   predictionCount:  number
   completedGames:   number
+  totalPredictions: number
+  activePredictions: number
+  completedPredictions: number
+  cancelledPredictions: number
+  remainingGames: number
+  progressPercentage: number
   createdBy:        string
   createdAt:        string
   startedAt:        string | null

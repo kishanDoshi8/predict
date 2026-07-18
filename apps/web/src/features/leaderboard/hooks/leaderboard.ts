@@ -51,6 +51,7 @@ export const usePredictionHistory = (
     roomId?: string,
     filter: PredictionHistoryFilter = 'all',
     search = '',
+    seriesId?: string,
 ) => {
     const initialCursor: PredictionHistoryCursor = {
         cursorCreatedAt: null,
@@ -61,10 +62,10 @@ export const usePredictionHistory = (
         PredictionHistoryPage,
         Error,
         InfiniteData<PredictionHistoryPage, PredictionHistoryCursor>,
-        readonly [string, string, PredictionHistoryFilter, string],
+        readonly [string, string, PredictionHistoryFilter, string, string],
         PredictionHistoryCursor
     >({
-        queryKey: ['prediction-history', roomId ?? '', filter, search],
+        queryKey: ['prediction-history', roomId ?? '', filter, search, seriesId ?? 'all'],
         queryFn: ({ pageParam }) =>
             getRoomPredictionHistory({
                 roomId: roomId ?? '',
@@ -73,6 +74,7 @@ export const usePredictionHistory = (
                 cursorId: pageParam.cursorId,
                 search,
                 filter,
+                seriesId,
             }),
         initialPageParam: initialCursor,
         getNextPageParam: (lastPage) => {

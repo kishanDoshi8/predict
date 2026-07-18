@@ -12,10 +12,10 @@ export const useActivePrediction = (roomId?: string) => {
 
 // Returns all active (draft/locked) predictions for a room ordered by deadline asc.
 // Falls back to the most recently completed prediction when no active ones exist.
-export const useActivePredictions = (roomId?: string) => {
+export const useActivePredictions = (roomId?: string, seriesId?: string) => {
     return useQuery({
-        queryKey: roomKeys.activePredictions(roomId ?? ""),
-        queryFn: () => getActivePredictions(roomId ?? ""),
+        queryKey: [...roomKeys.activePredictions(roomId ?? ""), seriesId ?? "all"],
+        queryFn: () => getActivePredictions(roomId ?? "", seriesId),
         enabled: !!roomId,
     });
 }

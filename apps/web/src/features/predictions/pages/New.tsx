@@ -23,6 +23,14 @@ import { useCreatePrediction } from "@/features/predictions";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useRoomSeries } from "@/features/series";
 import { useLocation } from "react-router-dom";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/shared/ui";
 
 export default function PredictionNew() {
 	const { room } = useRoomContext();
@@ -226,6 +234,30 @@ export default function PredictionNew() {
 				<h3 className={`text-2xl font-bold`}>Create Prediction</h3>
 				<FieldGroup>
 					<Field>
+						<FieldLabel htmlFor='series'>Series</FieldLabel>
+						<Select
+							value={selectedSeriesId}
+							onValueChange={setSelectedSeriesId}
+							disabled={activeSeries.length <= 1}
+						>
+							<SelectTrigger className={`w-full`}>
+								<SelectValue placeholder='Series' />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectGroup>
+									{activeSeries.map((series) => (
+										<SelectItem
+											key={series.id}
+											value={series.id}
+										>
+											{series.title}
+										</SelectItem>
+									))}
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</Field>
+					<Field>
 						<FieldLabel htmlFor='question'>The Question</FieldLabel>
 						<Textarea
 							id='question'
@@ -296,24 +328,6 @@ export default function PredictionNew() {
 						<FieldLabel htmlFor='deadline' className={`mt-4`}>
 							Bidding deadline
 						</FieldLabel>
-						<FieldLabel htmlFor='series' className={`mt-4`}>
-							Series (optional)
-						</FieldLabel>
-						<select
-							id='series'
-							value={selectedSeriesId}
-							onChange={(event) =>
-								setSelectedSeriesId(event.target.value)
-							}
-							className='h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs'
-						>
-							<option value=''>None</option>
-							{activeSeries.map((series) => (
-								<option key={series.id} value={series.id}>
-									{series.title}
-								</option>
-							))}
-						</select>
 						<ToggleGroup
 							id='deadline'
 							type='single'

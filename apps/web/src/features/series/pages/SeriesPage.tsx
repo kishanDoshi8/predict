@@ -4,13 +4,7 @@ import type { RoomActivity } from "@/features/activities/types/types";
 import { usePlayer } from "@/features/home";
 import { useActivePredictions } from "@/features/predictions";
 import { SeriesDetailView, SeriesListView } from "@/features/series/components";
-import {
-	useActivateSeries,
-	useArchiveSeries,
-	useCompleteSeries,
-	useRoomSeries,
-	useUpdateSeries,
-} from "@/features/series";
+import { useRoomSeries, useUpdateSeries } from "@/features/series";
 import type { Series } from "@/features/series/types/series";
 import { Button, Skeleton } from "@/shared/ui";
 import { useMemo, useState } from "react";
@@ -110,12 +104,6 @@ export default function SeriesPage() {
 
 	const { mutate: updateSeries, isPending: isUpdatePending } =
 		useUpdateSeries(room.id);
-	const { mutate: activateSeries, isPending: isActivatePending } =
-		useActivateSeries(room.id);
-	const { mutate: completeSeries, isPending: isCompletePending } =
-		useCompleteSeries(room.id);
-	const { mutate: archiveSeries, isPending: isArchivePending } =
-		useArchiveSeries(room.id);
 
 	const isOrganizer = room.members.some(
 		(member) => member.player_id === player?.id && member.is_organizer,
@@ -126,8 +114,7 @@ export default function SeriesPage() {
 	const [formState, setFormState] =
 		useState<SeriesFormState>(defaultFormState);
 
-	const isActionPending =
-		isActivatePending || isCompletePending || isArchivePending;
+	const isActionPending = false;
 
 	const activeSeries = seriesByStatus?.active ?? [];
 	const completedSeries = seriesByStatus?.completed ?? [];
@@ -176,30 +163,15 @@ export default function SeriesPage() {
 			.slice(0, 3);
 	}, [activityPages, seriesPredictionIds]);
 
-	const handleActivate = (targetSeriesId: string) => {
-		activateSeries(targetSeriesId, {
-			onError: (error) =>
-				toast("Failed to activate series.", {
-					description: error.message,
-				}),
-		});
-	};
-
-	const handleComplete = (targetSeriesId: string) => {
-		completeSeries(targetSeriesId, {
-			onError: (error) =>
-				toast("Failed to complete series.", {
-					description: error.message,
-				}),
-		});
-	};
-
 	const handleArchive = (targetSeriesId: string) => {
-		archiveSeries(targetSeriesId, {
-			onError: (error) =>
-				toast("Failed to archive series.", {
-					description: error.message,
-				}),
+		toast("Archive series callback triggered.", {
+			description: `Series ${targetSeriesId} is pending backend wiring.`,
+		});
+	};
+
+	const handleCloseSeries = (targetSeriesId: string) => {
+		toast("Close series callback triggered.", {
+			description: `Series ${targetSeriesId} is pending backend wiring.`,
 		});
 	};
 
@@ -299,9 +271,8 @@ export default function SeriesPage() {
 			formState={formState}
 			onBackToList={() => navigate(`/rooms/${room.code}/series`)}
 			onEdit={() => openEditDialog(selectedSeries)}
-			onActivate={() => handleActivate(selectedSeries.id)}
-			onComplete={() => handleComplete(selectedSeries.id)}
 			onArchive={() => handleArchive(selectedSeries.id)}
+			onCloseSeries={() => handleCloseSeries(selectedSeries.id)}
 			onNewPrediction={() =>
 				navigate(`/rooms/${room.code}/predictions/new`, {
 					state: {

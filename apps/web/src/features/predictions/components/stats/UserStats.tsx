@@ -160,7 +160,7 @@ function UserStats({
 					leaderboard={leaderboard}
 					isLoading={isLeaderboardLoading}
 					room={room}
-					sortBy={sortBy}
+					sortBy={"points"}
 					showSeeAllLink={showSeeAllLink}
 				/>
 			)}

@@ -8,9 +8,8 @@ type SeriesOverviewCardProps = {
 	isOrganizer: boolean;
 	isActionPending: boolean;
 	onEdit: () => void;
-	onActivate: () => void;
-	onComplete: () => void;
 	onArchive: () => void;
+	onCloseSeries: () => void;
 };
 
 export function SeriesOverviewCard({
@@ -18,9 +17,8 @@ export function SeriesOverviewCard({
 	isOrganizer,
 	isActionPending,
 	onEdit,
-	onActivate,
-	onComplete,
 	onArchive,
+	onCloseSeries,
 }: Readonly<SeriesOverviewCardProps>) {
 	const expectedGames = Math.max(series.expectedGames, 0);
 	const completedGames = Math.max(series.completedGames, 0);
@@ -42,9 +40,8 @@ export function SeriesOverviewCard({
 						series={series}
 						isPending={isActionPending}
 						onEdit={onEdit}
-						onActivate={onActivate}
-						onComplete={onComplete}
 						onArchive={onArchive}
+						onCloseSeries={onCloseSeries}
 					/>
 				) : null}
 			</div>

@@ -28,9 +28,8 @@ type SeriesDetailViewProps = {
 	formState: SeriesFormState;
 	onBackToList: () => void;
 	onEdit: () => void;
-	onActivate: () => void;
-	onComplete: () => void;
 	onArchive: () => void;
+	onCloseSeries: () => void;
 	onNewPrediction: () => void;
 	onEditDialogOpenChange: (open: boolean) => void;
 	onFormStateChange: (nextState: SeriesFormState) => void;
@@ -51,9 +50,8 @@ export function SeriesDetailView({
 	formState,
 	onBackToList,
 	onEdit,
-	onActivate,
-	onComplete,
 	onArchive,
+	onCloseSeries,
 	onNewPrediction,
 	onEditDialogOpenChange,
 	onFormStateChange,
@@ -77,15 +75,12 @@ export function SeriesDetailView({
 				isOrganizer={isOrganizer}
 				isActionPending={isActionPending}
 				onEdit={onEdit}
-				onActivate={onActivate}
-				onComplete={onComplete}
 				onArchive={onArchive}
+				onCloseSeries={onCloseSeries}
 			/>
 
 			<section className='space-y-3'>
-				<h3 className='text-sm font-semibold uppercase text-muted-foreground'>
-					Open predictions
-				</h3>
+				<h3 className={`text-lg font-semibold`}>Open predictions</h3>
 				<InPlayPredictions
 					predictionsOverride={seriesOpenPredictions}
 					emptyMessage='No open predictions in this series yet.'
@@ -97,19 +92,13 @@ export function SeriesDetailView({
 				<UserStats
 					showControls={false}
 					title='Leaderboard'
-					subtitle='Current standings for this room.'
+					subtitle='Current standings for this series.'
 					showSeeAllLink={false}
 				/>
 			</section>
 
-			<SeriesRecentActivitySection
-				isLoading={isActivityLoading}
-				activities={seriesActivities}
-				roomCode={roomCode}
-			/>
-
 			<section className='space-y-3'>
-				<h3 className='text-sm font-semibold uppercase text-muted-foreground'>
+				<h3 className={`text-lg font-semibold`}>
 					Completed predictions
 				</h3>
 				<PredictionHistoryFeed

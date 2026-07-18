@@ -30,25 +30,25 @@ begin
 
   select coalesce(json_agg(s.* order by s.started_at desc nulls last, s.created_at desc), '[]'::json)
     into v_active
-  from public.series s
+  from public.series_with_stats s
   where s.room_id = p_room_id
     and s.status = 'active';
 
   select coalesce(json_agg(s.* order by s.completed_at desc nulls last, s.created_at desc), '[]'::json)
     into v_completed
-  from public.series s
+  from public.series_with_stats s
   where s.room_id = p_room_id
     and s.status = 'completed';
 
   select coalesce(json_agg(s.* order by s.archived_at desc nulls last, s.created_at desc), '[]'::json)
     into v_archived
-  from public.series s
+  from public.series_with_stats s
   where s.room_id = p_room_id
     and s.status = 'archived';
 
   select coalesce(json_agg(s.* order by s.created_at desc), '[]'::json)
     into v_draft
-  from public.series s
+  from public.series_with_stats s
   where s.room_id = p_room_id
     and s.status = 'draft';
 

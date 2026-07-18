@@ -35,6 +35,8 @@ export type PredictionHistoryOption = {
 export type PredictionHistoryEntry = {
   prediction_id:        string
   title:                string
+  series_title:         string | null
+  series_prediction_number: number | null
   status:               'revealed' | 'cancelled' | 'no_result'
   no_result_reason:     string | null
   resolved_at:          string | null

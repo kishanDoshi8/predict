@@ -53,6 +53,12 @@ type SeriesPayload = {
   expected_games: number
   prediction_count: number
   completed_games: number
+  total_predictions?: number
+  active_predictions?: number
+  completed_predictions?: number
+  cancelled_predictions?: number
+  remaining_games?: number
+  progress_percentage?: number
   created_by: string
   created_at: string
   started_at: string | null
@@ -89,6 +95,12 @@ function mapSeriesPayload(series: SeriesPayload): Series {
     expectedGames: series.expected_games,
     predictionCount: series.prediction_count,
     completedGames: series.completed_games,
+    totalPredictions: series.total_predictions ?? series.prediction_count,
+    activePredictions: series.active_predictions ?? 0,
+    completedPredictions: series.completed_predictions ?? series.completed_games,
+    cancelledPredictions: series.cancelled_predictions ?? 0,
+    remainingGames: series.remaining_games ?? Math.max(series.expected_games - series.completed_games, 0),
+    progressPercentage: series.progress_percentage ?? (series.expected_games > 0 ? Math.min((series.completed_games / series.expected_games) * 100, 100) : 0),
     createdBy: series.created_by,
     createdAt: series.created_at,
     startedAt: series.started_at,
@@ -519,7 +531,7 @@ export async function createPrediction(
 export async function getPrediction(predictionId: string) {
   const { data, error } = await supabase
     .from('predictions')
-    .select(`*`)
+    .select(`*, series:series_id(title)`)
     .eq('id', predictionId)
     .maybeSingle()
   
@@ -535,8 +547,10 @@ export async function getPrediction(predictionId: string) {
 
   return {
     ...data,
+    series_title: data.series?.title ?? null,
     seriesId: data.series_id,
     seriesPredictionNumber: data.series_prediction_number,
+    seriesTitle: data.series?.title ?? null,
     tags: [],
     status: data.status as PredictionStatus,
     prediction_options: predictionOptions ?? [],
@@ -547,7 +561,7 @@ export async function getPrediction(predictionId: string) {
 export async function getActivePrediction(roomId: string) {
   const { data, error } = await supabase
     .from('predictions')
-    .select(`*`)
+    .select(`*, series:series_id(title)`)
     .eq('room_id', roomId)
     // .in('status', ['draft', 'locked'])
     .order('created_at', { ascending: false })
@@ -567,22 +581,28 @@ export async function getActivePrediction(roomId: string) {
 
   return {
     ...data,
+    series_title: data.series?.title ?? null,
     seriesId: data.series_id,
     seriesPredictionNumber: data.series_prediction_number,
+    seriesTitle: data.series?.title ?? null,
     tags: [],
     status: data.status as PredictionStatus,
     prediction_options: predictionOptions ?? [],
   }
 }
 
-export async function getActivePredictions(roomId: string): Promise<Prediction[]> {
+export async function getActivePredictions(roomId: string, seriesId?: string): Promise<Prediction[]> {
   // First: fetch all active (draft/locked) predictions ordered by deadline asc
-  const { data: activeRows, error: activeError } = await supabase
+  let activeQuery = supabase
     .from('predictions')
-    .select('*')
+    .select('*, series:series_id(title)')
     .eq('room_id', roomId)
     .in('status', ['draft', 'locked'])
     .order('deadline', { ascending: true })
+  if (seriesId) {
+    activeQuery = activeQuery.eq('series_id', seriesId)
+  }
+  const { data: activeRows, error: activeError } = await activeQuery
 
   if (activeError) throw activeError
 
@@ -598,8 +618,10 @@ export async function getActivePredictions(roomId: string): Promise<Prediction[]
         if (optsErr) throw optsErr
         return {
           ...row,
+          series_title: row.series?.title ?? null,
           seriesId: row.series_id,
           seriesPredictionNumber: row.series_prediction_number,
+          seriesTitle: row.series?.title ?? null,
           tags: [],
           status: row.status as PredictionStatus,
           prediction_options: opts ?? [],
@@ -610,13 +632,17 @@ export async function getActivePredictions(roomId: string): Promise<Prediction[]
   }
 
   // Fallback: no active predictions — return the most recently completed prediction
-  const { data: fallbackRows, error: fallbackError } = await supabase
+  let fallbackQuery = supabase
     .from('predictions')
-    .select('*')
+    .select('*, series:series_id(title)')
     .eq('room_id', roomId)
     .in('status', ['revealed', 'cancelled', 'no_result'])
     .order('resolved_at', { ascending: false })
     .limit(1)
+  if (seriesId) {
+    fallbackQuery = fallbackQuery.eq('series_id', seriesId)
+  }
+  const { data: fallbackRows, error: fallbackError } = await fallbackQuery
 
   if (fallbackError) throw fallbackError
   if (!fallbackRows || fallbackRows.length === 0) return []
@@ -632,8 +658,10 @@ export async function getActivePredictions(roomId: string): Promise<Prediction[]
   return [
     {
       ...fallback,
+      series_title: fallback.series?.title ?? null,
       seriesId: fallback.series_id,
       seriesPredictionNumber: fallback.series_prediction_number,
+      seriesTitle: fallback.series?.title ?? null,
       tags: [],
       status: fallback.status as PredictionStatus,
       prediction_options: fallbackOpts ?? [],
@@ -818,6 +846,19 @@ export async function getRoomLeaderboard(
   return assertOk(data, error) as LeaderboardEntry[]
 }
 
+export async function getSeriesLeaderboard(
+  roomId: string,
+  seriesId: string,
+  sortBy: 'points' | 'rating' | 'accuracy' | 'streak' = 'points',
+) {
+  const { data, error } = await untypedSupabase.rpc('get_series_leaderboard', {
+    p_room_id: roomId,
+    p_series_id: seriesId,
+    p_sort_by: sortBy,
+  })
+  return assertOk(data, error) as LeaderboardEntry[]
+}
+
 export async function getRoomWeeklyLeaderboard(
   roomId: string,
   sortBy: 'points' | 'rating' | 'accuracy' | 'streak' = 'points',
@@ -836,6 +877,7 @@ type GetRoomPredictionHistoryParams = {
   cursorId?: string | null
   search?: string | null
   filter?: PredictionHistoryFilter
+  seriesId?: string | null
 }
 
 export async function getRoomPredictionHistory({
@@ -845,14 +887,16 @@ export async function getRoomPredictionHistory({
   cursorId = null,
   search = null,
   filter = 'all',
+  seriesId = null,
 }: GetRoomPredictionHistoryParams) {
-  const { data, error } = await supabase.rpc('get_room_prediction_history', {
+  const { data, error } = await untypedSupabase.rpc('get_room_prediction_history', {
     p_room_id: roomId,
     p_limit:   limit,
     p_cursor_created_at: cursorCreatedAt ?? undefined,
     p_cursor_id: cursorId ?? undefined,
     p_search: search ?? undefined,
     p_filter: filter,
+    p_series_id: seriesId ?? undefined,
   })
   return assertOk(data, error) as PredictionHistoryPage
 }

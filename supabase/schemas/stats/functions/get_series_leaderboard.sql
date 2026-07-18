@@ -1,5 +1,6 @@
-create or replace function public.get_room_leaderboard(
+create or replace function public.get_series_leaderboard(
   p_room_id uuid,
+  p_series_id uuid,
   p_sort_by text default 'points'
 )
 returns json
@@ -10,7 +11,7 @@ as $$
 declare
   v_caller_id uuid;
   v_is_member boolean;
-  v_result    json;
+  v_result json;
 begin
   v_caller_id := private.get_player_id_from_auth();
   if v_caller_id is null then
@@ -24,6 +25,15 @@ begin
 
   if not v_is_member then
     raise exception 'You are not a member of this room' using errcode = 'P0011';
+  end if;
+
+  if not exists (
+    select 1
+    from public.series s
+    where s.id = p_series_id
+      and s.room_id = p_room_id
+  ) then
+    raise exception 'Series not found for this room' using errcode = 'P0002';
   end if;
 
   if p_sort_by not in ('points', 'rating', 'accuracy', 'streak') then
@@ -47,31 +57,15 @@ begin
     from public.bets b
     join public.predictions pred on pred.id = b.prediction_id
     where pred.room_id = p_room_id
+      and pred.series_id = p_series_id
       and pred.status in ('revealed', 'cancelled', 'no_result')
     group by b.player_id
-  ),
-  latest_snapshots as (
-    select distinct on (s.player_id)
-      s.player_id,
-      s.week_start,
-      s.total_won_in_room,
-      s.prediction_rating,
-      s.peak_prediction_rating,
-      s.rated_predictions_count,
-      s.correct_predictions,
-      s.total_predictions,
-      s.current_streak,
-      s.highest_streak
-    from public.room_member_weekly_snapshots s
-    where s.room_id = p_room_id
-    order by s.player_id, s.week_start desc
   ),
   base_current as (
     select
       rm.player_id,
       p.username,
       coalesce(s.net_points, 0) as total_won_in_room,
-      coalesce(s.net_points, 0) as current_total_won_in_room,
       rm.joined_at,
       rm.is_organizer,
       rm.current_streak,
@@ -101,7 +95,7 @@ begin
     left join stats s on s.player_id = rm.player_id
     where rm.room_id = p_room_id
   ),
-  current_ranked as (
+  ranked as (
     select
       bc.*,
       rank() over (
@@ -117,76 +111,36 @@ begin
           bc.joined_at asc
       ) as rank
     from base_current bc
-  ),
-  previous_candidates as (
-    select
-      bc.player_id,
-      bc.joined_at,
-      ls.total_won_in_room,
-      ls.prediction_rating,
-      ls.rated_predictions_count,
-      ls.correct_predictions,
-      ls.total_predictions,
-      ls.current_streak,
-      ls.highest_streak,
-      case
-        when ls.total_predictions > 0 then ls.correct_predictions::numeric / ls.total_predictions
-      end as accuracy_ratio
-    from base_current bc
-    join latest_snapshots ls on ls.player_id = bc.player_id
-  ),
-  previous_ranked as (
-    select
-      pc.player_id,
-      rank() over (
-        order by
-          case when p_sort_by = 'points' then pc.total_won_in_room end desc nulls last,
-          case when p_sort_by = 'points' then pc.accuracy_ratio end desc nulls last,
-          case when p_sort_by = 'rating' then pc.prediction_rating end desc nulls last,
-          case when p_sort_by = 'rating' then pc.rated_predictions_count end desc nulls last,
-          case when p_sort_by = 'accuracy' then pc.accuracy_ratio end desc nulls last,
-          case when p_sort_by = 'accuracy' then pc.total_predictions end desc nulls last,
-          case when p_sort_by = 'streak' then pc.current_streak end desc nulls last,
-          case when p_sort_by = 'streak' then pc.highest_streak end desc nulls last,
-          pc.joined_at asc
-      ) as previous_rank
-    from previous_candidates pc
   )
   select json_agg(lb order by lb.rank)
   into v_result
   from (
     select
-      cr.player_id,
-      cr.username,
-      cr.total_won_in_room,
-      cr.joined_at,
-      cr.is_organizer,
-      cr.current_streak,
-      cr.highest_streak,
-      cr.prediction_rating,
-      cr.peak_prediction_rating,
-      cr.rated_predictions_count,
-      cr.total_bets,
-      cr.total_revealed_bets,
-      cr.winning_bets,
-      cr.total_wagered,
-      cr.total_payout,
-      cr.net_points,
-      cr.win_percentage,
-      cr.rank,
-      pr.previous_rank,
-      case
-        when pr.previous_rank is not null then pr.previous_rank - cr.rank
-      end as rank_change,
-      ls.prediction_rating as previous_prediction_rating,
-      case
-        when ls.player_id is not null then cr.prediction_rating - ls.prediction_rating
-      end as rating_change,
+      r.player_id,
+      r.username,
+      r.total_won_in_room,
+      r.joined_at,
+      r.is_organizer,
+      r.current_streak,
+      r.highest_streak,
+      r.prediction_rating,
+      r.peak_prediction_rating,
+      r.rated_predictions_count,
+      r.total_bets,
+      r.total_revealed_bets,
+      r.winning_bets,
+      r.total_wagered,
+      r.total_payout,
+      r.net_points,
+      r.win_percentage,
+      r.rank,
+      null::int as previous_rank,
+      null::int as rank_change,
+      null::numeric as previous_prediction_rating,
+      null::numeric as rating_change,
       null::numeric as previous_total_won_in_room,
       null::numeric as points_change
-    from current_ranked cr
-    left join latest_snapshots ls on ls.player_id = cr.player_id
-    left join previous_ranked pr on pr.player_id = cr.player_id
+    from ranked r
   ) lb;
 
   return coalesce(v_result, '[]'::json);

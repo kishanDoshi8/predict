@@ -5,8 +5,6 @@ create table if not exists public.series (
   description text,
   status text not null default 'draft' check (status in ('draft', 'active', 'completed', 'archived')),
   expected_games integer not null default 0 check (expected_games >= 0),
-  prediction_count integer not null default 0 check (prediction_count >= 0),
-  completed_games integer not null default 0 check (completed_games >= 0),
   created_by uuid not null references public.players(id),
   created_at timestamptz not null default now(),
   started_at timestamptz,

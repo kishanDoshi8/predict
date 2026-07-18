@@ -42,7 +42,9 @@ begin
       ) as winning_bets,
       sum(b.amount) as total_wagered,
       sum(coalesce(b.payout, 0)) as total_payout,
-      sum(greatest(coalesce(b.payout, 0) - b.amount, 0)) as weekly_total_won
+      sum(greatest(coalesce(b.payout, 0) - b.amount, 0)) as total_profit,
+      sum(greatest(b.amount - coalesce(b.payout, 0), 0)) as total_loss,
+      sum(coalesce(b.payout, 0) - b.amount) as net_points
     from public.bets b
     join public.predictions pred on pred.id = b.prediction_id
     where pred.room_id = p_room_id
@@ -71,8 +73,8 @@ begin
     select
       rm.player_id,
       p.username,
-      coalesce(ws.weekly_total_won, 0) as total_won_in_room,
-      rm.total_won_in_room as current_total_won_in_room,
+      coalesce(ws.net_points, 0) as total_won_in_room,
+      coalesce(ws.net_points, 0) as current_total_won_in_room,
       rm.joined_at,
       rm.is_organizer,
       rm.current_streak,
@@ -85,7 +87,9 @@ begin
       coalesce(ws.winning_bets, 0) as winning_bets,
       coalesce(ws.total_wagered, 0) as total_wagered,
       coalesce(ws.total_payout, 0) as total_payout,
-      coalesce(ws.total_payout, 0) - coalesce(ws.total_wagered, 0) as net_points,
+      coalesce(ws.total_profit, 0) as total_profit,
+      coalesce(ws.total_loss, 0) as total_loss,
+      coalesce(ws.net_points, 0) as net_points,
       case
         when coalesce(ws.total_revealed_bets, 0) > 0 then
           round((coalesce(ws.winning_bets, 0)::numeric / ws.total_revealed_bets) * 100, 1)
@@ -181,10 +185,8 @@ begin
       case
         when ls.player_id is not null then cr.prediction_rating - ls.prediction_rating
       end as rating_change,
-      ls.total_won_in_room as previous_total_won_in_room,
-      case
-        when ls.player_id is not null then cr.current_total_won_in_room - ls.total_won_in_room
-      end as points_change
+      null::numeric as previous_total_won_in_room,
+      null::numeric as points_change
     from current_ranked cr
     left join latest_snapshots ls on ls.player_id = cr.player_id
     left join previous_ranked pr on pr.player_id = cr.player_id

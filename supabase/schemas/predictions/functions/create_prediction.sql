@@ -119,12 +119,6 @@ begin
   )
   returning * into v_prediction;
 
-  if p_series_id is not null then
-    update public.series
-    set prediction_count = prediction_count + 1
-    where id = p_series_id;
-  end if;
-
   -- Create options
   v_i := 1;
   foreach v_label in array p_options loop

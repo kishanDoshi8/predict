@@ -1,6 +1,7 @@
 import { SeriesEditDialog } from "@/features/series/components/SeriesEditDialog";
 import { SeriesOverviewCard } from "@/features/series/components/SeriesOverviewCard";
 import { SeriesRecentActivitySection } from "@/features/series/components/SeriesRecentActivitySection";
+import type { PredictionHistoryEntry } from "@/features/leaderboard";
 import type { RoomActivity } from "@/features/activities/types/types";
 import { PredictionHistoryFeed } from "@/features/leaderboard";
 import { InPlayPredictions, UserStats } from "@/features/predictions";
@@ -24,6 +25,8 @@ type SeriesDetailViewProps = {
 	seriesOpenPredictions: Prediction[];
 	seriesActivities: RoomActivity[];
 	isActivityLoading: boolean;
+	seriesCompletedPredictions: PredictionHistoryEntry[];
+	isCompletedPredictionsLoading: boolean;
 	isEditorOpen: boolean;
 	formState: SeriesFormState;
 	onBackToList: () => void;
@@ -46,6 +49,8 @@ export function SeriesDetailView({
 	seriesOpenPredictions,
 	seriesActivities,
 	isActivityLoading,
+	seriesCompletedPredictions,
+	isCompletedPredictionsLoading,
 	isEditorOpen,
 	formState,
 	onBackToList,
@@ -97,13 +102,19 @@ export function SeriesDetailView({
 				/>
 			</section>
 
+			<SeriesRecentActivitySection
+				activities={seriesActivities}
+				isLoading={isActivityLoading}
+				roomCode={roomCode}
+			/>
+
 			<section className='space-y-3'>
 				<h3 className={`text-lg font-semibold`}>
 					Completed predictions
 				</h3>
 				<PredictionHistoryFeed
-					entries={[]}
-					isLoading={false}
+					entries={seriesCompletedPredictions}
+					isLoading={isCompletedPredictionsLoading}
 					emptyMessage='Completed predictions for this series will appear here soon.'
 				/>
 			</section>

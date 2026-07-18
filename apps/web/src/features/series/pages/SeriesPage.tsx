@@ -2,6 +2,7 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useRoomActivities } from "@/features/activities/hooks";
 import type { RoomActivity } from "@/features/activities/types/types";
 import { usePlayer } from "@/features/home";
+import { usePredictionHistory } from "@/features/leaderboard";
 import { useActivePredictions } from "@/features/predictions";
 import { SeriesDetailView, SeriesListView } from "@/features/series/components";
 import { useRoomSeries, useUpdateSeries } from "@/features/series";
@@ -98,7 +99,9 @@ export default function SeriesPage() {
 	const { data: player } = usePlayer();
 	const { data: seriesByStatus, isPending } = useRoomSeries(room.id);
 	const { data: roomPredictions = [], isPending: isPredictionsPending } =
-		useActivePredictions(room.id);
+		useActivePredictions(room.id, seriesId);
+	const { data: seriesHistoryPages, isPending: isSeriesHistoryPending } =
+		usePredictionHistory(room.id, "all", "", seriesId);
 	const { data: activityPages, isPending: isActivitiesPending } =
 		useRoomActivities(room.id, "predictions");
 
@@ -162,6 +165,13 @@ export default function SeriesPage() {
 			})
 			.slice(0, 3);
 	}, [activityPages, seriesPredictionIds]);
+
+	const seriesCompletedPredictions = useMemo(
+		() =>
+			seriesHistoryPages?.pages.flatMap((page) => page.items).slice(0, 20) ??
+			[],
+		[seriesHistoryPages],
+	);
 
 	const handleArchive = (targetSeriesId: string) => {
 		toast("Archive series callback triggered.", {
@@ -267,6 +277,8 @@ export default function SeriesPage() {
 			seriesOpenPredictions={seriesOpenPredictions}
 			seriesActivities={seriesActivities}
 			isActivityLoading={isActivitiesPending || isPredictionsPending}
+			seriesCompletedPredictions={seriesCompletedPredictions}
+			isCompletedPredictionsLoading={isSeriesHistoryPending}
 			isEditorOpen={isEditorOpen}
 			formState={formState}
 			onBackToList={() => navigate(`/rooms/${room.code}/series`)}

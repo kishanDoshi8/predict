@@ -2,7 +2,7 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useRoomActivities } from "@/features/activities/hooks";
 import type { RoomActivity } from "@/features/activities/types/types";
 import { usePlayer } from "@/features/home";
-import { usePredictionHistory } from "@/features/leaderboard";
+import { usePredictionHistory, useSeriesLeaderboard } from "@/features/leaderboard";
 import { useActivePredictions } from "@/features/predictions";
 import { SeriesDetailView, SeriesListView } from "@/features/series/components";
 import { useRoomSeries, useUpdateSeries } from "@/features/series";
@@ -131,6 +131,10 @@ export default function SeriesPage() {
 		() => allSeries.find((series) => series.id === seriesId) ?? null,
 		[allSeries, seriesId],
 	);
+	const {
+		data: seriesLeaderboard = [],
+		isPending: isSeriesLeaderboardLoading,
+	} = useSeriesLeaderboard(room.id, selectedSeries?.id ?? null, !!selectedSeries);
 
 	const seriesOpenPredictions = useMemo(() => {
 		if (!selectedSeries) {
@@ -279,6 +283,8 @@ export default function SeriesPage() {
 			isActivityLoading={isActivitiesPending || isPredictionsPending}
 			seriesCompletedPredictions={seriesCompletedPredictions}
 			isCompletedPredictionsLoading={isSeriesHistoryPending}
+			seriesLeaderboard={seriesLeaderboard}
+			isSeriesLeaderboardLoading={isSeriesLeaderboardLoading}
 			isEditorOpen={isEditorOpen}
 			formState={formState}
 			onBackToList={() => navigate(`/rooms/${room.code}/series`)}

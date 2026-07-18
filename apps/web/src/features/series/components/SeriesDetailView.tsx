@@ -1,7 +1,7 @@
 import { SeriesEditDialog } from "@/features/series/components/SeriesEditDialog";
 import { SeriesOverviewCard } from "@/features/series/components/SeriesOverviewCard";
 import { SeriesRecentActivitySection } from "@/features/series/components/SeriesRecentActivitySection";
-import type { PredictionHistoryEntry } from "@/features/leaderboard";
+import type { LeaderboardEntry, PredictionHistoryEntry } from "@/features/leaderboard";
 import type { RoomActivity } from "@/features/activities/types/types";
 import { PredictionHistoryFeed } from "@/features/leaderboard";
 import { InPlayPredictions, UserStats } from "@/features/predictions";
@@ -27,6 +27,8 @@ type SeriesDetailViewProps = {
 	isActivityLoading: boolean;
 	seriesCompletedPredictions: PredictionHistoryEntry[];
 	isCompletedPredictionsLoading: boolean;
+	seriesLeaderboard: LeaderboardEntry[];
+	isSeriesLeaderboardLoading: boolean;
 	isEditorOpen: boolean;
 	formState: SeriesFormState;
 	onBackToList: () => void;
@@ -51,6 +53,8 @@ export function SeriesDetailView({
 	isActivityLoading,
 	seriesCompletedPredictions,
 	isCompletedPredictionsLoading,
+	seriesLeaderboard,
+	isSeriesLeaderboardLoading,
 	isEditorOpen,
 	formState,
 	onBackToList,
@@ -98,6 +102,8 @@ export function SeriesDetailView({
 					showControls={false}
 					title='Leaderboard'
 					subtitle='Current standings for this series.'
+					leaderboardEntriesOverride={seriesLeaderboard}
+					isLeaderboardLoadingOverride={isSeriesLeaderboardLoading}
 					showSeeAllLink={false}
 				/>
 			</section>

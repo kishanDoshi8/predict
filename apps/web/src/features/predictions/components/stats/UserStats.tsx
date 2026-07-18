@@ -2,6 +2,12 @@ import {
 	Badge,
 	FadeContent,
 	Skeleton,
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
 	Tabs,
 	TabsContent,
 	TabsList,
@@ -25,7 +31,8 @@ import {
 	LeaderboardEntry,
 	type SortByOption,
 	useRoomLeaderboard,
-	useRoomWeeklyLeaderboard,
+	useRoomSeriesSelector,
+	useSeriesLeaderboard,
 } from "@/features/leaderboard";
 import { Room } from "@/features/rooms";
 import { twColor } from "@/shared/lib/utils";
@@ -39,7 +46,7 @@ const PlayerProfileDialog = lazy(() =>
 	),
 );
 
-type LeaderboardTab = "this_week" | "all_time";
+type LeaderboardTab = "series" | "all_time";
 
 type UserStatsProps = {
 	showControls?: boolean;
@@ -60,17 +67,22 @@ function UserStats({
 }: Readonly<UserStatsProps>) {
 	const { room } = useRoomContext();
 	const [activeLeaderboardTab, setActiveLeaderboardTab] =
-		useLocalStorage<LeaderboardTab>(
-			"this_week",
+		useLocalStorage<string>(
+			"series",
 			localStorageKeys.userPreference.leaderboard.active_leaderboard_tab,
 		);
+
+	const normalizedLeaderboardTab: LeaderboardTab =
+		activeLeaderboardTab === "all_time" ? "all_time" : "series";
+
+	const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
 
 	const [sortBy, setSortBy] = useLocalStorage<SortByOption>(
 		"ratings",
 		localStorageKeys.userPreference.leaderboard.sort_by,
 	);
 	const effectiveTab: LeaderboardTab = showControls
-		? activeLeaderboardTab
+		? normalizedLeaderboardTab
 		: "all_time";
 
 	const {
@@ -78,19 +90,37 @@ function UserStats({
 		isPending: isAllTimeLeaderboardLoading,
 	} = useRoomLeaderboard(room.id, effectiveTab === "all_time", sortBy);
 
-	const {
-		data: weeklyLeaderboard = [],
-		isPending: isWeeklyLeaderboardLoading,
-	} = useRoomWeeklyLeaderboard(room.id, effectiveTab === "this_week", sortBy);
+	const { data: seriesSelector, isPending: isSeriesSelectorLoading } =
+		useRoomSeriesSelector(room.id, selectedSeriesId, effectiveTab === "series");
+
+	const { data: seriesLeaderboard = [], isPending: isSeriesLeaderboardLoading } =
+		useSeriesLeaderboard(
+			room.id,
+			seriesSelector?.selected_series_id ?? null,
+			effectiveTab === "series",
+			sortBy,
+		);
 
 	const leaderboard =
 		leaderboardEntriesOverride ??
-		(effectiveTab === "all_time" ? allTimeLeaderboard : weeklyLeaderboard);
+		(effectiveTab === "all_time" ? allTimeLeaderboard : seriesLeaderboard);
 	const isLeaderboardLoading =
 		isLeaderboardLoadingOverride ??
 		(effectiveTab === "all_time"
 			? isAllTimeLeaderboardLoading
-			: isWeeklyLeaderboardLoading);
+			: isSeriesSelectorLoading || isSeriesLeaderboardLoading);
+
+	useEffect(() => {
+		if (seriesSelector?.selected_series_id) {
+			setSelectedSeriesId(seriesSelector.selected_series_id);
+		}
+	}, [seriesSelector?.selected_series_id]);
+
+	useEffect(() => {
+		if (activeLeaderboardTab === "this_week") {
+			setActiveLeaderboardTab("series");
+		}
+	}, [activeLeaderboardTab, setActiveLeaderboardTab]);
 
 	const handleOnTabChange = (value: string) => {
 		setActiveLeaderboardTab(value as LeaderboardTab);
@@ -102,17 +132,37 @@ function UserStats({
 			<p className={`text-xs text-muted-foreground mb-4`}>{subtitle}</p>
 			{showControls ? (
 				<Tabs
-					defaultValue={activeLeaderboardTab}
+					defaultValue={normalizedLeaderboardTab}
 					onValueChange={handleOnTabChange}
 				>
 					<TabsList className={`w-full`}>
-						<TabsTrigger value='this_week'>
-							<Calendar1Icon /> This Week
+						<TabsTrigger value='series'>
+							<Calendar1Icon /> Series
 						</TabsTrigger>
 						<TabsTrigger value='all_time'>
 							<TrophyIcon /> All Time
 						</TabsTrigger>
 					</TabsList>
+					{effectiveTab === "series" ? (
+						<Select
+							value={seriesSelector?.selected_series_id ?? ""}
+							onValueChange={setSelectedSeriesId}
+							disabled={(seriesSelector?.series.length ?? 0) <= 1}
+						>
+							<SelectTrigger className='w-full mt-2'>
+								<SelectValue placeholder='Select series' />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectGroup>
+									{(seriesSelector?.series ?? []).map((series) => (
+										<SelectItem key={series.id} value={series.id}>
+											{series.title}
+										</SelectItem>
+									))}
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					) : null}
 					{/* Sort by */}
 					<div className={`flex gap-1 my-1 justify-end items-center`}>
 						<ArrowDown10Icon
@@ -136,10 +186,12 @@ function UserStats({
 							</ToggleGroupItem>
 						</ToggleGroup>
 					</div>
-					<TabsContent value='this_week'>
+					<TabsContent value='series'>
 						<LeaderboardContent
-							leaderboard={weeklyLeaderboard}
-							isLoading={isWeeklyLeaderboardLoading}
+							leaderboard={seriesLeaderboard}
+							isLoading={
+								isSeriesSelectorLoading || isSeriesLeaderboardLoading
+							}
 							room={room}
 							sortBy={sortBy}
 							showSeeAllLink={showSeeAllLink}

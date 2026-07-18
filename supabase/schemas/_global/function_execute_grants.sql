@@ -11,6 +11,7 @@ grant execute on function public.activate_series(uuid) to authenticated;
 grant execute on function public.complete_series(uuid) to authenticated;
 grant execute on function public.archive_series(uuid) to authenticated;
 grant execute on function public.get_room_series(uuid) to authenticated;
+grant execute on function public.get_room_series_selector(uuid, uuid) to authenticated;
 grant execute on function public.get_series_active_predictions(uuid, uuid) to authenticated;
 grant execute on function public.get_series_completed_predictions(uuid, uuid) to authenticated;
 grant execute on function public.lock_prediction(uuid) to authenticated;

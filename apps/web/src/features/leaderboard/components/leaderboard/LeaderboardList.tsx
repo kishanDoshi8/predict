@@ -7,7 +7,7 @@ type Props = {
 	entries: LeaderboardEntry[];
 	currentPlayerId: string;
 	isLoading: boolean;
-	scope: "all_time" | "this_week";
+	scope: "all_time" | "series";
 	sortBy: LeaderboardSortBy;
 	onRowClick?: (playerId: string) => void;
 };
@@ -35,8 +35,8 @@ export function LeaderboardList({
 			<div className='flex flex-col items-center gap-2 py-12 text-center'>
 				<p className='text-4xl'>🏆</p>
 				<p className='text-muted-foreground text-sm'>
-					{scope === "this_week"
-						? "No wins this week yet. Be the first to score."
+					{scope === "series"
+						? "No series standings yet. Be the first to score."
 						: "No one is on the board yet. Make a prediction!"}
 				</p>
 			</div>

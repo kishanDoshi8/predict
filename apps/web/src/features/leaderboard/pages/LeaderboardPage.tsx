@@ -2,7 +2,8 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
 import {
 	useRoomLeaderboard,
-	useRoomWeeklyLeaderboard,
+	useRoomSeriesSelector,
+	useSeriesLeaderboard,
 	LeaderboardList,
 	TopThreePodium,
 } from "@/features/leaderboard";
@@ -11,7 +12,16 @@ import { cn } from "@/shared/lib/utils";
 import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
 import { ArrowDown10Icon, CircleQuestionMarkIcon } from "lucide-react";
-import { ToggleGroup, ToggleGroupItem } from "@/shared/ui";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	ToggleGroup,
+	ToggleGroupItem,
+} from "@/shared/ui";
 import { useMarkRatingsTipSeen, usePreferences } from "@/features/preferences";
 import React, { Suspense, lazy } from "react";
 
@@ -24,7 +34,7 @@ const PlayerProfileDialog = lazy(() =>
 	),
 );
 
-const LEADERBOARD_TABS = ["this_week", "all_time"] as const;
+const LEADERBOARD_TABS = ["series", "all_time"] as const;
 type LeaderboardTab = (typeof LEADERBOARD_TABS)[number];
 
 export function LeaderboardPage() {
@@ -39,8 +49,8 @@ export function LeaderboardPage() {
 	const hasOpenedOnboardingRef = React.useRef(false);
 	const hasMarkedRatingsTipSeenRef = React.useRef(false);
 	const [activeLeaderboardTab, setActiveLeaderboardTab] =
-		useLocalStorage<LeaderboardTab>(
-			"this_week",
+		useLocalStorage<string>(
+			"series",
 			localStorageKeys.userPreference.leaderboard.active_leaderboard_tab,
 		);
 
@@ -53,32 +63,61 @@ export function LeaderboardPage() {
 	>(null);
 	const [isProfileDialogOpen, setIsProfileDialogOpen] = React.useState(false);
 
+	const normalizedLeaderboardTab: LeaderboardTab =
+		activeLeaderboardTab === "all_time" ? "all_time" : "series";
+
+	const [selectedSeriesId, setSelectedSeriesId] = React.useState<string | null>(
+		null,
+	);
+
 	const {
 		data: allTimeLeaderboard = [],
 		isPending: isAllTimeLeaderboardLoading,
 	} = useRoomLeaderboard(
 		room.id,
-		activeLeaderboardTab === "all_time",
+		normalizedLeaderboardTab === "all_time",
 		sortBy,
 	);
 
 	const {
-		data: weeklyLeaderboard = [],
-		isPending: isWeeklyLeaderboardLoading,
-	} = useRoomWeeklyLeaderboard(
+		data: seriesSelector,
+		isPending: isSeriesSelectorLoading,
+	} = useRoomSeriesSelector(
 		room.id,
-		activeLeaderboardTab === "this_week",
+		selectedSeriesId,
+		normalizedLeaderboardTab === "series",
+	);
+
+	const {
+		data: seriesLeaderboard = [],
+		isPending: isSeriesLeaderboardLoading,
+	} = useSeriesLeaderboard(
+		room.id,
+		seriesSelector?.selected_series_id ?? null,
+		normalizedLeaderboardTab === "series",
 		sortBy,
 	);
 
+	React.useEffect(() => {
+		if (seriesSelector?.selected_series_id) {
+			setSelectedSeriesId(seriesSelector.selected_series_id);
+		}
+	}, [seriesSelector?.selected_series_id]);
+
+	React.useEffect(() => {
+		if (activeLeaderboardTab === "this_week") {
+			setActiveLeaderboardTab("series");
+		}
+	}, [activeLeaderboardTab, setActiveLeaderboardTab]);
+
 	const leaderboard =
-		activeLeaderboardTab === "all_time"
+		normalizedLeaderboardTab === "all_time"
 			? allTimeLeaderboard
-			: weeklyLeaderboard;
+			: seriesLeaderboard;
 	const isLeaderboardLoading =
-		activeLeaderboardTab === "all_time"
+		normalizedLeaderboardTab === "all_time"
 			? isAllTimeLeaderboardLoading
-			: isWeeklyLeaderboardLoading;
+			: isSeriesSelectorLoading || isSeriesLeaderboardLoading;
 
 	React.useEffect(() => {
 		if (!preferences) return;
@@ -139,15 +178,36 @@ export function LeaderboardPage() {
 							onClick={() => setActiveLeaderboardTab(tab)}
 							className={cn(
 								"flex-1 text-sm py-2 rounded-md font-bold transition-colors",
-								activeLeaderboardTab === tab
+								normalizedLeaderboardTab === tab
 									? "bg-linear-to-r from-primary to-accent shadow-sm text-foreground"
 									: "text-muted-foreground hover:text-foreground",
 							)}
 						>
-							{tab === "this_week" ? "This Week" : "All Time"}
+							{tab === "series" ? "Series" : "All Time"}
 						</button>
 					))}
 				</div>
+
+				{normalizedLeaderboardTab === "series" ? (
+					<Select
+						value={seriesSelector?.selected_series_id ?? ""}
+						onValueChange={setSelectedSeriesId}
+						disabled={(seriesSelector?.series.length ?? 0) <= 1}
+					>
+						<SelectTrigger className='w-full'>
+							<SelectValue placeholder='Select series' />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								{(seriesSelector?.series ?? []).map((series) => (
+									<SelectItem key={series.id} value={series.id}>
+										{series.title}
+									</SelectItem>
+								))}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				) : null}
 
 				{/* Sort by */}
 				<div className={`flex gap-1 my-1 justify-end items-center`}>
@@ -177,7 +237,7 @@ export function LeaderboardPage() {
 					entries={leaderboard}
 					currentPlayerId={player?.id ?? ""}
 					isLoading={isLeaderboardLoading}
-					scope={activeLeaderboardTab}
+					scope={normalizedLeaderboardTab}
 					sortBy={sortBy}
 					onRowClick={(playerId) => {
 						setSelectedPlayerId(playerId);

@@ -1,13 +1,12 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { cn } from "@/shared/lib/utils";
 import {
-	Combobox,
-	ComboboxContent,
-	ComboboxEmpty,
-	ComboboxInput,
-	ComboboxItem,
-	ComboboxList,
-} from "@/shared/ui/combobox";
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/shared/ui";
 import { SeriesSelectorMode } from "@/shared/lib/api";
 import { useSeriesSelector } from "@/features/series/hooks/series";
 
@@ -46,62 +45,81 @@ export function SeriesSelector({
 	emptyMessage = "No series found.",
 }: Readonly<SeriesSelectorProps>) {
 	const { data, isPending } = useSeriesSelector(roomId, mode, value);
+	const seriesCount = data?.series.length ?? 0;
 
 	const items = useMemo<SeriesSelectorItem[]>(
-		() =>
-			[
-				...(optional
-					? [{ value: ALL_SERIES_VALUE, label: allLabel }]
-					: []),
-				...(data?.series ?? []).map((series) => ({
-					value: series.id,
-					label: series.title,
-				})),
-			],
+		() => [
+			...(optional ? [{ value: ALL_SERIES_VALUE, label: allLabel }] : []),
+			...(data?.series ?? []).map((series) => ({
+				value: series.id,
+				label: series.title,
+			})),
+		],
 		[allLabel, data?.series, optional],
 	);
 
-	const selectedItem = useMemo(() => {
-		const selectedValue = value ?? (optional ? ALL_SERIES_VALUE : null);
-		return items.find((item) => item.value === selectedValue) ?? null;
-	}, [items, optional, value]);
+	const selectedValue = useMemo(() => {
+		if (!value && optional) {
+			return ALL_SERIES_VALUE;
+		}
+
+		return value ?? undefined;
+	}, [optional, value]);
+
+	const handleValueChange = useCallback(
+		(nextValue: string) => {
+			onValueChange(
+				nextValue === ALL_SERIES_VALUE ? null : (nextValue ?? null),
+			);
+		},
+		[onValueChange],
+	);
 
 	useEffect(() => {
-		if (!autoSelect || value || !data?.selected_series_id) {
+		if (!autoSelect || value || items.length === 0) {
 			return;
 		}
-		onValueChange(data.selected_series_id);
-	}, [autoSelect, data?.selected_series_id, onValueChange, value]);
+
+		const firstSeriesItem =
+			items.find((item) => item.value !== ALL_SERIES_VALUE) ?? items[0];
+		if (!firstSeriesItem) {
+			return;
+		}
+
+		onValueChange(
+			firstSeriesItem.value === ALL_SERIES_VALUE
+				? null
+				: firstSeriesItem.value,
+		);
+	}, [autoSelect, items, onValueChange, value]);
 
 	return (
-		<Combobox
-			value={selectedItem}
-			onValueChange={(nextValue) =>
-				onValueChange(
-					nextValue?.value === ALL_SERIES_VALUE
-						? null
-						: (nextValue?.value ?? null),
-				)
-			}
-			itemToStringLabel={(item) => item.label}
-			itemToStringValue={(item) => item.value}
-		>
-			<ComboboxInput
+		<Select value={selectedValue} onValueChange={handleValueChange}>
+			<SelectTrigger
 				className={cn("w-full", className)}
-				placeholder={isPending ? "Loading series..." : placeholder}
-				disabled={disabled || isPending || items.length === 0}
-				showClear={optional && Boolean(value)}
-			/>
-			<ComboboxContent>
-				<ComboboxList>
-					<ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
-					{items.map((item) => (
-						<ComboboxItem key={item.value} value={item}>
+				disabled={
+					disabled ||
+					isPending ||
+					(seriesCount <= 1 && mode !== "all")
+				}
+			>
+				<SelectValue
+					placeholder={isPending ? "Loading series..." : placeholder}
+				/>
+			</SelectTrigger>
+			<SelectContent>
+				{items.length > 0 ? (
+					items.map((item) => (
+						<SelectItem key={item.value} value={item.value}>
 							{item.label}
-						</ComboboxItem>
-					))}
-				</ComboboxList>
-			</ComboboxContent>
-		</Combobox>
+						</SelectItem>
+					))
+				) : (
+					<SelectItem value='__empty_series__' disabled>
+						{emptyMessage}
+					</SelectItem>
+				)}
+			</SelectContent>
+		</Select>
 	);
 }

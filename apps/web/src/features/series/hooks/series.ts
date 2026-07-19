@@ -39,6 +39,7 @@ export const useSeriesSelector = (
 			selectedSeriesId ?? "default",
 		),
 		queryFn: () => getRoomSeriesSelector(roomId ?? "", selectedSeriesId, mode),
+		placeholderData: (previousData) => previousData,
 		enabled: !!roomId && enabled,
 	});
 };

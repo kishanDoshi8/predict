@@ -11,7 +11,7 @@ grant execute on function public.activate_series(uuid) to authenticated;
 grant execute on function public.complete_series(uuid) to authenticated;
 grant execute on function public.archive_series(uuid) to authenticated;
 grant execute on function public.get_room_series(uuid) to authenticated;
-grant execute on function public.get_room_series_selector(uuid, uuid) to authenticated;
+grant execute on function public.get_room_series_selector(uuid, uuid, text) to authenticated;
 grant execute on function public.get_series_active_predictions(uuid, uuid) to authenticated;
 grant execute on function public.get_series_completed_predictions(uuid, uuid) to authenticated;
 grant execute on function public.lock_prediction(uuid) to authenticated;
@@ -30,7 +30,7 @@ grant execute on function public.get_series_leaderboard(uuid, uuid, text) to aut
 grant execute on function public.get_room_weekly_leaderboard(uuid, text) to authenticated;
 grant execute on function public.get_latest_room_member_snapshot(uuid, uuid) to authenticated;
 grant execute on function public.get_room_prediction_history(uuid, int, timestamptz, uuid, text, text, uuid) to authenticated;
-grant execute on function public.get_room_activities(uuid, integer, timestamptz, uuid, text) to authenticated;
+grant execute on function public.get_room_activities(uuid, integer, timestamptz, uuid, text, uuid) to authenticated;
 grant execute on function public.get_room_stat_cards(uuid, int) to authenticated;
 grant execute on function public.get_room_member_stats(uuid, uuid) to authenticated;
 grant execute on function public.get_room_member_recent_predictions(uuid, uuid, int, int) to authenticated;

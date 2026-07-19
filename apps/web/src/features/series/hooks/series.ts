@@ -4,6 +4,9 @@ import {
 	completeSeries,
 	createSeries,
 	getRoomSeries,
+	getRoomSeriesSelector,
+	type RoomSeriesSelector,
+	type SeriesSelectorMode,
 	updateSeries,
 } from "@/shared/lib/api";
 import { roomKeys } from "@/shared/constants/queryKeys";
@@ -20,6 +23,23 @@ export const useRoomSeries = (roomId?: string) => {
 		queryKey: roomKeys.series(roomId ?? ""),
 		queryFn: () => getRoomSeries(roomId ?? ""),
 		enabled: !!roomId,
+	});
+};
+
+export const useSeriesSelector = (
+	roomId?: string,
+	mode: SeriesSelectorMode = "active-or-last",
+	selectedSeriesId?: string | null,
+	enabled = true,
+) => {
+	return useQuery<RoomSeriesSelector>({
+		queryKey: roomKeys.seriesSelector(
+			roomId ?? "",
+			mode,
+			selectedSeriesId ?? "default",
+		),
+		queryFn: () => getRoomSeriesSelector(roomId ?? "", selectedSeriesId, mode),
+		enabled: !!roomId && enabled,
 	});
 };
 

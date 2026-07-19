@@ -7,3 +7,4 @@ export { SeriesRecentActivitySection } from "./SeriesRecentActivitySection";
 export { SeriesSectionHeader } from "./SeriesSectionHeader";
 export { SeriesStatusBadge } from "./SeriesStatusBadge";
 export { SeriesTile } from "./SeriesTile";
+export { SeriesSelector } from "./SeriesSelector";

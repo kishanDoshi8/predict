@@ -21,23 +21,13 @@ import { toast } from "sonner";
 import { Spinner } from "@/shared/ui/spinner";
 import { useCreatePrediction } from "@/features/predictions";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import { useRoomSeries } from "@/features/series";
+import { SeriesSelector } from "@/features/series";
 import { useLocation } from "react-router-dom";
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/shared/ui";
 
 export default function PredictionNew() {
 	const { room } = useRoomContext();
 	const location = useLocation();
 	const navigationState = location.state as { seriesId?: string } | null;
-	const { data: roomSeries } = useRoomSeries(room?.id);
-	const activeSeries = roomSeries?.active ?? [];
 	const { mutate: createPrediction, isPending: isLoading } =
 		useCreatePrediction();
 	const navigate = useNavigate();
@@ -57,7 +47,9 @@ export default function PredictionNew() {
 		new Date(Date.now() + 24 * 60 * 60 * 1000),
 	);
 	const [customTime, setCustomTime] = useState<string>("22:00:00");
-	const [selectedSeriesId, setSelectedSeriesId] = useState<string>("");
+	const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(
+		navigationState?.seriesId ?? null,
+	);
 	const [openCustomDatePicker, setOpenCustomDatePicker] = useState(false);
 
 	const [errors, setErrors] = useState<string[]>([]);
@@ -65,24 +57,6 @@ export default function PredictionNew() {
 	useEffect(() => {
 		calculateDeadline();
 	}, [customDate, customTime, biddingDeadline]);
-
-	useEffect(() => {
-		const preselectedSeriesId = navigationState?.seriesId;
-		if (
-			preselectedSeriesId &&
-			activeSeries.some((series) => series.id === preselectedSeriesId)
-		) {
-			setSelectedSeriesId(preselectedSeriesId);
-			return;
-		}
-
-		if (activeSeries.length === 1) {
-			setSelectedSeriesId(activeSeries[0].id);
-			return;
-		}
-
-		setSelectedSeriesId("");
-	}, [activeSeries, navigationState?.seriesId]);
 
 	useEffect(() => {
 		if (errors.includes("question") && question.trim()) {
@@ -134,7 +108,7 @@ export default function PredictionNew() {
 					title: question,
 					options: options.map((opt) => opt.text),
 					deadline: new Date(deadlineDate),
-					seriesId: selectedSeriesId || null,
+					seriesId: selectedSeriesId,
 				},
 				{
 					onSuccess: () => {
@@ -235,27 +209,15 @@ export default function PredictionNew() {
 				<FieldGroup>
 					<Field>
 						<FieldLabel htmlFor='series'>Series</FieldLabel>
-						<Select
+						<SeriesSelector
+							roomId={room?.id}
+							mode='active'
 							value={selectedSeriesId}
 							onValueChange={setSelectedSeriesId}
-							disabled={activeSeries.length <= 1}
-						>
-							<SelectTrigger className={`w-full`}>
-								<SelectValue placeholder='Series' />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectGroup>
-									{activeSeries.map((series) => (
-										<SelectItem
-											key={series.id}
-											value={series.id}
-										>
-											{series.title}
-										</SelectItem>
-									))}
-								</SelectGroup>
-							</SelectContent>
-						</Select>
+							placeholder='Select active series'
+							optional
+							autoSelect
+						/>
 					</Field>
 					<Field>
 						<FieldLabel htmlFor='question'>The Question</FieldLabel>

@@ -2,6 +2,7 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useRoomActivities, ActivityFilter } from "@/features/activities";
 import { useMarkRoomActivitiesSeen } from "@/features/rooms";
 import { RoomActivitiesFeed } from "@/features/activities/components";
+import { SeriesSelector } from "@/features/series";
 import { Button, Skeleton } from "@/shared/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -12,6 +13,7 @@ const FILTERS: Array<{ label: string; value: ActivityFilter }> = [
 export default function RoomActivitiesPage() {
 	const { room } = useRoomContext();
 	const [filter, setFilter] = useState<ActivityFilter>("all");
+	const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 	const hasScheduledSeenRef = useRef(false);
 	const { mutate: markActivitiesSeen } = useMarkRoomActivitiesSeen(
@@ -27,7 +29,7 @@ export default function RoomActivitiesPage() {
 		hasNextPage,
 		isFetchingNextPage,
 		fetchNextPage,
-	} = useRoomActivities(room.id, filter);
+	} = useRoomActivities(room.id, filter, selectedSeriesId ?? undefined);
 
 	const activities = useMemo(
 		() => data?.pages.flatMap((page) => page.items) ?? [],
@@ -102,6 +104,14 @@ export default function RoomActivitiesPage() {
 					</Button>
 				))}
 			</div>
+			<SeriesSelector
+				roomId={room.id}
+				mode='all'
+				value={selectedSeriesId}
+				onValueChange={setSelectedSeriesId}
+				placeholder='Filter by series'
+				optional
+			/>
 
 			<RoomActivitiesFeed
 				activities={activities}
@@ -109,6 +119,11 @@ export default function RoomActivitiesPage() {
 				isLoading={isPending}
 				isError={isError}
 				errorMessage={error instanceof Error ? error.message : undefined}
+				emptyMessage={
+					selectedSeriesId
+						? "No activities found for this Series."
+						: undefined
+				}
 			/>
 
 			<div ref={loadMoreRef} className='h-4' />

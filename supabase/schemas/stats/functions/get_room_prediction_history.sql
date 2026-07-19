@@ -50,6 +50,7 @@ begin
       pred.resolved_at,
       pred.created_at,
       pred.winning_option_id,
+      pred.series_id,
       pred.series_prediction_number,
       s.title as series_title,
       user_bet.option_id  as selected_option_id,
@@ -117,10 +118,7 @@ begin
       group by b.prediction_id
     ) bs on bs.prediction_id = pred.id
     where pred.room_id = p_room_id
-      and (
-        (p_series_id is null and pred.status in ('revealed', 'cancelled', 'no_result'))
-        or (p_series_id is not null and pred.status in ('revealed', 'no_result'))
-      )
+      and pred.status in ('revealed', 'cancelled', 'no_result')
       and (p_series_id is null or pred.series_id = p_series_id)
       and (
         p_cursor_created_at is null

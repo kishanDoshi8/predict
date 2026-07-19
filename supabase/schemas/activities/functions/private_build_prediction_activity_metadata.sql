@@ -8,6 +8,7 @@ set search_path = public, private
 as $$
 declare
   v_prediction public.predictions%rowtype;
+  v_series_title text := null;
   v_total_bets integer := 0;
   v_total_wagered integer := 0;
   v_option_totals jsonb := '[]'::jsonb;
@@ -50,9 +51,18 @@ begin
     where po.id = v_prediction.winning_option_id;
   end if;
 
+  if v_prediction.series_id is not null then
+    select s.title into v_series_title
+    from public.series s
+    where s.id = v_prediction.series_id;
+  end if;
+
   return jsonb_build_object(
     'predictionId', v_prediction.id,
     'title', v_prediction.title,
+    'seriesId', v_prediction.series_id,
+    'seriesTitle', v_series_title,
+    'seriesPredictionNumber', v_prediction.series_prediction_number,
     'status', v_prediction.status,
     'deadline', v_prediction.deadline,
     'resolvedAt', v_prediction.resolved_at,

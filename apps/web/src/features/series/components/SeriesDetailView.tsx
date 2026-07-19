@@ -1,7 +1,10 @@
 import { SeriesEditDialog } from "@/features/series/components/SeriesEditDialog";
 import { SeriesOverviewCard } from "@/features/series/components/SeriesOverviewCard";
 import { SeriesRecentActivitySection } from "@/features/series/components/SeriesRecentActivitySection";
-import type { LeaderboardEntry, PredictionHistoryEntry } from "@/features/leaderboard";
+import type {
+	LeaderboardEntry,
+	PredictionHistoryEntry,
+} from "@/features/leaderboard";
 import type { RoomActivity } from "@/features/activities/types/types";
 import { PredictionHistoryFeed } from "@/features/leaderboard";
 import { InPlayPredictions, UserStats } from "@/features/predictions";
@@ -9,6 +12,7 @@ import type { Prediction } from "@/features/predictions";
 import type { Series } from "@/features/series/types/series";
 import { Button } from "@/shared/ui";
 import { ChevronLeftIcon, RocketIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
 type SeriesFormState = {
 	title: string;
@@ -67,18 +71,20 @@ export function SeriesDetailView({
 	onCancelEdit,
 	onSaveEdit,
 }: Readonly<SeriesDetailViewProps>) {
+	const [compactBackButton, setCompactBackButton] = useState(false);
+
+	useEffect(() => {
+		const onScroll = () => {
+			setCompactBackButton(window.scrollY > 80);
+		};
+
+		onScroll();
+		window.addEventListener("scroll", onScroll, { passive: true });
+		return () => window.removeEventListener("scroll", onScroll);
+	}, []);
+
 	return (
 		<div className='mx-auto w-full max-w-md space-y-6 p-4'>
-			<Button
-				variant='outline'
-				size='sm'
-				onClick={onBackToList}
-				className='rounded-2xl text-muted-foreground'
-			>
-				<ChevronLeftIcon className='mr-2 h-4 w-4' />
-				Back to series
-			</Button>
-
 			<SeriesOverviewCard
 				series={series}
 				isOrganizer={isOrganizer}
@@ -127,10 +133,12 @@ export function SeriesDetailView({
 
 			{isOrganizer ? (
 				<div
-					className='fixed right-4 z-50 mb-4'
-					style={{
-						bottom: "calc(4.5rem + env(safe-area-inset-bottom))",
-					}}
+					className='fixed right-8 z-50 bottom-2'
+					style={
+						{
+							// bottom: "calc(2rem + env(safe-area-inset-bottom))",
+						}
+					}
 				>
 					<Button
 						type='button'
@@ -154,6 +162,26 @@ export function SeriesDetailView({
 				onCancel={onCancelEdit}
 				onSave={onSaveEdit}
 			/>
+
+			<Button
+				variant='secondary'
+				onClick={onBackToList}
+				aria-label='Back to series'
+				className={`sticky bottom-8 left-8 border border-muted-foreground/20 backdrop-blur-sm rounded-2xl
+                    transition-all duration-300 ease-out overflow-hidden
+                    ${compactBackButton ? "w-10 px-0 justify-center gap-0" : "w-auto px-3 justify-start"}
+                `}
+				size={compactBackButton ? "icon-lg" : "default"}
+			>
+				<ChevronLeftIcon className='size-5 shrink-0' />
+				<span
+					className={`ml-2 whitespace-nowrap transition-all duration-300 ease-out
+                        ${compactBackButton ? "max-w-0 w-0 opacity-0 -translate-x-1 ml-0" : "max-w-32 opacity-100 translate-x-0"}
+                    `}
+				>
+					Back to series
+				</span>
+			</Button>
 		</div>
 	);
 }

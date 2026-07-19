@@ -1,8 +1,9 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import { useRoomActivities } from "@/features/activities/hooks";
-import type { RoomActivity } from "@/features/activities/types/types";
 import { usePlayer } from "@/features/home";
-import { usePredictionHistory, useSeriesLeaderboard } from "@/features/leaderboard";
+import {
+	usePredictionHistory,
+	useSeriesLeaderboard,
+} from "@/features/leaderboard";
 import { useActivePredictions } from "@/features/predictions";
 import { SeriesDetailView, SeriesListView } from "@/features/series/components";
 import { useRoomSeries, useUpdateSeries } from "@/features/series";
@@ -38,18 +39,6 @@ function getAllSeries(seriesByStatus?: SeriesByStatus) {
 		...(seriesByStatus?.completed ?? []),
 		...(seriesByStatus?.archived ?? []),
 	];
-}
-
-function getPredictionIdFromActivity(activity: RoomActivity) {
-	if (activity.clickAction?.type === "prediction") {
-		return activity.clickAction.predictionId;
-	}
-
-	if (activity.clickAction?.type === "duel") {
-		return activity.clickAction.predictionId;
-	}
-
-	return null;
 }
 
 function saveSeriesEdit({
@@ -98,12 +87,12 @@ export default function SeriesPage() {
 	const location = useLocation();
 	const { data: player } = usePlayer();
 	const { data: seriesByStatus, isPending } = useRoomSeries(room.id);
-	const { data: roomPredictions = [], isPending: isPredictionsPending } =
-		useActivePredictions(room.id, seriesId);
+	const { data: roomPredictions = [] } = useActivePredictions(
+		room.id,
+		seriesId,
+	);
 	const { data: seriesHistoryPages, isPending: isSeriesHistoryPending } =
 		usePredictionHistory(room.id, "all", "", seriesId);
-	const { data: activityPages, isPending: isActivitiesPending } =
-		useRoomActivities(room.id, "predictions");
 
 	const { mutate: updateSeries, isPending: isUpdatePending } =
 		useUpdateSeries(room.id);
@@ -134,7 +123,11 @@ export default function SeriesPage() {
 	const {
 		data: seriesLeaderboard = [],
 		isPending: isSeriesLeaderboardLoading,
-	} = useSeriesLeaderboard(room.id, selectedSeries?.id ?? null, !!selectedSeries);
+	} = useSeriesLeaderboard(
+		room.id,
+		selectedSeries?.id ?? null,
+		!!selectedSeries,
+	);
 
 	const seriesOpenPredictions = useMemo(() => {
 		if (!selectedSeries) {
@@ -152,28 +145,11 @@ export default function SeriesPage() {
 		});
 	}, [roomPredictions, selectedSeries]);
 
-	const seriesPredictionIds = useMemo(
-		() => new Set(seriesOpenPredictions.map((prediction) => prediction.id)),
-		[seriesOpenPredictions],
-	);
-
-	const seriesActivities = useMemo(() => {
-		const activities =
-			activityPages?.pages.flatMap((page) => page.items) ?? [];
-		return activities
-			.filter((activity) => {
-				const predictionId = getPredictionIdFromActivity(activity);
-				return predictionId
-					? seriesPredictionIds.has(predictionId)
-					: false;
-			})
-			.slice(0, 3);
-	}, [activityPages, seriesPredictionIds]);
-
 	const seriesCompletedPredictions = useMemo(
 		() =>
-			seriesHistoryPages?.pages.flatMap((page) => page.items).slice(0, 20) ??
-			[],
+			seriesHistoryPages?.pages
+				.flatMap((page) => page.items)
+				.slice(0, 20) ?? [],
 		[seriesHistoryPages],
 	);
 
@@ -274,13 +250,10 @@ export default function SeriesPage() {
 	return (
 		<SeriesDetailView
 			series={selectedSeries}
-			roomCode={room.code}
 			isOrganizer={isOrganizer}
 			isActionPending={isUpdatePending || isActionPending}
 			isUpdatePending={isUpdatePending}
 			seriesOpenPredictions={seriesOpenPredictions}
-			seriesActivities={seriesActivities}
-			isActivityLoading={isActivitiesPending || isPredictionsPending}
 			seriesCompletedPredictions={seriesCompletedPredictions}
 			isCompletedPredictionsLoading={isSeriesHistoryPending}
 			seriesLeaderboard={seriesLeaderboard}

@@ -53,7 +53,7 @@ type UserStatsProps = {
 
 function UserStats({
 	showControls = true,
-	title = "The Hall of Fame",
+	title = "Leaderboard",
 	subtitle = "Where legends are made (and egos are crushed)",
 	leaderboardEntriesOverride,
 	isLeaderboardLoadingOverride,
@@ -69,7 +69,9 @@ function UserStats({
 	const normalizedLeaderboardTab: LeaderboardTab =
 		activeLeaderboardTab === "all_time" ? "all_time" : "series";
 
-	const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
+	const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(
+		null,
+	);
 
 	const [sortBy, setSortBy] = useLocalStorage<SortByOption>(
 		"ratings",
@@ -84,13 +86,15 @@ function UserStats({
 		isPending: isAllTimeLeaderboardLoading,
 	} = useRoomLeaderboard(room.id, effectiveTab === "all_time", sortBy);
 
-	const { data: seriesLeaderboard = [], isPending: isSeriesLeaderboardLoading } =
-		useSeriesLeaderboard(
-			room.id,
-			selectedSeriesId,
-			effectiveTab === "series",
-			sortBy,
-		);
+	const {
+		data: seriesLeaderboard = [],
+		isPending: isSeriesLeaderboardLoading,
+	} = useSeriesLeaderboard(
+		room.id,
+		selectedSeriesId,
+		effectiveTab === "series",
+		sortBy,
+	);
 
 	const leaderboard =
 		leaderboardEntriesOverride ??
@@ -122,10 +126,10 @@ function UserStats({
 				>
 					<TabsList className={`w-full`}>
 						<TabsTrigger value='series'>
-							<Calendar1Icon /> Series
+							<TrophyIcon /> Series
 						</TabsTrigger>
 						<TabsTrigger value='all_time'>
-							<TrophyIcon /> All Time
+							<Calendar1Icon /> All Time
 						</TabsTrigger>
 					</TabsList>
 					{effectiveTab === "series" ? (
@@ -155,19 +159,17 @@ function UserStats({
 							variant={"outline"}
 						>
 							<ToggleGroupItem value='ratings'>
-								Skill
+								Ratings
 							</ToggleGroupItem>
 							<ToggleGroupItem value='points'>
-								Wealth
+								Points
 							</ToggleGroupItem>
 						</ToggleGroup>
 					</div>
 					<TabsContent value='series'>
 						<LeaderboardContent
 							leaderboard={seriesLeaderboard}
-							isLoading={
-								isSeriesLeaderboardLoading
-							}
+							isLoading={isSeriesLeaderboardLoading}
 							room={room}
 							sortBy={sortBy}
 							showSeeAllLink={showSeeAllLink}

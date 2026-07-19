@@ -162,6 +162,16 @@ function PredictionCard({
 				</div>
 
 				<FadeContent delay={contentDelays.title}>
+					<h6
+						className={`text-xs text-muted-foreground font-semibold`}
+					>
+						{prediction.series_title
+							? `${prediction.series_title} • #${prediction.series_prediction_number}`
+							: "Prediction"}
+					</h6>
+				</FadeContent>
+
+				<FadeContent delay={contentDelays.title}>
 					<h4 className={`text-xl md:text-2xl font-semibold mb-4`}>
 						{prediction.title}
 					</h4>

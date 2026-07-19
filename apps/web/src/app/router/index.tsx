@@ -40,7 +40,7 @@ const RoomHistoryPage = lazy(
 const RoomActivitiesPage = lazy(
 	() => import("@/features/rooms/pages/RoomActivitiesPage"),
 );
-const RoomProfilePage = lazy(() =>
+const SeriesPage = lazy(() =>
 	import("@/features/series").then((module) => ({
 		default: module.SeriesPage,
 	})),
@@ -185,7 +185,7 @@ export const router = createBrowserRouter([
 											{
 												path: "series",
 												element: withSuspense(
-													<RoomProfilePage />,
+													<SeriesPage />,
 												),
 												handle: {
 													header: {
@@ -204,18 +204,16 @@ export const router = createBrowserRouter([
 													},
 												},
 											},
-											{
-												path: "series/:seriesId",
-												element: withSuspense(
-													<RoomProfilePage />,
-												),
-												handle: {
-													header: {
-														leftAction: "back",
-													},
-												},
-											},
 										],
+									},
+									{
+										path: "series/:seriesId",
+										element: withSuspense(<SeriesPage />),
+										handle: {
+											header: {
+												leftAction: "back",
+											},
+										},
 									},
 									{
 										path: "predictions/new",

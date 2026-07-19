@@ -2,26 +2,17 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
 import {
 	useRoomLeaderboard,
-	useRoomSeriesSelector,
 	useSeriesLeaderboard,
 	LeaderboardList,
 	TopThreePodium,
 } from "@/features/leaderboard";
+import { SeriesSelector } from "@/features/series";
 import type { SortByOption } from "@/features/leaderboard/types/types";
 import { cn } from "@/shared/lib/utils";
 import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
 import { ArrowDown10Icon, CircleQuestionMarkIcon } from "lucide-react";
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-	ToggleGroup,
-	ToggleGroupItem,
-} from "@/shared/ui";
+import { ToggleGroup, ToggleGroupItem } from "@/shared/ui";
 import { useMarkRatingsTipSeen, usePreferences } from "@/features/preferences";
 import React, { Suspense, lazy } from "react";
 
@@ -80,29 +71,14 @@ export function LeaderboardPage() {
 	);
 
 	const {
-		data: seriesSelector,
-		isPending: isSeriesSelectorLoading,
-	} = useRoomSeriesSelector(
-		room.id,
-		selectedSeriesId,
-		normalizedLeaderboardTab === "series",
-	);
-
-	const {
 		data: seriesLeaderboard = [],
 		isPending: isSeriesLeaderboardLoading,
 	} = useSeriesLeaderboard(
 		room.id,
-		seriesSelector?.selected_series_id ?? null,
+		selectedSeriesId,
 		normalizedLeaderboardTab === "series",
 		sortBy,
 	);
-
-	React.useEffect(() => {
-		if (seriesSelector?.selected_series_id) {
-			setSelectedSeriesId(seriesSelector.selected_series_id);
-		}
-	}, [seriesSelector?.selected_series_id]);
 
 	React.useEffect(() => {
 		if (activeLeaderboardTab === "this_week") {
@@ -117,7 +93,7 @@ export function LeaderboardPage() {
 	const isLeaderboardLoading =
 		normalizedLeaderboardTab === "all_time"
 			? isAllTimeLeaderboardLoading
-			: isSeriesSelectorLoading || isSeriesLeaderboardLoading;
+			: isSeriesLeaderboardLoading;
 
 	React.useEffect(() => {
 		if (!preferences) return;
@@ -189,24 +165,14 @@ export function LeaderboardPage() {
 				</div>
 
 				{normalizedLeaderboardTab === "series" ? (
-					<Select
-						value={seriesSelector?.selected_series_id ?? ""}
+					<SeriesSelector
+						roomId={room.id}
+						mode='active-or-last'
+						value={selectedSeriesId}
 						onValueChange={setSelectedSeriesId}
-						disabled={(seriesSelector?.series.length ?? 0) <= 1}
-					>
-						<SelectTrigger className='w-full'>
-							<SelectValue placeholder='Select series' />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								{(seriesSelector?.series ?? []).map((series) => (
-									<SelectItem key={series.id} value={series.id}>
-										{series.title}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
+						placeholder='Select series'
+						autoSelect
+					/>
 				) : null}
 
 				{/* Sort by */}

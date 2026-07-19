@@ -16,6 +16,7 @@ const DEFAULT_ACTIVITY_LIMIT = 20;
 export const useRoomActivities = (
 	roomId?: string,
 	filter: ActivityFilter = "all",
+	seriesId?: string | null,
 ) => {
 	const initialCursor: ActivityCursor = {
 		cursorCreatedAt: null,
@@ -29,7 +30,7 @@ export const useRoomActivities = (
 		ReturnType<typeof roomKeys.activities>,
 		ActivityCursor
 	>({
-		queryKey: roomKeys.activities(roomId ?? "", filter),
+		queryKey: roomKeys.activities(roomId ?? "", filter, seriesId ?? "all"),
 		queryFn: ({ pageParam }) =>
 			getRoomActivities({
 				roomId: roomId ?? "",
@@ -37,6 +38,7 @@ export const useRoomActivities = (
 				cursorCreatedAt: pageParam.cursorCreatedAt,
 				cursorId: pageParam.cursorId,
 				filter,
+				seriesId,
 			}),
 		initialPageParam: initialCursor,
 		getNextPageParam: (lastPage) => {

@@ -87,6 +87,8 @@ export type RoomSeriesSelector = {
   series: RoomSeriesSelectorOption[]
 }
 
+export type SeriesSelectorMode = 'active' | 'active-or-last' | 'all'
+
 // ============================================================
 // API — thin wrappers around Supabase RPC functions
 // All functions throw on error so callers can catch uniformly.
@@ -357,10 +359,12 @@ export async function archiveSeries(seriesId: string): Promise<Series> {
 export async function getRoomSeriesSelector(
   roomId: string,
   selectedSeriesId?: string | null,
+  mode: SeriesSelectorMode = 'active-or-last',
 ): Promise<RoomSeriesSelector> {
   const { data, error } = await untypedSupabase.rpc('get_room_series_selector', {
     p_room_id: roomId,
     p_selected_series_id: selectedSeriesId ?? undefined,
+    p_mode: mode,
   })
 
   return assertOk(data, error) as RoomSeriesSelector
@@ -933,6 +937,7 @@ type GetRoomActivitiesParams = {
   cursorCreatedAt?: string | null
   cursorId?: string | null
   filter?: ActivityFilter
+  seriesId?: string | null
 }
 
 export async function getRoomActivities({
@@ -941,6 +946,7 @@ export async function getRoomActivities({
   cursorCreatedAt = null,
   cursorId = null,
   filter = 'all',
+  seriesId = null,
 }: GetRoomActivitiesParams) {
   const { data, error } = await untypedSupabase.rpc('get_room_activities', {
     p_room_id: roomId,
@@ -948,6 +954,7 @@ export async function getRoomActivities({
     p_cursor_created_at: cursorCreatedAt ?? undefined,
     p_cursor_id: cursorId ?? undefined,
     p_filter: filter,
+    p_series_id: seriesId ?? undefined,
   })
 
   return assertOk(data, error) as RoomActivitiesPage

@@ -1,6 +1,7 @@
 create or replace function public.get_room_series_selector(
   p_room_id uuid,
-  p_selected_series_id uuid default null
+  p_selected_series_id uuid default null,
+  p_mode text default 'active-or-last'
 )
 returns json
 language plpgsql
@@ -9,6 +10,7 @@ set search_path = public, private
 as $$
 declare
   v_player_id uuid;
+  v_mode text;
   v_active_count integer := 0;
   v_options json := '[]'::json;
   v_selected_series_id uuid;
@@ -29,13 +31,60 @@ begin
     raise exception 'Room member not found' using errcode = 'P0011';
   end if;
 
+  v_mode := coalesce(nullif(lower(trim(p_mode)), ''), 'active-or-last');
+
+  if v_mode not in ('active', 'active-or-last', 'all') then
+    raise exception 'Invalid selector mode: %', p_mode using errcode = 'P0001';
+  end if;
+
   select count(*)::int
   into v_active_count
   from public.series s
   where s.room_id = p_room_id
     and s.status = 'active';
 
-  if v_active_count > 0 then
+  if v_mode = 'all' then
+    select coalesce(
+      json_agg(
+        json_build_object(
+          'id', s.id,
+          'title', s.title,
+          'status', s.status,
+          'started_at', s.started_at,
+          'completed_at', s.completed_at,
+          'created_at', s.created_at
+        )
+        order by
+          case s.status
+            when 'active' then 0
+            when 'draft' then 1
+            when 'completed' then 2
+            else 3
+          end,
+          coalesce(s.started_at, s.completed_at, s.created_at) desc,
+          s.created_at desc
+      ),
+      '[]'::json
+    )
+    into v_options
+    from public.series s
+    where s.room_id = p_room_id
+      and s.status <> 'archived';
+
+    if p_selected_series_id is not null
+      and exists (
+        select 1
+        from public.series s
+        where s.id = p_selected_series_id
+          and s.room_id = p_room_id
+          and s.status <> 'archived'
+      ) then
+      v_selected_series_id := p_selected_series_id;
+    else
+      v_selected_series_id := null;
+    end if;
+
+  elsif v_active_count > 0 then
     select coalesce(
       json_agg(
         json_build_object(
@@ -64,6 +113,8 @@ begin
           and s.status = 'active'
       ) then
       v_selected_series_id := p_selected_series_id;
+    elsif v_mode = 'active' and v_active_count > 1 then
+      v_selected_series_id := null;
     else
       select s.id
       into v_selected_series_id
@@ -73,6 +124,9 @@ begin
       order by s.started_at desc nulls last, s.created_at desc
       limit 1;
     end if;
+  elsif v_mode = 'active' then
+    v_selected_series_id := null;
+    v_options := '[]'::json;
   else
     select coalesce(
       json_agg(

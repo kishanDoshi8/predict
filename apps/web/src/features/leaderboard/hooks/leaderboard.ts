@@ -4,6 +4,7 @@ import {
     getRoomMemberStats,
     getRoomPredictionHistory,
     getRoomSeriesSelector,
+    SeriesSelectorMode,
     getSeriesLeaderboard,
     getRoomWeeklyLeaderboard,
 } from '@/shared/lib/api'
@@ -45,11 +46,12 @@ export const useRoomWeeklyLeaderboard = (
 export const useRoomSeriesSelector = (
     roomId?: string,
     selectedSeriesId?: string | null,
+    mode: SeriesSelectorMode = 'active-or-last',
     enabled = true,
 ) => {
     return useQuery({
-        queryKey: roomKeys.seriesLeaderboardSelector(roomId ?? '', selectedSeriesId ?? 'default'),
-        queryFn: () => getRoomSeriesSelector(roomId ?? '', selectedSeriesId),
+        queryKey: roomKeys.seriesSelector(roomId ?? '', mode, selectedSeriesId ?? 'default'),
+        queryFn: () => getRoomSeriesSelector(roomId ?? '', selectedSeriesId, mode),
         enabled: !!roomId && enabled,
     })
 }

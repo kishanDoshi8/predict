@@ -7,6 +7,7 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Input, Button } from "@/shared/ui";
 import { Skeleton } from "@/shared/ui/skeleton";
+import { SeriesSelector } from "@/features/series";
 
 const FILTERS: Array<{ label: string; value: PredictionHistoryFilter }> = [
 	{ label: "All", value: "all" },
@@ -15,7 +16,15 @@ const FILTERS: Array<{ label: string; value: PredictionHistoryFilter }> = [
 	{ label: "My Bets", value: "my_bets" },
 ];
 
-function emptyStateMessage(filter: PredictionHistoryFilter, search: string) {
+function emptyStateMessage(
+	filter: PredictionHistoryFilter,
+	search: string,
+	seriesId: string | null,
+) {
+	if (seriesId) {
+		return "No predictions found for this Series.";
+	}
+
 	if (search.trim().length > 0) {
 		return "No predictions match your search.";
 	}
@@ -37,6 +46,7 @@ function HistoryFeed() {
 	const [filter, setFilter] = useState<PredictionHistoryFilter>("all");
 	const [searchInput, setSearchInput] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
+	const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
@@ -53,7 +63,12 @@ function HistoryFeed() {
 		hasNextPage,
 		isFetchingNextPage,
 		fetchNextPage,
-	} = usePredictionHistory(room.id, filter, debouncedSearch);
+	} = usePredictionHistory(
+		room.id,
+		filter,
+		debouncedSearch,
+		selectedSeriesId ?? undefined,
+	);
 
 	const history = useMemo(
 		() => data?.pages.flatMap((page) => page.items) ?? [],
@@ -101,6 +116,14 @@ function HistoryFeed() {
 					value={searchInput}
 					onChange={(event) => setSearchInput(event.target.value)}
 				/>
+				<SeriesSelector
+					roomId={room.id}
+					mode='all'
+					value={selectedSeriesId}
+					onValueChange={setSelectedSeriesId}
+					placeholder='Filter by series'
+					optional
+				/>
 				<div className='flex flex-wrap gap-2'>
 					{FILTERS.map((item) => (
 						<Button
@@ -120,7 +143,11 @@ function HistoryFeed() {
 			<PredictionHistoryFeed
 				entries={history}
 				isLoading={isHistoryLoading}
-				emptyMessage={emptyStateMessage(filter, debouncedSearch)}
+				emptyMessage={emptyStateMessage(
+					filter,
+					debouncedSearch,
+					selectedSeriesId,
+				)}
 			/>
 
 			<div ref={loadMoreRef} className='h-4' />

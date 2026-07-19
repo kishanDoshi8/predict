@@ -9,6 +9,7 @@ type RoomActivitiesFeedProps = {
 	isLoading: boolean;
 	isError: boolean;
 	errorMessage?: string;
+	emptyMessage?: string;
 };
 
 export function RoomActivitiesFeed({
@@ -17,6 +18,7 @@ export function RoomActivitiesFeed({
 	isLoading,
 	isError,
 	errorMessage,
+	emptyMessage,
 }: Readonly<RoomActivitiesFeedProps>) {
 	if (isLoading) {
 		return (
@@ -47,7 +49,7 @@ export function RoomActivitiesFeed({
 			<div className='rounded-2xl border border-dashed p-8 text-center'>
 				<p className='text-3xl'>🗒️</p>
 				<p className='mt-2 text-sm text-muted-foreground'>
-					No room activities yet.
+					{emptyMessage ?? "No room activities yet."}
 				</p>
 			</div>
 		);

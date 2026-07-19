@@ -55,6 +55,13 @@ export const roomKeys = {
   ) =>
     [...roomKeys.detail(roomId), "seriesLeaderboardSelector", selectedSeriesId] as const,
 
+  seriesSelector: (
+    roomId: string,
+    mode: "active" | "active-or-last" | "all",
+    selectedSeriesId = "default",
+  ) =>
+    [...roomKeys.detail(roomId), "seriesSelector", mode, selectedSeriesId] as const,
+
   stats: (roomId: string) =>
     [...roomKeys.detail(roomId), "stats"] as const,
 
@@ -64,8 +71,8 @@ export const roomKeys = {
   predictionHistory: (roomId: string) =>
     [...roomKeys.detail(roomId), "predictionHistory"] as const,
 
-  activities: (roomId: string, filter = "all") =>
-    [...roomKeys.detail(roomId), "activities", filter] as const,
+  activities: (roomId: string, filter = "all", seriesId = "all") =>
+    [...roomKeys.detail(roomId), "activities", filter, seriesId] as const,
 
   roomMemberStats: (roomId: string, playerId: string) =>
     [...roomKeys.detail(roomId), "memberProfile", playerId, "stats"] as const,

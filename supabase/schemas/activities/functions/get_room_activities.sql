@@ -3,7 +3,8 @@ create or replace function public.get_room_activities(
   p_limit integer default 20,
   p_cursor_created_at timestamptz default null,
   p_cursor_id uuid default null,
-  p_filter text default 'all'
+  p_filter text default 'all',
+  p_series_id uuid default null
 )
 returns json
 language plpgsql
@@ -59,6 +60,27 @@ begin
         or (v_filter = 'duels' and a.activity_type like 'duel_%')
         or (v_filter = 'members' and a.activity_type like 'room_%')
         or (v_filter = 'achievements' and a.activity_type like 'achievement_%')
+      )
+      and (
+        p_series_id is null
+        or exists (
+          select 1
+          from public.predictions p
+          where p.id = case
+            when coalesce(
+              a.metadata ->> 'predictionId',
+              a.metadata #>> '{duel,predictionId}',
+              a.click_action ->> 'predictionId'
+            ) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+            then coalesce(
+              a.metadata ->> 'predictionId',
+              a.metadata #>> '{duel,predictionId}',
+              a.click_action ->> 'predictionId'
+            )::uuid
+            else null
+          end
+            and p.series_id = p_series_id
+        )
       )
     order by a.created_at desc, a.id desc
     limit v_limit + 1

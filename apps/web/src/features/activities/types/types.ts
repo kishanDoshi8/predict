@@ -48,6 +48,9 @@ export type PredictionActivityOptionTotal = {
 export type PredictionActivityMetadata = {
 	predictionId: string;
 	title: string;
+	seriesId: string | null;
+	seriesTitle: string | null;
+	seriesPredictionNumber: number | null;
 	status: "draft" | "locked" | "revealed" | "cancelled" | "no_result";
 	deadline: string;
 	resolvedAt: string | null;

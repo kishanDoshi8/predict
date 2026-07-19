@@ -4,7 +4,8 @@ create or replace function private.fire_push_notification(
   p_room_id       uuid,
   p_title         text,
   p_body          text,
-  p_url_path      text
+  p_url_path      text,
+  p_extra_payload jsonb default '{}'::jsonb
 )
 returns void
 language plpgsql
@@ -68,7 +69,7 @@ begin
       'title', p_title,
       'body',  p_body,
       'url',   v_app_url || p_url_path
-    )
+    ) || coalesce(p_extra_payload, '{}'::jsonb)
   );
 
   v_headers := jsonb_build_object(

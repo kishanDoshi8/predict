@@ -2,12 +2,6 @@ import {
 	Badge,
 	FadeContent,
 	Skeleton,
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
 	Tabs,
 	TabsContent,
 	TabsList,
@@ -31,9 +25,9 @@ import {
 	LeaderboardEntry,
 	type SortByOption,
 	useRoomLeaderboard,
-	useRoomSeriesSelector,
 	useSeriesLeaderboard,
 } from "@/features/leaderboard";
+import { SeriesSelector } from "@/features/series";
 import { Room } from "@/features/rooms";
 import { twColor } from "@/shared/lib/utils";
 import { Link } from "react-router-dom";
@@ -90,13 +84,10 @@ function UserStats({
 		isPending: isAllTimeLeaderboardLoading,
 	} = useRoomLeaderboard(room.id, effectiveTab === "all_time", sortBy);
 
-	const { data: seriesSelector, isPending: isSeriesSelectorLoading } =
-		useRoomSeriesSelector(room.id, selectedSeriesId, effectiveTab === "series");
-
 	const { data: seriesLeaderboard = [], isPending: isSeriesLeaderboardLoading } =
 		useSeriesLeaderboard(
 			room.id,
-			seriesSelector?.selected_series_id ?? null,
+			selectedSeriesId,
 			effectiveTab === "series",
 			sortBy,
 		);
@@ -108,13 +99,7 @@ function UserStats({
 		isLeaderboardLoadingOverride ??
 		(effectiveTab === "all_time"
 			? isAllTimeLeaderboardLoading
-			: isSeriesSelectorLoading || isSeriesLeaderboardLoading);
-
-	useEffect(() => {
-		if (seriesSelector?.selected_series_id) {
-			setSelectedSeriesId(seriesSelector.selected_series_id);
-		}
-	}, [seriesSelector?.selected_series_id]);
+			: isSeriesLeaderboardLoading);
 
 	useEffect(() => {
 		if (activeLeaderboardTab === "this_week") {
@@ -144,24 +129,15 @@ function UserStats({
 						</TabsTrigger>
 					</TabsList>
 					{effectiveTab === "series" ? (
-						<Select
-							value={seriesSelector?.selected_series_id ?? ""}
+						<SeriesSelector
+							roomId={room.id}
+							mode='active-or-last'
+							value={selectedSeriesId}
 							onValueChange={setSelectedSeriesId}
-							disabled={(seriesSelector?.series.length ?? 0) <= 1}
-						>
-							<SelectTrigger className='w-full mt-2'>
-								<SelectValue placeholder='Select series' />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectGroup>
-									{(seriesSelector?.series ?? []).map((series) => (
-										<SelectItem key={series.id} value={series.id}>
-											{series.title}
-										</SelectItem>
-									))}
-								</SelectGroup>
-							</SelectContent>
-						</Select>
+							className='mt-2'
+							placeholder='Select series'
+							autoSelect
+						/>
 					) : null}
 					{/* Sort by */}
 					<div className={`flex gap-1 my-1 justify-end items-center`}>
@@ -190,7 +166,7 @@ function UserStats({
 						<LeaderboardContent
 							leaderboard={seriesLeaderboard}
 							isLoading={
-								isSeriesSelectorLoading || isSeriesLeaderboardLoading
+								isSeriesLeaderboardLoading
 							}
 							room={room}
 							sortBy={sortBy}

@@ -1,9 +1,8 @@
 import { Button } from "@/shared/ui";
-import { Copy, CopyCheck, MedalIcon } from "lucide-react";
+import { Copy, CopyCheck } from "lucide-react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useState } from "react";
 import { RoomPreferencesDialog } from "@/features/preferences";
-import { Link } from "react-router-dom";
 
 export default function PredictionHeader() {
 	const { room } = useRoomContext();
@@ -47,15 +46,6 @@ export default function PredictionHeader() {
 			</div>
 			<div className={`flex gap-4`}>
 				<RoomPreferencesDialog roomId={room.id} />
-				<Link to={`/rooms/${room.code}/leaderboard`}>
-					<Button
-						variant='secondary'
-						size='icon-lg'
-						className={`rounded-full`}
-					>
-						<MedalIcon />
-					</Button>
-				</Link>
 			</div>
 		</div>
 	);

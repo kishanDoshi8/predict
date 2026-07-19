@@ -217,7 +217,9 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 			</div>
 
 			<div className='rounded-md bg-muted/40 px-2.5 py-2 text-xs space-y-0.5'>
-				<p className='font-medium text-foreground'>{payoutSummary}</p>
+				<div className='font-medium text-foreground'>
+					{payoutSummary}
+				</div>
 				{entry.status === "revealed" && entry.biggest_payout > 0 && (
 					<p className='text-muted-foreground'>
 						Biggest payout:{" "}

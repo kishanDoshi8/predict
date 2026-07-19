@@ -284,7 +284,7 @@ begin
 
     update public.players
     set points_in_escrow = points_in_escrow - v_winner.bet_amount,
-        points_balance   = points_balance   + v_final_payout,
+        points_balance   = points_balance   + v_winner.total_gain,
         total_won        = total_won        + v_winner.total_gain
     where id = v_winner.player_id;
 

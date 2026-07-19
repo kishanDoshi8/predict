@@ -14,7 +14,7 @@ export function SeriesTile({ series, roomCode }: Readonly<SeriesTileProps>) {
 	const expectedGames = Math.max(series.expectedGames, 0);
 	const progressValue =
 		expectedGames > 0
-			? Math.round(Math.min((completedGames / expectedGames) * 100, 100))
+			? Math.floor(Math.min((completedGames / expectedGames) * 100, 100))
 			: 0;
 	const remainingGames = Math.max(expectedGames - completedGames, 0);
 	const isCompleted = series.status === "completed";

@@ -25,7 +25,7 @@ export function SeriesOverviewCard({
 	const remainingGames = Math.max(expectedGames - completedGames, 0);
 	const progressValue =
 		expectedGames > 0
-			? Math.round(Math.min((completedGames / expectedGames) * 100, 100))
+			? Math.floor(Math.min((completedGames / expectedGames) * 100, 100))
 			: 0;
 
 	return (

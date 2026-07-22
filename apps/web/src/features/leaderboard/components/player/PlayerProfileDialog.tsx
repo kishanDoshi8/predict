@@ -18,8 +18,13 @@ import {
 } from "@/shared/ui";
 import {
 	useRoomMemberRecentPredictions,
+	useRoomMemberSeriesRecognition,
 	useRoomMemberStats,
 } from "@/features/leaderboard";
+import {
+	getSeriesAwardLabel,
+	getSeriesPlacementLabel,
+} from "@/shared/lib/seriesRewards";
 import { RatingBadge } from "./RatingBadge";
 import {
 	CheckIcon,
@@ -136,6 +141,11 @@ export function PlayerProfileDialog({
 		isPending: isHistoryLoading,
 		error: historyError,
 	} = useRoomMemberRecentPredictions(roomId, playerId, 5, 0, enabled);
+	const {
+		data: seriesRecognition,
+		isPending: isSeriesRecognitionLoading,
+		error: seriesRecognitionError,
+	} = useRoomMemberSeriesRecognition(roomId, playerId, enabled);
 
 	const [error, setError] = useState<string | null>(null);
 
@@ -150,10 +160,15 @@ export function PlayerProfileDialog({
 				historyError.message ||
 					"An error occurred while loading the player history.",
 			);
+		} else if (seriesRecognitionError) {
+			setError(
+				seriesRecognitionError.message ||
+					"An error occurred while loading player recognitions.",
+			);
 		} else {
 			setError(null);
 		}
-	}, [statsError, historyError]);
+	}, [historyError, seriesRecognitionError, statsError]);
 
 	const recentPredictionsContent = (() => {
 		if (isHistoryLoading) {
@@ -370,6 +385,98 @@ export function PlayerProfileDialog({
 							</h3>
 							{recentPredictionsContent}
 						</FadeContent>
+					</section>
+
+					<section className='mt-2 space-y-3'>
+						<div className='grid grid-cols-2 gap-3'>
+							<div className='rounded-lg border border-border/60 bg-card p-3'>
+								<p className='text-xs text-muted-foreground'>
+									Championships
+								</p>
+								<p className='mt-1 flex items-center gap-2 text-xl font-semibold tabular-nums'>
+									<FlameIcon className='h-5 w-5 text-rank-1' />
+									{seriesRecognition?.championships.length ?? 0}
+								</p>
+							</div>
+							<div className='rounded-lg border border-border/60 bg-card p-3'>
+								<p className='text-xs text-muted-foreground'>
+									Awards
+								</p>
+								<p className='mt-1 flex items-center gap-2 text-xl font-semibold tabular-nums'>
+									<CoinsIcon className='h-5 w-5 text-accent' />
+									{seriesRecognition?.awards.length ?? 0}
+								</p>
+							</div>
+						</div>
+
+						<div className='space-y-2'>
+							<h3 className='text-sm font-semibold text-muted-foreground'>
+								Championships
+							</h3>
+							{isSeriesRecognitionLoading ? (
+								<PredictionsSkeleton />
+							) : seriesRecognition?.championships.length ? (
+								<div className='space-y-2'>
+									{seriesRecognition.championships.map((row) => (
+										<div
+											key={row.id}
+											className={`rounded-lg border border-border/60 bg-card p-3 ${
+												row.collected_at ? "" : "opacity-60"
+											}`}
+										>
+											<p className='text-sm font-semibold'>
+												{row.series_title}
+											</p>
+											<p className='text-xs text-muted-foreground'>
+												{getSeriesPlacementLabel(
+													row.placement,
+												)}
+											</p>
+										</div>
+									))}
+								</div>
+							) : (
+								<div className='rounded-lg border border-border/60 p-4 text-sm text-muted-foreground'>
+									No championships yet.
+								</div>
+							)}
+						</div>
+
+						<div className='space-y-2 pb-2'>
+							<h3 className='text-sm font-semibold text-muted-foreground'>
+								Awards
+							</h3>
+							{isSeriesRecognitionLoading ? (
+								<PredictionsSkeleton />
+							) : seriesRecognition?.awards.length ? (
+								<div className='space-y-2'>
+									{seriesRecognition.awards.map((row) => (
+										<div
+											key={row.id}
+											className={`rounded-lg border border-border/60 bg-card p-3 ${
+												row.collected_at ? "" : "opacity-60"
+											}`}
+										>
+											<p className='text-sm font-semibold'>
+												{getSeriesAwardLabel(
+													row.award_type,
+												)}
+											</p>
+											<p className='text-xs text-muted-foreground'>
+												{row.series_title}
+											</p>
+											<p className='text-xs text-muted-foreground'>
+												{row.description}
+											</p>
+										</div>
+									))}
+								</div>
+							) : (
+								<div className='rounded-lg border border-border/60 p-4 text-sm text-muted-foreground'>
+									No awards yet.
+								</div>
+							)}
+						</div>
 					</section>
 				</div>
 			</ContentComponent>

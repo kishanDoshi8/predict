@@ -6,7 +6,13 @@ import {
 } from "@/features/leaderboard";
 import { useActivePredictions } from "@/features/predictions";
 import { SeriesDetailView, SeriesListView } from "@/features/series/components";
-import { useRoomSeries, useUpdateSeries } from "@/features/series";
+import {
+	useCollectSeriesRewards,
+	useRoomSeries,
+	useSeriesAwards,
+	useSeriesPlacements,
+	useUpdateSeries,
+} from "@/features/series";
 import type { Series } from "@/features/series/types/series";
 import { Button, Skeleton } from "@/shared/ui";
 import { useMemo, useState } from "react";
@@ -128,6 +134,19 @@ export default function SeriesPage() {
 		selectedSeries?.id ?? null,
 		!!selectedSeries,
 	);
+	const isClosedSeries =
+		selectedSeries?.status === "completed" ||
+		selectedSeries?.status === "archived";
+	const {
+		data: seriesPlacements = [],
+		isPending: isSeriesPlacementsLoading,
+	} = useSeriesPlacements(room.id, selectedSeries?.id ?? null, !!isClosedSeries);
+	const { data: seriesAwards = [], isPending: isSeriesAwardsLoading } =
+		useSeriesAwards(room.id, selectedSeries?.id ?? null, !!isClosedSeries);
+	const {
+		mutate: collectSeriesRewards,
+		isPending: isCollectSeriesRewardsPending,
+	} = useCollectSeriesRewards(room.id, selectedSeries?.id ?? null);
 
 	const seriesOpenPredictions = useMemo(() => {
 		if (!selectedSeries) {
@@ -208,6 +227,19 @@ export default function SeriesPage() {
 		});
 	};
 
+	const handleCollectRewards = () => {
+		collectSeriesRewards(undefined, {
+			onSuccess: () => {
+				toast("Rewards collected.");
+			},
+			onError: (error) => {
+				toast("Failed to collect rewards.", {
+					description: error.message,
+				});
+			},
+		});
+	};
+
 	if (!seriesId) {
 		return (
 			<SeriesListView
@@ -258,6 +290,13 @@ export default function SeriesPage() {
 			isCompletedPredictionsLoading={isSeriesHistoryPending}
 			seriesLeaderboard={seriesLeaderboard}
 			isSeriesLeaderboardLoading={isSeriesLeaderboardLoading}
+			seriesPlacements={seriesPlacements}
+			isSeriesPlacementsLoading={isSeriesPlacementsLoading}
+			seriesAwards={seriesAwards}
+			isSeriesAwardsLoading={isSeriesAwardsLoading}
+			currentPlayerId={player?.id ?? null}
+			onCollectRewards={handleCollectRewards}
+			isCollectRewardsPending={isCollectSeriesRewardsPending}
 			isEditorOpen={isEditorOpen}
 			formState={formState}
 			onBackToList={() => navigate(`/rooms/${room.code}/series`)}

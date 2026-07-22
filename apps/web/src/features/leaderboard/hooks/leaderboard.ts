@@ -4,6 +4,7 @@ import {
     getRoomMemberStats,
     getRoomPredictionHistory,
     getRoomSeriesSelector,
+    getRoomMemberSeriesRecognition,
     SeriesSelectorMode,
     getSeriesLeaderboard,
     getRoomWeeklyLeaderboard,
@@ -156,6 +157,18 @@ export const useRoomMemberRecentPredictions = (
                 limit,
                 offset,
             ),
+        enabled: !!roomId && !!playerId && enabled,
+    })
+}
+
+export const useRoomMemberSeriesRecognition = (
+    roomId?: string,
+    playerId?: string | null,
+    enabled = true,
+) => {
+    return useQuery({
+        queryKey: roomKeys.roomMemberSeriesRecognition(roomId ?? "", playerId ?? ""),
+        queryFn: () => getRoomMemberSeriesRecognition(roomId ?? "", playerId ?? ""),
         enabled: !!roomId && !!playerId && enabled,
     })
 }

@@ -377,6 +377,13 @@ export type Database = {
             foreignKeyName: "players_last_visited_room_id_fkey"
             columns: ["last_visited_room_id"]
             isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
+          },
+          {
+            foreignKeyName: "players_last_visited_room_id_fkey"
+            columns: ["last_visited_room_id"]
+            isOneToOne: false
             referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
@@ -531,6 +538,13 @@ export type Database = {
             referencedRelation: "series"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "predictions_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series_with_stats"
+            referencedColumns: ["id"]
+          },
         ]
       }
       rating_system_config: {
@@ -556,6 +570,64 @@ export type Database = {
           version?: number
         }
         Relationships: []
+      }
+      room_activities: {
+        Row: {
+          activity_tier: number
+          activity_type: string
+          click_action: Json | null
+          created_at: string
+          created_by_player_id: string | null
+          dedupe_key: string | null
+          id: string
+          metadata: Json
+          room_id: string
+        }
+        Insert: {
+          activity_tier: number
+          activity_type: string
+          click_action?: Json | null
+          created_at?: string
+          created_by_player_id?: string | null
+          dedupe_key?: string | null
+          id?: string
+          metadata?: Json
+          room_id: string
+        }
+        Update: {
+          activity_tier?: number
+          activity_type?: string
+          click_action?: Json | null
+          created_at?: string
+          created_by_player_id?: string | null
+          dedupe_key?: string | null
+          id?: string
+          metadata?: Json
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_activities_created_by_player_id_fkey"
+            columns: ["created_by_player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_activities_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
+          },
+          {
+            foreignKeyName: "room_activities_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       room_member_weekly_snapshots: {
         Row: {
@@ -634,6 +706,7 @@ export type Database = {
           id: string
           is_organizer: boolean
           joined_at: string
+          last_activity_seen_at: string | null
           peak_prediction_rating: number
           player_id: string
           prediction_rating: number
@@ -648,6 +721,7 @@ export type Database = {
           id?: string
           is_organizer?: boolean
           joined_at?: string
+          last_activity_seen_at?: string | null
           peak_prediction_rating?: number
           player_id: string
           prediction_rating?: number
@@ -662,6 +736,7 @@ export type Database = {
           id?: string
           is_organizer?: boolean
           joined_at?: string
+          last_activity_seen_at?: string | null
           peak_prediction_rating?: number
           player_id?: string
           prediction_rating?: number
@@ -837,13 +912,12 @@ export type Database = {
         Row: {
           archived_at: string | null
           completed_at: string | null
-          completed_games: number
           created_at: string
           created_by: string
           description: string | null
           expected_games: number
           id: string
-          prediction_count: number
+          minimum_predictions_for_awards: number
           room_id: string
           started_at: string | null
           status: string
@@ -852,13 +926,12 @@ export type Database = {
         Insert: {
           archived_at?: string | null
           completed_at?: string | null
-          completed_games?: number
           created_at?: string
           created_by: string
           description?: string | null
           expected_games?: number
           id?: string
-          prediction_count?: number
+          minimum_predictions_for_awards?: number
           room_id: string
           started_at?: string | null
           status?: string
@@ -867,13 +940,12 @@ export type Database = {
         Update: {
           archived_at?: string | null
           completed_at?: string | null
-          completed_games?: number
           created_at?: string
           created_by?: string
           description?: string | null
           expected_games?: number
           id?: string
-          prediction_count?: number
+          minimum_predictions_for_awards?: number
           room_id?: string
           started_at?: string | null
           status?: string
@@ -899,6 +971,113 @@ export type Database = {
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      series_awards: {
+        Row: {
+          award_type: Database["public"]["Enums"]["series_award_type"]
+          collected_at: string | null
+          created_at: string
+          description: string
+          id: string
+          player_id: string
+          series_id: string
+          value: number
+        }
+        Insert: {
+          award_type: Database["public"]["Enums"]["series_award_type"]
+          collected_at?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          player_id: string
+          series_id: string
+          value: number
+        }
+        Update: {
+          award_type?: Database["public"]["Enums"]["series_award_type"]
+          collected_at?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          player_id?: string
+          series_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "series_awards_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_awards_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_awards_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series_with_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      series_placements: {
+        Row: {
+          collected_at: string | null
+          created_at: string
+          id: string
+          placement: number
+          player_id: string
+          points: number
+          series_id: string
+        }
+        Insert: {
+          collected_at?: string | null
+          created_at?: string
+          id?: string
+          placement: number
+          player_id: string
+          points: number
+          series_id: string
+        }
+        Update: {
+          collected_at?: string | null
+          created_at?: string
+          id?: string
+          placement?: number
+          player_id?: string
+          points?: number
+          series_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "series_placements_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_placements_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_placements_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series_with_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -989,8 +1168,56 @@ export type Database = {
           },
         ]
       }
+      series_with_stats: {
+        Row: {
+          active_predictions: number | null
+          archived_at: string | null
+          cancelled_predictions: number | null
+          completed_at: string | null
+          completed_games: number | null
+          completed_predictions: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          expected_games: number | null
+          id: string | null
+          prediction_count: number | null
+          progress_percentage: number | null
+          remaining_games: number | null
+          room_id: string | null
+          started_at: string | null
+          status: string | null
+          title: string | null
+          total_predictions: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "series_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
+          },
+          {
+            foreignKeyName: "series_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      activate_series: { Args: { p_series_id: string }; Returns: Json }
+      archive_series: { Args: { p_series_id: string }; Returns: Json }
       cancel_bet: { Args: { p_prediction_id: string }; Returns: Json }
       cancel_duel: {
         Args: { p_duel_id: string; p_player_id: string }
@@ -1046,8 +1273,8 @@ export type Database = {
         Args: { p_duel_id: string; p_player_id: string }
         Returns: Json
       }
-      complete_series: { Args: { p_series_id: string }; Returns: Json }
       claim_weekly_points: { Args: { p_auto_claimed?: boolean }; Returns: Json }
+      complete_series: { Args: { p_series_id: string }; Returns: Json }
       create_duel: {
         Args: {
           p_bet_id: string
@@ -1095,6 +1322,7 @@ export type Database = {
         }
         Returns: Json
       }
+      create_room: { Args: { p_room_name: string }; Returns: Json }
       create_series: {
         Args: {
           p_description?: string
@@ -1104,7 +1332,6 @@ export type Database = {
         }
         Returns: Json
       }
-      create_room: { Args: { p_room_name: string }; Returns: Json }
       create_weekly_room_member_snapshots: { Args: never; Returns: Json }
       get_latest_room_member_snapshot: {
         Args: { p_player_id: string; p_room_id: string }
@@ -1130,6 +1357,21 @@ export type Database = {
         Returns: Json
       }
       get_preferences: { Args: { p_room_id?: string }; Returns: Json }
+      get_room_activities: {
+        Args: {
+          p_cursor_created_at?: string
+          p_cursor_id?: string
+          p_filter?: string
+          p_limit?: number
+          p_room_id: string
+          p_series_id?: string
+        }
+        Returns: Json
+      }
+      get_room_has_unseen_activities: {
+        Args: { p_room_id: string }
+        Returns: boolean
+      }
       get_room_leaderboard: {
         Args: { p_room_id: string; p_sort_by?: string }
         Returns: Json
@@ -1155,6 +1397,16 @@ export type Database = {
           p_limit?: number
           p_room_id: string
           p_search?: string
+          p_series_id?: string
+        }
+        Returns: Json
+      }
+      get_room_series: { Args: { p_room_id: string }; Returns: Json }
+      get_room_series_selector: {
+        Args: {
+          p_mode?: string
+          p_room_id: string
+          p_selected_series_id?: string
         }
         Returns: Json
       }
@@ -1162,9 +1414,28 @@ export type Database = {
         Args: { p_limit?: number; p_room_id: string }
         Returns: Json
       }
-      get_room_series: { Args: { p_room_id: string }; Returns: Json }
       get_room_weekly_leaderboard: {
         Args: { p_room_id: string; p_sort_by?: string }
+        Returns: Json
+      }
+      get_series_active_predictions: {
+        Args: { p_room_id: string; p_series_id: string }
+        Returns: Json
+      }
+      get_series_awards: {
+        Args: { p_room_id: string; p_series_id: string }
+        Returns: Json
+      }
+      get_series_completed_predictions: {
+        Args: { p_room_id: string; p_series_id: string }
+        Returns: Json
+      }
+      get_series_leaderboard: {
+        Args: { p_room_id: string; p_series_id: string; p_sort_by?: string }
+        Returns: Json
+      }
+      get_series_placements: {
+        Args: { p_room_id: string; p_series_id: string }
         Returns: Json
       }
       join_duel_queue: {
@@ -1198,18 +1469,16 @@ export type Database = {
       lock_prediction: { Args: { p_prediction_id: string }; Returns: Json }
       mark_how_to_play_seen: { Args: never; Returns: undefined }
       mark_ratings_tip_seen: { Args: never; Returns: undefined }
-      activate_series: { Args: { p_series_id: string }; Returns: Json }
-      archive_series: { Args: { p_series_id: string }; Returns: Json }
+      mark_room_activities_seen: {
+        Args: { p_room_id: string }
+        Returns: undefined
+      }
       place_bet: {
         Args: { p_amount: number; p_option_id: string; p_prediction_id: string }
         Returns: Json
       }
       register_player: { Args: { p_username: string }; Returns: Json }
       reset_room_preferences: { Args: { p_room_id: string }; Returns: Json }
-      set_last_visited_room: {
-        Args: { p_room_id: string }
-        Returns: undefined
-      }
       resolve_duels_for_prediction: {
         Args: { p_prediction_id: string }
         Returns: Json
@@ -1233,6 +1502,7 @@ export type Database = {
         }
         Returns: Json
       }
+      set_last_visited_room: { Args: { p_room_id: string }; Returns: undefined }
       update_global_preferences: {
         Args: {
           p_dark_mode: boolean
@@ -1262,15 +1532,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      update_series: {
-        Args: {
-          p_description?: string
-          p_expected_games?: number
-          p_series_id: string
-          p_title: string
-        }
-        Returns: Json
-      }
       update_room_preferences: {
         Args: {
           p_dark_mode?: boolean
@@ -1293,6 +1554,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_series: {
+        Args: {
+          p_description?: string
+          p_expected_games?: number
+          p_series_id: string
+          p_title: string
+        }
+        Returns: Json
+      }
       update_streaks_after_resolution: {
         Args: {
           p_outcome: string
@@ -1308,7 +1578,12 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      series_award_type:
+        | "LONGEST_STREAK"
+        | "BIGGEST_PROFIT"
+        | "MOST_DUEL_WINS"
+        | "MOST_POINTS_RISKED"
+        | "EVER_PRESENT"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1438,6 +1713,14 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      series_award_type: [
+        "LONGEST_STREAK",
+        "BIGGEST_PROFIT",
+        "MOST_DUEL_WINS",
+        "MOST_POINTS_RISKED",
+        "EVER_PRESENT",
+      ],
+    },
   },
 } as const

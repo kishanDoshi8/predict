@@ -1,5 +1,6 @@
 export { SeriesDetailView } from "./SeriesDetailView";
 export { SeriesEditDialog } from "./SeriesEditDialog";
+export { SeriesHallOfFameSection } from "./SeriesHallOfFameSection";
 export { SeriesListView } from "./SeriesListView";
 export { SeriesOrganizerActionsMenu } from "./SeriesOrganizerActionsMenu";
 export { SeriesOverviewCard } from "./SeriesOverviewCard";

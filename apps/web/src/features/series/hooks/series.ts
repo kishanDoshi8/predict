@@ -1,8 +1,11 @@
 import {
 	activateSeries,
 	archiveSeries,
+	collectSeriesRewards,
 	completeSeries,
 	createSeries,
+	getSeriesAwards,
+	getSeriesPlacements,
 	getRoomSeries,
 	getRoomSeriesSelector,
 	type RoomSeriesSelector,
@@ -116,6 +119,53 @@ export const useArchiveSeries = (roomId?: string) => {
 				void queryClient.invalidateQueries({
 					queryKey: roomKeys.series(roomId),
 				});
+			}
+		},
+	});
+};
+
+export const useSeriesPlacements = (
+	roomId?: string,
+	seriesId?: string | null,
+	enabled = true,
+) => {
+	return useQuery({
+		queryKey: roomKeys.seriesPlacements(roomId ?? "", seriesId ?? ""),
+		queryFn: () => getSeriesPlacements(roomId ?? "", seriesId ?? ""),
+		enabled: !!roomId && !!seriesId && enabled,
+	});
+};
+
+export const useSeriesAwards = (
+	roomId?: string,
+	seriesId?: string | null,
+	enabled = true,
+) => {
+	return useQuery({
+		queryKey: roomKeys.seriesAwards(roomId ?? "", seriesId ?? ""),
+		queryFn: () => getSeriesAwards(roomId ?? "", seriesId ?? ""),
+		enabled: !!roomId && !!seriesId && enabled,
+	});
+};
+
+export const useCollectSeriesRewards = (
+	roomId?: string,
+	seriesId?: string | null,
+) => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: () => collectSeriesRewards(seriesId ?? ""),
+		onSuccess: () => {
+			if (roomId && seriesId) {
+				void Promise.all([
+					queryClient.invalidateQueries({
+						queryKey: roomKeys.seriesPlacements(roomId, seriesId),
+					}),
+					queryClient.invalidateQueries({
+						queryKey: roomKeys.seriesAwards(roomId, seriesId),
+					}),
+				]);
 			}
 		},
 	});

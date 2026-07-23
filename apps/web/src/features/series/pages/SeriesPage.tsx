@@ -6,7 +6,14 @@ import {
 } from "@/features/leaderboard";
 import { useActivePredictions } from "@/features/predictions";
 import { SeriesDetailView, SeriesListView } from "@/features/series/components";
-import { useRoomSeries, useUpdateSeries } from "@/features/series";
+import {
+	useCollectSeriesRewards,
+	useRoomSeries,
+	useSeriesAwards,
+	useSeriesPlacements,
+	useUpdateSeries,
+	useCompleteSeries,
+} from "@/features/series";
 import type { Series } from "@/features/series/types/series";
 import { Button, Skeleton } from "@/shared/ui";
 import { useMemo, useState } from "react";
@@ -96,6 +103,8 @@ export default function SeriesPage() {
 
 	const { mutate: updateSeries, isPending: isUpdatePending } =
 		useUpdateSeries(room.id);
+	const { mutate: completeSeries, isPending: isCompleteSeriesPending } =
+		useCompleteSeries(room.id);
 
 	const isOrganizer = room.members.some(
 		(member) => member.player_id === player?.id && member.is_organizer,
@@ -128,6 +137,23 @@ export default function SeriesPage() {
 		selectedSeries?.id ?? null,
 		!!selectedSeries,
 	);
+	const isClosedSeries =
+		selectedSeries?.status === "completed" ||
+		selectedSeries?.status === "archived";
+	const {
+		data: seriesPlacements = [],
+		isPending: isSeriesPlacementsLoading,
+	} = useSeriesPlacements(
+		room.id,
+		selectedSeries?.id ?? null,
+		!!isClosedSeries,
+	);
+	const { data: seriesAwards = [], isPending: isSeriesAwardsLoading } =
+		useSeriesAwards(room.id, selectedSeries?.id ?? null, !!isClosedSeries);
+	const {
+		mutate: collectSeriesRewards,
+		isPending: isCollectSeriesRewardsPending,
+	} = useCollectSeriesRewards(room.id, selectedSeries?.id ?? null);
 
 	const seriesOpenPredictions = useMemo(() => {
 		if (!selectedSeries) {
@@ -160,8 +186,15 @@ export default function SeriesPage() {
 	};
 
 	const handleCloseSeries = (targetSeriesId: string) => {
-		toast("Close series callback triggered.", {
-			description: `Series ${targetSeriesId} is pending backend wiring.`,
+		completeSeries(targetSeriesId, {
+			onSuccess: () => {
+				toast("Series closed.");
+			},
+			onError: (error) => {
+				toast("Failed to close series.", {
+					description: error.message,
+				});
+			},
 		});
 	};
 
@@ -208,6 +241,19 @@ export default function SeriesPage() {
 		});
 	};
 
+	const handleCollectRewards = () => {
+		collectSeriesRewards(undefined, {
+			onSuccess: () => {
+				toast("Rewards collected.");
+			},
+			onError: (error) => {
+				toast("Failed to collect rewards.", {
+					description: error.message,
+				});
+			},
+		});
+	};
+
 	if (!seriesId) {
 		return (
 			<SeriesListView
@@ -251,13 +297,22 @@ export default function SeriesPage() {
 		<SeriesDetailView
 			series={selectedSeries}
 			isOrganizer={isOrganizer}
-			isActionPending={isUpdatePending || isActionPending}
+			isActionPending={
+				isUpdatePending || isActionPending || isCompleteSeriesPending
+			}
 			isUpdatePending={isUpdatePending}
 			seriesOpenPredictions={seriesOpenPredictions}
 			seriesCompletedPredictions={seriesCompletedPredictions}
 			isCompletedPredictionsLoading={isSeriesHistoryPending}
 			seriesLeaderboard={seriesLeaderboard}
 			isSeriesLeaderboardLoading={isSeriesLeaderboardLoading}
+			seriesPlacements={seriesPlacements}
+			isSeriesPlacementsLoading={isSeriesPlacementsLoading}
+			seriesAwards={seriesAwards}
+			isSeriesAwardsLoading={isSeriesAwardsLoading}
+			currentPlayerId={player?.id ?? null}
+			onCollectRewards={handleCollectRewards}
+			isCollectRewardsPending={isCollectSeriesRewardsPending}
 			isEditorOpen={isEditorOpen}
 			formState={formState}
 			onBackToList={() => navigate(`/rooms/${room.code}/series`)}

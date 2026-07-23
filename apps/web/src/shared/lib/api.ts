@@ -6,6 +6,7 @@ import { Series } from "@/features/series/types/series";
 import { Room } from "@/features/rooms";
 import type { ActivityFilter, RoomActivitiesPage } from "@/features/activities/types/types";
 import type { Json } from '@/shared/lib/supabase.types'
+import type { SeriesAwardType } from "@/shared/lib/seriesRewards";
 import { supabase } from './supabase'
 
 export type PreferenceSettings = {
@@ -88,6 +89,57 @@ export type RoomSeriesSelector = {
 }
 
 export type SeriesSelectorMode = 'active' | 'active-or-last' | 'all'
+
+export type SeriesPlacement = {
+  id: string
+  series_id: string
+  player_id: string
+  username: string
+  placement: number
+  points: number
+  collected_at: string | null
+  created_at: string
+}
+
+export type SeriesAward = {
+  id: string
+  series_id: string
+  player_id: string
+  username: string
+  award_type: SeriesAwardType
+  value: number
+  description: string
+  collected_at: string | null
+  created_at: string
+}
+
+export type CollectSeriesRewardsResult = {
+  placements_collected: number
+  awards_collected: number
+  collected_at: string
+}
+
+export type RoomMemberSeriesRecognition = {
+  championships: Array<{
+    id: string
+    series_id: string
+    series_title: string
+    placement: number
+    points: number
+    collected_at: string | null
+    created_at: string
+  }>
+  awards: Array<{
+    id: string
+    series_id: string
+    series_title: string
+    award_type: SeriesAwardType
+    description: string
+    value: number
+    collected_at: string | null
+    created_at: string
+  }>
+}
 
 // ============================================================
 // API — thin wrappers around Supabase RPC functions
@@ -368,6 +420,32 @@ export async function getRoomSeriesSelector(
   })
 
   return assertOk(data, error) as RoomSeriesSelector
+}
+
+export async function getSeriesPlacements(roomId: string, seriesId: string) {
+  const { data, error } = await untypedSupabase.rpc('get_series_placements', {
+    p_room_id: roomId,
+    p_series_id: seriesId,
+  })
+
+  return assertOk(data, error) as SeriesPlacement[]
+}
+
+export async function getSeriesAwards(roomId: string, seriesId: string) {
+  const { data, error } = await untypedSupabase.rpc('get_series_awards', {
+    p_room_id: roomId,
+    p_series_id: seriesId,
+  })
+
+  return assertOk(data, error) as SeriesAward[]
+}
+
+export async function collectSeriesRewards(seriesId: string) {
+  const { data, error } = await untypedSupabase.rpc('collect_series_rewards', {
+    series_id: seriesId,
+  })
+
+  return assertOk(data, error) as CollectSeriesRewardsResult
 }
 
 // #endregion Series
@@ -1012,5 +1090,85 @@ export async function getRoomStatCards(roomId: string, limit = 5) {
   })
 
   return assertOk(data, error) as DefaultRoomStat[]
+}
+
+export async function getRoomMemberSeriesRecognition(
+  roomId: string,
+  playerId: string,
+) {
+  const { data: placementsData, error: placementsError } = await untypedSupabase
+    .from('series_placements')
+    .select(`
+      id,
+      series_id,
+      player_id,
+      placement,
+      points,
+      collected_at,
+      created_at,
+      series:series!inner (
+        id,
+        room_id,
+        status,
+        title
+      )
+    `)
+    .eq('player_id', playerId)
+    .eq('series.room_id', roomId)
+    .in('series.status', ['completed', 'archived'])
+    .order('created_at', { ascending: false })
+
+  if (placementsError) throw placementsError
+
+  const championships = (placementsData ?? []).map((row: any) => ({
+    id: row.id,
+    series_id: row.series_id,
+    series_title: row.series?.title ?? 'Series',
+    placement: row.placement,
+    points: Number(row.points ?? 0),
+    collected_at: row.collected_at,
+    created_at: row.created_at,
+  }))
+
+  const { data: awardsData, error: awardsError } = await untypedSupabase
+    .from('series_awards')
+    .select(`
+      id,
+      series_id,
+      player_id,
+      award_type,
+      description,
+      value,
+      collected_at,
+      created_at,
+      series:series!inner (
+        id,
+        room_id,
+        status,
+        title
+      )
+    `)
+    .eq('player_id', playerId)
+    .eq('series.room_id', roomId)
+    .in('series.status', ['completed', 'archived'])
+    .order('created_at', { ascending: false })
+
+  if (awardsError) throw awardsError
+
+  const awards = (awardsData ?? []).map((row: any) => ({
+    id: row.id,
+    series_id: row.series_id,
+    series_title: row.series?.title ?? 'Series',
+    award_type: row.award_type,
+    description: row.description,
+    value: Number(row.value ?? 0),
+    collected_at: row.collected_at,
+    created_at: row.created_at,
+  }))
+
+  return {
+    championships,
+    awards,
+  } as RoomMemberSeriesRecognition
 }
 // #endregion Leaderboard

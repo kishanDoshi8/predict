@@ -49,6 +49,12 @@ export const roomKeys = {
     sortBy = "points",
   ) => [...roomKeys.detail(roomId), "seriesLeaderboard", seriesId, sortBy] as const,
 
+  seriesPlacements: (roomId: string, seriesId: string) =>
+    [...roomKeys.detail(roomId), "seriesPlacements", seriesId] as const,
+
+  seriesAwards: (roomId: string, seriesId: string) =>
+    [...roomKeys.detail(roomId), "seriesAwards", seriesId] as const,
+
   seriesLeaderboardSelector: (
     roomId: string,
     selectedSeriesId = "default",
@@ -79,6 +85,9 @@ export const roomKeys = {
 
   roomMemberRecentPredictions: (roomId: string, playerId: string, limit = 5, offset = 0) =>
     [...roomKeys.detail(roomId), "memberProfile", playerId, "recentPredictions", limit, offset] as const,
+
+  roomMemberSeriesRecognition: (roomId: string, playerId: string) =>
+    [...roomKeys.detail(roomId), "memberProfile", playerId, "seriesRecognition"] as const,
 };
 
 export const localStorageKeys = {

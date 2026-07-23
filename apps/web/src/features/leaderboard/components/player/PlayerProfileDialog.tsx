@@ -18,17 +18,28 @@ import {
 } from "@/shared/ui";
 import {
 	useRoomMemberRecentPredictions,
+	useRoomMemberSeriesRecognition,
 	useRoomMemberStats,
 } from "@/features/leaderboard";
+import { getSeriesAwardLabel } from "@/shared/lib/seriesRewards";
+import {
+	getAwardVisual,
+	getChampionshipVisual,
+} from "@/shared/lib/seriesRecognitionVisuals";
+import { cn } from "@/shared/lib/utils";
 import { RatingBadge } from "./RatingBadge";
 import {
+	ChartColumnIcon,
 	CheckIcon,
 	CircleDollarSign,
 	CircleSlash,
 	CoinsIcon,
 	Crosshair,
 	FlameIcon,
+	Lock,
+	MedalIcon,
 	TargetIcon,
+	TrophyIcon,
 	X,
 	ZapIcon,
 } from "lucide-react";
@@ -119,6 +130,18 @@ function PredictionsSkeleton() {
 	);
 }
 
+function formatCollectedDate(value: string | null) {
+	if (!value) {
+		return "Not yet collected";
+	}
+
+	return `Collected ${new Date(value).toLocaleDateString(undefined, {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	})}`;
+}
+
 export function PlayerProfileDialog({
 	roomId,
 	playerId,
@@ -136,6 +159,11 @@ export function PlayerProfileDialog({
 		isPending: isHistoryLoading,
 		error: historyError,
 	} = useRoomMemberRecentPredictions(roomId, playerId, 5, 0, enabled);
+	const {
+		data: seriesRecognition,
+		isPending: isSeriesRecognitionLoading,
+		error: seriesRecognitionError,
+	} = useRoomMemberSeriesRecognition(roomId, playerId, enabled);
 
 	const [error, setError] = useState<string | null>(null);
 
@@ -150,10 +178,15 @@ export function PlayerProfileDialog({
 				historyError.message ||
 					"An error occurred while loading the player history.",
 			);
+		} else if (seriesRecognitionError) {
+			setError(
+				seriesRecognitionError.message ||
+					"An error occurred while loading player recognitions.",
+			);
 		} else {
 			setError(null);
 		}
-	}, [statsError, historyError]);
+	}, [historyError, seriesRecognitionError, statsError]);
 
 	const recentPredictionsContent = (() => {
 		if (isHistoryLoading) {
@@ -183,6 +216,136 @@ export function PlayerProfileDialog({
 						</Badge>
 					);
 				})}
+			</div>
+		);
+	})();
+
+	const championshipsContent = (() => {
+		if (isSeriesRecognitionLoading) {
+			return <PredictionsSkeleton />;
+		}
+
+		if (seriesRecognition?.championships.length) {
+			return (
+				<div className='space-y-2'>
+					{seriesRecognition.championships.map((row) => {
+						const tierVisual = getChampionshipVisual(row.placement);
+						const isUncollected = !row.collected_at;
+
+						return (
+							<div
+								key={row.id}
+								className={cn(
+									"flex items-center gap-3 rounded-2xl border bg-card p-3.5",
+									tierVisual.ringClassName,
+								)}
+							>
+								<div
+									className={cn(
+										"flex size-12 shrink-0 items-center justify-center rounded-xl border",
+										tierVisual.ringClassName,
+									)}
+								>
+									<tierVisual.Icon
+										className={cn(
+											"size-6",
+											tierVisual.textClassName,
+										)}
+									/>
+								</div>
+
+								<div className='min-w-0 flex-1'>
+									<p
+										className={cn(
+											"text-[11px] font-semibold uppercase tracking-wider",
+											tierVisual.textClassName,
+										)}
+									>
+										{tierVisual.tierLabel}
+									</p>
+									<p className='truncate text-sm font-semibold text-foreground'>
+										{row.series_title}
+									</p>
+									<p className='text-[11px] text-muted-foreground'>
+										{formatCollectedDate(row.collected_at)}
+									</p>
+								</div>
+
+								{isUncollected ? (
+									<span className='inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-secondary px-2 py-1 text-[10px] font-medium text-muted-foreground'>
+										<Lock className='size-3' />
+										Uncollected
+									</span>
+								) : null}
+							</div>
+						);
+					})}
+				</div>
+			);
+		}
+
+		return (
+			<div className='rounded-lg border border-border/60 p-4 text-sm text-muted-foreground'>
+				No championships yet.
+			</div>
+		);
+	})();
+
+	const awardsContent = (() => {
+		if (isSeriesRecognitionLoading) {
+			return <PredictionsSkeleton />;
+		}
+
+		if (seriesRecognition?.awards.length) {
+			return (
+				<div className='space-y-2'>
+					{seriesRecognition.awards.map((row) => {
+						const awardVisual = getAwardVisual(row.award_type);
+						const isUncollected = !row.collected_at;
+
+						return (
+							<div
+								key={row.id}
+								className='flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5'
+							>
+								<div
+									className={cn(
+										"flex size-10 shrink-0 items-center justify-center rounded-xl border",
+										awardVisual.ringClassName,
+									)}
+								>
+									<awardVisual.Icon
+										className={cn(
+											"size-5",
+											awardVisual.textClassName,
+										)}
+									/>
+								</div>
+
+								<div className='min-w-0 flex-1'>
+									<p className='truncate text-sm font-semibold text-foreground'>
+										{getSeriesAwardLabel(row.award_type)}
+									</p>
+									<p className='truncate text-[11px] text-muted-foreground'>
+										{row.series_title}
+									</p>
+								</div>
+
+								{isUncollected ? (
+									<span className='shrink-0 rounded-full border border-border bg-secondary px-2 py-1 text-[10px] font-medium text-muted-foreground'>
+										Uncollected
+									</span>
+								) : null}
+							</div>
+						);
+					})}
+				</div>
+			);
+		}
+
+		return (
+			<div className='rounded-lg border border-border/60 p-4 text-sm text-muted-foreground'>
+				No awards yet.
 			</div>
 		);
 	})();
@@ -230,7 +393,51 @@ export function PlayerProfileDialog({
 				)}
 
 				<div className={`p-4 overflow-auto no-scrollbar`}>
-					<section className='space-y-2'>
+					<section className='space-y-3'>
+						<div className='grid grid-cols-2 gap-3'>
+							<div className='rounded-lg border border-border/60 bg-card p-3'>
+								<p className='text-xs text-muted-foreground'>
+									Championships
+								</p>
+								<p className='mt-1 flex items-center gap-2 text-xl font-semibold tabular-nums'>
+									<TrophyIcon className='h-5 w-5 text-rank-1' />
+									{seriesRecognition?.championships.length ??
+										0}
+								</p>
+							</div>
+							<div className='rounded-lg border border-border/60 bg-card p-3'>
+								<p className='text-xs text-muted-foreground'>
+									Awards
+								</p>
+								<p className='mt-1 flex items-center gap-2 text-xl font-semibold tabular-nums'>
+									<MedalIcon className='h-5 w-5 text-accent' />
+									{seriesRecognition?.awards.length ?? 0}
+								</p>
+							</div>
+						</div>
+
+						<div className='space-y-2 mt-6'>
+							<h3 className='flex items-center gap-2 text-sm font-semibold text-muted-foreground'>
+								<TrophyIcon className='h-4 w-4 text-rank-1' />
+								Championships
+							</h3>
+							{championshipsContent}
+						</div>
+
+						<div className='space-y-2 pb-2 mt-6'>
+							<h3 className='flex items-center gap-2 text-sm font-semibold text-muted-foreground'>
+								<MedalIcon className='h-4 w-4 text-accent' />
+								Awards
+							</h3>
+							{awardsContent}
+						</div>
+					</section>
+
+					<section className='space-y-2 mt-4'>
+						<h3 className='flex items-center gap-2 text-sm font-semibold text-muted-foreground'>
+							<ChartColumnIcon className='h-4 w-4 text-activity' />
+							Stats
+						</h3>
 						{isStatsLoading || !stats ? (
 							<StatsSkeleton />
 						) : (

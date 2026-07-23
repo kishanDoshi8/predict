@@ -1,4 +1,5 @@
 import { SeriesEditDialog } from "@/features/series/components/SeriesEditDialog";
+import { SeriesHallOfFameSection } from "@/features/series/components/SeriesHallOfFameSection";
 import { SeriesOverviewCard } from "@/features/series/components/SeriesOverviewCard";
 import type {
 	LeaderboardEntry,
@@ -8,7 +9,26 @@ import { PredictionHistoryFeed } from "@/features/leaderboard";
 import { InPlayPredictions, UserStats } from "@/features/predictions";
 import type { Prediction } from "@/features/predictions";
 import type { Series } from "@/features/series/types/series";
+import type { SeriesAward, SeriesPlacement } from "@/shared/lib/api";
+import {
+	getSeriesAwardLabel,
+	getSeriesPlacementLabel,
+} from "@/shared/lib/seriesRewards";
 import { Button } from "@/shared/ui";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/shared/ui/dialog";
+import {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	type CarouselApi,
+} from "@/shared/ui/carousel";
 import { ChevronLeftIcon, RocketIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -28,6 +48,13 @@ type SeriesDetailViewProps = {
 	isCompletedPredictionsLoading: boolean;
 	seriesLeaderboard: LeaderboardEntry[];
 	isSeriesLeaderboardLoading: boolean;
+	seriesPlacements: SeriesPlacement[];
+	isSeriesPlacementsLoading: boolean;
+	seriesAwards: SeriesAward[];
+	isSeriesAwardsLoading: boolean;
+	currentPlayerId: string | null;
+	onCollectRewards: () => void;
+	isCollectRewardsPending: boolean;
 	isEditorOpen: boolean;
 	formState: SeriesFormState;
 	onBackToList: () => void;
@@ -51,6 +78,13 @@ export function SeriesDetailView({
 	isCompletedPredictionsLoading,
 	seriesLeaderboard,
 	isSeriesLeaderboardLoading,
+	seriesPlacements,
+	isSeriesPlacementsLoading,
+	seriesAwards,
+	isSeriesAwardsLoading,
+	currentPlayerId,
+	onCollectRewards,
+	isCollectRewardsPending,
 	isEditorOpen,
 	formState,
 	onBackToList,
@@ -64,6 +98,37 @@ export function SeriesDetailView({
 	onSaveEdit,
 }: Readonly<SeriesDetailViewProps>) {
 	const [compactBackButton, setCompactBackButton] = useState(false);
+	const [isCollectDialogOpen, setIsCollectDialogOpen] = useState(false);
+	const [collectCarouselApi, setCollectCarouselApi] = useState<CarouselApi>();
+	const [collectCurrentSlide, setCollectCurrentSlide] = useState(0);
+	const isSeriesClosed =
+		series.status === "completed" || series.status === "archived";
+	const uncollectedRewards = [
+		...seriesPlacements
+			.filter(
+				(entry) =>
+					entry.player_id === currentPlayerId &&
+					entry.collected_at === null,
+			)
+			.map((entry) => ({
+				key: `placement-${entry.id}`,
+				title: getSeriesPlacementLabel(entry.placement),
+				subtitle: `${series.title}`,
+				description: `+${Math.round(entry.points).toLocaleString()} points`,
+			})),
+		...seriesAwards
+			.filter(
+				(entry) =>
+					entry.player_id === currentPlayerId &&
+					entry.collected_at === null,
+			)
+			.map((entry) => ({
+				key: `award-${entry.id}`,
+				title: getSeriesAwardLabel(entry.award_type),
+				subtitle: entry.description,
+				description: `+${Math.round(entry.value).toLocaleString()}`,
+			})),
+	];
 
 	useEffect(() => {
 		const onScroll = () => {
@@ -74,6 +139,14 @@ export function SeriesDetailView({
 		window.addEventListener("scroll", onScroll, { passive: true });
 		return () => window.removeEventListener("scroll", onScroll);
 	}, []);
+
+	useEffect(() => {
+		if (!collectCarouselApi) return;
+		setCollectCurrentSlide(collectCarouselApi.selectedScrollSnap());
+		collectCarouselApi.on("select", () => {
+			setCollectCurrentSlide(collectCarouselApi.selectedScrollSnap());
+		});
+	}, [collectCarouselApi]);
 
 	return (
 		<div className='mx-auto w-full max-w-md space-y-6 p-4'>
@@ -86,14 +159,24 @@ export function SeriesDetailView({
 				onCloseSeries={onCloseSeries}
 			/>
 
-			<section className='space-y-3'>
-				<h3 className={`text-lg font-semibold`}>Open predictions</h3>
-				<InPlayPredictions
-					predictionsOverride={seriesOpenPredictions}
-					emptyMessage='No open predictions in this series yet.'
-					showSectionHeader={false}
+			{isSeriesClosed ? (
+				<SeriesHallOfFameSection
+					series={series}
+					seriesPlacements={seriesPlacements}
+					isSeriesPlacementsLoading={isSeriesPlacementsLoading}
+					seriesAwards={seriesAwards}
+					isSeriesAwardsLoading={isSeriesAwardsLoading}
 				/>
-			</section>
+			) : (
+				<section className='space-y-3'>
+					<h3 className='text-lg font-semibold'>Open predictions</h3>
+					<InPlayPredictions
+						predictionsOverride={seriesOpenPredictions}
+						emptyMessage='No open predictions in this series yet.'
+						showSectionHeader={false}
+					/>
+				</section>
+			)}
 
 			<section className='space-y-3'>
 				<UserStats
@@ -102,7 +185,7 @@ export function SeriesDetailView({
 					subtitle='Current standings for this series.'
 					leaderboardEntriesOverride={seriesLeaderboard}
 					isLeaderboardLoadingOverride={isSeriesLeaderboardLoading}
-					showSeeAllLink={false}
+					showSeeAllLink={true}
 				/>
 			</section>
 
@@ -117,7 +200,7 @@ export function SeriesDetailView({
 				/>
 			</section>
 
-			{isOrganizer ? (
+			{isOrganizer && series.status !== "completed" ? (
 				<div
 					className='fixed right-8 z-50 bottom-2'
 					style={
@@ -135,6 +218,19 @@ export function SeriesDetailView({
 						aria-label='New prediction'
 					>
 						<RocketIcon />
+					</Button>
+				</div>
+			) : null}
+
+			{uncollectedRewards.length > 0 ? (
+				<div className='fixed inset-x-0 bottom-0 z-40 mx-auto w-[calc(100%-2rem)] max-w-md'>
+					<Button
+						type='button'
+						variant='linear'
+						className='h-11 w-full rounded-full shadow-lg'
+						onClick={() => setIsCollectDialogOpen(true)}
+					>
+						Collect rewards
 					</Button>
 				</div>
 			) : null}
@@ -168,6 +264,89 @@ export function SeriesDetailView({
 					Back to series
 				</span>
 			</Button>
+
+			<Dialog
+				open={isCollectDialogOpen}
+				onOpenChange={setIsCollectDialogOpen}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Collect your rewards</DialogTitle>
+						<DialogDescription>
+							Review and collect all unclaimed series rewards.
+						</DialogDescription>
+					</DialogHeader>
+
+					<Carousel
+						setApi={setCollectCarouselApi}
+						opts={{ loop: false }}
+						className='w-full'
+					>
+						<CarouselContent className='ml-0'>
+							{uncollectedRewards.map((reward) => (
+								<CarouselItem key={reward.key} className='pl-0'>
+									<div className='rounded-xl border border-border/60 bg-card p-4'>
+										<p className='text-xs text-muted-foreground'>
+											Reward
+										</p>
+										<p className='text-lg font-semibold'>
+											{reward.title}
+										</p>
+										<p className='text-sm text-muted-foreground'>
+											{reward.subtitle}
+										</p>
+										<p className='mt-2 text-sm'>
+											{reward.description}
+										</p>
+									</div>
+								</CarouselItem>
+							))}
+						</CarouselContent>
+					</Carousel>
+
+					<div className='flex justify-center gap-2'>
+						{uncollectedRewards.map((reward, index) => (
+							<button
+								key={reward.key}
+								type='button'
+								onClick={() =>
+									collectCarouselApi?.scrollTo(index)
+								}
+								className={`h-2 rounded-full transition-all ${
+									index === collectCurrentSlide
+										? "w-6 bg-primary"
+										: "w-2 bg-muted-foreground/30"
+								}`}
+								aria-label={`Go to reward ${index + 1}`}
+							/>
+						))}
+					</div>
+
+					<DialogFooter className='flex-row gap-2 sm:justify-between'>
+						<Button
+							type='button'
+							variant='ghost'
+							className='flex-1'
+							onClick={() => setIsCollectDialogOpen(false)}
+							disabled={isCollectRewardsPending}
+						>
+							Later
+						</Button>
+						<Button
+							type='button'
+							variant='linear'
+							className='flex-1'
+							onClick={() => {
+								onCollectRewards();
+								setIsCollectDialogOpen(false);
+							}}
+							disabled={isCollectRewardsPending}
+						>
+							Collect all
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

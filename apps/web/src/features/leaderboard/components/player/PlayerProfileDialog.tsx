@@ -129,17 +129,17 @@ function PredictionsSkeleton() {
 	);
 }
 
-function formatCollectedDate(value: string | null) {
-	if (!value) {
-		return "Not yet collected";
-	}
+// function formatCollectedDate(value: string | null) {
+// 	if (!value) {
+// 		return "Not yet collected";
+// 	}
 
-	return `Collected ${new Date(value).toLocaleDateString(undefined, {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	})}`;
-}
+// 	return `Collected ${new Date(value).toLocaleDateString(undefined, {
+// 		year: "numeric",
+// 		month: "short",
+// 		day: "numeric",
+// 	})}`;
+// }
 
 export function PlayerProfileDialog({
 	roomId,

@@ -36,7 +36,6 @@ import {
 	CoinsIcon,
 	Crosshair,
 	FlameIcon,
-	Lock,
 	MedalIcon,
 	TargetIcon,
 	TrophyIcon,
@@ -230,8 +229,6 @@ export function PlayerProfileDialog({
 				<div className='space-y-2'>
 					{seriesRecognition.championships.map((row) => {
 						const tierVisual = getChampionshipVisual(row.placement);
-						const isUncollected = !row.collected_at;
-
 						return (
 							<div
 								key={row.id}
@@ -266,17 +263,7 @@ export function PlayerProfileDialog({
 									<p className='truncate text-sm font-semibold text-foreground'>
 										{row.series_title}
 									</p>
-									<p className='text-[11px] text-muted-foreground'>
-										{formatCollectedDate(row.collected_at)}
-									</p>
 								</div>
-
-								{isUncollected ? (
-									<span className='inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-secondary px-2 py-1 text-[10px] font-medium text-muted-foreground'>
-										<Lock className='size-3' />
-										Uncollected
-									</span>
-								) : null}
 							</div>
 						);
 					})}
@@ -301,7 +288,6 @@ export function PlayerProfileDialog({
 				<div className='space-y-2'>
 					{seriesRecognition.awards.map((row) => {
 						const awardVisual = getAwardVisual(row.award_type);
-						const isUncollected = !row.collected_at;
 
 						return (
 							<div
@@ -330,12 +316,6 @@ export function PlayerProfileDialog({
 										{row.series_title}
 									</p>
 								</div>
-
-								{isUncollected ? (
-									<span className='shrink-0 rounded-full border border-border bg-secondary px-2 py-1 text-[10px] font-medium text-muted-foreground'>
-										Uncollected
-									</span>
-								) : null}
 							</div>
 						);
 					})}

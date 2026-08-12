@@ -222,7 +222,7 @@ export function SeriesDetailView({
 				</div>
 			) : null}
 
-			{uncollectedRewards.length > 0 ? (
+			{/* {uncollectedRewards.length > 0 ? (
 				<div className='fixed inset-x-0 bottom-0 z-40 mx-auto w-[calc(100%-2rem)] max-w-md'>
 					<Button
 						type='button'
@@ -233,7 +233,7 @@ export function SeriesDetailView({
 						Collect rewards
 					</Button>
 				</div>
-			) : null}
+			) : null} */}
 
 			<SeriesEditDialog
 				open={isEditorOpen}

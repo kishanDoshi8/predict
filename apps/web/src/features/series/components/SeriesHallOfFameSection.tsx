@@ -11,7 +11,7 @@ import {
 } from "@/shared/lib/seriesRecognitionVisuals";
 import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui";
-import { CheckIcon } from "lucide-react";
+import { TrophyIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 type SeriesHallOfFameSectionProps = {
@@ -72,7 +72,7 @@ export function SeriesHallOfFameSection({
 				<div
 					className={`rounded-2xl border p-6 ${getPlacementCardClass(1)}`}
 				>
-					<div className='flex flex-wrap items-start justify-between gap-4'>
+					<div className='flex items-stretch justify-between gap-4'>
 						<div className='space-y-2'>
 							<p className='text-sm font-medium text-rank-1'>
 								Series Champion
@@ -88,21 +88,14 @@ export function SeriesHallOfFameSection({
 										champion.points,
 									).toLocaleString()}
 								</p>
-								<p className='text-xs text-current/80'>
-									series points
-								</p>
+								<p className='text-xs text-current/80'>pts</p>
 							</div>
 						</div>
-						<div className='flex items-center gap-2'>
+						<div className='flex flex-col items-center justify-between gap-2'>
 							<Badge className='bg-rank-1/15 text-rank-1'>
-								#1 Overall
+								Rank #1
 							</Badge>
-							{champion.collected_at ? (
-								<Badge className='gap-2 bg-muted text-foreground'>
-									<CheckIcon className='h-3.5 w-3.5' />
-									Collected
-								</Badge>
-							) : null}
+							<TrophyIcon className='flex-1 my-auto h-14 w-14 text-rank-1' />
 						</div>
 					</div>
 				</div>
@@ -136,11 +129,6 @@ export function SeriesHallOfFameSection({
 									pts
 								</p>
 							</div>
-							{entry.collected_at ? (
-								<p className='mt-2 text-xs text-muted-foreground'>
-									Collected
-								</p>
-							) : null}
 						</div>
 					))}
 				</div>
@@ -209,11 +197,6 @@ export function SeriesHallOfFameSection({
 									{award.username}
 								</p>
 							</div>
-							{award.collected_at ? (
-								<Badge className='bg-muted text-foreground text-xs'>
-									Collected
-								</Badge>
-							) : null}
 						</div>
 					);
 				})}

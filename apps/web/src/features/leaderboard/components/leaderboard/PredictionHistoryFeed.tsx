@@ -47,8 +47,10 @@ function myResult(entry: PredictionHistoryEntry) {
 		return { label: "Refunded", tone: "text-muted-foreground bg-muted" };
 	}
 	const net = (entry.my_payout ?? 0) - entry.my_bet_amount;
-	if (net > 0) return { label: formatSignedPoints(net), tone: "text-win bg-win/15" };
-	if (net < 0) return { label: formatSignedPoints(net), tone: "text-loss bg-loss/15" };
+	if (net > 0)
+		return { label: formatSignedPoints(net), tone: "text-win bg-win/15" };
+	if (net < 0)
+		return { label: formatSignedPoints(net), tone: "text-loss bg-loss/15" };
 	return { label: "±0", tone: "text-muted-foreground bg-muted" };
 }
 
@@ -89,14 +91,16 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 				<span className={`text-sm text-foreground font-semibold`}>
 					+{entry.total_paid_to_winners.toLocaleString()} pts
 				</span>{" "}
-				paid to {entry.winner_count} {winnerLabel}
+				to {entry.winner_count} {winnerLabel}
 			</span>
 		);
 	}
 
 	const result = myResult(entry);
 	const seriesLabel = [
-		entry.series_prediction_number ? `#${entry.series_prediction_number}` : null,
+		entry.series_prediction_number
+			? `#${entry.series_prediction_number}`
+			: null,
 		entry.series_title,
 	]
 		.filter(Boolean)
@@ -126,31 +130,33 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 			className={`border-2 rounded-xl p-3 flex flex-col gap-2 hover:bg-secondary/50 transition-colors ${borderClass}`}
 		>
 			{/* Header: where it sits in its series, and how it went for you */}
-			<div className='flex items-start gap-2'>
-				<div className='mt-0.5 shrink-0' title={meta.label}>
-					{meta.icon}
-				</div>
-				<div className='flex-1 min-w-0'>
-					{seriesLabel ? (
-						<p className='text-xs text-muted-foreground truncate'>
-							{seriesLabel}
-						</p>
+			<div className={`space-y-1`}>
+				<div className='flex items-center gap-2'>
+					<div className='shrink-0' title={meta.label}>
+						{meta.icon}
+					</div>
+					<div className='flex-1 min-w-0'>
+						{seriesLabel ? (
+							<p className='text-xs text-muted-foreground truncate'>
+								{seriesLabel}
+							</p>
+						) : null}
+					</div>
+					{result ? (
+						<span
+							className={cn(
+								"shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold tabular-nums",
+								result.tone,
+							)}
+							aria-label={`Your result: ${result.label}`}
+						>
+							{result.label}
+						</span>
 					) : null}
-					<p className='text-sm font-medium leading-snug'>
-						{entry.title}
-					</p>
 				</div>
-				{result ? (
-					<span
-						className={cn(
-							"shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold tabular-nums",
-							result.tone,
-						)}
-						aria-label={`Your result: ${result.label}`}
-					>
-						{result.label}
-					</span>
-				) : null}
+				<p className='text-sm font-medium leading-snug'>
+					{entry.title}
+				</p>
 			</div>
 
 			{/* Winner pill */}
@@ -234,31 +240,23 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 			)}
 
 			{/* Footer meta */}
-			<div className='flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground'>
-				{resolvedLabel && <span>{resolvedLabel}</span>}
-				{total > 0 && (
-					<>
-						{resolvedLabel ? <Dot /> : null}
-						<span>Pool: {total.toLocaleString()} pts</span>
-					</>
-				)}
+			<div className='grid grid-cols-[1fr_auto] px-2 gap-x-3 gap-y-0.5 text-xs text-muted-foreground'>
+				{total > 0 && <span>Pool: {total.toLocaleString()} pts</span>}
 				{participants > 0 && (
-					<>
-						<Dot />
-						{participants} predictor
-						{participants === 1 ? "" : "s"}
-					</>
+					<span>
+						{participants} predictor{participants === 1 ? "" : "s"}
+					</span>
 				)}
 				{winPct !== null && entry.status === "revealed" && (
-					<>
-						<Dot />
-						<span>{winPct}% called it</span>
-					</>
+					<span>{winPct}% called it</span>
 				)}
+				{resolvedLabel && <span>{resolvedLabel}</span>}
 			</div>
 
 			<div className='flex flex-wrap items-center gap-x-2 rounded-md bg-muted/40 px-2.5 py-1.5 text-xs'>
-				<div className='font-medium text-foreground'>{payoutSummary}</div>
+				<div className='font-medium text-foreground'>
+					{payoutSummary}
+				</div>
 				{entry.status === "revealed" && entry.biggest_payout > 0 && (
 					<span className='text-muted-foreground'>
 						· top{" "}

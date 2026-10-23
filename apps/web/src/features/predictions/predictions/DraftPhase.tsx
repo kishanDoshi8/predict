@@ -100,6 +100,7 @@ export default function DraftPhase({
 						<DraftControls
 							player={player}
 							predictionId={prediction.id}
+							seriesId={prediction.seriesId ?? null}
 							selectedOption={selectedOption}
 							setSelectedOption={setSelectedOption}
 						/>

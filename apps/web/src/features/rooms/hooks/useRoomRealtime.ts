@@ -38,6 +38,16 @@ export function useRoomRealtime(roomId: string | null) {
 					queryClient.invalidateQueries({
 						queryKey: roomKeys.activePredictions(roomId),
 					});
+					// A result moves points, so wallets and standings change too.
+					queryClient.invalidateQueries({
+						queryKey: roomKeys.seriesWallets(roomId),
+					});
+					queryClient.invalidateQueries({
+						predicate: (query) =>
+							query.queryKey[0] === roomKeys.all[0] &&
+							query.queryKey[1] === roomId &&
+							query.queryKey[2] === "seriesLeaderboard",
+					});
 				},
 			)
 			.on(

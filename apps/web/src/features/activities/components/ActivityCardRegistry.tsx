@@ -27,6 +27,7 @@ import { DuelCancelledCard } from "@/features/activities/components/cards/DuelCa
 import { DuelExpiredCard } from "@/features/activities/components/cards/DuelExpiredCard";
 import { AchievementRatingTierReachedCard } from "@/features/activities/components/cards/AchievementRatingTierReachedCard";
 import { AchievementStreakMilestoneCard } from "@/features/activities/components/cards/AchievementStreakMilestoneCard";
+import { FEATURES } from "@/shared/constants/features";
 
 type RegistryProps = {
 	activity: RoomActivity;
@@ -71,7 +72,16 @@ const registry: RegistryMap = {
 	duel_expired: DuelExpiredCard,
 };
 
+// Activity from features that are switched off. Ratings still update in the
+// background but aren't shown while the series standings are the one ranking.
+function isHiddenActivity(activityType: RoomActivity["activityType"]) {
+	if (activityType === "achievement_rating_tier_reached") return true;
+	return !FEATURES.duels && activityType.startsWith("duel_");
+}
+
 export function ActivityCardRegistry({ activity, roomCode }: Readonly<RegistryProps>) {
+	if (isHiddenActivity(activity.activityType)) return null;
+
 	const Card = registry[activity.activityType] as (props: {
 		activity: RoomActivity;
 		roomCode: string;

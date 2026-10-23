@@ -80,6 +80,12 @@ export function SeriesSelector({
 			return;
 		}
 
+		// Prefer the series the server picked (e.g. the latest active one).
+		if (data?.selected_series_id) {
+			onValueChange(data.selected_series_id);
+			return;
+		}
+
 		const firstSeriesItem =
 			items.find((item) => item.value !== ALL_SERIES_VALUE) ?? items[0];
 		if (!firstSeriesItem) {
@@ -91,7 +97,7 @@ export function SeriesSelector({
 				? null
 				: firstSeriesItem.value,
 		);
-	}, [autoSelect, items, onValueChange, value]);
+	}, [autoSelect, data?.selected_series_id, items, onValueChange, value]);
 
 	return (
 		<Select value={selectedValue} onValueChange={handleValueChange}>

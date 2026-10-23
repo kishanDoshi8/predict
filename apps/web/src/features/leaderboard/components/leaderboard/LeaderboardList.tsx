@@ -1,14 +1,11 @@
 import { Skeleton } from "@/shared/ui/skeleton";
 import { LeaderboardEntry } from "@/features/leaderboard";
 import { LeaderboardRow } from "./LeaderboardRow";
-import { LeaderboardSortBy } from "@/features/leaderboard";
 
 type Props = {
 	entries: LeaderboardEntry[];
 	currentPlayerId: string;
 	isLoading: boolean;
-	scope: "all_time" | "series";
-	sortBy: LeaderboardSortBy;
 	onRowClick?: (playerId: string) => void;
 };
 
@@ -16,8 +13,6 @@ export function LeaderboardList({
 	entries,
 	currentPlayerId,
 	isLoading,
-	scope,
-	sortBy,
 	onRowClick,
 }: Readonly<Props>) {
 	if (isLoading) {
@@ -35,9 +30,7 @@ export function LeaderboardList({
 			<div className='flex flex-col items-center gap-2 py-12 text-center'>
 				<p className='text-4xl'>🏆</p>
 				<p className='text-muted-foreground text-sm'>
-					{scope === "series"
-						? "No series standings yet. Be the first to score."
-						: "No one is on the board yet. Make a prediction!"}
+					No standings yet. They appear once a series starts.
 				</p>
 			</div>
 		);
@@ -56,7 +49,6 @@ export function LeaderboardList({
 						key={entry.player_id}
 						entry={entry}
 						currentPlayerId={currentPlayerId}
-						sortBy={sortBy}
 						onClick={onRowClick}
 					/>
 				))}

@@ -15,21 +15,19 @@ import {
 	useCompleteSeries,
 } from "@/features/series";
 import type { Series } from "@/features/series/types/series";
+import type { SeriesFormState } from "@/features/series/components/SeriesEditDialog";
+import { getSeriesPointsError } from "@/features/series/lib/points";
 import { Button, Skeleton } from "@/shared/ui";
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
-type SeriesFormState = {
-	title: string;
-	description: string;
-	expectedGames: string;
-};
-
 const defaultFormState: SeriesFormState = {
 	title: "",
 	description: "",
 	expectedGames: "0",
+	startingStack: "1000",
+	weeklyTopup: "100",
 };
 
 type SeriesByStatus = {
@@ -60,6 +58,8 @@ function saveSeriesEdit({
 		title: string;
 		description: string;
 		expectedGames: number;
+		startingStack: number;
+		weeklyTopup: number;
 	}) => void;
 }) {
 	if (!editingSeriesId) {
@@ -79,11 +79,22 @@ function saveSeriesEdit({
 		return;
 	}
 
+	const pointsError = getSeriesPointsError(
+		formState.startingStack,
+		formState.weeklyTopup,
+	);
+	if (pointsError) {
+		toast(pointsError);
+		return;
+	}
+
 	updateSeries({
 		seriesId: editingSeriesId,
 		title,
 		description: formState.description,
 		expectedGames,
+		startingStack: Number(formState.startingStack),
+		weeklyTopup: Number(formState.weeklyTopup),
 	});
 }
 
@@ -204,6 +215,8 @@ export default function SeriesPage() {
 			title: series.title,
 			description: series.description ?? "",
 			expectedGames: String(series.expectedGames),
+			startingStack: String(series.startingStack),
+			weeklyTopup: String(series.weeklyTopup),
 		});
 		setIsEditorOpen(true);
 	};
@@ -219,6 +232,8 @@ export default function SeriesPage() {
 		title: string;
 		description: string;
 		expectedGames: number;
+		startingStack: number;
+		weeklyTopup: number;
 	}) => {
 		updateSeries(payload, {
 			onSuccess: () => {

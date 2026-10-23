@@ -1,26 +1,22 @@
 import { LeaderboardEntry } from "@/features/leaderboard";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
-import { cn } from "@/shared/lib/utils";
-import { CoinsIcon, FlameIcon, TriangleIcon, ZapIcon } from "lucide-react";
+import { cn, formatSignedPoints } from "@/shared/lib/utils";
+import { CoinsIcon, FlameIcon } from "lucide-react";
 import { Badge } from "@/shared/ui";
-import { LeaderboardSortBy } from "@/features/leaderboard";
 
 type Props = {
 	entry: LeaderboardEntry;
 	currentPlayerId: string;
-	sortBy: LeaderboardSortBy;
 	onClick?: (playerId: string) => void;
 };
 
 export function LeaderboardRow({
 	entry,
 	currentPlayerId,
-	sortBy,
 	onClick,
 }: Readonly<Props>) {
 	const isSelf = entry.player_id === currentPlayerId;
 	const initials = entry.username.slice(0, 2).toUpperCase();
-	const isRatingsView = sortBy === "ratings";
 
 	let rankLabel: string;
 	if (entry.rank === 1) {
@@ -89,55 +85,29 @@ export function LeaderboardRow({
 						</div>
 					)}
 				</p>
-				<p className={`flex gap-4 items-center`}>
-					{entry.total_revealed_bets > 0 && (
-						<p className='text-xs text-muted-foreground tabular-nums'>
-							{entry.winning_bets}/{entry.total_revealed_bets}{" "}
-							wins
-						</p>
-					)}
-					{entry.rank_change !== null && entry.rank_change < 0 && (
-						<p className='flex items-center text-xs text-loss tabular-nums'>
-							<TriangleIcon
-								className={`w-3 h-3 inline-block mr-1 rotate-180`}
-							/>
-							{Math.abs(entry.rank_change)}
-						</p>
-					)}
-					{entry.rank_change !== null && entry.rank_change > 0 && (
-						<p className='flex items-center text-xs text-win tabular-nums'>
-							<TriangleIcon
-								className={`w-3 h-3 inline-block mr-1`}
-							/>
-							{Math.abs(entry.rank_change)}
-						</p>
-					)}
-				</p>
+				{entry.total_revealed_bets > 0 && (
+					<p className='text-xs text-muted-foreground tabular-nums text-left'>
+						{entry.winning_bets}/{entry.total_revealed_bets} wins
+					</p>
+				)}
 			</div>
 
-			{/* Stats */}
+			{/* Balance, then profit or loss this series */}
 			<div className='flex flex-col items-end gap-0.5 shrink-0 text-right'>
-				{isRatingsView ? (
-					<>
-						<p className='flex items-center font-semibold tabular-nums'>
-							<ZapIcon className='w-4 h-4 text-cyan-500 inline-block mr-0.5' />
-							{entry.prediction_rating}
-						</p>
-						<p className='text-xs text-muted-foreground tabular-nums'>
-							{entry.total_won_in_room.toLocaleString()} pts
-						</p>
-					</>
-				) : (
-					<>
-						<p className='font-semibold tabular-nums'>
-							<CoinsIcon className='w-4 h-4 text-yellow-400 inline-block mr-0.5' />
-							{entry.total_won_in_room.toLocaleString()}
-						</p>
-						<p className='flex items-center text-xs text-muted-foreground tabular-nums'>
-							{entry.prediction_rating} PR
-						</p>
-					</>
-				)}
+				<p className='font-semibold tabular-nums'>
+					<CoinsIcon className='w-4 h-4 text-yellow-400 inline-block mr-0.5' />
+					{entry.balance.toLocaleString()}
+				</p>
+				<p
+					className={cn(
+						"text-xs tabular-nums",
+						entry.net_profit > 0 && "text-win",
+						entry.net_profit < 0 && "text-loss",
+						entry.net_profit === 0 && "text-muted-foreground",
+					)}
+				>
+					{formatSignedPoints(entry.net_profit)}
+				</p>
 			</div>
 		</button>
 	);

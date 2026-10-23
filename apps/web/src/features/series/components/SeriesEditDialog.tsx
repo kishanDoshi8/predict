@@ -9,15 +9,19 @@ import {
 import { Textarea } from "@/shared/ui/textarea";
 import type { ChangeEvent } from "react";
 
-type SeriesFormState = {
+export type SeriesFormState = {
 	title: string;
 	description: string;
 	expectedGames: string;
+	startingStack: string;
+	weeklyTopup: string;
 };
 
 type SeriesEditDialogProps = {
 	open: boolean;
 	isUpdatePending: boolean;
+	// Points settings can't change once anyone has bet in the series.
+	pointsLocked: boolean;
 	formState: SeriesFormState;
 	onOpenChange: (open: boolean) => void;
 	onFormStateChange: (nextState: SeriesFormState) => void;
@@ -28,6 +32,7 @@ type SeriesEditDialogProps = {
 export function SeriesEditDialog({
 	open,
 	isUpdatePending,
+	pointsLocked,
 	formState,
 	onOpenChange,
 	onFormStateChange,
@@ -71,6 +76,40 @@ export function SeriesEditDialog({
 						onChange={updateField("expectedGames")}
 						disabled={isUpdatePending}
 					/>
+					<div className='grid grid-cols-2 gap-3'>
+						<label className='space-y-1 text-sm'>
+							<span className='text-muted-foreground'>
+								Starting points
+							</span>
+							<Input
+								type='number'
+								min={100}
+								step={100}
+								value={formState.startingStack}
+								onChange={updateField("startingStack")}
+								disabled={isUpdatePending || pointsLocked}
+							/>
+						</label>
+						<label className='space-y-1 text-sm'>
+							<span className='text-muted-foreground'>
+								Weekly top-up
+							</span>
+							<Input
+								type='number'
+								min={0}
+								step={10}
+								value={formState.weeklyTopup}
+								onChange={updateField("weeklyTopup")}
+								disabled={isUpdatePending || pointsLocked}
+							/>
+						</label>
+					</div>
+					{pointsLocked ? (
+						<p className='text-xs text-muted-foreground'>
+							Points settings are locked once anyone has placed a
+							bet.
+						</p>
+					) : null}
 					<div className='flex justify-end gap-2'>
 						<Button
 							variant='outline'

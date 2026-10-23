@@ -8,7 +8,7 @@ import {
 import { useRoom, Room, RoomSwitcherDrawer, useRoomRealtime } from "@/features/rooms";
 import { RoomHeader } from "@/features/predictions";
 import { Suspense, lazy, useEffect, useState } from "react";
-import { usePlayer, useSetLastVisitedRoom, useWeeklyClaim } from "@/features/home";
+import { usePlayer, useSetLastVisitedRoom } from "@/features/home";
 import { usePreferences, useMarkHowToPlaySeen } from "@/features/preferences";
 import { Loading } from "@/shared/ui";
 
@@ -28,7 +28,6 @@ export default function RoomLayout() {
 
 	useRoomRealtime(room?.id ?? null);
 
-	const { mutate: claimWeeklyReward } = useWeeklyClaim();
 	const roomId = room?.id ?? "";
 	const { data: preferences } = usePreferences(roomId);
 	const { mutate: markSeen } = useMarkHowToPlaySeen(roomId || undefined);
@@ -37,10 +36,6 @@ export default function RoomLayout() {
 	const [showRoomSwitcher, setShowRoomSwitcher] = useState(false);
 
 	useEffect(() => {
-		if (player) {
-			claimWeeklyReward();
-		}
-
 		if (!isPlayerLoading && !player) {
 			navigate("/create-player", { replace: true });
 		}

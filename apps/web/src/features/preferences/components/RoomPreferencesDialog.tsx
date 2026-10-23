@@ -42,7 +42,7 @@ const notificationLabels: Record<NotificationPreferenceKey, string> = {
 	prediction_locked: "Prediction locked",
 	deadline_1h: "Betting deadline (1h)",
 	result_revealed: "Result revealed",
-	weekly_points_claim: "Weekly points claim available",
+	weekly_points_claim: "Weekly top-up",
 };
 
 const notificationKeys: NotificationPreferenceKey[] = [

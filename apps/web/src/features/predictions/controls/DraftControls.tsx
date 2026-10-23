@@ -18,10 +18,13 @@ import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
 import { Counter, FadeContent } from "@/shared/ui";
 import { usePredictionDuels } from "@/features/duels";
+import { useCurrentSeries, useSeriesWallet } from "@/features/series";
+import { FEATURES } from "@/shared/constants/features";
 
 type Props = {
 	player: Player;
 	predictionId: string;
+	seriesId: string | null;
 	selectedOption: string | null;
 	setSelectedOption: React.Dispatch<React.SetStateAction<string | null>>;
 };
@@ -29,12 +32,18 @@ type Props = {
 export default function DraftControls({
 	player,
 	predictionId,
+	seriesId,
 	selectedOption,
 	setSelectedOption,
 }: Readonly<Props>) {
 	const { room } = useRoomContext();
 	const { mutate: placeBet, isPending: isPlacingBet } = usePlaceBet();
-	const { data: duels } = usePredictionDuels(room.id, predictionId);
+	const { data: duels } = usePredictionDuels(
+		room.id,
+		FEATURES.duels ? predictionId : undefined,
+	);
+	const { wallet } = useSeriesWallet(room.id, seriesId);
+	const { setCurrentSeriesId } = useCurrentSeries(room.id);
 	const { data: myBet, isPending: isMyBetLoading } = useMyBet(
 		room.id,
 		predictionId,
@@ -49,8 +58,13 @@ export default function DraftControls({
 	);
 	const [canUpdateBet, setCanUpdateBet] = React.useState<boolean>(false);
 
-	const availableBalance =
-		player.points_balance - player.points_in_escrow + (myBet?.amount ?? 0);
+	// Bets spend points from this prediction's series wallet.
+	const availableBalance = (wallet?.available ?? 0) + (myBet?.amount ?? 0);
+
+	// Betting here means looking at this series, so the header shows its points.
+	useEffect(() => {
+		if (seriesId) setCurrentSeriesId(seriesId);
+	}, [seriesId, setCurrentSeriesId]);
 
 	useEffect(() => {
 		const hasDuelInProgress = duels?.some((duel) => {
@@ -108,6 +122,7 @@ export default function DraftControls({
 				roomId: room.id,
 				playerId: player.id,
 				predictionId: predictionId,
+				seriesId,
 				optionId: selectedOption,
 				amount: betAmount,
 			},
@@ -155,6 +170,7 @@ export default function DraftControls({
 				roomId: room.id,
 				playerId: player.id,
 				predictionId: predictionId,
+				seriesId,
 			},
 			{
 				onError: (error) => {

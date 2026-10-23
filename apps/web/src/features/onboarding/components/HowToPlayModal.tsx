@@ -22,9 +22,9 @@ const SLIDES = [
 	},
 	{
 		emoji: "🪙",
-		title: "Claim your points",
+		title: "Everyone starts level",
 		description:
-			"You get 100 points every week, automatically soon as you log on. That's your ammunition - spend it wisely.",
+			"Each series, every player gets the same points, plus a top-up every Monday. Nobody carries a head start from last time.",
 	},
 	{
 		emoji: "💰",
@@ -34,9 +34,9 @@ const SLIDES = [
 	},
 	{
 		emoji: "🏆",
-		title: "Wait for the verdict",
+		title: "Win the series",
 		description:
-			"Once the organizer calls it, winners get paid out. Losers cope. Check the leaderboard and do better next time.",
+			"Once the organizer calls a result, winners get paid. When the series closes, the top balance takes the title.",
 	},
 ] as const;
 

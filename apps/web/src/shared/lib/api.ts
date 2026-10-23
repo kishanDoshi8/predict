@@ -65,6 +65,24 @@ type SeriesPayload = {
   started_at: string | null
   completed_at: string | null
   archived_at: string | null
+  starting_stack?: number
+  weekly_topup?: number
+  topups_paid?: number
+  has_bets?: boolean
+}
+
+export type SeriesWallet = {
+  series_id: string
+  title: string
+  status: Series["status"]
+  starting_stack: number
+  weekly_topup: number
+  balance: number
+  escrow: number
+  available: number
+  granted: number
+  net_profit: number
+  started_at: string | null
 }
 
 export type RoomSeriesCollection = {
@@ -174,6 +192,10 @@ function mapSeriesPayload(series: SeriesPayload): Series {
     startedAt: series.started_at,
     completedAt: series.completed_at,
     archivedAt: series.archived_at,
+    startingStack: series.starting_stack ?? 1000,
+    weeklyTopup: series.weekly_topup ?? 100,
+    topupsPaid: series.topups_paid ?? 0,
+    hasBets: series.has_bets ?? false,
   }
 }
 
@@ -387,26 +409,39 @@ type SeriesUpsertPayload = {
   title: string
   description: string
   expectedGames: number
+  startingStack?: number
+  weeklyTopup?: number
 }
 
 export async function createSeries(roomId: string, payload: SeriesUpsertPayload): Promise<Series> {
-  const { data, error } = await supabase.rpc('create_series', {
+  const { data, error } = await untypedSupabase.rpc('create_series', {
     p_room_id: roomId,
     p_title: payload.title,
     p_description: payload.description,
     p_expected_games: payload.expectedGames,
+    p_starting_stack: payload.startingStack,
+    p_weekly_topup: payload.weeklyTopup,
   })
   return mapSeriesPayload(assertOk(data, error) as SeriesPayload)
 }
 
 export async function updateSeries(seriesId: string, payload: SeriesUpsertPayload): Promise<Series> {
-  const { data, error } = await supabase.rpc('update_series', {
+  const { data, error } = await untypedSupabase.rpc('update_series', {
     p_series_id: seriesId,
     p_title: payload.title,
     p_description: payload.description,
     p_expected_games: payload.expectedGames,
+    p_starting_stack: payload.startingStack,
+    p_weekly_topup: payload.weeklyTopup,
   })
   return mapSeriesPayload(assertOk(data, error) as SeriesPayload)
+}
+
+export async function getMySeriesWallets(roomId: string): Promise<SeriesWallet[]> {
+  const { data, error } = await untypedSupabase.rpc('get_my_series_wallets', {
+    p_room_id: roomId,
+  })
+  return assertOk(data, error) as SeriesWallet[]
 }
 
 export async function activateSeries(seriesId: string): Promise<Series> {
@@ -471,27 +506,6 @@ export async function collectSeriesRewards(seriesId: string) {
 }
 
 // #endregion Series
-
-// #region Weekly Points
-// -------------------------------------------------------
-
-export async function claimWeeklyPoints(autoClaimed = true) {
-  const { data, error } = await supabase.rpc('claim_weekly_points', {
-    p_auto_claimed: autoClaimed,
-  })
-  return assertOk(data, error) as {
-    claimed: boolean
-    already_claimed: boolean
-    week_key: string
-    points_added: number
-    points_balance: number
-    current_streak: number
-    longest_streak: number
-    auto_claimed: boolean
-  }
-}
-
-// #endregion Weekly Points
 
 // #region Preferences
 // -------------------------------------------------------
@@ -965,17 +979,6 @@ export async function cancelDuelQueue(
 // #endregion Duels
 
 // #region Leaderboard
-export async function getRoomLeaderboard(
-  roomId: string,
-  sortBy: 'points' | 'rating' | 'accuracy' | 'streak' = 'points',
-) {
-  const { data, error } = await supabase.rpc('get_room_leaderboard', {
-    p_room_id: roomId,
-    p_sort_by: sortBy,
-  })
-  return assertOk(data, error) as LeaderboardEntry[]
-}
-
 export async function getSeriesLeaderboard(
   roomId: string,
   seriesId: string,
@@ -984,17 +987,6 @@ export async function getSeriesLeaderboard(
   const { data, error } = await untypedSupabase.rpc('get_series_leaderboard', {
     p_room_id: roomId,
     p_series_id: seriesId,
-    p_sort_by: sortBy,
-  })
-  return assertOk(data, error) as LeaderboardEntry[]
-}
-
-export async function getRoomWeeklyLeaderboard(
-  roomId: string,
-  sortBy: 'points' | 'rating' | 'accuracy' | 'streak' = 'points',
-) {
-  const { data, error } = await supabase.rpc('get_room_weekly_leaderboard', {
-    p_room_id: roomId,
     p_sort_by: sortBy,
   })
   return assertOk(data, error) as LeaderboardEntry[]

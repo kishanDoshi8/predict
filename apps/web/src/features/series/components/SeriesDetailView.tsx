@@ -32,11 +32,7 @@ import {
 import { ChevronLeftIcon, RocketIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-type SeriesFormState = {
-	title: string;
-	description: string;
-	expectedGames: string;
-};
+import type { SeriesFormState } from "@/features/series/components/SeriesEditDialog";
 
 type SeriesDetailViewProps = {
 	series: Series;
@@ -239,6 +235,7 @@ export function SeriesDetailView({
 				open={isEditorOpen}
 				onOpenChange={onEditDialogOpenChange}
 				isUpdatePending={isUpdatePending}
+				pointsLocked={series.hasBets}
 				formState={formState}
 				onFormStateChange={onFormStateChange}
 				onCancel={onCancelEdit}

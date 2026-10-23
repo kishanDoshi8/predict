@@ -1,5 +1,4 @@
 import {
-    getRoomLeaderboard,
     getRoomMemberRecentPredictions,
     getRoomMemberStats,
     getRoomPredictionHistory,
@@ -7,42 +6,10 @@ import {
     getRoomMemberSeriesRecognition,
     SeriesSelectorMode,
     getSeriesLeaderboard,
-    getRoomWeeklyLeaderboard,
 } from '@/shared/lib/api'
 import { PredictionHistoryFilter, PredictionHistoryPage } from "@/features/leaderboard";
 import { InfiniteData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { roomKeys } from '@/shared/constants/queryKeys'
-
-export type LeaderboardSortBy = 'points' | 'ratings'
-
-const toApiSortBy = (sortBy: LeaderboardSortBy): 'points' | 'rating' => {
-    return sortBy === 'ratings' ? 'rating' : 'points'
-}
-
-export const useRoomLeaderboard = (
-    roomId?: string,
-    enabled = true,
-    sortBy: LeaderboardSortBy = 'points',
-) => {
-    return useQuery({
-        queryKey: roomKeys.leaderboard(roomId ?? '', sortBy),
-        queryFn: () => getRoomLeaderboard(roomId ?? '', toApiSortBy(sortBy)),
-        enabled: !!roomId && enabled,
-    })
-}
-
-export const useRoomWeeklyLeaderboard = (
-    roomId?: string,
-    enabled = true,
-    sortBy: LeaderboardSortBy = 'points',
-) => {
-    return useQuery({
-        queryKey: roomKeys.weeklyLeaderboard(roomId ?? '', sortBy),
-        queryFn: () =>
-            getRoomWeeklyLeaderboard(roomId ?? '', toApiSortBy(sortBy)),
-        enabled: !!roomId && enabled,
-    })
-}
 
 export const useRoomSeriesSelector = (
     roomId?: string,
@@ -57,16 +24,15 @@ export const useRoomSeriesSelector = (
     })
 }
 
+// Series standings, ranked by wallet balance.
 export const useSeriesLeaderboard = (
     roomId?: string,
     seriesId?: string | null,
     enabled = true,
-    sortBy: LeaderboardSortBy = 'points',
 ) => {
     return useQuery({
-        queryKey: roomKeys.seriesLeaderboard(roomId ?? '', seriesId ?? '', sortBy),
-        queryFn: () =>
-            getSeriesLeaderboard(roomId ?? '', seriesId ?? '', toApiSortBy(sortBy)),
+        queryKey: roomKeys.seriesLeaderboard(roomId ?? '', seriesId ?? ''),
+        queryFn: () => getSeriesLeaderboard(roomId ?? '', seriesId ?? '', 'points'),
         enabled: !!roomId && !!seriesId && enabled,
     })
 }

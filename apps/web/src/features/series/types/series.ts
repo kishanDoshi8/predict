@@ -21,4 +21,10 @@ export interface Series {
   startedAt:        string | null
   completedAt:      string | null
   archivedAt:       string | null
+  // Every member's wallet starts at startingStack and gains weeklyTopup each Monday.
+  startingStack:    number
+  weeklyTopup:      number
+  topupsPaid:       number
+  // Points settings are locked once anyone has bet in the series.
+  hasBets:          boolean
 }

@@ -2,6 +2,11 @@ export type LeaderboardEntry = {
   player_id:          string
   username:           string
   total_won_in_room:  number
+  // Series wallet: standings rank by balance; net_profit = balance - granted.
+  balance:            number
+  available:          number
+  granted:            number
+  net_profit:         number
   joined_at:          string
   is_organizer:       boolean
   current_streak:     number

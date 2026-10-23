@@ -12,17 +12,22 @@ import { Textarea } from "@/shared/ui/textarea";
 import { useMemo, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { getSeriesPointsError } from "@/features/series/lib/points";
 
 type FormState = {
 	title: string;
 	description: string;
 	expectedGames: string;
+	startingStack: string;
+	weeklyTopup: string;
 };
 
 const DEFAULT_FORM: FormState = {
 	title: "",
 	description: "",
 	expectedGames: "3",
+	startingStack: "1000",
+	weeklyTopup: "100",
 };
 
 const DESCRIPTION_MAX_LENGTH = 240;
@@ -55,10 +60,16 @@ export default function SeriesCreatePage() {
 		return "";
 	}, [form.expectedGames]);
 
+	const pointsError = getSeriesPointsError(
+		form.startingStack,
+		form.weeklyTopup,
+	);
+
 	const canSubmit =
 		!isPending &&
 		titleError.length === 0 &&
 		expectedGamesError.length === 0 &&
+		pointsError.length === 0 &&
 		isOrganizer;
 
 	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -79,11 +90,18 @@ export default function SeriesCreatePage() {
 			return;
 		}
 
+		if (pointsError.length > 0) {
+			toast(pointsError);
+			return;
+		}
+
 		createSeries(
 			{
 				title: form.title.trim(),
 				description: form.description.trim(),
 				expectedGames: Number(form.expectedGames),
+				startingStack: Number(form.startingStack),
+				weeklyTopup: Number(form.weeklyTopup),
 			},
 			{
 				onSuccess: () => {
@@ -104,8 +122,8 @@ export default function SeriesCreatePage() {
 			<div>
 				<h2 className='text-lg font-semibold'>New series</h2>
 				<p className='mt-1 text-sm text-muted-foreground'>
-					Set up a series to group related predictions and track
-					progress.
+					Everyone starts the series with the same points. Top
+					balance when it closes wins the title.
 				</p>
 			</div>
 
@@ -182,6 +200,51 @@ export default function SeriesCreatePage() {
 							How many predictions are planned in this series.
 						</FieldDescription>
 					</Field>
+
+					<div className='grid grid-cols-2 gap-3'>
+						<Field>
+							<FieldLabel htmlFor='series-starting-stack'>
+								Starting points
+							</FieldLabel>
+							<Input
+								id='series-starting-stack'
+								type='number'
+								min={100}
+								step={100}
+								value={form.startingStack}
+								onChange={(event) =>
+									setForm((current) => ({
+										...current,
+										startingStack: event.target.value,
+									}))
+								}
+								disabled={isPending}
+							/>
+						</Field>
+						<Field>
+							<FieldLabel htmlFor='series-weekly-topup'>
+								Weekly top-up
+							</FieldLabel>
+							<Input
+								id='series-weekly-topup'
+								type='number'
+								min={0}
+								step={10}
+								value={form.weeklyTopup}
+								onChange={(event) =>
+									setForm((current) => ({
+										...current,
+										weeklyTopup: event.target.value,
+									}))
+								}
+								disabled={isPending}
+							/>
+						</Field>
+					</div>
+					<FieldDescription>
+						Every member gets the starting points, plus the top-up
+						each Monday. Locked once anyone bets.
+					</FieldDescription>
 				</FieldGroup>
 
 				<div className='flex justify-end gap-2'>

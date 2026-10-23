@@ -1,5 +1,7 @@
 begin;
 
+create extension if not exists pgtap with schema extensions;
+
 select plan(18);
 
 create or replace function public._test_create_player_with_auth_user(
@@ -66,7 +68,10 @@ begin
 end;
 $$;
 
-do $$
+create function pg_temp.weekly_first_claim_bonus_tests()
+returns setof text
+language plpgsql
+as $$
 declare
   v_current_week text := private.current_week_key();
   v_prev_week text := to_char((now() - interval '7 days') at time zone 'UTC', 'IYYY"-W"IW');
@@ -79,19 +84,19 @@ begin
   perform set_config('request.jwt.claim.sub', v_player.user_id::text, true);
   v_result := public.claim_weekly_points(false);
 
-  perform is((v_result->>'claimed')::boolean, true, 'manual first claim succeeds');
-  perform is((v_result->>'points_added')::integer, 500, 'manual first claim awards 500');
-  perform is((v_result->>'current_streak')::integer, 1, 'manual first claim starts streak at 1');
-  perform is((select points_balance from public.players where id = v_player.id), 500, 'manual first claim updates points balance to 500');
+  return next is((v_result->>'claimed')::boolean, true, 'manual first claim succeeds');
+  return next is((v_result->>'points_added')::integer, 500, 'manual first claim awards 500');
+  return next is((v_result->>'current_streak')::integer, 1, 'manual first claim starts streak at 1');
+  return next is((select points_balance from public.players where id = v_player.id), 500, 'manual first claim updates points balance to 500');
 
   -- first auto claim = 500
   v_player := public._test_create_player_with_auth_user('22222222-2222-2222-2222-222222222222', 'weekly_bonus_auto');
   perform set_config('request.jwt.claim.sub', v_player.user_id::text, true);
   v_result := public.claim_weekly_points(true);
 
-  perform is((v_result->>'points_added')::integer, 500, 'auto first claim awards 500');
-  perform is((v_result->>'auto_claimed')::boolean, true, 'auto first claim response marks auto_claimed=true');
-  perform is(
+  return next is((v_result->>'points_added')::integer, 500, 'auto first claim awards 500');
+  return next is((v_result->>'auto_claimed')::boolean, true, 'auto first claim response marks auto_claimed=true');
+  return next is(
     (select auto_claimed from public.weekly_claims where player_id = v_player.id and week_key = v_current_week),
     true,
     'auto first claim stores auto_claimed=true in weekly_claims'
@@ -111,9 +116,9 @@ begin
   perform set_config('request.jwt.claim.sub', v_player.user_id::text, true);
   v_result := public.claim_weekly_points(false);
 
-  perform is((v_result->>'points_added')::integer, 100, 'second claim awards 100');
-  perform is((v_result->>'current_streak')::integer, 2, 'second claim increments streak normally');
-  perform is((select points_balance from public.players where id = v_player.id), 110, 'second claim adds 100 points to balance');
+  return next is((v_result->>'points_added')::integer, 100, 'second claim awards 100');
+  return next is((v_result->>'current_streak')::integer, 2, 'second claim increments streak normally');
+  return next is((select points_balance from public.players where id = v_player.id), 110, 'second claim adds 100 points to balance');
 
   -- existing users remain at 100
   v_player := public._test_create_player_with_auth_user(
@@ -129,9 +134,9 @@ begin
   perform set_config('request.jwt.claim.sub', v_player.user_id::text, true);
   v_result := public.claim_weekly_points(false);
 
-  perform is((v_result->>'points_added')::integer, 100, 'existing player with prior claim still gets 100');
-  perform is((v_result->>'current_streak')::integer, 1, 'existing player streak still follows prior logic');
-  perform is((select points_balance from public.players where id = v_player.id), 400, 'existing player points increase by 100');
+  return next is((v_result->>'points_added')::integer, 100, 'existing player with prior claim still gets 100');
+  return next is((v_result->>'current_streak')::integer, 1, 'existing player streak still follows prior logic');
+  return next is((select points_balance from public.players where id = v_player.id), 400, 'existing player points increase by 100');
 
   -- duplicate weekly claim returns already claimed without extra points
   v_player := public._test_create_player_with_auth_user(
@@ -147,13 +152,15 @@ begin
   perform set_config('request.jwt.claim.sub', v_player.user_id::text, true);
   v_result := public.claim_weekly_points(false);
 
-  perform is((v_result->>'claimed')::boolean, false, 'duplicate claim returns claimed=false');
-  perform is((v_result->>'already_claimed')::boolean, true, 'duplicate claim returns already_claimed=true');
-  perform ok(not (v_result ? 'points_added'), 'duplicate claim does not return points_added');
-  perform is((select points_balance from public.players where id = v_player.id), 777, 'duplicate claim does not change points balance');
-  perform is((select count(*) from public.weekly_claims where player_id = v_player.id and week_key = v_current_week), 1::bigint, 'duplicate claim does not insert extra weekly claim row');
+  return next is((v_result->>'claimed')::boolean, false, 'duplicate claim returns claimed=false');
+  return next is((v_result->>'already_claimed')::boolean, true, 'duplicate claim returns already_claimed=true');
+  return next ok(not (v_result::jsonb ? 'points_added'), 'duplicate claim does not return points_added');
+  return next is((select points_balance from public.players where id = v_player.id), 777, 'duplicate claim does not change points balance');
+  return next is((select count(*) from public.weekly_claims where player_id = v_player.id and week_key = v_current_week), 1::bigint, 'duplicate claim does not insert extra weekly claim row');
 end;
 $$;
+
+select * from pg_temp.weekly_first_claim_bonus_tests();
 
 drop function if exists public._test_create_player_with_auth_user(uuid, text, integer, integer, integer, timestamptz);
 

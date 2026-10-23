@@ -44,13 +44,6 @@ export function LeaderboardPage() {
 								: "Standings appear once a series starts."}
 					</p>
 				</div>
-				<Link
-					to={`/rooms/${room.code}/series`}
-					className='flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0'
-				>
-					<TrophyIcon className='h-4 w-4' />
-					Past champions
-				</Link>
 			</div>
 
 			<div className='flex flex-col gap-3'>

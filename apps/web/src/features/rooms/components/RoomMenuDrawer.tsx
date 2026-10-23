@@ -10,12 +10,11 @@ import {
 	CircleQuestionMarkIcon,
 	CopyIcon,
 	Share2Icon,
-	TrophyIcon,
 	type LucideIcon,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import type { Room } from "@/features/rooms/types/types";
+import { SettingsRow } from "@/features/series/components/SeriesOrganizerActionsMenu";
 
 type Props = {
 	room: Room;
@@ -44,7 +43,6 @@ export function RoomMenuDrawer({
 	onOpenNotifications,
 	onOpenHowToPlay,
 }: Readonly<Props>) {
-	const navigate = useNavigate();
 	const inviteUrl = `${globalThis.location.origin}/rooms/${room.code}/join`;
 
 	const close = (then: () => void) => () => {
@@ -68,12 +66,54 @@ export function RoomMenuDrawer({
 		await copyText(inviteUrl, "Invite link copied");
 	};
 
-	const items: Array<{ label: string; detail?: string; icon: LucideIcon; onClick: () => void }> = [
-		{ label: "Invite friends", detail: "Share a link to join", icon: Share2Icon, onClick: close(() => void handleInvite()) },
-		{ label: "Copy room code", detail: room.code, icon: CopyIcon, onClick: close(() => void copyText(room.code, "Room code copied")) },
-		{ label: "Notifications", icon: BellIcon, onClick: close(onOpenNotifications) },
-		{ label: "All series and past champions", icon: TrophyIcon, onClick: close(() => navigate(`/rooms/${room.code}/series`)) },
-		{ label: "How to play", icon: CircleQuestionMarkIcon, onClick: close(onOpenHowToPlay) },
+	const items: Array<{
+		label: string;
+		detail?: string;
+		icon: LucideIcon;
+		onClick: () => void;
+	}> = [
+		{
+			label: "Invite friends",
+			icon: Share2Icon,
+			onClick: close(() => void handleInvite()),
+		},
+		{
+			label: "Copy room code",
+			detail: room.code,
+			icon: CopyIcon,
+			onClick: close(() => void copyText(room.code, "Room code copied")),
+		},
+		// {
+		// 	label: "All series and past champions",
+		// 	icon: TrophyIcon,
+		// 	onClick: close(() => navigate(`/rooms/${room.code}/series`)),
+		// },
+	];
+
+	const settingsSectionItems: Array<{
+		label: string;
+		detail?: string;
+		icon: LucideIcon;
+		onClick: () => void;
+	}> = [
+		{
+			label: "Notifications",
+			icon: BellIcon,
+			onClick: close(onOpenNotifications),
+		},
+	];
+
+	const helpSectionItems: Array<{
+		label: string;
+		detail?: string;
+		icon: LucideIcon;
+		onClick: () => void;
+	}> = [
+		{
+			label: "How to play",
+			icon: CircleQuestionMarkIcon,
+			onClick: close(onOpenHowToPlay),
+		},
 	];
 
 	return (
@@ -86,25 +126,56 @@ export function RoomMenuDrawer({
 						{room.members.length === 1 ? "" : "s"}
 					</DrawerDescription>
 				</DrawerHeader>
-				<ul className='flex flex-col gap-1 px-4 pb-6'>
-					{items.map(({ label, detail, icon: Icon, onClick }) => (
-						<li key={label}>
-							<button
-								type='button'
-								onClick={onClick}
-								className='w-full flex items-center gap-3 rounded-lg px-3 py-3 text-left hover:bg-accent/20'
-							>
-								<Icon className='size-5 text-muted-foreground' />
-								<span className='flex-1'>{label}</span>
-								{detail ? (
-									<span className='text-sm text-muted-foreground tabular-nums'>
-										{detail}
-									</span>
-								) : null}
-							</button>
-						</li>
-					))}
-				</ul>
+				<div className='flex flex-col gap-1 space-y-5 overflow-y-auto px-4 pb-4'>
+					<ul>
+						{items.map(({ label, detail, icon: Icon, onClick }) => (
+							<li key={label}>
+								<SettingsRow
+									icon={
+										<Icon className='size-5 text-muted-foreground' />
+									}
+									label={label}
+									description={detail}
+									onClick={onClick}
+								/>
+							</li>
+						))}
+					</ul>
+					{settingsSectionItems.map(
+						({ label, detail, icon: Icon, onClick }) => (
+							<section className='space-y-2' key={label}>
+								<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+									Settings
+								</p>
+								<SettingsRow
+									icon={
+										<Icon className='size-5 text-muted-foreground' />
+									}
+									label={label}
+									description={detail}
+									onClick={onClick}
+								/>
+							</section>
+						),
+					)}
+					{helpSectionItems.map(
+						({ label, detail, icon: Icon, onClick }) => (
+							<section className='space-y-2' key={label}>
+								<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+									Help
+								</p>
+								<SettingsRow
+									icon={
+										<Icon className='size-5 text-muted-foreground' />
+									}
+									label={label}
+									description={detail}
+									onClick={onClick}
+								/>
+							</section>
+						),
+					)}
+				</div>
 			</DrawerContent>
 		</Drawer>
 	);

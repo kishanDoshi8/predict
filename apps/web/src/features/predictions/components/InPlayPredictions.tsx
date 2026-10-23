@@ -172,9 +172,7 @@ function PredictionCard({
 					</h4>
 				</FadeContent>
 
-				<FadeContent
-					className={`flex flex-col gap-4 mt-2`}
-				>
+				<FadeContent className={`flex flex-col gap-4 mt-2`}>
 					{prediction.prediction_options.map((option) => (
 						<Field className='w-full' key={option.id}>
 							<FieldLabel htmlFor={`progress-${option.id}`}>
@@ -229,9 +227,7 @@ function PredictionCard({
 
 				<div className={`flex items-center justify-between mt-4`}>
 					{/* show total pooled */}
-					<FadeContent
-						className={`flex items-center gap-2`}
-					>
+					<FadeContent className={`flex items-center gap-2`}>
 						<TrophyIcon
 							className={`text-muted-foreground w-3 h-3`}
 						/>
@@ -246,9 +242,7 @@ function PredictionCard({
 						</p>
 					</FadeContent>
 					{/* total participants */}
-					<FadeContent
-						className={`flex items-center gap-2`}
-					>
+					<FadeContent className={`flex items-center gap-2`}>
 						<UsersIcon
 							className={`text-muted-foreground w-3 h-3`}
 						/>
@@ -320,15 +314,17 @@ function SectionHeader({
 
 	if (activeCount > 0) {
 		return (
-			<div className={`flex items-center gap-2 my-4`}>
-				<div className={`flex flex-1 items-center gap-2`}>
-					<span
-						className={`h-2 w-2 rounded-full bg-primary animate-pulse`}
-					/>
-					<h2 className={`text-lg font-semibold`}>What's Hot</h2>
-					<span className={`text-xs text-muted-foreground`}>
+			<div className={`flex items-center justify-between gap-2 my-4`}>
+				<div className={`flex flex-col`}>
+					<div className={`flex flex-1 items-center gap-2`}>
+						<span
+							className={`h-2 w-2 rounded-full bg-primary animate-pulse`}
+						/>
+						<h2 className={`text-lg font-semibold`}>What's Hot</h2>
+					</div>
+					<div className={`text-xs text-muted-foreground`}>
 						{activeCount} active
-					</span>
+					</div>
 				</div>
 				{action}
 			</div>
@@ -498,7 +494,8 @@ function InPlayPredictions({
 					<p className={`text-muted-foreground text-center py-4`}>
 						{emptyMessage}
 					</p>
-					{predictionsOverride === undefined && newPredictionAction ? (
+					{predictionsOverride === undefined &&
+					newPredictionAction ? (
 						<div className='flex justify-center pb-2'>
 							{newPredictionAction}
 						</div>

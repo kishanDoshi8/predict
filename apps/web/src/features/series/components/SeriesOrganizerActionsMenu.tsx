@@ -45,7 +45,7 @@ type SettingsRowProps = {
 	isDanger?: boolean;
 };
 
-function SettingsRow({
+export function SettingsRow({
 	icon,
 	label,
 	description,
@@ -125,7 +125,11 @@ export function SeriesOrganizerActionsMenu({
 		<>
 			<Drawer open={isManageOpen} onOpenChange={setIsManageOpen}>
 				<DrawerTrigger asChild>
-					<Button variant='ghost' size='icon' aria-label='Manage series'>
+					<Button
+						variant='ghost'
+						size='icon'
+						aria-label='Manage series'
+					>
 						<SettingsIcon className='size-5' />
 					</Button>
 				</DrawerTrigger>
@@ -151,7 +155,7 @@ export function SeriesOrganizerActionsMenu({
 							</p>
 							<SettingsRow
 								icon={
-									<PencilIcon className='size-4 text-muted-foreground' />
+									<PencilIcon className='size-5 text-muted-foreground' />
 								}
 								label='Edit details'
 								description='Title, description, games and points'
@@ -166,7 +170,7 @@ export function SeriesOrganizerActionsMenu({
 							</p>
 							<SettingsRow
 								icon={
-									<WrenchIcon className='size-4 text-destructive' />
+									<WrenchIcon className='size-5 text-destructive' />
 								}
 								label='Close series'
 								description='Ends the series and records the final standings.'
@@ -176,7 +180,7 @@ export function SeriesOrganizerActionsMenu({
 							/>
 							<SettingsRow
 								icon={
-									<ArchiveIcon className='size-4 text-muted-foreground' />
+									<ArchiveIcon className='size-5 text-muted-foreground' />
 								}
 								label='Archive series'
 								description={
@@ -185,7 +189,9 @@ export function SeriesOrganizerActionsMenu({
 										: "Close the series first."
 								}
 								onClick={openArchiveConfirmation}
-								disabled={isPending || series.status !== "completed"}
+								disabled={
+									isPending || series.status !== "completed"
+								}
 							/>
 						</section>
 					</div>
@@ -208,7 +214,8 @@ export function SeriesOrganizerActionsMenu({
 						<div className='rounded-xl border border-destructive/40 bg-destructive/10 p-3'>
 							<p className='flex items-start gap-2 text-sm text-destructive'>
 								<ShieldAlertIcon className='mt-0.5 size-4 shrink-0' />
-								Archived series can't be brought back from the app.
+								Archived series can't be brought back from the
+								app.
 							</p>
 						</div>
 						<div className='rounded-xl border p-3'>
@@ -216,7 +223,10 @@ export function SeriesOrganizerActionsMenu({
 								What happens
 							</p>
 							<ul className='mt-2 list-disc space-y-1 pl-4 text-sm text-muted-foreground'>
-								<li>It no longer appears in the series list or picker.</li>
+								<li>
+									It no longer appears in the series list or
+									picker.
+								</li>
 								<li>Its predictions stay in History.</li>
 							</ul>
 						</div>
@@ -281,7 +291,8 @@ export function SeriesOrganizerActionsMenu({
 							<ul className='mt-2 list-none space-y-1 text-sm text-muted-foreground'>
 								<li>
 									<TrophyIcon className='size-4 inline-block mr-2 text-accent' />
-									The top 3 and special awards go into the Hall of Fame.
+									The top 3 and special awards go into the
+									Hall of Fame.
 								</li>
 								<li>
 									<CheckCircle2Icon className='size-4 inline-block mr-2 text-accent' />

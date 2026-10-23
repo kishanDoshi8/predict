@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { usePlayer, useWeeklyClaim } from "@/features/home";
+import { usePlayer } from "@/features/home";
 import { usePlayerRooms } from "@/features/rooms/hooks/room";
 import { Loading } from "@/shared/ui";
 
@@ -13,7 +13,6 @@ export function HomePage() {
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
 	const { data: player, isPending: isPlayerLoading } = usePlayer();
-	const { mutate: claimWeeklyPoints } = useWeeklyClaim();
 	const queryClient = useQueryClient();
 	const requestedTab = getHomeTab(searchParams.get("tab"));
 	const hasExplicitTab = requestedTab !== null;
@@ -31,10 +30,8 @@ export function HomePage() {
 	useEffect(() => {
 		if (!isPlayerLoading && !player) {
 			navigate("/create-player", { replace: true });
-		} else if (player) {
-			claimWeeklyPoints();
 		}
-	}, [player, isPlayerLoading, claimWeeklyPoints, navigate]);
+	}, [player, isPlayerLoading, navigate]);
 
 	useEffect(() => {
 		if (

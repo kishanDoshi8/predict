@@ -19,6 +19,8 @@ type UpsertSeriesParams = {
 	title: string;
 	description: string;
 	expectedGames: number;
+	startingStack?: number;
+	weeklyTopup?: number;
 };
 
 export const useRoomSeries = (roomId?: string) => {
@@ -55,8 +57,9 @@ export const useCreateSeries = (roomId?: string) => {
 			createSeries(roomId ?? "", payload),
 		onSuccess: () => {
 			if (roomId) {
+				// Series changes touch wallets, standings and the series picker too.
 				void queryClient.invalidateQueries({
-					queryKey: roomKeys.series(roomId),
+					queryKey: roomKeys.detail(roomId),
 				});
 			}
 		},
@@ -71,8 +74,9 @@ export const useUpdateSeries = (roomId?: string) => {
 			updateSeries(payload.seriesId, payload),
 		onSuccess: () => {
 			if (roomId) {
+				// Series changes touch wallets, standings and the series picker too.
 				void queryClient.invalidateQueries({
-					queryKey: roomKeys.series(roomId),
+					queryKey: roomKeys.detail(roomId),
 				});
 			}
 		},
@@ -86,8 +90,9 @@ export const useActivateSeries = (roomId?: string) => {
 		mutationFn: (seriesId: string) => activateSeries(seriesId),
 		onSuccess: () => {
 			if (roomId) {
+				// Series changes touch wallets, standings and the series picker too.
 				void queryClient.invalidateQueries({
-					queryKey: roomKeys.series(roomId),
+					queryKey: roomKeys.detail(roomId),
 				});
 			}
 		},
@@ -101,8 +106,9 @@ export const useCompleteSeries = (roomId?: string) => {
 		mutationFn: (seriesId: string) => completeSeries(seriesId),
 		onSuccess: () => {
 			if (roomId) {
+				// Series changes touch wallets, standings and the series picker too.
 				void queryClient.invalidateQueries({
-					queryKey: roomKeys.series(roomId),
+					queryKey: roomKeys.detail(roomId),
 				});
 			}
 		},
@@ -116,8 +122,9 @@ export const useArchiveSeries = (roomId?: string) => {
 		mutationFn: (seriesId: string) => archiveSeries(seriesId),
 		onSuccess: () => {
 			if (roomId) {
+				// Series changes touch wallets, standings and the series picker too.
 				void queryClient.invalidateQueries({
-					queryKey: roomKeys.series(roomId),
+					queryKey: roomKeys.detail(roomId),
 				});
 			}
 		},

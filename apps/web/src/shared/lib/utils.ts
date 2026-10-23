@@ -1,6 +1,11 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+// "+120", "-40", "0": for point changes.
+export function formatSignedPoints(value: number) {
+	return `${value > 0 ? "+" : ""}${value.toLocaleString()}`;
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }

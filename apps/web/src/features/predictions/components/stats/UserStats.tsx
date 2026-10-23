@@ -1,17 +1,5 @@
+import { Badge, FadeContent, Skeleton } from "@/shared/ui";
 import {
-	Badge,
-	FadeContent,
-	Skeleton,
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-	ToggleGroup,
-	ToggleGroupItem,
-} from "@/shared/ui";
-import {
-	ArrowDown10Icon,
-	Calendar1Icon,
 	ChevronRightIcon,
 	CrosshairIcon,
 	CrownIcon,
@@ -21,26 +9,17 @@ import {
 import { Suspense, lazy, useEffect, useState } from "react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
-import {
-	LeaderboardEntry,
-	type SortByOption,
-	useRoomLeaderboard,
-	useSeriesLeaderboard,
-} from "@/features/leaderboard";
-import { SeriesSelector } from "@/features/series";
+import { LeaderboardEntry, useSeriesLeaderboard } from "@/features/leaderboard";
+import { SeriesSelector, useCurrentSeries } from "@/features/series";
 import { Room } from "@/features/rooms";
 import { twColor } from "@/shared/lib/utils";
 import { Link } from "react-router-dom";
-import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
-import { localStorageKeys } from "@/shared/constants/queryKeys";
 
 const PlayerProfileDialog = lazy(() =>
 	import("@/features/leaderboard/components/player/PlayerProfileDialog").then(
 		(module) => ({ default: module.PlayerProfileDialog }),
 	),
 );
-
-type LeaderboardTab = "series" | "all_time";
 
 type UserStatsProps = {
 	showControls?: boolean;
@@ -53,147 +32,49 @@ type UserStatsProps = {
 
 function UserStats({
 	showControls = true,
-	title = "Leaderboard",
-	subtitle = "Where legends are made (and egos are crushed)",
+	title = "Standings",
+	subtitle = "Top balance when the series closes wins the title",
 	leaderboardEntriesOverride,
 	isLeaderboardLoadingOverride,
 	showSeeAllLink = true,
 }: Readonly<UserStatsProps>) {
 	const { room } = useRoomContext();
-	const [activeLeaderboardTab, setActiveLeaderboardTab] =
-		useLocalStorage<string>(
-			"series",
-			localStorageKeys.userPreference.leaderboard.active_leaderboard_tab,
+	const { currentSeriesId, setCurrentSeriesId } = useCurrentSeries(room.id);
+
+	const { data: seriesLeaderboard = [], isPending: isSeriesLeaderboardLoading } =
+		useSeriesLeaderboard(
+			room.id,
+			currentSeriesId,
+			leaderboardEntriesOverride === undefined,
 		);
 
-	const normalizedLeaderboardTab: LeaderboardTab =
-		activeLeaderboardTab === "all_time" ? "all_time" : "series";
-
-	const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(
-		null,
-	);
-
-	const [sortBy, setSortBy] = useLocalStorage<SortByOption>(
-		"ratings",
-		localStorageKeys.userPreference.leaderboard.sort_by,
-	);
-	const effectiveTab: LeaderboardTab = showControls
-		? normalizedLeaderboardTab
-		: "all_time";
-
-	const {
-		data: allTimeLeaderboard = [],
-		isPending: isAllTimeLeaderboardLoading,
-	} = useRoomLeaderboard(room.id, effectiveTab === "all_time", sortBy);
-
-	const {
-		data: seriesLeaderboard = [],
-		isPending: isSeriesLeaderboardLoading,
-	} = useSeriesLeaderboard(
-		room.id,
-		selectedSeriesId,
-		effectiveTab === "series",
-		sortBy,
-	);
-
 	const leaderboard =
-		leaderboardEntriesOverride ??
-		(effectiveTab === "all_time" ? allTimeLeaderboard : seriesLeaderboard);
+		leaderboardEntriesOverride ?? (currentSeriesId ? seriesLeaderboard : []);
 	const isLeaderboardLoading =
 		isLeaderboardLoadingOverride ??
-		(effectiveTab === "all_time"
-			? isAllTimeLeaderboardLoading
-			: isSeriesLeaderboardLoading);
-
-	useEffect(() => {
-		if (activeLeaderboardTab === "this_week") {
-			setActiveLeaderboardTab("series");
-		}
-	}, [activeLeaderboardTab, setActiveLeaderboardTab]);
-
-	const handleOnTabChange = (value: string) => {
-		setActiveLeaderboardTab(value as LeaderboardTab);
-	};
+		(!!currentSeriesId && isSeriesLeaderboardLoading);
 
 	return (
 		<div className={`w-full max-w-md mx-auto`}>
 			<h2 className={`text-lg font-semibold`}>{title}</h2>
 			<p className={`text-xs text-muted-foreground mb-4`}>{subtitle}</p>
 			{showControls ? (
-				<Tabs
-					defaultValue={normalizedLeaderboardTab}
-					onValueChange={handleOnTabChange}
-				>
-					<TabsList className={`w-full`}>
-						<TabsTrigger value='series'>
-							<TrophyIcon /> Series
-						</TabsTrigger>
-						<TabsTrigger value='all_time'>
-							<Calendar1Icon /> All Time
-						</TabsTrigger>
-					</TabsList>
-					{effectiveTab === "series" ? (
-						<SeriesSelector
-							roomId={room.id}
-							mode='active-or-last'
-							value={selectedSeriesId}
-							onValueChange={setSelectedSeriesId}
-							className='mt-2'
-							placeholder='Select series'
-							autoSelect
-						/>
-					) : null}
-					{/* Sort by */}
-					<div className={`flex gap-1 my-1 justify-end items-center`}>
-						<ArrowDown10Icon
-							className={`text-muted-foreground/70`}
-						/>
-						<ToggleGroup
-							type='single'
-							value={sortBy}
-							onValueChange={(value) => {
-								if (value !== "points" && value !== "ratings")
-									return;
-								setSortBy(value);
-							}}
-							variant={"outline"}
-						>
-							<ToggleGroupItem value='ratings'>
-								Ratings
-							</ToggleGroupItem>
-							<ToggleGroupItem value='points'>
-								Points
-							</ToggleGroupItem>
-						</ToggleGroup>
-					</div>
-					<TabsContent value='series'>
-						<LeaderboardContent
-							leaderboard={seriesLeaderboard}
-							isLoading={isSeriesLeaderboardLoading}
-							room={room}
-							sortBy={sortBy}
-							showSeeAllLink={showSeeAllLink}
-						/>
-					</TabsContent>
-					<TabsContent value='all_time'>
-						<LeaderboardContent
-							leaderboard={allTimeLeaderboard}
-							isLoading={isAllTimeLeaderboardLoading}
-							room={room}
-							sortBy={sortBy}
-							showSeeAllLink={showSeeAllLink}
-						/>
-					</TabsContent>
-				</Tabs>
-			) : (
-				<LeaderboardContent
-					leaderboard={leaderboard}
-					isLoading={isLeaderboardLoading}
-					room={room}
-					sortBy={"points"}
-					showSeeAllLink={showSeeAllLink}
+				<SeriesSelector
+					roomId={room.id}
+					mode='all'
+					value={currentSeriesId}
+					onValueChange={setCurrentSeriesId}
+					className='mb-3'
+					placeholder='Select series'
+					emptyMessage='No series yet.'
 				/>
-			)}
+			) : null}
+			<LeaderboardContent
+				leaderboard={leaderboard}
+				isLoading={isLeaderboardLoading}
+				room={room}
+				showSeeAllLink={showSeeAllLink}
+			/>
 		</div>
 	);
 }
@@ -210,13 +91,11 @@ function LeaderboardContent({
 	leaderboard,
 	isLoading,
 	room,
-	sortBy,
 	showSeeAllLink = true,
 }: Readonly<{
 	leaderboard: LeaderboardEntry[];
 	isLoading: boolean;
 	room: Room;
-	sortBy: SortByOption;
 	showSeeAllLink?: boolean;
 }>) {
 	const { data: player } = usePlayer();
@@ -224,12 +103,7 @@ function LeaderboardContent({
 		useState<LeaderboardEntry | null>(null);
 	const [gapToNextPlayer, setGapToNextPlayer] =
 		useState<LeaderboardEntry | null>(null);
-	const isRatingsView = sortBy === "ratings";
-
-	const metricValue = (entry: LeaderboardEntry) =>
-		isRatingsView
-			? (entry.prediction_rating ?? 0)
-			: (entry.total_won_in_room ?? 0);
+	const metricValue = (entry: LeaderboardEntry) => entry.balance ?? 0;
 	const currentMetric = leaderboardPlayer
 		? metricValue(leaderboardPlayer)
 		: 0;
@@ -271,7 +145,6 @@ function LeaderboardContent({
 			playerId={playerId}
 			leaderboardPlayer={leaderboardPlayer}
 			gapToNextPlayer={gapToNextPlayer}
-			isRatingsView={isRatingsView}
 			currentMetric={currentMetric}
 			gapMetric={gapMetric}
 			metricValue={metricValue}
@@ -287,7 +160,6 @@ function LeaderboardContentView({
 	playerId,
 	leaderboardPlayer,
 	gapToNextPlayer,
-	isRatingsView,
 	currentMetric,
 	gapMetric,
 	metricValue,
@@ -299,7 +171,6 @@ function LeaderboardContentView({
 	playerId?: string;
 	leaderboardPlayer: LeaderboardEntry | null;
 	gapToNextPlayer: LeaderboardEntry | null;
-	isRatingsView: boolean;
 	currentMetric: number;
 	gapMetric: number;
 	metricValue: (entry: LeaderboardEntry) => number;
@@ -345,13 +216,9 @@ function LeaderboardContentView({
 							delay={contentDelay.yourPoints}
 							className={`flex-1`}
 						>
-							<p className={`text-xs`}>
-								{isRatingsView ? "YOUR RATING" : "YOUR POINTS"}
-							</p>
+							<p className={`text-xs`}>YOUR POINTS</p>
 							<p className={`text-3xl font-extrabold`}>
-								{isRatingsView
-									? currentMetric
-									: currentMetric.toLocaleString()}
+								{currentMetric.toLocaleString()}
 							</p>
 						</FadeContent>
 					)}
@@ -412,7 +279,6 @@ function LeaderboardContentView({
 						leaderboard={leaderboard}
 						playerId={playerId}
 						roomCode={room.code}
-						isRatingsView={isRatingsView}
 						metricValue={metricValue}
 						showSeeAllLink={showSeeAllLink}
 					/>
@@ -494,14 +360,12 @@ function LeaderboardMiniRows({
 	leaderboard,
 	playerId,
 	roomCode,
-	isRatingsView,
 	metricValue,
 	showSeeAllLink,
 }: Readonly<{
 	leaderboard: LeaderboardEntry[];
 	playerId?: string;
 	roomCode: string;
-	isRatingsView: boolean;
 	metricValue: (entry: LeaderboardEntry) => number;
 	showSeeAllLink: boolean;
 }>) {
@@ -518,7 +382,7 @@ function LeaderboardMiniRows({
 
 				return (
 					<button
-						key={entry.player_id + isRatingsView}
+						key={entry.player_id}
 						onClick={() => {
 							setSelectedPlayerId(entry.player_id);
 							setIsProfileDialogOpen(true);
@@ -559,13 +423,11 @@ function LeaderboardMiniRows({
 								)}
 							</p>
 							<p className={`ml-auto font-bold`}>
-								{isRatingsView
-									? metricValue(entry)
-									: metricValue(entry).toLocaleString()}
+								{metricValue(entry).toLocaleString()}
 								<span
 									className={`text-xs ml-1 text-muted-foreground font-normal`}
 								>
-									{isRatingsView ? "" : "pts"}
+									pts
 								</span>
 							</p>
 						</FadeContent>

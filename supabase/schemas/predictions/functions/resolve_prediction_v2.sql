@@ -269,10 +269,12 @@ begin
       end loop;
     end if;
 
-    update public.players
-    set points_in_escrow = points_in_escrow - v_loser.amount,
-        points_balance   = points_balance   - v_loser.amount + v_loser_refund
-    where id = v_loser.player_id;
+    update public.series_wallets
+    set escrow     = escrow  - v_loser.amount,
+        balance    = balance - v_loser.amount + v_loser_refund,
+        updated_at = now()
+    where series_id = v_prediction.series_id
+      and player_id = v_loser.player_id;
 
     update public.bets
     set payout = v_loser_refund
@@ -284,10 +286,16 @@ begin
   for v_winner in select player_id, bet_amount, total_gain from _winner_gains loop
     v_final_payout := v_winner.bet_amount + v_winner.total_gain;
 
+    update public.series_wallets
+    set escrow     = escrow  - v_winner.bet_amount,
+        balance    = balance + v_winner.total_gain,
+        updated_at = now()
+    where series_id = v_prediction.series_id
+      and player_id = v_winner.player_id;
+
+    -- Lifetime winnings stat shown on player profiles.
     update public.players
-    set points_in_escrow = points_in_escrow - v_winner.bet_amount,
-        points_balance   = points_balance   + v_winner.total_gain,
-        total_won        = total_won        + v_winner.total_gain
+    set total_won = total_won + v_winner.total_gain
     where id = v_winner.player_id;
 
     update public.room_members

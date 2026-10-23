@@ -36,9 +36,14 @@ begin
   update public.series
   set
     status = 'active',
-    started_at = now()
+    started_at = now(),
+    last_topup_week = private.current_week_key()
   where id = p_series_id
   returning * into v_series;
+
+  perform private.ensure_series_wallet(v_series.id, rm.player_id)
+  from public.room_members rm
+  where rm.room_id = v_series.room_id;
 
   return row_to_json(v_series);
 end;

@@ -7,6 +7,7 @@ import { RouteErrorBoundary } from "@/app/router/RouteErrorBoundary";
 import RoomLayout from "@/app/layouts/RoomLayout";
 import RoomTabsLayout from "@/app/layouts/RoomTabsLayout";
 import { RequireRoomMember } from "@/features/rooms";
+import { FEATURES } from "@/shared/constants/features";
 
 const LoginPage = lazy(() =>
 	import("@/features/auth/pages/LoginPage").then((module) => ({
@@ -237,39 +238,44 @@ export const router = createBrowserRouter([
 											},
 										},
 									},
-									{
-										path: "predictions/:predictionId/duels",
-										element: withSuspense(
-											<PredictionDuelsPage />,
-										),
-										handle: {
-											header: {
-												leftAction: "back",
+									// Duels are paused; their routes fall through to 404.
+									...(FEATURES.duels
+										? [
+											{
+												path: "predictions/:predictionId/duels",
+												element: withSuspense(
+													<PredictionDuelsPage />,
+												),
+												handle: {
+													header: {
+														leftAction: "back",
+													},
+												},
 											},
-										},
-									},
-									{
-										path: "predictions/:predictionId/duels/create",
-										element: withSuspense(
-											<PredictionDuelCreatePage />,
-										),
-										handle: {
-											header: {
-												leftAction: "back",
+											{
+												path: "predictions/:predictionId/duels/create",
+												element: withSuspense(
+													<PredictionDuelCreatePage />,
+												),
+												handle: {
+													header: {
+														leftAction: "back",
+													},
+												},
 											},
-										},
-									},
-									{
-										path: "predictions/:predictionId/duels/:duelId",
-										element: withSuspense(
-											<PredictionDuelDetailPage />,
-										),
-										handle: {
-											header: {
-												leftAction: "back",
+											{
+												path: "predictions/:predictionId/duels/:duelId",
+												element: withSuspense(
+													<PredictionDuelDetailPage />,
+												),
+												handle: {
+													header: {
+														leftAction: "back",
+													},
+												},
 											},
-										},
-									},
+										]
+										: []),
 								],
 							},
 						],

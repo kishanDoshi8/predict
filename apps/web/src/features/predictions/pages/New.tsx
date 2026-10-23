@@ -21,8 +21,8 @@ import { toast } from "sonner";
 import { Spinner } from "@/shared/ui/spinner";
 import { useCreatePrediction } from "@/features/predictions";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import { SeriesSelector } from "@/features/series";
-import { useLocation } from "react-router-dom";
+import { SeriesSelector, useCurrentSeries } from "@/features/series";
+import { Link, useLocation } from "react-router-dom";
 
 export default function PredictionNew() {
 	const { room } = useRoomContext();
@@ -47,8 +47,12 @@ export default function PredictionNew() {
 		new Date(Date.now() + 24 * 60 * 60 * 1000),
 	);
 	const [customTime, setCustomTime] = useState<string>("22:00:00");
+	const { currentSeries, hasActiveSeries, isPending: isSeriesLoading } =
+		useCurrentSeries(room?.id);
+	// Every prediction belongs to a series: default to the one the player is looking at.
 	const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(
-		navigationState?.seriesId ?? null,
+		navigationState?.seriesId ??
+			(currentSeries?.status === "active" ? currentSeries.id : null),
 	);
 	const [openCustomDatePicker, setOpenCustomDatePicker] = useState(false);
 
@@ -91,6 +95,9 @@ export default function PredictionNew() {
 
 	const handleCreatePrediction = () => {
 		const newErrors: string[] = [];
+		if (!selectedSeriesId) {
+			newErrors.push("series");
+		}
 		if (!question.trim()) {
 			newErrors.push("question");
 		}
@@ -202,22 +209,47 @@ export default function PredictionNew() {
 		}
 	};
 
+	if (!isSeriesLoading && !hasActiveSeries) {
+		return (
+			<div className={`p-4`}>
+				<div
+					className={`w-full max-w-md mx-auto flex flex-col gap-3 rounded-xl border p-5`}
+				>
+					<h3 className={`text-xl font-bold`}>Start a series first</h3>
+					<p className={`text-sm text-muted-foreground`}>
+						Every prediction is part of a series, and points live in
+						the series. Start one, then add predictions to it.
+					</p>
+					<Button variant='linear' asChild>
+						<Link to={`/rooms/${room.code}/series/new`}>
+							Start a series
+						</Link>
+					</Button>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className={`p-4`}>
 			<FieldSet className={`w-full max-w-md mx-auto`}>
 				<h3 className={`text-2xl font-bold`}>Create Prediction</h3>
 				<FieldGroup>
-					<Field>
+					<Field data-invalid={errors.includes("series")}>
 						<FieldLabel htmlFor='series'>Series</FieldLabel>
 						<SeriesSelector
 							roomId={room?.id}
 							mode='active'
 							value={selectedSeriesId}
 							onValueChange={setSelectedSeriesId}
-							placeholder='Select active series'
-							optional
+							placeholder='Select a series'
 							autoSelect
 						/>
+						{errors.includes("series") ? (
+							<p className={`text-sm text-destructive`}>
+								Choose the series this prediction belongs to.
+							</p>
+						) : null}
 					</Field>
 					<Field>
 						<FieldLabel htmlFor='question'>The Question</FieldLabel>

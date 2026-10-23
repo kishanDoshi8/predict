@@ -20,18 +20,19 @@ grant execute on function private.can_view_duel(uuid) to authenticated;
 grant execute on function private.can_view_series(uuid) to authenticated;
 
 -- RPCs the web app calls.
+-- Paused while duels are hidden: create_duel_view, join_duel_queue_view.
+-- Retired with series wallets: claim_weekly_points, get_room_leaderboard.
 grant execute on function public.activate_series(uuid) to authenticated;
 grant execute on function public.archive_series(uuid) to authenticated;
 grant execute on function public.cancel_bet(uuid) to authenticated;
 grant execute on function public.cancel_duel_queue_view(uuid, uuid) to authenticated;
 grant execute on function public.cancel_duel_view(uuid, uuid) to authenticated;
-grant execute on function public.claim_weekly_points(boolean) to authenticated;
 grant execute on function public.collect_series_rewards(uuid) to authenticated;
 grant execute on function public.complete_series(uuid) to authenticated;
-grant execute on function public.create_duel_view(uuid, uuid, uuid, integer) to authenticated;
 grant execute on function public.create_prediction(uuid, text, text[], timestamp with time zone, uuid) to authenticated;
 grant execute on function public.create_room(text) to authenticated;
-grant execute on function public.create_series(uuid, text, text, integer) to authenticated;
+grant execute on function public.create_series(uuid, text, text, integer, integer, integer) to authenticated;
+grant execute on function public.get_my_series_wallets(uuid) to authenticated;
 grant execute on function public.get_player() to authenticated;
 grant execute on function public.get_prediction_duel_summary(uuid) to authenticated;
 grant execute on function public.get_prediction_duels_view(uuid) to authenticated;
@@ -39,7 +40,6 @@ grant execute on function public.get_preferences(uuid) to authenticated;
 grant execute on function public.get_room_activities(uuid, integer, timestamp with time zone, uuid, text, uuid) to authenticated;
 grant execute on function public.get_room_by_code(text) to authenticated;
 grant execute on function public.get_room_has_unseen_activities(uuid) to authenticated;
-grant execute on function public.get_room_leaderboard(uuid, text) to authenticated;
 grant execute on function public.get_room_member_recent_predictions(uuid, uuid, integer, integer) to authenticated;
 grant execute on function public.get_room_member_stats(uuid, uuid) to authenticated;
 grant execute on function public.get_room_prediction_history(uuid, integer, timestamp with time zone, uuid, text, text, uuid) to authenticated;
@@ -50,7 +50,6 @@ grant execute on function public.get_room_weekly_leaderboard(uuid, text) to auth
 grant execute on function public.get_series_awards(uuid, uuid) to authenticated;
 grant execute on function public.get_series_leaderboard(uuid, uuid, text) to authenticated;
 grant execute on function public.get_series_placements(uuid, uuid) to authenticated;
-grant execute on function public.join_duel_queue_view(uuid, uuid, uuid) to authenticated;
 grant execute on function public.join_room(text) to authenticated;
 grant execute on function public.mark_how_to_play_seen() to authenticated;
 grant execute on function public.mark_ratings_tip_seen() to authenticated;
@@ -62,5 +61,5 @@ grant execute on function public.resolve_prediction_v2(uuid, uuid, text, uuid, c
 grant execute on function public.set_last_visited_room(uuid) to authenticated;
 grant execute on function public.update_global_preferences(boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
 grant execute on function public.update_room_preferences(uuid, boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
-grant execute on function public.update_series(uuid, text, text, integer) to authenticated;
+grant execute on function public.update_series(uuid, text, text, integer, integer, integer) to authenticated;
 grant execute on function public.upsert_user_push_subscription(jsonb) to authenticated;

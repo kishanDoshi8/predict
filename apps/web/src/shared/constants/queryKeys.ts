@@ -40,14 +40,14 @@ export const roomKeys = {
   preferences: (roomId: string) =>
     [...roomKeys.detail(roomId), "preferences"] as const,
 
-  leaderboard: (roomId: string, sortBy = "points") =>
-    [...roomKeys.detail(roomId), "leaderboard", sortBy] as const,
-
   seriesLeaderboard: (
     roomId: string,
     seriesId: string,
     sortBy = "points",
   ) => [...roomKeys.detail(roomId), "seriesLeaderboard", seriesId, sortBy] as const,
+
+  seriesWallets: (roomId: string) =>
+    [...roomKeys.detail(roomId), "seriesWallets"] as const,
 
   seriesPlacements: (roomId: string, seriesId: string) =>
     [...roomKeys.detail(roomId), "seriesPlacements", seriesId] as const,
@@ -71,9 +71,6 @@ export const roomKeys = {
   stats: (roomId: string) =>
     [...roomKeys.detail(roomId), "stats"] as const,
 
-  weeklyLeaderboard: (roomId: string, sortBy = "points") =>
-    [...roomKeys.detail(roomId), "weeklyLeaderboard", sortBy] as const,
-
   predictionHistory: (roomId: string) =>
     [...roomKeys.detail(roomId), "predictionHistory"] as const,
 
@@ -93,10 +90,8 @@ export const roomKeys = {
 export const localStorageKeys = {
   userPreference: {
     theme: "theme",
-    leaderboard: {
-      active_leaderboard_tab: "active_leaderboard_tab",
-      sort_by: "sort_by",
-    },
+    // Suffixed with the room id: the series a player last looked at in that room.
+    currentSeries: "currentSeries",
     bettingControls: {
       collapsed: "bettingControls.collapsed",
     }

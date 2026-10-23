@@ -27,7 +27,6 @@ import {
 	getChampionshipVisual,
 } from "@/shared/lib/seriesRecognitionVisuals";
 import { cn } from "@/shared/lib/utils";
-import { RatingBadge } from "./RatingBadge";
 import {
 	ChartColumnIcon,
 	CheckIcon,
@@ -40,21 +39,21 @@ import {
 	TargetIcon,
 	TrophyIcon,
 	X,
-	ZapIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const statsLabels = [
 	{
 		key: "current_points",
-		label: "Points Won",
+		label: "Lifetime Winnings",
 		icon: <CoinsIcon className={`text-rank-1`} size={20} />,
 	},
-	{
-		key: "current_rating",
-		label: "Current Rating",
-		icon: <ZapIcon className={`text-cyan-500`} size={20} />,
-	},
+	// Ratings are hidden while the series standings are the one ranking.
+	// {
+	// 	key: "current_rating",
+	// 	label: "Current Rating",
+	// 	icon: <ZapIcon className={`text-cyan-500`} size={20} />, (re-import ZapIcon)
+	// },
 	{
 		key: "total_predictions",
 		label: "Predictions Made",
@@ -100,13 +99,6 @@ const resultBadgeMeta = {
 		icon: <CircleSlash className={`w-4 h-4 text-muted-foreground`} />,
 	},
 } as const;
-
-const getRankBadgeClassName = (rank?: number) => {
-	if (rank === 1) return "bg-rank-1 text-background font-bold";
-	if (rank === 2) return "bg-rank-2 text-background font-bold";
-	if (rank === 3) return "bg-rank-3 text-background font-bold";
-	return "bg-secondary text-secondary-foreground";
-};
 
 function StatsSkeleton() {
 	return (
@@ -362,9 +354,6 @@ export function PlayerProfileDialog({
 									</Badge>
 								</div>
 							)}
-						{stats?.current_rating !== undefined && (
-							<RatingBadge rating={stats.current_rating ?? 0} />
-						)}
 					</DescriptionComponent>
 				</HeaderComponent>
 
@@ -430,24 +419,6 @@ export function PlayerProfileDialog({
 									>
 										<p className='flex justify-between text-xs text-muted-foreground'>
 											{label}
-											{label === "Points Won" && (
-												<span
-													className={`text-xs font-bold tracking-wider px-2 rounded-md ${getRankBadgeClassName(
-														stats.points_rank,
-													)}`}
-												>
-													#{stats.points_rank}
-												</span>
-											)}
-											{label === "Current Rating" && (
-												<span
-													className={`text-xs font-bold tracking-wider px-2 rounded-md ${getRankBadgeClassName(
-														stats.rating_rank,
-													)}`}
-												>
-													#{stats.rating_rank}
-												</span>
-											)}
 										</p>
 										<p className='font-semibold tabular-nums flex items-center gap-2'>
 											{icon}

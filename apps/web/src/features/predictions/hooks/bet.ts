@@ -1,9 +1,28 @@
-import { cancelBet, getBetsForPrediction, getMyBet, placeBet } from "@/shared/lib/api";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { cancelBet, getBetsForPrediction, getMyBet, placeBet, type SeriesWallet } from "@/shared/lib/api";
+import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "@/shared/constants/queryKeys";
-import { Player } from "@/features/home";
 import { Bet } from "@/features/predictions";
-import { playerQueryKey } from "@/features/home";
+
+// Moves points into or out of escrow in the cached series wallet, so the
+// available balance updates before the server answers.
+function adjustCachedWalletEscrow(
+    queryClient: QueryClient,
+    roomId: string,
+    seriesId: string | null,
+    escrowDelta: number,
+) {
+    queryClient.setQueryData<SeriesWallet[]>(roomKeys.seriesWallets(roomId), (old) =>
+        old?.map((wallet) =>
+            wallet.series_id === seriesId
+                ? {
+                    ...wallet,
+                    escrow: wallet.escrow + escrowDelta,
+                    available: wallet.available - escrowDelta,
+                }
+                : wallet
+        )
+    );
+}
 
 export const useMyBet = (roomId: string, predictionId: string, playerId: string) => {
     return useQuery({
@@ -25,6 +44,7 @@ type PlaceBetParams = {
     roomId: string;
     playerId: string;
     predictionId: string;
+    seriesId: string | null;
     optionId: string;
     amount: number;
 }
@@ -37,9 +57,10 @@ export const usePlaceBet = () => {
         placeBet(data.predictionId, data.optionId, data.amount),
 
         onMutate: async (variables) => {
-        await queryClient.cancelQueries({ queryKey: playerQueryKey });
+        const walletsKey = roomKeys.seriesWallets(variables.roomId);
+        await queryClient.cancelQueries({ queryKey: walletsKey });
 
-        const previousPlayer = queryClient.getQueryData<Player>(playerQueryKey);
+        const previousWallets = queryClient.getQueryData<SeriesWallet[]>(walletsKey);
         const previousBet = queryClient.getQueryData<Bet>(
             roomKeys.myBet(variables.roomId, variables.predictionId, variables.playerId)
         );
@@ -57,23 +78,15 @@ export const usePlaceBet = () => {
             }
         );
 
-        // update player escrow
-        queryClient.setQueryData<Player>(playerQueryKey, (old) =>
-            old
-            ? {
-                ...old,
-                points_in_escrow: old.points_in_escrow + escrowDelta,
-                }
-            : old
-        );
+        adjustCachedWalletEscrow(queryClient, variables.roomId, variables.seriesId, escrowDelta);
 
-        return { previousPlayer, previousBet };
+        return { previousWallets, previousBet };
         },
 
         onError: (_err, variables, context) => {
         // rollback
-        if (context?.previousPlayer) {
-            queryClient.setQueryData(playerQueryKey, context.previousPlayer);
+        if (context?.previousWallets) {
+            queryClient.setQueryData(roomKeys.seriesWallets(variables.roomId), context.previousWallets);
         }
         if (context?.previousBet) {
             queryClient.setQueryData(
@@ -89,7 +102,7 @@ export const usePlaceBet = () => {
         });
 
         queryClient.invalidateQueries({
-            queryKey: playerQueryKey,
+            queryKey: roomKeys.seriesWallets(variables.roomId),
         });
         },
     });
@@ -99,6 +112,7 @@ type CancelBetParams = {
     roomId: string;
     playerId: string;
     predictionId: string;
+    seriesId: string | null;
 }
 
 export const useCancelBet = () => {
@@ -109,7 +123,8 @@ export const useCancelBet = () => {
         cancelBet(predictionId),
 
         onMutate: async (variables) => {
-        await queryClient.cancelQueries({ queryKey: playerQueryKey });
+        const walletsKey = roomKeys.seriesWallets(variables.roomId);
+        await queryClient.cancelQueries({ queryKey: walletsKey });
 
         const betKey = roomKeys.myBet(
             variables.roomId,
@@ -118,7 +133,7 @@ export const useCancelBet = () => {
         );
 
         const previousBet = queryClient.getQueryData<Bet>(betKey);
-        const previousPlayer = queryClient.getQueryData<Player>(playerQueryKey);
+        const previousWallets = queryClient.getQueryData<SeriesWallet[]>(walletsKey);
 
         const oldAmount = previousBet?.amount ?? 0;
 
@@ -132,16 +147,9 @@ export const useCancelBet = () => {
         );
 
         // release escrow
-        queryClient.setQueryData<Player>(playerQueryKey, (old) =>
-            old
-            ? {
-                ...old,
-                points_in_escrow: old.points_in_escrow - oldAmount,
-                }
-            : old
-        );
+        adjustCachedWalletEscrow(queryClient, variables.roomId, variables.seriesId, -oldAmount);
 
-        return { previousBet, previousPlayer };
+        return { previousBet, previousWallets };
         },
 
         onError: (_err, variables, context) => {
@@ -158,8 +166,8 @@ export const useCancelBet = () => {
             );
         }
 
-        if (context.previousPlayer) {
-            queryClient.setQueryData(playerQueryKey, context.previousPlayer);
+        if (context.previousWallets) {
+            queryClient.setQueryData(roomKeys.seriesWallets(variables.roomId), context.previousWallets);
         }
         },
 
@@ -169,7 +177,7 @@ export const useCancelBet = () => {
         });
 
         queryClient.invalidateQueries({
-            queryKey: playerQueryKey,
+            queryKey: roomKeys.seriesWallets(variables.roomId),
         });
         },
     });

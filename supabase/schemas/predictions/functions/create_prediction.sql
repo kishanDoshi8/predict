@@ -77,28 +77,29 @@ begin
     raise exception 'Deadline must be in the future' using errcode = 'P0001';
   end if;
 
-  if p_series_id is not null then
-    select * into v_series
-    from public.series
-    where id = p_series_id
-      and room_id = p_room_id
-    for update;
-
-    if not found then
-      raise exception 'Series not found for this room' using errcode = 'P0002';
-    end if;
-
-    if v_series.status <> 'active' then
-      raise exception 'Predictions can only be assigned to active series' using errcode = 'P0001';
-    end if;
-
-    select coalesce(max(series_prediction_number), 0) + 1
-      into v_series_prediction_number
-    from public.predictions
-    where series_id = p_series_id;
-  else
-    v_series_prediction_number := null;
+  -- Points live in series wallets, so every prediction needs a series.
+  if p_series_id is null then
+    raise exception 'Predictions must belong to an active series' using errcode = 'P0001';
   end if;
+
+  select * into v_series
+  from public.series
+  where id = p_series_id
+    and room_id = p_room_id
+  for update;
+
+  if not found then
+    raise exception 'Series not found for this room' using errcode = 'P0002';
+  end if;
+
+  if v_series.status <> 'active' then
+    raise exception 'Predictions can only be assigned to active series' using errcode = 'P0001';
+  end if;
+
+  select coalesce(max(series_prediction_number), 0) + 1
+    into v_series_prediction_number
+  from public.predictions
+  where series_id = p_series_id;
 
   -- Create the prediction
   insert into public.predictions (

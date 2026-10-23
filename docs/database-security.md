@@ -30,8 +30,10 @@ The browser talks to Postgres directly with the public anon key, so the database
 
 ## Points
 
-- RPCs that move points lock the player row (`select ... for update`) before checking the balance, and lock the prediction before changing its status.
-- `players_escrow_within_balance` guarantees escrowed points never exceed the balance.
+- Points live in `series_wallets`, one row per player per series. `players.points_balance` and `points_in_escrow` are retired and stay at 0.
+- RPCs that move points lock the wallet row (`select ... for update`) before checking the balance, and lock the prediction before changing its status.
+- `series_wallets_escrow_within_balance` guarantees escrowed points never exceed the balance.
+- Only `private.ensure_series_wallet` creates wallets and only `private.pay_series_topups` (the Monday cron job) adds top-ups.
 
 ## Running the tests
 

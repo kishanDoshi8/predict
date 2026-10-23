@@ -33,6 +33,15 @@ select
   s.created_at,
   s.started_at,
   s.completed_at,
-  s.archived_at
+  s.archived_at,
+  s.starting_stack,
+  s.weekly_topup,
+  s.topups_paid,
+  exists (
+    select 1
+    from public.bets b
+    join public.predictions p on p.id = b.prediction_id
+    where p.series_id = s.id
+  ) as has_bets
 from public.series s
 left join series_prediction_stats sps on sps.series_id = s.id;

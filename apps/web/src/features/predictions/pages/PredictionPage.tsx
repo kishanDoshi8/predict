@@ -4,6 +4,7 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePredictionDuelSummary, DuelSummaryCard } from "@/features/duels";
 import { usePredictionDuelRealtime } from "@/features/rooms";
+import { FEATURES } from "@/shared/constants/features";
 import { Skeleton } from "@/shared/ui";
 
 // // ============================================================
@@ -16,7 +17,7 @@ export function PredictionPage() {
 	const { predictionId } = useParams<{ predictionId: string }>();
 	const navigate = useNavigate();
 
-	const [showDuelSummary, setShowDuelSummary] = useState(true);
+	const [showDuelSummary, setShowDuelSummary] = useState(FEATURES.duels);
 
 	const { room } = useRoomContext();
 	const {
@@ -24,13 +25,15 @@ export function PredictionPage() {
 		isPending: isPredictionLoading,
 		refetch: refetchPrediction,
 	} = usePrediction(room.id, predictionId);
+	const duelPredictionId = FEATURES.duels ? predictionId : undefined;
 	const { data: duelSummary } = usePredictionDuelSummary(
 		room.id,
-		predictionId,
+		duelPredictionId,
 	);
 	const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
 	useEffect(() => {
+		if (!FEATURES.duels) return;
 		const hideDuelSummary =
 			prediction?.status !== "draft" &&
 			duelSummary?.totalDuels === 0 &&
@@ -39,7 +42,7 @@ export function PredictionPage() {
 		setShowDuelSummary(!hideDuelSummary);
 	}, [prediction, duelSummary]);
 
-	usePredictionDuelRealtime(room.id, predictionId ?? null);
+	usePredictionDuelRealtime(room.id, duelPredictionId ?? null);
 
 	if (!room) return null; // This should never happen because RoomLayout already checks for room and redirects to 404 if not found
 

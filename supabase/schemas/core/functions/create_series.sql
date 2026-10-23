@@ -2,7 +2,9 @@ create or replace function public.create_series(
   p_room_id uuid,
   p_title text,
   p_description text default null,
-  p_expected_games integer default 0
+  p_expected_games integer default 0,
+  p_starting_stack integer default 1000,
+  p_weekly_topup integer default 100
 )
 returns json
 language plpgsql
@@ -38,13 +40,25 @@ begin
     raise exception 'Expected games cannot be negative' using errcode = 'P0001';
   end if;
 
+  if p_starting_stack < 100 then
+    raise exception 'Starting points must be at least 100' using errcode = 'P0001';
+  end if;
+
+  if p_weekly_topup < 0 then
+    raise exception 'Weekly top-up cannot be negative' using errcode = 'P0001';
+  end if;
+
   insert into public.series (
     room_id,
     title,
     status,
     description,
     expected_games,
-    created_by
+    created_by,
+    started_at,
+    starting_stack,
+    weekly_topup,
+    last_topup_week
   )
   values (
     p_room_id,
@@ -52,9 +66,18 @@ begin
     'active',
     nullif(trim(coalesce(p_description, '')), ''),
     p_expected_games,
-    v_player_id
+    v_player_id,
+    now(),
+    p_starting_stack,
+    p_weekly_topup,
+    -- The first top-up is paid the Monday after the series starts.
+    private.current_week_key()
   )
   returning * into v_series;
+
+  perform private.ensure_series_wallet(v_series.id, rm.player_id)
+  from public.room_members rm
+  where rm.room_id = p_room_id;
 
   return row_to_json(v_series);
 end;

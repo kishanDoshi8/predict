@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(45);
+select plan(49);
 
 -- ------------------------------------------------------------
 -- Fixtures: Alice organizes a room, Bob joins it, Carol is an outsider.
@@ -30,7 +30,6 @@ as $$ select current_setting('test.' || p_name)::uuid $$;
 select pg_temp.login('00000000-0000-0000-0000-00000000a11c');
 set local role authenticated;
 select public.register_player('alice');
-select public.claim_weekly_points(false);
 select set_config('test.room_id', (public.create_room('Alice room')->>'id'), true);
 reset role;
 
@@ -40,7 +39,6 @@ select set_config('test.room_code', (select room_code from public.rooms where id
 select pg_temp.login('00000000-0000-0000-0000-000000000b0b');
 set local role authenticated;
 select public.register_player('bob');
-select public.claim_weekly_points(false);
 select public.join_room(current_setting('test.room_code'));
 reset role;
 
@@ -50,12 +48,13 @@ set local role authenticated;
 select public.register_player('carol');
 reset role;
 
--- Alice opens a prediction
+-- Alice starts a series (everyone gets 1000 points) and opens a prediction in it
 select pg_temp.login('00000000-0000-0000-0000-00000000a11c');
 set local role authenticated;
+select set_config('test.series_id', (public.create_series(pg_temp.setting('room_id'), 'Season 1')->>'id'), true);
 select set_config(
   'test.prediction_id',
-  (public.create_prediction(pg_temp.setting('room_id'), 'Will it rain?', array['Yes', 'No'], now() + interval '1 day')->>'prediction_id'),
+  (public.create_prediction(pg_temp.setting('room_id'), 'Will it rain?', array['Yes', 'No'], now() + interval '1 day', pg_temp.setting('series_id'))->>'prediction_id'),
   true
 );
 reset role;
@@ -106,6 +105,11 @@ select throws_ok(
   'a player cannot change a prediction directly'
 );
 select throws_ok(
+  $$ update public.series_wallets set balance = 1000000 where player_id = (select id from public.players where username = 'bob') $$,
+  '42501', null,
+  'a player cannot set their own series balance'
+);
+select throws_ok(
   $$ select player_token from public.players $$,
   '42501', null,
   'player tokens are not readable'
@@ -114,8 +118,8 @@ select throws_ok(
 reset role;
 
 select is(
-  (select points_balance from public.players where username = 'bob'),
-  500,
+  (select balance from public.series_wallets w join public.players p on p.id = w.player_id where p.username = 'bob'),
+  1000,
   'bob''s balance is unchanged after the attempted writes'
 );
 
@@ -183,13 +187,13 @@ select is(
   ),
   array[
     'activate_series', 'archive_series', 'cancel_bet', 'cancel_duel_queue_view', 'cancel_duel_view',
-    'claim_weekly_points', 'collect_series_rewards', 'complete_series', 'create_duel_view',
-    'create_prediction', 'create_room', 'create_series', 'get_player', 'get_prediction_duel_summary',
+    'collect_series_rewards', 'complete_series',
+    'create_prediction', 'create_room', 'create_series', 'get_my_series_wallets', 'get_player', 'get_prediction_duel_summary',
     'get_prediction_duels_view', 'get_preferences', 'get_room_activities', 'get_room_by_code',
-    'get_room_has_unseen_activities', 'get_room_leaderboard', 'get_room_member_recent_predictions',
+    'get_room_has_unseen_activities', 'get_room_member_recent_predictions',
     'get_room_member_stats', 'get_room_prediction_history', 'get_room_series', 'get_room_series_selector',
     'get_room_stat_cards', 'get_room_weekly_leaderboard', 'get_series_awards',
-    'get_series_leaderboard', 'get_series_placements', 'join_duel_queue_view', 'join_room',
+    'get_series_leaderboard', 'get_series_placements', 'join_room',
     'mark_how_to_play_seen', 'mark_ratings_tip_seen', 'mark_room_activities_seen', 'place_bet',
     'register_player', 'reset_room_preferences', 'resolve_prediction_v2', 'set_last_visited_room',
     'update_global_preferences', 'update_room_preferences', 'update_series', 'upsert_user_push_subscription'
@@ -237,6 +241,7 @@ select is((select count(*)::int from public.room_members), 0, 'an outsider sees 
 select is((select count(*)::int from public.predictions), 0, 'an outsider sees no predictions');
 select is((select count(*)::int from public.prediction_options), 0, 'an outsider sees no prediction options');
 select is((select count(*)::int from public.bets), 0, 'an outsider sees no bets');
+select is((select count(*)::int from public.series_wallets), 0, 'an outsider sees no series wallets');
 select is((select count(*)::int from public.player_rooms_by_activity), 0, 'an outsider sees no room list rows');
 select is((select array_agg(username::text) from public.players), array['carol'], 'an outsider sees only their own player');
 
@@ -276,6 +281,7 @@ select is((select count(*)::int from public.room_members), 2, 'a member sees eve
 select is((select count(*)::int from public.predictions), 1, 'a member sees the room''s predictions');
 select is((select count(*)::int from public.prediction_options), 2, 'a member sees prediction options');
 select is((select count(*)::int from public.bets), 2, 'a member sees the room''s bets');
+select is((select count(*)::int from public.series_wallets), 2, 'a member sees the series wallets in their room');
 select is(
   (select array_agg(username::text order by username) from public.players),
   array['alice', 'bob'],
@@ -302,11 +308,16 @@ select throws_ok(
   '23514', null,
   'escrow can never exceed the balance'
 );
+select throws_ok(
+  $$ update public.series_wallets set escrow = balance + 1 where player_id = (select id from public.players where username = 'bob') $$,
+  '23514', null,
+  'series escrow can never exceed the series balance'
+);
 
 select pg_temp.login('00000000-0000-0000-0000-000000000b0b');
 set local role authenticated;
 select throws_ok(
-  format($$ select public.place_bet(%L, %L, 501) $$, pg_temp.setting('prediction_id'), pg_temp.setting('yes_id')),
+  format($$ select public.place_bet(%L, %L, 1001) $$, pg_temp.setting('prediction_id'), pg_temp.setting('yes_id')),
   'P0009', null,
   'a bet larger than the available balance is rejected'
 );
@@ -341,10 +352,10 @@ select throws_ok(
 );
 reset role;
 
-select is((select points_balance from public.players where username = 'bob'), 600, 'the winner is paid');
-select is((select points_balance from public.players where username = 'alice'), 400, 'the loser pays');
-select is((select points_in_escrow from public.players where username = 'bob'), 0, 'the winner''s escrow is released');
-select is((select points_in_escrow from public.players where username = 'alice'), 0, 'the loser''s escrow is released');
+select is((select balance from public.series_wallets w join public.players p on p.id = w.player_id where p.username = 'bob'), 1100, 'the winner is paid');
+select is((select balance from public.series_wallets w join public.players p on p.id = w.player_id where p.username = 'alice'), 900, 'the loser pays');
+select is((select escrow from public.series_wallets w join public.players p on p.id = w.player_id where p.username = 'bob'), 0, 'the winner''s escrow is released');
+select is((select escrow from public.series_wallets w join public.players p on p.id = w.player_id where p.username = 'alice'), 0, 'the loser''s escrow is released');
 
 select * from finish();
 rollback;

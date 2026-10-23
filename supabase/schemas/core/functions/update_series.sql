@@ -2,7 +2,9 @@ create or replace function public.update_series(
   p_series_id uuid,
   p_title text,
   p_description text default null,
-  p_expected_games integer default 0
+  p_expected_games integer default 0,
+  p_starting_stack integer default null,
+  p_weekly_topup integer default null
 )
 returns json
 language plpgsql
@@ -12,6 +14,7 @@ as $$
 declare
   v_player_id uuid;
   v_series public.series%rowtype;
+  v_points_changed boolean;
 begin
   v_player_id := private.get_player_id_from_auth();
 
@@ -44,13 +47,51 @@ begin
     raise exception 'Expected games cannot be negative' using errcode = 'P0001';
   end if;
 
+  v_points_changed :=
+    (p_starting_stack is not null and p_starting_stack <> v_series.starting_stack)
+    or (p_weekly_topup is not null and p_weekly_topup <> v_series.weekly_topup);
+
+  if v_points_changed then
+    if v_series.status not in ('draft', 'active') then
+      raise exception 'Points settings can only change before a series is closed' using errcode = 'P0001';
+    end if;
+
+    if exists (
+      select 1
+      from public.bets b
+      join public.predictions p on p.id = b.prediction_id
+      where p.series_id = p_series_id
+    ) then
+      raise exception 'Points settings can''t change once the series has bets' using errcode = 'P0001';
+    end if;
+
+    if coalesce(p_starting_stack, v_series.starting_stack) < 100 then
+      raise exception 'Starting points must be at least 100' using errcode = 'P0001';
+    end if;
+
+    if coalesce(p_weekly_topup, v_series.weekly_topup) < 0 then
+      raise exception 'Weekly top-up cannot be negative' using errcode = 'P0001';
+    end if;
+  end if;
+
   update public.series
   set
     title = trim(p_title),
     description = nullif(trim(coalesce(p_description, '')), ''),
-    expected_games = p_expected_games
+    expected_games = p_expected_games,
+    starting_stack = coalesce(p_starting_stack, starting_stack),
+    weekly_topup = coalesce(p_weekly_topup, weekly_topup)
   where id = p_series_id
   returning * into v_series;
+
+  -- No bets yet, so every wallet is still untouched: reissue it with the new settings.
+  if v_points_changed then
+    update public.series_wallets
+    set balance = v_series.starting_stack + v_series.weekly_topup * v_series.topups_paid,
+        granted = v_series.starting_stack + v_series.weekly_topup * v_series.topups_paid,
+        updated_at = now()
+    where series_id = p_series_id;
+  end if;
 
   return row_to_json(v_series);
 end;

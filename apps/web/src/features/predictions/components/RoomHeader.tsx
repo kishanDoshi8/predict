@@ -2,7 +2,7 @@ import { Button } from "@/shared/ui/button";
 import { Room } from "@/features/rooms";
 import { ChevronLeftIcon, CoinsIcon, ZapIcon } from "lucide-react";
 import { Link } from "react-router-dom";
-import { usePlayer } from "@/features/home";
+import { useCurrentSeries, useSeriesWallet } from "@/features/series";
 
 export type RoomHeaderLeftAction = "home" | "back" | "none";
 
@@ -19,7 +19,9 @@ function RoomHeader({
 	title,
 	onLeftAction,
 }: Readonly<Props>) {
-	const { data: player } = usePlayer();
+	// Points live per series, so the header shows the series the player is looking at.
+	const { currentSeriesId } = useCurrentSeries(room.id);
+	const { wallet } = useSeriesWallet(room.id, currentSeriesId);
 
 	return (
 		<header
@@ -47,17 +49,19 @@ function RoomHeader({
 				>
 					<h1>{title ?? room.name}</h1>
 				</Link>
-				<div>
-					{/* point */}
-					<Button
-						variant='ghost'
-						size='sm'
-						className={`text-accent text-base cursor-default`}
-					>
-						<CoinsIcon />
-						{(player?.points_balance ?? 0).toLocaleString()}
-					</Button>
-				</div>
+				{wallet ? (
+					<div>
+						<Button
+							variant='ghost'
+							size='sm'
+							className={`text-accent text-base cursor-default`}
+							title={`Your points in ${wallet.title}`}
+						>
+							<CoinsIcon />
+							{wallet.balance.toLocaleString()}
+						</Button>
+					</div>
+				) : null}
 			</div>
 		</header>
 	);

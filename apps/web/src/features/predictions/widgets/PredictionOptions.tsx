@@ -2,7 +2,6 @@ import {
 	FadeContent,
 	Field,
 	FieldContent,
-	FieldDescription,
 	FieldLabel,
 	FieldTitle,
 	Progress,
@@ -127,7 +126,8 @@ export default function PredictionOptions({
 												);
 											})()}
 										</FieldTitle>
-										<FieldDescription>
+										{/* A div, not FieldDescription (<p>): Progress renders block elements. */}
+										<div className='w-full'>
 											{prediction.winning_option_id ? (
 												<Progress
 													value={
@@ -156,7 +156,7 @@ export default function PredictionOptions({
 													className={`${selectedOption !== option.id && "[&>div]:bg-slate-400 bg-slate-400/50"}`}
 												/>
 											)}
-										</FieldDescription>
+										</div>
 									</FieldContent>
 								</Field>
 							</FieldLabel>

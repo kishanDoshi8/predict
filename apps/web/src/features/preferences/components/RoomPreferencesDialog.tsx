@@ -9,11 +9,7 @@ import {
 	Spinner,
 } from "@/shared/ui";
 import { useNotificationPermission } from "@/shared/hooks/useNotificationPermission";
-import {
-	PreferenceSettings,
-	RoomPreferenceOverrides,
-	sendPushNotificationTrigger,
-} from "@/shared/lib/api";
+import { PreferenceSettings, RoomPreferenceOverrides } from "@/shared/lib/api";
 import { registerForPushNotifications } from "@/shared/lib/pushNotifications";
 import {
 	usePreferences,
@@ -21,13 +17,15 @@ import {
 	useUpdateGlobalPreferences,
 	useUpdateRoomPreferences,
 } from "@/features/preferences";
-import { BellIcon, BellOffIcon } from "lucide-react";
+import { BellOffIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { NotificationPermissionBlockedDialog } from "@/features/predictions";
 
 type Props = {
 	roomId: string;
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
 };
 
 type NotificationPreferenceKey =
@@ -74,9 +72,11 @@ const overrideVariant = (
 const getErrorMessage = (error: unknown) =>
 	error instanceof Error ? error.message : "Unexpected error";
 
-export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
-	const [isSendingTestPush, setIsSendingTestPush] = useState(false);
-	const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
+export function RoomPreferencesDialog({
+	roomId,
+	open,
+	onOpenChange,
+}: Readonly<Props>) {
 	const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
 	const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 	const { permission, requestPermission } = useNotificationPermission();
@@ -146,39 +146,8 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 		isUpdatingRoom ||
 		isResettingRoom;
 
-	const handleSendTestPush = async () => {
-		try {
-			setIsSendingTestPush(true);
-			await registerForPushNotifications(permission);
-			const response = await sendPushNotificationTrigger({
-				event_type: "prediction_live",
-				payload: {
-					title: "Verdict test notification",
-					body: "Push notifications are configured for your account.",
-					url: globalThis.window.location.pathname,
-				},
-			});
-
-			toast.success("Test notification request sent.", {
-				description: `Sent: ${response.sent_count}, failed: ${response.failed_count}`,
-				position: "top-center",
-			});
-		} catch (error) {
-			toast.error("Failed to send test notification.", {
-				description: getErrorMessage(error),
-				position: "top-center",
-			});
-		} finally {
-			setIsSendingTestPush(false);
-		}
-	};
-
-	const handleNotificationBellClick = async () => {
-		if (permission === "granted") {
-			setIsPreferencesOpen(true);
-			return;
-		}
-
+	// Settings can be changed before notifications are allowed on this device.
+	const handleEnableNotifications = async () => {
 		if (permission === "denied") {
 			setIsBlockedDialogOpen(true);
 			return;
@@ -189,11 +158,10 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 			const nextPermission = await requestPermission();
 			if (nextPermission === "granted") {
 				await registerForPushNotifications(nextPermission);
-				setIsPreferencesOpen(true);
-				return;
-			}
-
-			if (nextPermission === "denied") {
+				toast.success("Notifications are on for this device.", {
+					position: "top-center",
+				});
+			} else if (nextPermission === "denied") {
 				setIsBlockedDialogOpen(true);
 			}
 		} finally {
@@ -203,25 +171,35 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 
 	return (
 		<>
-			<Button
-				variant='secondary'
-				size='icon-lg'
-				className={`rounded-full`}
-				onClick={() => void handleNotificationBellClick()}
-				disabled={isRequestingPermission}
-			>
-				{permission === "granted" ? <BellIcon /> : <BellOffIcon />}
-			</Button>
-
-			<Dialog open={isPreferencesOpen} onOpenChange={setIsPreferencesOpen}>
+			<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className='sm:max-w-xl'>
 				<DialogHeader>
-					<DialogTitle>Room Preferences</DialogTitle>
+					<DialogTitle>Notifications</DialogTitle>
 					<DialogDescription>
-						Global defaults apply everywhere. This room can override
-						each notification.
+						Defaults apply to every room. This room can override
+						each one.
 					</DialogDescription>
 				</DialogHeader>
+
+				{permission !== "granted" ? (
+					<div className='flex items-center justify-between gap-3 rounded-md border border-accent/40 bg-accent/10 p-3'>
+						<div className='flex items-start gap-2 text-sm'>
+							<BellOffIcon className='size-4 mt-0.5 shrink-0' />
+							<p>
+								{permission === "denied"
+									? "Notifications are blocked for this site in your browser."
+									: "Notifications are off on this device."}
+							</p>
+						</div>
+						<Button
+							size='sm'
+							onClick={() => void handleEnableNotifications()}
+							disabled={isRequestingPermission}
+						>
+							{permission === "denied" ? "How to fix" : "Turn on"}
+						</Button>
+					</div>
+				) : null}
 
 				{!preferences || isPreferencesPending ? (
 					<div className='py-8 flex justify-center'>
@@ -230,7 +208,7 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 				) : (
 					<div className='-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4 space-y-6 bg-card/70 py-2'>
 						<section className='space-y-3'>
-							<h3 className='font-semibold'>Global Defaults</h3>
+							<h3 className='font-semibold'>Defaults</h3>
 							<div className='space-y-2'>
 								{notificationKeys.map((key) => (
 									<div
@@ -258,16 +236,6 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 										</Button>
 									</div>
 								))}
-								<div className='flex items-center justify-between gap-4 border rounded-md p-3 opacity-80'>
-									<p className='text-sm'>Theme</p>
-									<Button
-										size='sm'
-										variant='secondary'
-										disabled
-									>
-										Dark only
-									</Button>
-								</div>
 							</div>
 						</section>
 
@@ -310,15 +278,6 @@ export function RoomPreferencesDialog({ roomId }: Readonly<Props>) {
 				)}
 
 				<DialogFooter className='gap-2'>
-					<Button
-						variant='secondary'
-						onClick={() => void handleSendTestPush()}
-						disabled={isBusy || isSendingTestPush}
-					>
-						{isSendingTestPush
-							? "Sending..."
-							: "Send Test Notification"}
-					</Button>
 					<Button
 						variant='outline'
 						onClick={handleResetRoom}

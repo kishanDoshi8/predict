@@ -18,7 +18,7 @@ import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
 import { Counter, FadeContent } from "@/shared/ui";
 import { usePredictionDuels } from "@/features/duels";
-import { useCurrentSeries, useSeriesWallet } from "@/features/series";
+import { useSeriesWallet } from "@/features/series";
 import { FEATURES } from "@/shared/constants/features";
 
 type Props = {
@@ -43,7 +43,6 @@ export default function DraftControls({
 		FEATURES.duels ? predictionId : undefined,
 	);
 	const { wallet } = useSeriesWallet(room.id, seriesId);
-	const { setCurrentSeriesId } = useCurrentSeries(room.id);
 	const { data: myBet, isPending: isMyBetLoading } = useMyBet(
 		room.id,
 		predictionId,
@@ -61,10 +60,6 @@ export default function DraftControls({
 	// Bets spend points from this prediction's series wallet.
 	const availableBalance = (wallet?.available ?? 0) + (myBet?.amount ?? 0);
 
-	// Betting here means looking at this series, so the header shows its points.
-	useEffect(() => {
-		if (seriesId) setCurrentSeriesId(seriesId);
-	}, [seriesId, setCurrentSeriesId]);
 
 	useEffect(() => {
 		const hasDuelInProgress = duels?.some((duel) => {

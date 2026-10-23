@@ -75,14 +75,14 @@ export function LeaderboardRow({
 						</span>
 					)}
 					{entry.current_streak >= 3 && (
-						<div className={`inline-block`}>
+						<span className={`inline-block`}>
 							<Badge
 								className={`flex gap-0 items-center justify-center bg-accent/20 text-accent text-xs ml-2`}
 							>
 								<FlameIcon className={`w-2 h-2 text-rank-3`} />
 								{entry.current_streak}
 							</Badge>
-						</div>
+						</span>
 					)}
 				</p>
 				{entry.total_revealed_bets > 0 && (

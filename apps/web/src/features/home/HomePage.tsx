@@ -93,7 +93,16 @@ export function HomePage() {
 		}
 	};
 
-	if (isPlayerLoading || player?.last_visited_room_id) {
+	// Only hold on the spinner while we're about to jump back into the last room.
+	const lastVisitedRoom = playerRooms?.find(
+		(room) => room.id === player?.last_visited_room_id,
+	);
+	const willRedirect =
+		!hasExplicitTab &&
+		!!player?.last_visited_room_id &&
+		(isPlayerRoomsLoading || !!lastVisitedRoom);
+
+	if (isPlayerLoading || willRedirect) {
 		return (
 			<div className='flex items-center justify-center h-dvh'>
 				<Loading className={`size-10 text-primary`} />

@@ -8,6 +8,14 @@ import RoomLayout from "@/app/layouts/RoomLayout";
 import RoomTabsLayout from "@/app/layouts/RoomTabsLayout";
 import { RequireRoomMember } from "@/features/rooms";
 import { FEATURES } from "@/shared/constants/features";
+// The pages people move between inside a room load with the app, so switching
+// tabs never waits on a code download. Rarely used pages stay lazy.
+import RoomDashboard from "@/features/rooms/pages/RoomDashboard";
+import RoomHistoryPage from "@/features/rooms/pages/RoomHistoryPage";
+import RoomActivitiesPage from "@/features/rooms/pages/RoomActivitiesPage";
+import SeriesPage from "@/features/series/pages/SeriesPage";
+import { PredictionPage } from "@/features/predictions/pages/PredictionPage";
+import { LeaderboardPage } from "@/features/leaderboard/pages/LeaderboardPage";
 
 const LoginPage = lazy(() =>
 	import("@/features/auth/pages/LoginPage").then((module) => ({
@@ -32,20 +40,6 @@ const ResetPasswordPage = lazy(() =>
 const CreatePlayer = lazy(
 	() => import("@/features/home/components/CreatePlayer"),
 );
-const RoomDashboard = lazy(
-	() => import("@/features/rooms/pages/RoomDashboard"),
-);
-const RoomHistoryPage = lazy(
-	() => import("@/features/rooms/pages/RoomHistoryPage"),
-);
-const RoomActivitiesPage = lazy(
-	() => import("@/features/rooms/pages/RoomActivitiesPage"),
-);
-const SeriesPage = lazy(() =>
-	import("@/features/series").then((module) => ({
-		default: module.SeriesPage,
-	})),
-);
 const SeriesCreatePage = lazy(() =>
 	import("@/features/series").then((module) => ({
 		default: module.SeriesCreatePage,
@@ -57,11 +51,6 @@ const JoinRoomPage = lazy(() =>
 	})),
 );
 const PredictionNew = lazy(() => import("@/features/predictions/pages/New"));
-const PredictionPage = lazy(() =>
-	import("@/features/predictions/pages/PredictionPage").then((module) => ({
-		default: module.PredictionPage,
-	})),
-);
 const PredictionDuelsPage = lazy(() =>
 	import("@/features/duels/pages/PredictionDuelsPage").then((module) => ({
 		default: module.PredictionDuelsPage,
@@ -80,11 +69,6 @@ const PredictionDuelDetailPage = lazy(() =>
 			default: module.PredictionDuelDetailPage,
 		}),
 	),
-);
-const LeaderboardPage = lazy(() =>
-	import("@/features/leaderboard/pages/LeaderboardPage").then((module) => ({
-		default: module.LeaderboardPage,
-	})),
 );
 const NotFoundPage = lazy(() =>
 	import("@/app/router/NotFoundPage").then((module) => ({
@@ -143,9 +127,7 @@ export const router = createBrowserRouter([
 										children: [
 											{
 												index: true,
-												element: withSuspense(
-													<RoomDashboard />,
-												),
+												element: <RoomDashboard />,
 												handle: {
 													header: {
 														leftAction: "home",
@@ -154,62 +136,41 @@ export const router = createBrowserRouter([
 											},
 											{
 												path: "leaderboard",
-												element: withSuspense(
-													<LeaderboardPage />,
-												),
-												handle: {
-													header: {
-														// title: "Leaderboard",
-													},
-												},
+												element: <LeaderboardPage />,
+												handle: { header: {} },
 											},
 											{
 												path: "history",
-												element: withSuspense(
-													<RoomHistoryPage />,
-												),
-												handle: {
-													header: {
-														// title: "History",
-													},
-												},
+												element: <RoomHistoryPage />,
+												handle: { header: {} },
 											},
 											{
 												path: "activities",
-												element: withSuspense(
-													<RoomActivitiesPage />,
-												),
-												handle: {
-													header: {},
-												},
+												element: <RoomActivitiesPage />,
+												handle: { header: {} },
 											},
 											{
 												path: "series",
-												element: withSuspense(
-													<SeriesPage />,
-												),
-												handle: {
-													header: {
-														// title: "Series",
-													},
-												},
-											},
-											{
-												path: "series/new",
-												element: withSuspense(
-													<SeriesCreatePage />,
-												),
-												handle: {
-													header: {
-														leftAction: "back",
-													},
-												},
+												element: <SeriesPage />,
+												handle: { header: {} },
 											},
 										],
 									},
 									{
+										path: "series/new",
+										element: withSuspense(
+											<SeriesCreatePage />,
+										),
+										handle: {
+											header: {
+												leftAction: "back",
+												title: "New series",
+											},
+										},
+									},
+									{
 										path: "series/:seriesId",
-										element: withSuspense(<SeriesPage />),
+										element: <SeriesPage />,
 										handle: {
 											header: {
 												leftAction: "back",
@@ -224,14 +185,13 @@ export const router = createBrowserRouter([
 										handle: {
 											header: {
 												leftAction: "back",
+												title: "New prediction",
 											},
 										},
 									},
 									{
 										path: "predictions/:predictionId",
-										element: withSuspense(
-											<PredictionPage />,
-										),
+										element: <PredictionPage />,
 										handle: {
 											header: {
 												leftAction: "back",

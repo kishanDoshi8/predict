@@ -45,7 +45,6 @@ export function SeriesSelector({
 	emptyMessage = "No series found.",
 }: Readonly<SeriesSelectorProps>) {
 	const { data, isPending } = useSeriesSelector(roomId, mode, value);
-	const seriesCount = data?.series.length ?? 0;
 
 	const items = useMemo<SeriesSelectorItem[]>(
 		() => [
@@ -103,11 +102,7 @@ export function SeriesSelector({
 		<Select value={selectedValue} onValueChange={handleValueChange}>
 			<SelectTrigger
 				className={cn("w-full", className)}
-				disabled={
-					disabled ||
-					isPending ||
-					(seriesCount <= 1 && mode !== "all")
-				}
+				disabled={disabled || isPending}
 			>
 				<SelectValue
 					placeholder={isPending ? "Loading series..." : placeholder}

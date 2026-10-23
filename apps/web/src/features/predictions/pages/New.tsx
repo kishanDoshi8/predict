@@ -233,7 +233,6 @@ export default function PredictionNew() {
 	return (
 		<div className={`p-4`}>
 			<FieldSet className={`w-full max-w-md mx-auto`}>
-				<h3 className={`text-2xl font-bold`}>Create Prediction</h3>
 				<FieldGroup>
 					<Field data-invalid={errors.includes("series")}>
 						<FieldLabel htmlFor='series'>Series</FieldLabel>

@@ -1,6 +1,6 @@
 import { usePlayer } from "@/features/home";
 import { useJoinRoom, useRoom } from "@/features/rooms/hooks/room";
-import { Badge, Button, Loading, Spinner } from "@/shared/ui";
+import { Button, Loading, Spinner } from "@/shared/ui";
 import { ChevronLeftIcon, UsersIcon, ZapIcon } from "lucide-react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -94,9 +94,6 @@ export function JoinRoomPage() {
 									Join this room to make predictions with other members.
 								</p>
 							</div>
-							<Badge variant='secondary' className='rounded-md'>
-								Public
-							</Badge>
 						</div>
 
 						<div className='flex items-center gap-4 text-sm text-muted-foreground'>

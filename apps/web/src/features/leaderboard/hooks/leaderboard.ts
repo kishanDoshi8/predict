@@ -2,27 +2,12 @@ import {
     getRoomMemberRecentPredictions,
     getRoomMemberStats,
     getRoomPredictionHistory,
-    getRoomSeriesSelector,
     getRoomMemberSeriesRecognition,
-    SeriesSelectorMode,
     getSeriesLeaderboard,
 } from '@/shared/lib/api'
 import { PredictionHistoryFilter, PredictionHistoryPage } from "@/features/leaderboard";
-import { InfiniteData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { InfiniteData, keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { roomKeys } from '@/shared/constants/queryKeys'
-
-export const useRoomSeriesSelector = (
-    roomId?: string,
-    selectedSeriesId?: string | null,
-    mode: SeriesSelectorMode = 'active-or-last',
-    enabled = true,
-) => {
-    return useQuery({
-        queryKey: roomKeys.seriesSelector(roomId ?? '', mode, selectedSeriesId ?? 'default'),
-        queryFn: () => getRoomSeriesSelector(roomId ?? '', selectedSeriesId, mode),
-        enabled: !!roomId && enabled,
-    })
-}
 
 // Series standings, ranked by wallet balance.
 export const useSeriesLeaderboard = (
@@ -34,6 +19,8 @@ export const useSeriesLeaderboard = (
         queryKey: roomKeys.seriesLeaderboard(roomId ?? '', seriesId ?? ''),
         queryFn: () => getSeriesLeaderboard(roomId ?? '', seriesId ?? '', 'points'),
         enabled: !!roomId && !!seriesId && enabled,
+        // Keep the previous series on screen while the next one loads.
+        placeholderData: keepPreviousData,
     })
 }
 
@@ -74,6 +61,8 @@ export const usePredictionHistory = (
                 seriesId,
             }),
         initialPageParam: initialCursor,
+        // Keep the previous results on screen while the next filter loads.
+        placeholderData: keepPreviousData,
         getNextPageParam: (lastPage) => {
             if (!lastPage.has_more) return undefined
             if (!lastPage.next_cursor_created_at || !lastPage.next_cursor_id) {

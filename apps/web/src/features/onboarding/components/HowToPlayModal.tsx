@@ -18,7 +18,7 @@ const SLIDES = [
 		emoji: "🎯",
 		title: "Join the room",
 		description:
-			"Enter the 6-digit code your friend sent you. You're in instantly.",
+			"Enter the 6-character code your friend sent you, or open their invite link. You're in instantly.",
 	},
 	{
 		emoji: "🪙",

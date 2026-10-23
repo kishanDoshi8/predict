@@ -7,12 +7,12 @@ import {
 import { useActivePredictions } from "@/features/predictions";
 import { SeriesDetailView, SeriesListView } from "@/features/series/components";
 import {
-	useCollectSeriesRewards,
 	useRoomSeries,
 	useSeriesAwards,
 	useSeriesPlacements,
 	useUpdateSeries,
 	useCompleteSeries,
+	useArchiveSeries,
 } from "@/features/series";
 import type { Series } from "@/features/series/types/series";
 import type { SeriesFormState } from "@/features/series/components/SeriesEditDialog";
@@ -116,6 +116,8 @@ export default function SeriesPage() {
 		useUpdateSeries(room.id);
 	const { mutate: completeSeries, isPending: isCompleteSeriesPending } =
 		useCompleteSeries(room.id);
+	const { mutate: archiveSeries, isPending: isArchiveSeriesPending } =
+		useArchiveSeries(room.id);
 
 	const isOrganizer = room.members.some(
 		(member) => member.player_id === player?.id && member.is_organizer,
@@ -126,7 +128,6 @@ export default function SeriesPage() {
 	const [formState, setFormState] =
 		useState<SeriesFormState>(defaultFormState);
 
-	const isActionPending = false;
 
 	const activeSeries = seriesByStatus?.active ?? [];
 	const completedSeries = seriesByStatus?.completed ?? [];
@@ -161,10 +162,6 @@ export default function SeriesPage() {
 	);
 	const { data: seriesAwards = [], isPending: isSeriesAwardsLoading } =
 		useSeriesAwards(room.id, selectedSeries?.id ?? null, !!isClosedSeries);
-	const {
-		mutate: collectSeriesRewards,
-		isPending: isCollectSeriesRewardsPending,
-	} = useCollectSeriesRewards(room.id, selectedSeries?.id ?? null);
 
 	const seriesOpenPredictions = useMemo(() => {
 		if (!selectedSeries) {
@@ -191,8 +188,16 @@ export default function SeriesPage() {
 	);
 
 	const handleArchive = (targetSeriesId: string) => {
-		toast("Archive series callback triggered.", {
-			description: `Series ${targetSeriesId} is pending backend wiring.`,
+		archiveSeries(targetSeriesId, {
+			onSuccess: () => {
+				toast("Series archived.");
+				navigate(`/rooms/${room.code}/series`, { replace: true });
+			},
+			onError: (error) => {
+				toast("Failed to archive series.", {
+					description: error.message,
+				});
+			},
 		});
 	};
 
@@ -256,19 +261,6 @@ export default function SeriesPage() {
 		});
 	};
 
-	const handleCollectRewards = () => {
-		collectSeriesRewards(undefined, {
-			onSuccess: () => {
-				toast("Rewards collected.");
-			},
-			onError: (error) => {
-				toast("Failed to collect rewards.", {
-					description: error.message,
-				});
-			},
-		});
-	};
-
 	if (!seriesId) {
 		return (
 			<SeriesListView
@@ -313,7 +305,7 @@ export default function SeriesPage() {
 			series={selectedSeries}
 			isOrganizer={isOrganizer}
 			isActionPending={
-				isUpdatePending || isActionPending || isCompleteSeriesPending
+				isUpdatePending || isCompleteSeriesPending || isArchiveSeriesPending
 			}
 			isUpdatePending={isUpdatePending}
 			seriesOpenPredictions={seriesOpenPredictions}
@@ -325,12 +317,8 @@ export default function SeriesPage() {
 			isSeriesPlacementsLoading={isSeriesPlacementsLoading}
 			seriesAwards={seriesAwards}
 			isSeriesAwardsLoading={isSeriesAwardsLoading}
-			currentPlayerId={player?.id ?? null}
-			onCollectRewards={handleCollectRewards}
-			isCollectRewardsPending={isCollectSeriesRewardsPending}
 			isEditorOpen={isEditorOpen}
 			formState={formState}
-			onBackToList={() => navigate(`/rooms/${room.code}/series`)}
 			onEdit={() => openEditDialog(selectedSeries)}
 			onArchive={() => handleArchive(selectedSeries.id)}
 			onCloseSeries={() => handleCloseSeries(selectedSeries.id)}

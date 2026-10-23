@@ -1,6 +1,6 @@
 import { Duel, DuelSummary } from "@/features/duels";
 import { Player } from "@/features/home";
-import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, DefaultRoomStat, RoomMemberRecentPrediction, RoomMemberStats } from "@/features/leaderboard";
+import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, RoomMemberRecentPrediction, RoomMemberStats } from "@/features/leaderboard";
 import { Prediction, PredictionStatus } from "@/features/predictions";
 import { Series } from "@/features/series/types/series";
 import { Room } from "@/features/rooms";
@@ -131,12 +131,6 @@ export type SeriesAward = {
   created_at: string
 }
 
-export type CollectSeriesRewardsResult = {
-  placements_collected: number
-  awards_collected: number
-  collected_at: string
-}
-
 export type RoomMemberSeriesRecognition = {
   championships: Array<{
     id: string
@@ -228,7 +222,6 @@ export async function getPlayer(): Promise<Player> {
     total_won: number
     current_streak: number
     longest_streak: number
-    last_claim_at: string | null
     last_visited_room_id: string | null
   }
 }
@@ -497,14 +490,6 @@ export async function getSeriesAwards(roomId: string, seriesId: string) {
   return assertOk(data, error) as SeriesAward[]
 }
 
-export async function collectSeriesRewards(seriesId: string) {
-  const { data, error } = await untypedSupabase.rpc('collect_series_rewards', {
-    series_id: seriesId,
-  })
-
-  return assertOk(data, error) as CollectSeriesRewardsResult
-}
-
 // #endregion Series
 
 // #region Preferences
@@ -564,11 +549,6 @@ export async function markHowToPlaySeen() {
   if (error) throw error
 }
 
-export async function markRatingsTipSeen() {
-  const { error } = await supabase.rpc('mark_ratings_tip_seen')
-  if (error) throw error
-}
-
 export async function upsertPushSubscription(
   subscription: PushSubscriptionJSON,
 ) {
@@ -577,35 +557,6 @@ export async function upsertPushSubscription(
   })
 
   return assertOk(data, error) as string
-}
-
-export async function sendPushNotificationTrigger(args: {
-  event_type: NotificationEventType
-  payload?: Record<string, unknown>
-}) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  const headers: Record<string, string> = {}
-  if (session?.access_token) {
-    headers.Authorization = `Bearer ${session.access_token}`
-  }
-
-  const { data, error } = await supabase.functions.invoke(
-    'send-push-notifications',
-    {
-      body: args,
-      headers,
-    },
-  )
-
-  return assertOk(data, error) as {
-    sent_count: number
-    failed_count: number
-    pruned_count: number
-    target_count: number
-  }
 }
 
 // #endregion Preferences
@@ -1095,15 +1046,6 @@ export async function getRoomMemberRecentPredictions(
   })
 
   return assertOk(data, error) as RoomMemberRecentPrediction[]
-}
-
-export async function getRoomStatCards(roomId: string, limit = 5) {
-  const { data, error } = await supabase.rpc('get_room_stat_cards', {
-    p_room_id: roomId,
-    p_limit: limit,
-  })
-
-  return assertOk(data, error) as DefaultRoomStat[]
 }
 
 export async function getRoomMemberSeriesRecognition(

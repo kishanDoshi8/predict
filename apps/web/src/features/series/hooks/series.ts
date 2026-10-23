@@ -1,7 +1,6 @@
 import {
 	activateSeries,
 	archiveSeries,
-	collectSeriesRewards,
 	completeSeries,
 	createSeries,
 	getSeriesAwards,
@@ -152,28 +151,5 @@ export const useSeriesAwards = (
 		queryKey: roomKeys.seriesAwards(roomId ?? "", seriesId ?? ""),
 		queryFn: () => getSeriesAwards(roomId ?? "", seriesId ?? ""),
 		enabled: !!roomId && !!seriesId && enabled,
-	});
-};
-
-export const useCollectSeriesRewards = (
-	roomId?: string,
-	seriesId?: string | null,
-) => {
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: () => collectSeriesRewards(seriesId ?? ""),
-		onSuccess: () => {
-			if (roomId && seriesId) {
-				void Promise.all([
-					queryClient.invalidateQueries({
-						queryKey: roomKeys.seriesPlacements(roomId, seriesId),
-					}),
-					queryClient.invalidateQueries({
-						queryKey: roomKeys.seriesAwards(roomId, seriesId),
-					}),
-				]);
-			}
-		},
 	});
 };

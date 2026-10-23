@@ -32,12 +32,12 @@ const PredictionData = ({ prediction, fadeDelay }: Props) => {
 					<p className={`flex gap-2 items-center`}>
 						<UsersIcon className={`w-3 h-3 text-primary`} />{" "}
 						{bets ? (
-							<div>
+							<span>
 								{bets.length}{" "}
 								<span className={`text-muted-foreground`}>
 									{bets.length === 1 ? "bet" : "bets"}
 								</span>
-							</div>
+							</span>
 						) : (
 							<span>
 								0{" "}

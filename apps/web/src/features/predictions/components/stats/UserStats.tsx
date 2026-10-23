@@ -10,7 +10,7 @@ import { Suspense, lazy, useEffect, useState } from "react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
 import { LeaderboardEntry, useSeriesLeaderboard } from "@/features/leaderboard";
-import { SeriesSelector, useCurrentSeries } from "@/features/series";
+import { useCurrentSeries } from "@/features/series";
 import { Room } from "@/features/rooms";
 import { twColor } from "@/shared/lib/utils";
 import { Link } from "react-router-dom";
@@ -22,7 +22,6 @@ const PlayerProfileDialog = lazy(() =>
 );
 
 type UserStatsProps = {
-	showControls?: boolean;
 	title?: string;
 	subtitle?: string;
 	leaderboardEntriesOverride?: LeaderboardEntry[];
@@ -31,7 +30,6 @@ type UserStatsProps = {
 };
 
 function UserStats({
-	showControls = true,
 	title = "Standings",
 	subtitle = "Top balance when the series closes wins the title",
 	leaderboardEntriesOverride,
@@ -39,7 +37,7 @@ function UserStats({
 	showSeeAllLink = true,
 }: Readonly<UserStatsProps>) {
 	const { room } = useRoomContext();
-	const { currentSeriesId, setCurrentSeriesId } = useCurrentSeries(room.id);
+	const { currentSeriesId } = useCurrentSeries(room.id);
 
 	const { data: seriesLeaderboard = [], isPending: isSeriesLeaderboardLoading } =
 		useSeriesLeaderboard(
@@ -58,17 +56,6 @@ function UserStats({
 		<div className={`w-full max-w-md mx-auto`}>
 			<h2 className={`text-lg font-semibold`}>{title}</h2>
 			<p className={`text-xs text-muted-foreground mb-4`}>{subtitle}</p>
-			{showControls ? (
-				<SeriesSelector
-					roomId={room.id}
-					mode='all'
-					value={currentSeriesId}
-					onValueChange={setCurrentSeriesId}
-					className='mb-3'
-					placeholder='Select series'
-					emptyMessage='No series yet.'
-				/>
-			) : null}
 			<LeaderboardContent
 				leaderboard={leaderboard}
 				isLoading={isLeaderboardLoading}
@@ -78,14 +65,6 @@ function UserStats({
 		</div>
 	);
 }
-
-const contentDelay = {
-	rank: 0,
-	yourPoints: 200,
-	gap: 300,
-	leaderboard: 300,
-	stats: 300,
-};
 
 function LeaderboardContent({
 	leaderboard,
@@ -188,10 +167,9 @@ function LeaderboardContentView({
 						/>
 					) : (
 						<FadeContent
-							delay={contentDelay.rank}
 							className={`relative w-14 h-14 flex items-center justify-center rounded-lg font-bold text-foreground text-2xl ${leaderboardPlayer?.rank === 1 ? "bg-rank-1 text-secondary" : "bg-linear-to-r from-primary to-accent"}`}
 						>
-							#{leaderboardPlayer?.rank ?? 0}
+							{leaderboardPlayer ? `#${leaderboardPlayer.rank}` : "—"}
 							{leaderboardPlayer?.rank === 1 && (
 								<span>
 									<CrownIcon
@@ -213,7 +191,6 @@ function LeaderboardContentView({
 						</div>
 					) : (
 						<FadeContent
-							delay={contentDelay.yourPoints}
 							className={`flex-1`}
 						>
 							<p className={`text-xs`}>YOUR POINTS</p>
@@ -233,7 +210,6 @@ function LeaderboardContentView({
 								gapToNextPlayer &&
 								gapMetric > 0 && (
 									<FadeContent
-										delay={contentDelay.gap}
 										className={`flex flex-col gap-1`}
 									>
 										<p
@@ -296,7 +272,6 @@ function LeaderboardContentView({
 				</div>
 			) : (
 				<FadeContent
-					delay={contentDelay.stats}
 					className={`flex gap-2`}
 				>
 					<StatTile
@@ -390,7 +365,6 @@ function LeaderboardMiniRows({
 						className={`cursor-pointer`}
 					>
 						<FadeContent
-							delay={contentDelay.leaderboard}
 							className={`flex items-center gap-3 p-3 rounded-lg ${entry.player_id === playerId ? "bg-linear-30 from-accent/10 border to-primary/10" : "bg-secondary/60"}`}
 						>
 							<p
@@ -402,7 +376,7 @@ function LeaderboardMiniRows({
 							<p className={`font-medium`}>
 								{entry.username}
 								{entry.current_streak >= 3 && (
-									<div className={`inline-block`}>
+									<span className={`inline-block`}>
 										<Badge
 											className={`flex gap-0 items-center justify-center bg-accent/20 text-accent text-xs ml-2`}
 										>
@@ -411,7 +385,7 @@ function LeaderboardMiniRows({
 											/>
 											{entry.current_streak}
 										</Badge>
-									</div>
+									</span>
 								)}
 								{entry.player_id === playerId && (
 									<Badge

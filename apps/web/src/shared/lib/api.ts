@@ -268,20 +268,42 @@ export async function getRoomMembers(roomId: string) {
   return data ?? []
 }
 
-export async function spectateRoom(roomCode: string): Promise<Room> {
-  const { data, error } = await supabase
-    .from('rooms')
-    .select('*')
-    .eq('room_code', roomCode.toUpperCase())
-    .single()
+type RoomByCode = {
+  id: string
+  room_code: string
+  name: string
+  description: string | null
+  status: string
+  created_at: string
+  predictions_limit: number
+  is_member: boolean
+  member_count: number
+  active_prediction_count: number
+  organizer_username: string | null
+}
 
-  if (error) throw error
-  const members = await getRoomMembers(data.id)
-  const hasUnseenActivities = await getRoomHasUnseenActivities(data.id)
+export async function spectateRoom(roomCode: string): Promise<Room> {
+  // Room tables are only readable by members, so the invite-code lookup goes through an RPC.
+  const { data, error } = await untypedSupabase.rpc('get_room_by_code', {
+    p_room_code: roomCode,
+  })
+  const { is_member, ...room } = assertOk(data, error) as RoomByCode
+
+  if (!is_member) {
+    return {
+      ...room,
+      code: room.room_code,
+      members: [],
+      has_unseen_activities: false,
+    }
+  }
+
+  const members = await getRoomMembers(room.id)
+  const hasUnseenActivities = await getRoomHasUnseenActivities(room.id)
 
   return {
-    ...data,
-    code: data.room_code,
+    ...room,
+    code: room.room_code,
     members,
     has_unseen_activities: hasUnseenActivities,
   }

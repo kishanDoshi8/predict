@@ -13,16 +13,15 @@ declare
   v_prediction    public.predictions%rowtype;
   v_option        public.prediction_options%rowtype;
   v_existing_bet  public.bets%rowtype;
+  v_wallet        public.series_wallets%rowtype;
   v_is_member     boolean;
   v_available     integer;
   v_old_amount    integer := 0;
   v_escrow_delta  integer;
 begin
-  -- Lock the player row so concurrent bets can't both spend the same points.
   select * into v_player
   from public.players
-  where user_id = auth.uid()
-  for update;
+  where user_id = auth.uid();
 
   if not found then
     raise exception 'Player profile not found' using errcode = 'P0004';
@@ -62,6 +61,23 @@ begin
     raise exception 'Minimum bet is 1 point' using errcode = 'P0001';
   end if;
 
+  if v_prediction.series_id is null then
+    raise exception 'This prediction is not part of a series' using errcode = 'P0001';
+  end if;
+
+  perform private.ensure_series_wallet(v_prediction.series_id, v_player.id);
+
+  -- Lock the wallet so concurrent bets can't both spend the same points.
+  select * into v_wallet
+  from public.series_wallets
+  where series_id = v_prediction.series_id
+    and player_id = v_player.id
+  for update;
+
+  if not found then
+    raise exception 'No points wallet for this series' using errcode = 'P0009';
+  end if;
+
   select * into v_existing_bet
   from public.bets
   where prediction_id = p_prediction_id and player_id = v_player.id;
@@ -70,7 +86,7 @@ begin
     v_old_amount := v_existing_bet.amount;
   end if;
 
-  v_available := v_player.points_balance - v_player.points_in_escrow + v_old_amount;
+  v_available := v_wallet.balance - v_wallet.escrow + v_old_amount;
 
   if p_amount > v_available then
     raise exception 'Insufficient points. Available: %, Requested: %', v_available, p_amount
@@ -79,7 +95,7 @@ begin
 
   v_escrow_delta := p_amount - v_old_amount;
 
-  if found then
+  if v_old_amount > 0 then
     update public.prediction_options
     set total_bet = total_bet - v_old_amount
     where id = v_existing_bet.option_id;
@@ -98,17 +114,20 @@ begin
   set total_bet = total_bet + p_amount
   where id = p_option_id;
 
-  update public.players
-  set points_in_escrow = points_in_escrow + v_escrow_delta
-  where id = v_player.id
-  returning * into v_player;
+  update public.series_wallets
+  set escrow     = escrow + v_escrow_delta,
+      updated_at = now()
+  where series_id = v_wallet.series_id
+    and player_id = v_wallet.player_id
+  returning * into v_wallet;
 
   return json_build_object(
     'bet_placed',       true,
     'prediction_id',    p_prediction_id,
     'option_id',        p_option_id,
     'amount',           p_amount,
-    'points_available', v_player.points_balance - v_player.points_in_escrow
+    'series_id',        v_wallet.series_id,
+    'points_available', v_wallet.balance - v_wallet.escrow
   );
 end;
 $$;

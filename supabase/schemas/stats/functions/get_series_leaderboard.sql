@@ -11,6 +11,7 @@ as $$
 declare
   v_caller_id uuid;
   v_is_member boolean;
+  v_series public.series%rowtype;
   v_result json;
 begin
   v_caller_id := private.get_player_id_from_auth();
@@ -27,12 +28,12 @@ begin
     raise exception 'You are not a member of this room' using errcode = 'P0011';
   end if;
 
-  if not exists (
-    select 1
-    from public.series s
-    where s.id = p_series_id
-      and s.room_id = p_room_id
-  ) then
+  select * into v_series
+  from public.series s
+  where s.id = p_series_id
+    and s.room_id = p_room_id;
+
+  if not found then
     raise exception 'Series not found for this room' using errcode = 'P0002';
   end if;
 
@@ -53,6 +54,10 @@ begin
       rm.player_id,
       p.username,
       coalesce(s.net_profit, 0) as total_won_in_room,
+      -- Series that closed before wallets existed fall back to stack + profit.
+      coalesce(w.balance, v_series.starting_stack + coalesce(s.net_profit, 0)::int) as balance,
+      coalesce(w.balance - w.escrow, v_series.starting_stack + coalesce(s.net_profit, 0)::int) as available,
+      coalesce(w.granted, v_series.starting_stack) as granted,
       rm.joined_at,
       rm.is_organizer,
       rm.current_streak,
@@ -80,6 +85,7 @@ begin
     from public.room_members rm
     join public.players p on p.id = rm.player_id
     left join stats s on s.player_id = rm.player_id
+    left join public.series_wallets w on w.series_id = p_series_id and w.player_id = rm.player_id
     where rm.room_id = p_room_id
   ),
   ranked as (
@@ -87,14 +93,15 @@ begin
       bc.*,
       rank() over (
         order by
-          case when p_sort_by = 'points' then bc.total_won_in_room end desc nulls last,
+          case when p_sort_by = 'points' then bc.balance end desc nulls last,
+          case when p_sort_by = 'points' then bc.winning_bets end desc nulls last,
           case when p_sort_by = 'rating' then bc.prediction_rating end desc nulls last,
           case when p_sort_by = 'rating' then bc.rated_predictions_count end desc nulls last,
           case when p_sort_by = 'accuracy' then bc.accuracy_ratio end desc nulls last,
           case when p_sort_by = 'accuracy' then bc.total_revealed_bets end desc nulls last,
           case when p_sort_by = 'streak' then bc.current_streak end desc nulls last,
           case when p_sort_by = 'streak' then bc.highest_streak end desc nulls last,
-          case when p_sort_by <> 'points' then bc.joined_at end asc nulls last
+          bc.joined_at asc nulls last
       ) as rank
     from base_current bc
   )
@@ -105,6 +112,9 @@ begin
       r.player_id,
       r.username,
       r.total_won_in_room,
+      r.balance,
+      r.available,
+      r.granted,
       r.joined_at,
       r.is_organizer,
       r.current_streak,

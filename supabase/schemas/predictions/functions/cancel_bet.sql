@@ -12,11 +12,9 @@ declare
   v_bet        public.bets%rowtype;
   v_is_member  boolean;
 begin
-  -- Lock the player row so concurrent bets can't both spend the same points.
   select * into v_player
   from public.players
-  where user_id = auth.uid()
-  for update;
+  where user_id = auth.uid();
 
   if not found then
     raise exception 'Player profile not found' using errcode = 'P0004';
@@ -40,6 +38,13 @@ begin
     raise exception 'You are not a member of this room' using errcode = 'P0011';
   end if;
 
+  -- Lock the wallet so a concurrent bet sees the freed points correctly.
+  perform 1
+  from public.series_wallets
+  where series_id = v_prediction.series_id
+    and player_id = v_player.id
+  for update;
+
   select * into v_bet
   from public.bets
   where prediction_id = p_prediction_id and player_id = v_player.id;
@@ -52,9 +57,11 @@ begin
   set total_bet = total_bet - v_bet.amount
   where id = v_bet.option_id;
 
-  update public.players
-  set points_in_escrow = points_in_escrow - v_bet.amount
-  where id = v_player.id;
+  update public.series_wallets
+  set escrow     = escrow - v_bet.amount,
+      updated_at = now()
+  where series_id = v_prediction.series_id
+    and player_id = v_player.id;
 
   delete from public.bets where id = v_bet.id;
 

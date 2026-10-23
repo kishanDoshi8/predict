@@ -1,6 +1,6 @@
 # Predikt
 
-Private prediction game. Friends bet weekly points on real-life outcomes.
+Private prediction game. Friends play series of predictions on real-life outcomes; everyone starts each series with the same points.
 
 ## Stack
 - **Frontend**: React + Vite + TypeScript (PWA)
@@ -122,10 +122,8 @@ select cron.schedule(
   $cron$
 );
 
--- Weekly pipeline every Monday at 08:00 UTC:
--- 1) create weekly room-member snapshots
--- 2) run weekly claims processing hook (if configured)
--- 3) notify players that weekly points are claimable
+-- Weekly room-member snapshots every Monday at 08:00 UTC.
+-- (Series top-ups are scheduled by the series_wallets migration as 'series-weekly-topup'.)
 select cron.schedule(
   'run-weekly-processing',
   '0 8 * * 1',
@@ -180,7 +178,6 @@ predikt/
 │           │   └── leaderboard/  # Leaderboard components
 │           ├── hooks/
 │           │   ├── useRoomRealtime.ts   # Supabase Realtime subscriptions
-│           │   └── useWeeklyClaim.ts    # Weekly points claim logic
 │           ├── lib/
 │           │   ├── supabase.ts   # Supabase client
 │           │   ├── api.ts        # All API calls (RPC wrappers)

@@ -44,6 +44,11 @@ begin
   end if;
 
   if v_was_inserted then
+    perform private.ensure_series_wallet(s.id, v_player_id)
+    from public.series s
+    where s.room_id = v_room.id
+      and s.status = 'active';
+
     perform private.create_room_activity(
       p_room_id := v_room.id,
       p_activity_type := 'room_joined',

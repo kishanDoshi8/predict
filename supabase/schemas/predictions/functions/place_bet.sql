@@ -18,9 +18,11 @@ declare
   v_old_amount    integer := 0;
   v_escrow_delta  integer;
 begin
+  -- Lock the player row so concurrent bets can't both spend the same points.
   select * into v_player
   from public.players
-  where user_id = auth.uid();
+  where user_id = auth.uid()
+  for update;
 
   if not found then
     raise exception 'Player profile not found' using errcode = 'P0004';
@@ -28,7 +30,8 @@ begin
 
   select * into v_prediction
   from public.predictions
-  where id = p_prediction_id and status = 'draft';
+  where id = p_prediction_id and status = 'draft'
+  for share;
 
   if not found then
     raise exception 'Prediction not found or not in draft phase' using errcode = 'P0006';

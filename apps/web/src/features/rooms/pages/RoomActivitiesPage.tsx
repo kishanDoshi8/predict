@@ -17,7 +17,7 @@ export default function RoomActivitiesPage() {
 	const [scope, setScope] = useState<SeriesScope>("series");
 	const seriesId = scope === "series" ? currentSeries?.id : undefined;
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
-	const hasScheduledSeenRef = useRef(false);
+	const hasMarkedSeenRef = useRef(false);
 	const { mutate: markActivitiesSeen } = useMarkRoomActivitiesSeen(
 		room.code,
 		room.id,
@@ -38,27 +38,23 @@ export default function RoomActivitiesPage() {
 		[data],
 	);
 
+	// Clear the unseen dot after a second on this page. Depends only on whether
+	// the feed has loaded, so background refreshes don't cancel the timer.
+	const isFeedReady = !!data && !isPending && !isError;
 	useEffect(() => {
-		if (
-			!room.id ||
-			isPending ||
-			isError ||
-			!data ||
-			hasScheduledSeenRef.current
-		) {
+		if (!room.id || !isFeedReady || hasMarkedSeenRef.current) {
 			return;
 		}
 
-		hasScheduledSeenRef.current = true;
-
 		const timerId = globalThis.setTimeout(() => {
+			hasMarkedSeenRef.current = true;
 			markActivitiesSeen();
-		}, 900);
+		}, 1000);
 
 		return () => {
 			globalThis.clearTimeout(timerId);
 		};
-	}, [data, isError, isPending, markActivitiesSeen, room.id]);
+	}, [isFeedReady, markActivitiesSeen, room.id]);
 
 	useEffect(() => {
 		const node = loadMoreRef.current;

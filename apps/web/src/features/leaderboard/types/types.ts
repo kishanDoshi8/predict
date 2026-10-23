@@ -58,7 +58,25 @@ export type PredictionHistoryEntry = {
   biggest_payout:       number
   selected_option_id  : string | null
   selected_option_label: string | null
+  // The viewer's own stake and payout (payout is null until settled).
+  my_bet_amount:        number | null
+  my_payout:            number | null
   options:              PredictionHistoryOption[] | null
+}
+
+// One row of the standings across every series in a room.
+export type OverallStandingEntry = {
+  player_id:           string
+  username:            string
+  joined_at:           string
+  current_streak:      number
+  net_profit:          number
+  series_played:       number
+  total_revealed_bets: number
+  winning_bets:        number
+  titles:              number
+  podiums:             number
+  rank:                number
 }
 
 export type PredictionHistoryFilter = "all" | "wins" | "losses" | "my_bets"

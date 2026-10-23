@@ -54,6 +54,9 @@ begin
       pred.series_prediction_number,
       s.title as series_title,
       user_bet.option_id  as selected_option_id,
+      -- The caller's own stake and payout, for "you won / lost" on each card.
+      user_bet.amount     as my_bet_amount,
+      user_bet.payout     as my_payout,
       selected_opt.label  as selected_option_label,
       creator.username    as creator_username,
       winning_opt.label   as winning_option_label,

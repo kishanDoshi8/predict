@@ -1,6 +1,7 @@
 import { createRoom, getPlayerRooms, joinRoom, markRoomActivitiesSeen, spectateRoom } from "@/shared/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "@/shared/constants/queryKeys";
+import type { Room } from "@/features/rooms/types/types";
 import { playerQueryKey } from "@/features/home";
 
 export const useRoom = (roomCode?: string) => {
@@ -58,6 +59,10 @@ export const useMarkRoomActivitiesSeen = (roomCode?: string, roomId?: string) =>
         mutationFn: () => markRoomActivitiesSeen(roomId ?? ""),
         onSuccess: () => {
             if (roomCode) {
+                // Hide the dot straight away, then confirm with the server.
+                queryClient.setQueryData<Room>(roomKeys.byCode(roomCode), (room) =>
+                    room ? { ...room, has_unseen_activities: false } : room,
+                );
                 void queryClient.invalidateQueries({
                     queryKey: roomKeys.byCode(roomCode),
                 });

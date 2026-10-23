@@ -191,7 +191,7 @@ select is(
     'create_prediction', 'create_room', 'create_series', 'get_my_series_wallets', 'get_player', 'get_prediction_duel_summary',
     'get_prediction_duels_view', 'get_preferences', 'get_room_activities', 'get_room_by_code',
     'get_room_has_unseen_activities', 'get_room_member_recent_predictions',
-    'get_room_member_stats', 'get_room_prediction_history', 'get_room_series', 'get_room_series_selector',
+    'get_room_member_stats', 'get_room_overall_standings', 'get_room_prediction_history', 'get_room_series', 'get_room_series_selector',
     'get_room_stat_cards', 'get_room_weekly_leaderboard', 'get_series_awards',
     'get_series_leaderboard', 'get_series_placements', 'join_room',
     'mark_how_to_play_seen', 'mark_ratings_tip_seen', 'mark_room_activities_seen', 'place_bet',

@@ -1,6 +1,6 @@
 import { Duel, DuelSummary } from "@/features/duels";
 import { Player } from "@/features/home";
-import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, RoomMemberRecentPrediction, RoomMemberStats } from "@/features/leaderboard";
+import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, OverallStandingEntry, RoomMemberRecentPrediction, RoomMemberStats } from "@/features/leaderboard";
 import { Prediction, PredictionStatus } from "@/features/predictions";
 import { Series } from "@/features/series/types/series";
 import { Room } from "@/features/rooms";
@@ -930,6 +930,13 @@ export async function cancelDuelQueue(
 // #endregion Duels
 
 // #region Leaderboard
+export async function getRoomOverallStandings(roomId: string) {
+  const { data, error } = await untypedSupabase.rpc('get_room_overall_standings', {
+    p_room_id: roomId,
+  })
+  return assertOk(data, error) as OverallStandingEntry[]
+}
+
 export async function getSeriesLeaderboard(
   roomId: string,
   seriesId: string,

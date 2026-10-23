@@ -1,14 +1,20 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
 import {
+	useRoomOverallStandings,
 	useSeriesLeaderboard,
 	LeaderboardList,
+	OverallStandingsList,
 	TopThreePodium,
+	type PodiumEntry,
 } from "@/features/leaderboard";
-import { useCurrentSeries } from "@/features/series";
-import { TrophyIcon } from "lucide-react";
+import {
+	SeriesScopeToggle,
+	type SeriesScope,
+	useCurrentSeries,
+} from "@/features/series";
+import { formatSignedPoints } from "@/shared/lib/utils";
 import React, { Suspense, lazy } from "react";
-import { Link } from "react-router-dom";
 
 const PlayerProfileDialog = lazy(() =>
 	import("@/features/leaderboard/components/player/PlayerProfileDialog").then(
@@ -20,47 +26,87 @@ export function LeaderboardPage() {
 	const { room } = useRoomContext();
 	const { data: player } = usePlayer();
 	const { currentSeries, currentSeriesId } = useCurrentSeries(room.id);
+	const [scope, setScope] = React.useState<SeriesScope>("series");
 	const [selectedPlayerId, setSelectedPlayerId] = React.useState<
 		string | null
 	>(null);
 	const [isProfileDialogOpen, setIsProfileDialogOpen] = React.useState(false);
 
 	const { data: leaderboard = [], isPending: isLeaderboardLoading } =
-		useSeriesLeaderboard(room.id, currentSeriesId);
+		useSeriesLeaderboard(room.id, currentSeriesId, scope === "series");
+	const { data: overall = [], isPending: isOverallLoading } =
+		useRoomOverallStandings(room.id, scope === "all");
+
+	const podium: PodiumEntry[] =
+		scope === "series"
+			? (currentSeriesId ? leaderboard : []).slice(0, 3).map((entry) => ({
+					player_id: entry.player_id,
+					username: entry.username,
+					rank: entry.rank,
+					primary: `${entry.balance.toLocaleString()} pts`,
+					secondary: formatSignedPoints(entry.net_profit),
+				}))
+			: overall.slice(0, 3).map((entry) => ({
+					player_id: entry.player_id,
+					username: entry.username,
+					rank: entry.rank,
+					primary: `${formatSignedPoints(entry.net_profit)} pts`,
+					secondary:
+						entry.titles > 0
+							? `${entry.titles} ${entry.titles === 1 ? "title" : "titles"}`
+							: `${entry.series_played} series`,
+				}));
+
+	let subtitle = "Standings appear once a series starts.";
+	if (scope === "all") {
+		subtitle = "Total profit across every series, with titles won.";
+	} else if (currentSeries?.status === "active") {
+		subtitle = "Top balance when the series closes wins the title.";
+	} else if (currentSeries) {
+		subtitle = "Final standings.";
+	}
+
+	const openProfile = (playerId: string) => {
+		setSelectedPlayerId(playerId);
+		setIsProfileDialogOpen(true);
+	};
 
 	return (
 		<div className='flex flex-col gap-4 p-4 max-w-lg mx-auto w-full'>
 			{/* Section heading */}
-			<div className='flex items-start justify-between gap-3'>
-				<div>
-					<h2 className='text-lg font-semibold'>
-						{currentSeries?.title ?? "Standings"}
-					</h2>
-					<p className='text-sm text-muted-foreground'>
-						{currentSeries?.status === "active"
-							? "Top balance when the series closes wins the title."
-							: currentSeries
-								? "Final standings."
-								: "Standings appear once a series starts."}
-					</p>
-				</div>
+			<div>
+				<h2 className='text-lg font-semibold'>
+					{scope === "all"
+						? "All series"
+						: (currentSeries?.title ?? "Standings")}
+				</h2>
+				<p className='text-sm text-muted-foreground'>{subtitle}</p>
 			</div>
 
-			<div className='flex flex-col gap-3'>
-				<TopThreePodium
-					top={currentSeriesId ? leaderboard.slice(0, 3) : []}
-					currentPlayerId={player?.id ?? ""}
-				/>
+			<SeriesScopeToggle
+				value={scope}
+				onValueChange={setScope}
+				seriesTitle={currentSeries?.title}
+			/>
 
-				<LeaderboardList
-					entries={currentSeriesId ? leaderboard : []}
-					currentPlayerId={player?.id ?? ""}
-					isLoading={!!currentSeriesId && isLeaderboardLoading}
-					onRowClick={(playerId) => {
-						setSelectedPlayerId(playerId);
-						setIsProfileDialogOpen(true);
-					}}
-				/>
+			<div className='flex flex-col gap-3'>
+				<TopThreePodium top={podium} currentPlayerId={player?.id ?? ""} />
+
+				{scope === "series" ? (
+					<LeaderboardList
+						entries={currentSeriesId ? leaderboard : []}
+						currentPlayerId={player?.id ?? ""}
+						isLoading={!!currentSeriesId && isLeaderboardLoading}
+						onRowClick={openProfile}
+					/>
+				) : (
+					<OverallStandingsList
+						entries={overall}
+						currentPlayerId={player?.id ?? ""}
+						isLoading={isOverallLoading}
+						onRowClick={openProfile}
+					/>
+				)}
 			</div>
 
 			{isProfileDialogOpen ? (

@@ -5,7 +5,7 @@ import {
 	LeaderboardList,
 	TopThreePodium,
 } from "@/features/leaderboard";
-import { SeriesSelector, useCurrentSeries } from "@/features/series";
+import { useCurrentSeries } from "@/features/series";
 import { TrophyIcon } from "lucide-react";
 import React, { Suspense, lazy } from "react";
 import { Link } from "react-router-dom";
@@ -19,8 +19,7 @@ const PlayerProfileDialog = lazy(() =>
 export function LeaderboardPage() {
 	const { room } = useRoomContext();
 	const { data: player } = usePlayer();
-	const { currentSeries, currentSeriesId, setCurrentSeriesId } =
-		useCurrentSeries(room.id);
+	const { currentSeries, currentSeriesId } = useCurrentSeries(room.id);
 	const [selectedPlayerId, setSelectedPlayerId] = React.useState<
 		string | null
 	>(null);
@@ -34,32 +33,20 @@ export function LeaderboardPage() {
 			{/* Section heading */}
 			<div className='flex items-start justify-between gap-3'>
 				<div>
-					<h2 className='text-lg font-semibold'>Standings</h2>
+					<h2 className='text-lg font-semibold'>
+						{currentSeries?.title ?? "Standings"}
+					</h2>
 					<p className='text-sm text-muted-foreground'>
 						{currentSeries?.status === "active"
 							? "Top balance when the series closes wins the title."
-							: "Final standings."}
+							: currentSeries
+								? "Final standings."
+								: "Standings appear once a series starts."}
 					</p>
 				</div>
-				<Link
-					to={`/rooms/${room.code}/series`}
-					className='flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0'
-				>
-					<TrophyIcon className='h-4 w-4' />
-					Past champions
-				</Link>
 			</div>
 
 			<div className='flex flex-col gap-3'>
-				<SeriesSelector
-					roomId={room.id}
-					mode='all'
-					value={currentSeriesId}
-					onValueChange={setCurrentSeriesId}
-					placeholder='Select series'
-					emptyMessage='No series yet.'
-				/>
-
 				<TopThreePodium
 					top={currentSeriesId ? leaderboard.slice(0, 3) : []}
 					currentPlayerId={player?.id ?? ""}

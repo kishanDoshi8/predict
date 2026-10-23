@@ -10,7 +10,6 @@ export default function RoomTabsLayout() {
 			<div className='flex-1 pb-24'>
 				<Outlet context={context} />
 			</div>
-			{/* <RoomFloatingActionButton /> */}
 			<RoomBottomNavigation />
 		</div>
 	);

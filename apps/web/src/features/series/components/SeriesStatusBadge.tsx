@@ -17,7 +17,7 @@ export function SeriesStatusBadge({
 					color='primary'
 					animate={true}
 				/>
-				Live
+				Active
 			</Badge>
 		);
 	}
@@ -26,5 +26,9 @@ export function SeriesStatusBadge({
 		return <Badge className='bg-win/20 text-win'>Completed</Badge>;
 	}
 
-	return null;
+	if (status === "draft") {
+		return <Badge variant='outline'>Draft</Badge>;
+	}
+
+	return <Badge variant='secondary'>Archived</Badge>;
 }

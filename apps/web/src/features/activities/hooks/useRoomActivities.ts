@@ -1,4 +1,4 @@
-import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
+import { InfiniteData, keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import {
 	ActivityFilter,
 	RoomActivitiesPage,
@@ -41,6 +41,8 @@ export const useRoomActivities = (
 				seriesId,
 			}),
 		initialPageParam: initialCursor,
+		// Keep the previous series on screen while the next one loads.
+		placeholderData: keepPreviousData,
 		getNextPageParam: (lastPage) => {
 			if (!lastPage.has_more) {
 				return undefined;

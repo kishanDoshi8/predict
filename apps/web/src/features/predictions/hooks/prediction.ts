@@ -1,5 +1,5 @@
 import { createPrediction, getActivePrediction, getActivePredictions, getPrediction, resolvePrediction } from "@/shared/lib/api";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "@/shared/constants/queryKeys";
 
 export const useActivePrediction = (roomId?: string) => {
@@ -12,11 +12,13 @@ export const useActivePrediction = (roomId?: string) => {
 
 // Returns all active (draft/locked) predictions for a room ordered by deadline asc.
 // Falls back to the most recently completed prediction when no active ones exist.
-export const useActivePredictions = (roomId?: string, seriesId?: string) => {
+export const useActivePredictions = (roomId?: string, seriesId?: string, enabled = true) => {
     return useQuery({
         queryKey: [...roomKeys.activePredictions(roomId ?? ""), seriesId ?? "all"],
         queryFn: () => getActivePredictions(roomId ?? "", seriesId),
-        enabled: !!roomId,
+        enabled: !!roomId && enabled,
+        // Keep the previous series on screen while the next one loads.
+        placeholderData: keepPreviousData,
     });
 }
 

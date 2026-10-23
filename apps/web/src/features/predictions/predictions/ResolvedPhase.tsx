@@ -24,20 +24,18 @@ type Props = {
 
 const contentDelays = {
 	title: 0,
-	result: 200,
-	data: 300,
-	options: 400,
-	payout: 400,
+	result: 50,
+	data: 100,
+	options: 100,
+	payout: 100,
 };
 
 function ResolvedPhase({ prediction }: Readonly<Props>) {
-	if (!prediction) return null;
-
 	const { room } = useRoomContext();
 	const { data: player } = usePlayer();
 	const { data: bets, isPending: isBetsLoading } = useBets(
 		room.id,
-		prediction.id,
+		prediction?.id,
 	);
 
 	const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(
@@ -46,6 +44,9 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 	const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 
 	useRoomBetRealtime(room.id, prediction?.id ?? null);
+
+	// Hooks above run on every render; bail out only after them.
+	if (!prediction) return null;
 
 	const getPlayerName = (playerId: string) => {
 		if (player?.id === playerId) {

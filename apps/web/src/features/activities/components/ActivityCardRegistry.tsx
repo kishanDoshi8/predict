@@ -1,5 +1,4 @@
 import {
-	AchievementRatingTierReachedActivity,
 	AchievementStreakMilestoneActivity,
 	DuelCancelledActivity,
 	DuelCreatedActivity,
@@ -25,7 +24,6 @@ import { DuelMatchedCard } from "@/features/activities/components/cards/DuelMatc
 import { DuelResolvedCard } from "@/features/activities/components/cards/DuelResolvedCard";
 import { DuelCancelledCard } from "@/features/activities/components/cards/DuelCancelledCard";
 import { DuelExpiredCard } from "@/features/activities/components/cards/DuelExpiredCard";
-import { AchievementRatingTierReachedCard } from "@/features/activities/components/cards/AchievementRatingTierReachedCard";
 import { AchievementStreakMilestoneCard } from "@/features/activities/components/cards/AchievementStreakMilestoneCard";
 import { FEATURES } from "@/shared/constants/features";
 
@@ -36,10 +34,6 @@ type RegistryProps = {
 
 type RegistryMap = {
 	room_joined: (props: { activity: RoomJoinedActivity; roomCode: string }) => JSX.Element;
-	achievement_rating_tier_reached: (props: {
-		activity: AchievementRatingTierReachedActivity;
-		roomCode: string;
-	}) => JSX.Element;
 	achievement_streak_milestone: (props: {
 		activity: AchievementStreakMilestoneActivity;
 		roomCode: string;
@@ -58,7 +52,6 @@ type RegistryMap = {
 
 const registry: RegistryMap = {
 	room_joined: RoomJoinedCard,
-	achievement_rating_tier_reached: AchievementRatingTierReachedCard,
 	achievement_streak_milestone: AchievementStreakMilestoneCard,
 	prediction_created: PredictionCreatedCard,
 	prediction_locked: PredictionLockedCard,
@@ -82,7 +75,7 @@ function isHiddenActivity(activityType: RoomActivity["activityType"]) {
 export function ActivityCardRegistry({ activity, roomCode }: Readonly<RegistryProps>) {
 	if (isHiddenActivity(activity.activityType)) return null;
 
-	const Card = registry[activity.activityType] as (props: {
+	const Card = registry[activity.activityType as keyof RegistryMap] as (props: {
 		activity: RoomActivity;
 		roomCode: string;
 	}) => JSX.Element;

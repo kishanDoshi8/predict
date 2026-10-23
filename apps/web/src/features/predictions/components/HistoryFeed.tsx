@@ -7,7 +7,11 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Input, Button } from "@/shared/ui";
 import { Skeleton } from "@/shared/ui/skeleton";
-import { SeriesSelector } from "@/features/series";
+import {
+	SeriesScopeToggle,
+	type SeriesScope,
+	useCurrentSeries,
+} from "@/features/series";
 
 const FILTERS: Array<{ label: string; value: PredictionHistoryFilter }> = [
 	{ label: "All", value: "all" },
@@ -19,25 +23,22 @@ const FILTERS: Array<{ label: string; value: PredictionHistoryFilter }> = [
 function emptyStateMessage(
 	filter: PredictionHistoryFilter,
 	search: string,
-	seriesId: string | null,
+	scope: SeriesScope,
 ) {
-	if (seriesId) {
-		return "No predictions found for this Series.";
-	}
-
 	if (search.trim().length > 0) {
 		return "No predictions match your search.";
 	}
 
+	const where = scope === "series" ? " in this series" : "";
 	switch (filter) {
 		case "wins":
-			return "No wins found.";
+			return `No wins${where} yet.`;
 		case "losses":
-			return "No losses found.";
+			return `No losses${where} yet.`;
 		case "my_bets":
-			return "You haven't placed any bets yet.";
+			return `You haven't placed any bets${where} yet.`;
 		default:
-			return "No history available.";
+			return `No finished predictions${where} yet.`;
 	}
 }
 
@@ -46,7 +47,9 @@ function HistoryFeed() {
 	const [filter, setFilter] = useState<PredictionHistoryFilter>("all");
 	const [searchInput, setSearchInput] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
-	const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
+	const { currentSeries } = useCurrentSeries(room.id);
+	const [scope, setScope] = useState<SeriesScope>("series");
+	const seriesId = scope === "series" ? currentSeries?.id : undefined;
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
@@ -67,7 +70,7 @@ function HistoryFeed() {
 		room.id,
 		filter,
 		debouncedSearch,
-		selectedSeriesId ?? undefined,
+		seriesId,
 	);
 
 	const history = useMemo(
@@ -103,9 +106,9 @@ function HistoryFeed() {
 		<div className={`flex flex-col gap-4 p-4 max-w-lg mx-auto w-full`}>
 			{/* Section heading */}
 			<div>
-				<h2 className='text-lg font-semibold'>Blast from the Past</h2>
+				<h2 className='text-lg font-semibold'>History</h2>
 				<p className='text-sm text-muted-foreground'>
-					Relive the glory (or agony) of previous predictions.
+					Finished predictions and who called them.
 				</p>
 			</div>
 
@@ -116,13 +119,10 @@ function HistoryFeed() {
 					value={searchInput}
 					onChange={(event) => setSearchInput(event.target.value)}
 				/>
-				<SeriesSelector
-					roomId={room.id}
-					mode='all'
-					value={selectedSeriesId}
-					onValueChange={setSelectedSeriesId}
-					placeholder='Filter by series'
-					optional
+				<SeriesScopeToggle
+					value={scope}
+					onValueChange={setScope}
+					seriesTitle={currentSeries?.title}
 				/>
 				<div className='flex flex-wrap gap-2'>
 					{FILTERS.map((item) => (
@@ -146,7 +146,7 @@ function HistoryFeed() {
 				emptyMessage={emptyStateMessage(
 					filter,
 					debouncedSearch,
-					selectedSeriesId,
+					scope,
 				)}
 			/>
 

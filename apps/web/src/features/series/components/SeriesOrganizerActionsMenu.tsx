@@ -18,17 +18,11 @@ import {
 } from "@/shared/ui";
 import {
 	ArchiveIcon,
-	BellIcon,
-	CalendarDaysIcon,
-	MegaphoneIcon,
 	PencilIcon,
 	SettingsIcon,
 	ShieldAlertIcon,
 	TrophyIcon,
-	UsersIcon,
-	UserPlusIcon,
 	WrenchIcon,
-	GiftIcon,
 	CheckCircle2Icon,
 	LockIcon,
 } from "lucide-react";
@@ -51,7 +45,7 @@ type SettingsRowProps = {
 	isDanger?: boolean;
 };
 
-function SettingsRow({
+export function SettingsRow({
 	icon,
 	label,
 	description,
@@ -131,7 +125,11 @@ export function SeriesOrganizerActionsMenu({
 		<>
 			<Drawer open={isManageOpen} onOpenChange={setIsManageOpen}>
 				<DrawerTrigger asChild>
-					<Button variant='ghost' size='icon'>
+					<Button
+						variant='ghost'
+						size='icon'
+						aria-label='Manage series'
+					>
 						<SettingsIcon className='size-5' />
 					</Button>
 				</DrawerTrigger>
@@ -157,62 +155,12 @@ export function SeriesOrganizerActionsMenu({
 							</p>
 							<SettingsRow
 								icon={
-									<PencilIcon className='size-4 text-muted-foreground' />
+									<PencilIcon className='size-5 text-muted-foreground' />
 								}
 								label='Edit details'
-								description='Title, Description, # games'
+								description='Title, description, games and points'
 								disabled={disableEditableRows}
 								onClick={onEdit}
-							/>
-							<SettingsRow
-								icon={
-									<CalendarDaysIcon className='size-4 text-muted-foreground' />
-								}
-								label='Schedule & games'
-								description='Coming soon.'
-								disabled
-							/>
-							<SettingsRow
-								icon={
-									<TrophyIcon className='size-4 text-muted-foreground' />
-								}
-								label='Scoring rules'
-								description='Coming soon.'
-								disabled
-							/>
-						</section>
-
-						<section className='space-y-2'>
-							<p className='text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
-								Participants
-							</p>
-							<SettingsRow
-								icon={
-									<UserPlusIcon className='size-4 text-muted-foreground' />
-								}
-								label='Invite players'
-								disabled
-							/>
-							<SettingsRow
-								icon={
-									<UsersIcon className='size-4 text-muted-foreground' />
-								}
-								label='Manage members'
-								disabled
-							/>
-							<SettingsRow
-								icon={
-									<MegaphoneIcon className='size-4 text-muted-foreground' />
-								}
-								label='Post announcements'
-								disabled
-							/>
-							<SettingsRow
-								icon={
-									<BellIcon className='size-4 text-muted-foreground' />
-								}
-								label='Share link'
-								disabled
 							/>
 						</section>
 
@@ -222,22 +170,28 @@ export function SeriesOrganizerActionsMenu({
 							</p>
 							<SettingsRow
 								icon={
-									<ArchiveIcon className='size-4 text-muted-foreground' />
-								}
-								label='Archive series'
-								description='Irreversible in this UI.'
-								onClick={openArchiveConfirmation}
-								disabled
-							/>
-							<SettingsRow
-								icon={
-									<WrenchIcon className='size-4 text-destructive' />
+									<WrenchIcon className='size-5 text-destructive' />
 								}
 								label='Close series'
-								description='Locks this series permanently.'
+								description='Ends the series and records the final standings.'
 								disabled={disableEditableRows}
 								onClick={openCloseConfirmation}
 								isDanger
+							/>
+							<SettingsRow
+								icon={
+									<ArchiveIcon className='size-5 text-muted-foreground' />
+								}
+								label='Archive series'
+								description={
+									series.status === "completed"
+										? "Hides it from the series list."
+										: "Close the series first."
+								}
+								onClick={openArchiveConfirmation}
+								disabled={
+									isPending || series.status !== "completed"
+								}
 							/>
 						</section>
 					</div>
@@ -260,7 +214,8 @@ export function SeriesOrganizerActionsMenu({
 						<div className='rounded-xl border border-destructive/40 bg-destructive/10 p-3'>
 							<p className='flex items-start gap-2 text-sm text-destructive'>
 								<ShieldAlertIcon className='mt-0.5 size-4 shrink-0' />
-								This action is irreversible in this UI.
+								Archived series can't be brought back from the
+								app.
 							</p>
 						</div>
 						<div className='rounded-xl border p-3'>
@@ -268,9 +223,11 @@ export function SeriesOrganizerActionsMenu({
 								What happens
 							</p>
 							<ul className='mt-2 list-disc space-y-1 pl-4 text-sm text-muted-foreground'>
-								<li>Series is moved to archived state.</li>
-								<li>It is hidden from active room flows.</li>
-								<li>Settings remain read-only.</li>
+								<li>
+									It no longer appears in the series list or
+									picker.
+								</li>
+								<li>Its predictions stay in History.</li>
 							</ul>
 						</div>
 						<FieldLabel>
@@ -278,9 +235,9 @@ export function SeriesOrganizerActionsMenu({
 								<Checkbox
 									id='toggle-checkbox-2'
 									name='toggle-checkbox-2'
-									checked={closeAcknowledged}
+									checked={archiveAcknowledged}
 									onCheckedChange={(checked) =>
-										setCloseAcknowledged(checked === true)
+										setArchiveAcknowledged(checked === true)
 									}
 									disabled={isPending}
 								/>
@@ -333,8 +290,9 @@ export function SeriesOrganizerActionsMenu({
 							</p>
 							<ul className='mt-2 list-none space-y-1 text-sm text-muted-foreground'>
 								<li>
-									<GiftIcon className='size-4 inline-block mr-2 text-accent' />
-									Rewards are distributed to winners.
+									<TrophyIcon className='size-4 inline-block mr-2 text-accent' />
+									The top 3 and special awards go into the
+									Hall of Fame.
 								</li>
 								<li>
 									<CheckCircle2Icon className='size-4 inline-block mr-2 text-accent' />

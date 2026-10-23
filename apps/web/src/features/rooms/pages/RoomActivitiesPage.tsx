@@ -2,18 +2,20 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useRoomActivities, ActivityFilter } from "@/features/activities";
 import { useMarkRoomActivitiesSeen } from "@/features/rooms";
 import { RoomActivitiesFeed } from "@/features/activities/components";
-import { SeriesSelector } from "@/features/series";
-import { Button, Skeleton } from "@/shared/ui";
+import {
+	SeriesScopeToggle,
+	type SeriesScope,
+	useCurrentSeries,
+} from "@/features/series";
+import { Skeleton } from "@/shared/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
-
-const FILTERS: Array<{ label: string; value: ActivityFilter }> = [
-	{ label: "All", value: "all" },
-];
 
 export default function RoomActivitiesPage() {
 	const { room } = useRoomContext();
-	const [filter, setFilter] = useState<ActivityFilter>("all");
-	const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
+	const filter: ActivityFilter = "all";
+	const { currentSeries } = useCurrentSeries(room.id);
+	const [scope, setScope] = useState<SeriesScope>("series");
+	const seriesId = scope === "series" ? currentSeries?.id : undefined;
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 	const hasScheduledSeenRef = useRef(false);
 	const { mutate: markActivitiesSeen } = useMarkRoomActivitiesSeen(
@@ -29,7 +31,7 @@ export default function RoomActivitiesPage() {
 		hasNextPage,
 		isFetchingNextPage,
 		fetchNextPage,
-	} = useRoomActivities(room.id, filter, selectedSeriesId ?? undefined);
+	} = useRoomActivities(room.id, filter, seriesId);
 
 	const activities = useMemo(
 		() => data?.pages.flatMap((page) => page.items) ?? [],
@@ -85,32 +87,16 @@ export default function RoomActivitiesPage() {
 	return (
 		<div className='mx-auto w-full max-w-lg space-y-4 p-4'>
 			<div>
-				<h2 className='text-lg font-semibold'>Activities</h2>
+				<h2 className='text-lg font-semibold'>Activity</h2>
 				<p className='mt-1 text-sm text-muted-foreground'>
-					The social timeline of everything meaningful happening in this
-					room.
+					New predictions, results and who joined.
 				</p>
 			</div>
 
-			<div className='flex flex-wrap gap-2'>
-				{FILTERS.map((item) => (
-					<Button
-						key={item.value}
-						size='sm'
-						variant={filter === item.value ? "default" : "outline"}
-						onClick={() => setFilter(item.value)}
-					>
-						{item.label}
-					</Button>
-				))}
-			</div>
-			<SeriesSelector
-				roomId={room.id}
-				mode='all'
-				value={selectedSeriesId}
-				onValueChange={setSelectedSeriesId}
-				placeholder='Filter by series'
-				optional
+			<SeriesScopeToggle
+				value={scope}
+				onValueChange={setScope}
+				seriesTitle={currentSeries?.title}
 			/>
 
 			<RoomActivitiesFeed
@@ -120,8 +106,8 @@ export default function RoomActivitiesPage() {
 				isError={isError}
 				errorMessage={error instanceof Error ? error.message : undefined}
 				emptyMessage={
-					selectedSeriesId
-						? "No activities found for this Series."
+					scope === "series"
+						? "Nothing has happened in this series yet."
 						: undefined
 				}
 			/>

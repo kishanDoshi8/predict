@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import {
 	Badge,
+	Button,
 	CountUp,
 	FadeContent,
 	Field,
@@ -29,32 +30,29 @@ import {
 	Clock,
 	CrownIcon,
 	DotIcon,
+	PlusIcon,
 	TrophyIcon,
 	UsersIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import React from "react";
 import { usePlayer } from "@/features/home";
+import { useCurrentSeries } from "@/features/series";
 
 // Threshold (as a percentage) above which an option is labelled "🔥 hot pick"
 const HOT_PICK_THRESHOLD_PERCENT = 60;
-const contentDelays = {
-	title: 0,
-	options: 200,
-	pooled: 400,
-	participants: 400,
-	timer: 600,
-};
 
 // ── Per-card component ─────────────────────────────────────────────────────
 // Fetches its own bets so each card in the carousel is self-contained.
 function PredictionCard({
 	prediction,
 	roomId,
+	roomCode,
 	refetchPredictions,
 }: Readonly<{
 	prediction: Prediction;
 	roomId: string;
+	roomCode: string;
 	refetchPredictions: () => void;
 }>) {
 	const { data: bets = [] } = useBets(roomId, prediction.id);
@@ -91,10 +89,7 @@ function PredictionCard({
 			transition={{ type: "spring", duration: 0.4 }}
 			className={`text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-primary/5 p-5 mb-4 ${borderClass}`}
 		>
-			<div
-				className={`absolute inset-0 bg-linear-to-r from-primary/5 via-primary/15 to-primary/5 animate-pulse pointer-events-none`}
-			></div>
-			<Link to={`predictions/${prediction.id}`}>
+			<Link to={`/rooms/${roomCode}/predictions/${prediction.id}`}>
 				{/* Status badge per card */}
 				<div className={`flex items-center gap-2 mb-3`}>
 					{prediction.status === "draft" && (
@@ -107,7 +102,7 @@ function PredictionCard({
 								COMING UP
 							</Badge>
 							{prediction.deadline && (
-								<FadeContent delay={contentDelays.timer}>
+								<FadeContent>
 									<Countdown
 										targetTime={new Date(
 											prediction.deadline,
@@ -161,7 +156,7 @@ function PredictionCard({
 					)}
 				</div>
 
-				<FadeContent delay={contentDelays.title}>
+				<FadeContent>
 					<h6
 						className={`text-xs text-muted-foreground font-semibold tracking-wider`}
 					>
@@ -171,16 +166,13 @@ function PredictionCard({
 					</h6>
 				</FadeContent>
 
-				<FadeContent delay={contentDelays.title}>
+				<FadeContent>
 					<h4 className={`text-xl md:text-2xl font-semibold mb-4`}>
 						{prediction.title}
 					</h4>
 				</FadeContent>
 
-				<FadeContent
-					delay={contentDelays.options}
-					className={`flex flex-col gap-4 mt-2`}
-				>
+				<FadeContent className={`flex flex-col gap-4 mt-2`}>
 					{prediction.prediction_options.map((option) => (
 						<Field className='w-full' key={option.id}>
 							<FieldLabel htmlFor={`progress-${option.id}`}>
@@ -235,10 +227,7 @@ function PredictionCard({
 
 				<div className={`flex items-center justify-between mt-4`}>
 					{/* show total pooled */}
-					<FadeContent
-						delay={contentDelays.pooled}
-						className={`flex items-center gap-2`}
-					>
+					<FadeContent className={`flex items-center gap-2`}>
 						<TrophyIcon
 							className={`text-muted-foreground w-3 h-3`}
 						/>
@@ -253,10 +242,7 @@ function PredictionCard({
 						</p>
 					</FadeContent>
 					{/* total participants */}
-					<FadeContent
-						delay={contentDelays.participants}
-						className={`flex items-center gap-2`}
-					>
+					<FadeContent className={`flex items-center gap-2`}>
 						<UsersIcon
 							className={`text-muted-foreground w-3 h-3`}
 						/>
@@ -320,24 +306,27 @@ function PredictionCard({
 // ── Section header ─────────────────────────────────────────────────────────
 function SectionHeader({
 	predictions,
-}: Readonly<{ predictions: Prediction[] }>) {
-	const hasActive = predictions.some(
+	action,
+}: Readonly<{ predictions: Prediction[]; action?: React.ReactNode }>) {
+	const activeCount = predictions.filter(
 		(p) => p.status === "draft" || p.status === "locked",
-	);
+	).length;
 
-	if (hasActive) {
+	if (activeCount > 0) {
 		return (
-			<div className={`flex items-center gap-2 my-4`}>
-				<div className={`flex flex-1 items-center gap-2`}>
-					<span
-						className={`h-2 w-2 rounded-full bg-primary animate-pulse`}
-					/>
-					<h2 className={`text-lg font-semibold`}>What's Hot</h2>
+			<div className={`flex items-center justify-between gap-2 my-4`}>
+				<div className={`flex flex-col`}>
+					<div className={`flex flex-1 items-center gap-2`}>
+						<span
+							className={`h-2 w-2 rounded-full bg-primary animate-pulse`}
+						/>
+						<h2 className={`text-lg font-semibold`}>What's Hot</h2>
+					</div>
+					<div className={`text-xs text-muted-foreground`}>
+						{activeCount} active
+					</div>
 				</div>
-				<div className={`text-xs text-muted-foreground`}>
-					{predictions.length}
-					{" active"}
-				</div>
+				{action}
 			</div>
 		);
 	}
@@ -345,6 +334,15 @@ function SectionHeader({
 	// Fallback: completed prediction
 	const fallback = predictions[0];
 	if (!fallback) return null;
+
+	if (action) {
+		return (
+			<div className={`flex items-center gap-2 my-4`}>
+				<h2 className={`flex-1 text-lg font-semibold`}>Last Played</h2>
+				{action}
+			</div>
+		);
+	}
 
 	if (fallback.status === "revealed") {
 		return (
@@ -392,11 +390,33 @@ function InPlayPredictions({
 	showSectionHeader = true,
 }: Readonly<InPlayPredictionsProps> = {}) {
 	const { room } = useRoomContext();
+	const { data: player } = usePlayer();
+	// Home follows the series picked in the room header.
+	const { currentSeries, currentSeriesId } = useCurrentSeries(room.id);
 	const {
 		data: queriedPredictions = [],
 		isPending: isQueriedPredictionLoading,
 		refetch,
-	} = useActivePredictions(room.id);
+	} = useActivePredictions(
+		room.id,
+		currentSeriesId ?? undefined,
+		predictionsOverride === undefined,
+	);
+	const isOrganizer = room.members.some(
+		(member) => member.player_id === player?.id && member.is_organizer,
+	);
+	const newPredictionAction =
+		isOrganizer && currentSeries?.status === "active" ? (
+			<Button variant='linear' size='sm' asChild>
+				<Link
+					to={`/rooms/${room.code}/predictions/new`}
+					state={{ seriesId: currentSeries.id }}
+				>
+					<PlusIcon />
+					New prediction
+				</Link>
+			</Button>
+		) : null;
 	const predictions = predictionsOverride ?? queriedPredictions;
 	const isPredictionLoading =
 		predictionsOverride === undefined ? isQueriedPredictionLoading : false;
@@ -474,6 +494,12 @@ function InPlayPredictions({
 					<p className={`text-muted-foreground text-center py-4`}>
 						{emptyMessage}
 					</p>
+					{predictionsOverride === undefined &&
+					newPredictionAction ? (
+						<div className='flex justify-center pb-2'>
+							{newPredictionAction}
+						</div>
+					) : null}
 				</div>
 			</CarouselItem>
 		);
@@ -483,6 +509,7 @@ function InPlayPredictions({
 				<PredictionCard
 					prediction={prediction}
 					roomId={room.id}
+					roomCode={room.code}
 					refetchPredictions={refetchPredictions}
 				/>
 			</CarouselItem>
@@ -500,7 +527,14 @@ function InPlayPredictions({
 			{showSectionHeader &&
 				!isPredictionLoading &&
 				predictions.length > 0 && (
-					<SectionHeader predictions={predictions} />
+					<SectionHeader
+						predictions={predictions}
+						action={
+							predictionsOverride === undefined
+								? newPredictionAction
+								: undefined
+						}
+					/>
 				)}
 
 			<Carousel

@@ -20,8 +20,8 @@ type Props = {
 const contentDelays = {
 	status: 0,
 	title: 0,
-	data: 200,
-	options: 300,
+	data: 50,
+	options: 100,
 };
 
 export default function DraftPhase({

@@ -2,7 +2,6 @@ import type { Room } from "@/features/rooms/types/types";
 import { Badge, Skeleton } from "@/shared/ui";
 import { ChevronRightIcon, UsersIcon, ZapIcon } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toast } from "sonner";
 
 type Props = {
 	rooms?: Room[];
@@ -19,13 +18,6 @@ export function RoomCardsList({
 	emptyMessage = "You have not joined any rooms yet.",
 	onRoomSelect,
 }: Readonly<Props>) {
-	if (error) {
-		toast.error("Failed to load your rooms. Please try again later.", {
-			description: error.message,
-			position: "top-center",
-		});
-	}
-
 	if (isLoading) {
 		return (
 			<div className={`flex flex-col gap-2`}>
@@ -36,6 +28,14 @@ export function RoomCardsList({
 					/>
 				))}
 			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<p className={`text-sm text-destructive`}>
+				Couldn't load your rooms. Check your connection and try again.
+			</p>
 		);
 	}
 

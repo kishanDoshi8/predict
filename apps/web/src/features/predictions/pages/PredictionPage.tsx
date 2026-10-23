@@ -1,7 +1,7 @@
 import { usePrediction, PredictionPhaseView } from "@/features/predictions";
 import { useEffect, useState } from "react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { usePredictionDuelSummary, DuelSummaryCard } from "@/features/duels";
 import { usePredictionDuelRealtime } from "@/features/rooms";
 import { FEATURES } from "@/shared/constants/features";
@@ -69,6 +69,17 @@ export function PredictionPage() {
 						)}
 					</>
 				)}
+				{prediction?.seriesTitle ? (
+					<Link
+						to={`/rooms/${room.code}/series/${prediction.seriesId}`}
+						className='block max-w-md mx-auto mb-2 text-xs text-muted-foreground hover:text-foreground'
+					>
+						{prediction.seriesTitle}
+						{prediction.seriesPredictionNumber
+							? ` · #${prediction.seriesPredictionNumber}`
+							: ""}
+					</Link>
+				) : null}
 				<PredictionPhaseView
 					isLoading={isPredictionLoading}
 					prediction={prediction}

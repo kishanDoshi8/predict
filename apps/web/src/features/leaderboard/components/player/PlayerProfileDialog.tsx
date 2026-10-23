@@ -41,6 +41,7 @@ import {
 	X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FEATURES } from "@/shared/constants/features";
 
 const statsLabels = [
 	{
@@ -155,6 +156,10 @@ export function PlayerProfileDialog({
 		isPending: isSeriesRecognitionLoading,
 		error: seriesRecognitionError,
 	} = useRoomMemberSeriesRecognition(roomId, playerId, enabled);
+	// Duel awards stay hidden while duels are switched off, as in the Hall of Fame.
+	const visibleAwards = (seriesRecognition?.awards ?? []).filter(
+		(award) => FEATURES.duels || award.award_type !== "MOST_DUEL_WINS",
+	);
 
 	const [error, setError] = useState<string | null>(null);
 
@@ -275,10 +280,10 @@ export function PlayerProfileDialog({
 			return <PredictionsSkeleton />;
 		}
 
-		if (seriesRecognition?.awards.length) {
+		if (visibleAwards.length) {
 			return (
 				<div className='space-y-2'>
-					{seriesRecognition.awards.map((row) => {
+					{visibleAwards.map((row) => {
 						const awardVisual = getAwardVisual(row.award_type);
 
 						return (
@@ -380,7 +385,7 @@ export function PlayerProfileDialog({
 								</p>
 								<p className='mt-1 flex items-center gap-2 text-xl font-semibold tabular-nums'>
 									<MedalIcon className='h-5 w-5 text-accent' />
-									{seriesRecognition?.awards.length ?? 0}
+									{visibleAwards.length ?? 0}
 								</p>
 							</div>
 						</div>
@@ -414,7 +419,7 @@ export function PlayerProfileDialog({
 								{statsLabels.map(({ key, label, icon }) => (
 									<FadeContent
 										key={key}
-										delay={200}
+										delay={50}
 										className='rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'
 									>
 										<p className='flex justify-between text-xs text-muted-foreground'>
@@ -433,7 +438,7 @@ export function PlayerProfileDialog({
 									</FadeContent>
 								))}
 								<FadeContent
-									delay={300}
+									delay={100}
 									className='col-span-2 rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'
 								>
 									<h3 className='flex gap-2 items-center text-xs text-muted-foreground'>
@@ -470,7 +475,7 @@ export function PlayerProfileDialog({
 									</div>
 								</FadeContent>
 								<FadeContent
-									delay={300}
+									delay={100}
 									className='col-span-2 rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'
 								>
 									<h3 className='flex items-center gap-2 text-xs text-muted-foreground'>
@@ -522,7 +527,7 @@ export function PlayerProfileDialog({
 					</section>
 
 					<section className='mt-6 mb-4'>
-						<FadeContent delay={350}>
+						<FadeContent delay={100}>
 							<h3 className='text-sm font-semibold text-muted-foreground mb-2'>
 								Last 5 Predictions
 							</h3>

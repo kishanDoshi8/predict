@@ -8,7 +8,8 @@ const optionColors = [
 
 const optionColorMap: Record<string, string> = {}
 
-export function useOptionColor(optionId: string) {
+// A plain lookup (no React state), so it's safe to call inside loops.
+export function getOptionColor(optionId: string) {
   if (optionColorMap[optionId]) {
     return optionColorMap[optionId]
   }
@@ -17,8 +18,10 @@ export function useOptionColor(optionId: string) {
   return color
 }
 
+export const useOptionColor = getOptionColor
+
 export function useOptionBgColor(optionId: string) {
-  const color = useOptionColor(optionId)
+  const color = getOptionColor(optionId)
   
   const bgColor = color.replace("text-", "bg-").replace("-500", "-100")
   return bgColor

@@ -6,7 +6,7 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useBets } from "@/features/predictions";
 import { useEffect } from "react";
 import { usePlayer } from "@/features/home";
-import { useOptionColor } from "@/shared/hooks/useOptionColor";
+import { getOptionColor } from "@/shared/hooks/useOptionColor";
 import { ClockIcon, LockIcon } from "lucide-react";
 import LockControls from "../controls/LockControls";
 import { useRoomBetRealtime } from "@/features/rooms";
@@ -19,9 +19,9 @@ type Props = {
 
 const contentDelays = {
 	title: 0,
-	data: 200,
-	options: 300,
-	bets: 300,
+	data: 50,
+	options: 100,
+	bets: 100,
 };
 
 export default function LockedPhase({
@@ -125,12 +125,11 @@ export default function LockedPhase({
 							>
 								<div>
 									<p>{getPlayerName(bet.player_id)}</p>
-									<p>{}</p>
 								</div>
 								<div>
 									<p>{bet.amount} PTS</p>
 									<p
-										className={`text-sm text-right ${useOptionColor(bet.option?.id ?? "")}`}
+										className={`text-sm text-right ${getOptionColor(bet.option?.id ?? "")}`}
 									>
 										on {bet.option?.label ?? "Unknown"}
 									</p>

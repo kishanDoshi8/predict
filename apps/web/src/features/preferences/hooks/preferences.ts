@@ -1,7 +1,6 @@
 import {
   getPreferences,
   markHowToPlaySeen,
-  markRatingsTipSeen,
   PreferenceResponse,
   PreferenceSettings,
   resetRoomPreferences,
@@ -171,34 +170,3 @@ export const useMarkHowToPlaySeen = (roomId?: string) => {
   });
 };
 
-export const useMarkRatingsTipSeen = (roomId?: string) => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => markRatingsTipSeen(),
-    onMutate: async () => {
-      if (!roomId) return;
-      const queryKey = roomKeys.preferences(roomId);
-      await queryClient.cancelQueries({ queryKey });
-
-      const previous = queryClient.getQueryData<PreferenceResponse>(queryKey);
-      if (previous) {
-        queryClient.setQueryData<PreferenceResponse>(queryKey, {
-          ...previous,
-          has_seen_ratings_tip: true,
-        });
-      }
-      return { previous };
-    },
-    onError: (_error, _variables, context) => {
-      if (!roomId || !context?.previous) return;
-      const queryKey = roomKeys.preferences(roomId);
-      queryClient.setQueryData(queryKey, context.previous);
-    },
-    onSettled: () => {
-      if (roomId) {
-        queryClient.invalidateQueries({ queryKey: roomKeys.preferences(roomId) });
-      }
-    },
-  });
-};

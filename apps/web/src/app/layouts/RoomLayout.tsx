@@ -5,7 +5,13 @@ import {
 	useOutletContext,
 	useParams,
 } from "react-router-dom";
-import { useRoom, Room, RoomSwitcherDrawer, useRoomRealtime } from "@/features/rooms";
+import {
+	useRoom,
+	Room,
+	RoomPrefetcher,
+	RoomSwitcherDrawer,
+	useRoomRealtime,
+} from "@/features/rooms";
 import { RoomHeader } from "@/features/predictions";
 import { Suspense, lazy, useEffect, useState } from "react";
 import { usePlayer, useSetLastVisitedRoom } from "@/features/home";
@@ -100,11 +106,13 @@ export default function RoomLayout() {
 				leftAction={headerConfig?.leftAction ?? "home"}
 				title={headerConfig?.title}
 				onLeftAction={handleHeaderLeftAction}
+				onOpenHowToPlay={() => setShowHowToPlay(true)}
 			/>
 
 			<main className='max-w-280 w-full mx-auto flex-1 flex flex-col'>
 				<Outlet context={{ room, roomCode }} />
 			</main>
+			<RoomPrefetcher roomId={room.id} />
 
 			{player ? (
 				<RoomSwitcherDrawer

@@ -1,7 +1,7 @@
 import { PredictionHistoryEntry } from "@/features/leaderboard";
 import { Badge } from "@/shared/ui/badge";
 import { Skeleton } from "@/shared/ui/skeleton";
-import { cn } from "@/shared/lib/utils";
+import { cn, formatSignedPoints } from "@/shared/lib/utils";
 import {
 	CheckCircle2,
 	XCircle,
@@ -40,6 +40,18 @@ type CardProps = {
 	entry: PredictionHistoryEntry;
 };
 
+// The viewer's own outcome on a finished prediction.
+function myResult(entry: PredictionHistoryEntry) {
+	if (entry.my_bet_amount === null) return null;
+	if (entry.status !== "revealed") {
+		return { label: "Refunded", tone: "text-muted-foreground bg-muted" };
+	}
+	const net = (entry.my_payout ?? 0) - entry.my_bet_amount;
+	if (net > 0) return { label: formatSignedPoints(net), tone: "text-win bg-win/15" };
+	if (net < 0) return { label: formatSignedPoints(net), tone: "text-loss bg-loss/15" };
+	return { label: "±0", tone: "text-muted-foreground bg-muted" };
+}
+
 function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 	const { room } = useRoomContext();
 	const meta = statusMeta(entry.status);
@@ -70,7 +82,7 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 	} else {
 		const winnerLabel = entry.winner_count === 1 ? "winner" : "winners";
 		payoutSummary = (
-			<p className={`text-muted-foreground`}>
+			<span className={`text-muted-foreground`}>
 				<TrendingUpIcon
 					className={`w-3 h-3 inline-block mr-2 text-green-500`}
 				/>
@@ -78,9 +90,17 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 					+{entry.total_paid_to_winners.toLocaleString()} pts
 				</span>{" "}
 				paid to {entry.winner_count} {winnerLabel}
-			</p>
+			</span>
 		);
 	}
+
+	const result = myResult(entry);
+	const seriesLabel = [
+		entry.series_prediction_number ? `#${entry.series_prediction_number}` : null,
+		entry.series_title,
+	]
+		.filter(Boolean)
+		.join(" · ");
 
 	const isUpset = entry.status === "revealed" && (winPct ?? 100) <= 25;
 	const isSweep = entry.status === "revealed" && (winPct ?? 0) >= 80;
@@ -105,17 +125,32 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 			to={`/rooms/${room.code}/predictions/${entry.prediction_id}`}
 			className={`border-2 rounded-xl p-3 flex flex-col gap-2 hover:bg-secondary/50 transition-colors ${borderClass}`}
 		>
-			{/* Header row */}
+			{/* Header: where it sits in its series, and how it went for you */}
 			<div className='flex items-start gap-2'>
-				<div className='mt-0.5 shrink-0'>{meta.icon}</div>
-				<p className='text-sm font-medium flex-1 leading-snug'>
-					{entry.title}
-				</p>
-				{resolvedLabel && (
-					<span className='text-xs text-muted-foreground shrink-0'>
-						{resolvedLabel}
+				<div className='mt-0.5 shrink-0' title={meta.label}>
+					{meta.icon}
+				</div>
+				<div className='flex-1 min-w-0'>
+					{seriesLabel ? (
+						<p className='text-xs text-muted-foreground truncate'>
+							{seriesLabel}
+						</p>
+					) : null}
+					<p className='text-sm font-medium leading-snug'>
+						{entry.title}
+					</p>
+				</div>
+				{result ? (
+					<span
+						className={cn(
+							"shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold tabular-nums",
+							result.tone,
+						)}
+						aria-label={`Your result: ${result.label}`}
+					>
+						{result.label}
 					</span>
-				)}
+				) : null}
 			</div>
 
 			{/* Winner pill */}
@@ -200,7 +235,13 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 
 			{/* Footer meta */}
 			<div className='flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground'>
-				{total > 0 && <span>Pool: {total.toLocaleString()} pts</span>}
+				{resolvedLabel && <span>{resolvedLabel}</span>}
+				{total > 0 && (
+					<>
+						{resolvedLabel ? <Dot /> : null}
+						<span>Pool: {total.toLocaleString()} pts</span>
+					</>
+				)}
 				{participants > 0 && (
 					<>
 						<Dot />
@@ -216,17 +257,15 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 				)}
 			</div>
 
-			<div className='rounded-md bg-muted/40 px-2.5 py-2 text-xs space-y-0.5'>
-				<div className='font-medium text-foreground'>
-					{payoutSummary}
-				</div>
+			<div className='flex flex-wrap items-center gap-x-2 rounded-md bg-muted/40 px-2.5 py-1.5 text-xs'>
+				<div className='font-medium text-foreground'>{payoutSummary}</div>
 				{entry.status === "revealed" && entry.biggest_payout > 0 && (
-					<p className='text-muted-foreground'>
-						Biggest payout:{" "}
+					<span className='text-muted-foreground'>
+						· top{" "}
 						<span className={`text-win font-semibold`}>
-							+{entry.biggest_payout.toLocaleString()} pts
+							+{entry.biggest_payout.toLocaleString()}
 						</span>
-					</p>
+					</span>
 				)}
 			</div>
 		</Link>

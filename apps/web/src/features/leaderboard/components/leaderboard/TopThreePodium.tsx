@@ -1,9 +1,17 @@
-import { LeaderboardEntry } from "@/features/leaderboard";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
-import { cn, formatSignedPoints } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/utils";
+
+// What each podium spot shows; callers decide (series balance or overall profit).
+export type PodiumEntry = {
+	player_id: string;
+	username: string;
+	rank: number;
+	primary: string;
+	secondary: string;
+};
 
 type Props = {
-	top: LeaderboardEntry[];
+	top: PodiumEntry[];
 	currentPlayerId: string;
 };
 
@@ -82,10 +90,10 @@ export function TopThreePodium({
 									: "text-muted-foreground",
 							)}
 						>
-							{`${entry.balance.toLocaleString()} pts`}
+							{entry.primary}
 						</p>
 						<p className='text-[10px] text-muted-foreground tabular-nums'>
-							{formatSignedPoints(entry.net_profit)}
+							{entry.secondary}
 						</p>
 
 						{(() => {

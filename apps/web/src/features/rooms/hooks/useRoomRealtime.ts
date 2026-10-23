@@ -46,7 +46,8 @@ export function useRoomRealtime(roomId: string | null) {
 						predicate: (query) =>
 							query.queryKey[0] === roomKeys.all[0] &&
 							query.queryKey[1] === roomId &&
-							query.queryKey[2] === "seriesLeaderboard",
+							(query.queryKey[2] === "seriesLeaderboard" ||
+								query.queryKey[2] === "overallStandings"),
 					});
 				},
 			)

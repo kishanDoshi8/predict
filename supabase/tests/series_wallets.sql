@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(33);
+select plan(37);
 
 -- ------------------------------------------------------------
 -- Fixtures: Alice organizes a room with Bob. Carol joins later.
@@ -232,7 +232,50 @@ select is(private.pay_series_topups(), 1, 'closed series get no more top-ups');
 select is((pg_temp.wallet('cup', 'bob')).balance, 900, 'a closed series wallet is frozen');
 
 -- ------------------------------------------------------------
--- 8. Retired features stay off
+-- 8. Standings across all series and History stakes
+-- ------------------------------------------------------------
+select pg_temp.login('00000000-0000-0000-0000-000000000b0b');
+set local role authenticated;
+select is(
+  array(
+    select e->>'username'
+    from json_array_elements(public.get_room_overall_standings(pg_temp.setting('room_id'))) e
+    order by (e->>'rank')::int, e->>'username'
+  ),
+  array['alice', 'carol', 'bob'],
+  'overall standings rank by profit summed across series'
+);
+select is(
+  (
+    select (e->>'titles')::int
+    from json_array_elements(public.get_room_overall_standings(pg_temp.setting('room_id'))) e
+    where e->>'username' = 'alice'
+  ),
+  1,
+  'overall standings count titles'
+);
+select is(
+  (
+    select (e->>'my_bet_amount')::int || '/' || (e->>'my_payout')::int
+    from json_array_elements(public.get_room_prediction_history(pg_temp.setting('room_id'), 10, null, null, null, 'all', null)->'items') e
+    where e->>'title' = 'Who wins the final?'
+  ),
+  '200/0',
+  'history shows the caller''s own stake and payout'
+);
+reset role;
+
+select pg_temp.login('00000000-0000-0000-0000-00000000ca01');
+set local role authenticated;
+select is(
+  (select count(*)::int from json_array_elements(public.get_room_overall_standings(pg_temp.setting('room_id')))),
+  3,
+  'a late joiner appears in overall standings'
+);
+reset role;
+
+-- ------------------------------------------------------------
+-- 9. Retired features stay off
 -- ------------------------------------------------------------
 select pg_temp.login('00000000-0000-0000-0000-000000000b0b');
 set local role authenticated;

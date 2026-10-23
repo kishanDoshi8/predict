@@ -49,6 +49,9 @@ export const roomKeys = {
   seriesWallets: (roomId: string) =>
     [...roomKeys.detail(roomId), "seriesWallets"] as const,
 
+  overallStandings: (roomId: string) =>
+    [...roomKeys.detail(roomId), "overallStandings"] as const,
+
   seriesPlacements: (roomId: string, seriesId: string) =>
     [...roomKeys.detail(roomId), "seriesPlacements", seriesId] as const,
 

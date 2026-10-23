@@ -4,6 +4,7 @@ import {
     getRoomPredictionHistory,
     getRoomMemberSeriesRecognition,
     getSeriesLeaderboard,
+    getRoomOverallStandings,
 } from '@/shared/lib/api'
 import { PredictionHistoryFilter, PredictionHistoryPage } from "@/features/leaderboard";
 import { InfiniteData, keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
@@ -21,6 +22,15 @@ export const useSeriesLeaderboard = (
         enabled: !!roomId && !!seriesId && enabled,
         // Keep the previous series on screen while the next one loads.
         placeholderData: keepPreviousData,
+    })
+}
+
+// Standings across every series, ranked by total profit.
+export const useRoomOverallStandings = (roomId?: string, enabled = true) => {
+    return useQuery({
+        queryKey: roomKeys.overallStandings(roomId ?? ''),
+        queryFn: () => getRoomOverallStandings(roomId ?? ''),
+        enabled: !!roomId && enabled,
     })
 }
 

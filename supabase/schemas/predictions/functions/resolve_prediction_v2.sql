@@ -45,7 +45,9 @@ begin
   from public.predictions
   where id      = p_prediction_id
     and room_id = p_room_id
-    and status  = 'locked';
+    and status  = 'locked'
+  -- Lock the prediction so a second resolve call waits, then finds it no longer locked.
+  for update;
 
   if not found then
     raise exception 'Prediction not found or not in locked phase' using errcode = 'P0006';

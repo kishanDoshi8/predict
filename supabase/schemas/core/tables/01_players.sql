@@ -11,7 +11,8 @@ create table if not exists public.players (
   last_visited_room_id uuid references public.rooms(id) on delete set null,
   created_at timestamptz not null default now(),
   user_id uuid unique references auth.users(id) on delete cascade,
-  unique (username)
+  unique (username),
+  constraint players_escrow_within_balance check (points_in_escrow <= points_balance)
 );
 create index if not exists idx_players_total_won on public.players(total_won desc);
 create index if not exists idx_players_username on public.players(lower(username));

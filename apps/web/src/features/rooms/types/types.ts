@@ -27,4 +27,6 @@ export interface Room {
   // UI helper properties
   member_count?: number
   active_prediction_count?: number
+  // Set by the invite-code lookup, which non-members can use before joining.
+  organizer_username?: string | null
 }

@@ -1,4 +1,5 @@
-create or replace view public.series_with_stats as
+create or replace view public.series_with_stats
+with (security_invoker = true) as
 with series_prediction_stats as (
   select
     p.series_id,

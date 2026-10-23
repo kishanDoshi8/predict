@@ -1,5 +1,6 @@
 
-create or replace view public.player_rooms_by_activity as
+create or replace view public.player_rooms_by_activity
+with (security_invoker = true) as
 select distinct on (rm.player_id, r.id)
   rm.player_id,
   r.id as room_id,

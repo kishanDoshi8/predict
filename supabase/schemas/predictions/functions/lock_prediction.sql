@@ -20,7 +20,8 @@ begin
   select * into v_prediction
   from public.predictions
   where id = p_prediction_id
-    and status = 'draft';
+    and status = 'draft'
+  for update;
 
   if not found then
     raise exception 'Prediction not found or not in draft phase' using errcode = 'P0006';

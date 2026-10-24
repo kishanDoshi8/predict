@@ -14,7 +14,11 @@ interface AuthContextValue {
   session: Session | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  // Resolves to false when Supabase wants the email confirmed before signing in.
+  signUp: (email: string, password: string) => Promise<boolean>;
+  signInWithGoogle: () => Promise<void>;
+  linkGoogle: () => Promise<void>;
+  hasGoogleIdentity: boolean;
   signOut: () => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
 }
@@ -74,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) {
       const mappedError = new Error(getAuthErrorMessage(error)) as Error & {
         cause?: unknown;
@@ -82,7 +86,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       mappedError.cause = error;
       throw mappedError;
     }
+    return !!data.session;
   };
+
+  // Google sends people back to /auth/callback, which picks up the session and
+  // continues to wherever they were heading (see postAuthRedirect).
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) throw error;
+  };
+
+  // Attaches Google to the signed-in account, so a Google login with a different
+  // email still opens this account. Needs "manual linking" enabled in Supabase.
+  const linkGoogle = async () => {
+    const { error } = await supabase.auth.linkIdentity({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) throw error;
+  };
+
+  const hasGoogleIdentity =
+    user?.identities?.some((identity) => identity.provider === "google") ?? false;
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -105,6 +133,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         signIn,
         signUp,
+        signInWithGoogle,
+        linkGoogle,
+        hasGoogleIdentity,
         signOut,
         sendPasswordResetEmail,
       }}

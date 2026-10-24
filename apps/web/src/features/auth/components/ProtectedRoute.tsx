@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { Loading } from "@/shared/ui/spinner";
+import { savePostAuthRedirect } from "@/shared/lib/postAuthRedirect";
 
 export function ProtectedRoute() {
 	const { user, isLoading } = useAuth();
@@ -15,6 +16,8 @@ export function ProtectedRoute() {
 	}
 
 	if (!user) {
+		// Remember the page (e.g. an invite link) through signup and Google sign-in.
+		savePostAuthRedirect(location.pathname + location.search);
 		return <Navigate to='/login' state={{ from: location }} replace />;
 	}
 

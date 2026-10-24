@@ -9,12 +9,19 @@ import {
 	BellIcon,
 	CircleQuestionMarkIcon,
 	CopyIcon,
+	LinkIcon,
+	LogOutIcon,
 	Share2Icon,
 	type LucideIcon,
 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import type { Room } from "@/features/rooms/types/types";
 import { SettingsRow } from "@/features/series/components/SeriesOrganizerActionsMenu";
+import { useAuth } from "@/features/auth";
+import { copyToClipboard } from "@/shared/lib/clipboard";
+import { InviteSheet, inviteUrlFor } from "./InviteSheet";
 
 type Props = {
 	room: Room;
@@ -24,17 +31,6 @@ type Props = {
 	onOpenHowToPlay: () => void;
 };
 
-async function copyText(text: string, message: string) {
-	try {
-		await navigator.clipboard.writeText(text);
-		toast.success(message, { position: "top-center" });
-	} catch {
-		toast.error("Couldn't copy. Long-press to copy instead.", {
-			description: text,
-			position: "top-center",
-		});
-	}
-}
 
 export function RoomMenuDrawer({
 	room,
@@ -43,13 +39,19 @@ export function RoomMenuDrawer({
 	onOpenNotifications,
 	onOpenHowToPlay,
 }: Readonly<Props>) {
-	const inviteUrl = `${globalThis.location.origin}/rooms/${room.code}/join`;
+	const navigate = useNavigate();
+	const { user, hasGoogleIdentity, linkGoogle, signOut } = useAuth();
+	const [isInviteSheetOpen, setIsInviteSheetOpen] = useState(false);
+	const inviteUrl = inviteUrlFor(room);
 
 	const close = (then: () => void) => () => {
 		onOpenChange(false);
 		then();
 	};
 
+	// Share sheet first; if the phone has none (or sharing fails), show the
+	// Invite sheet with the link and copy buttons. Dismissing the share sheet
+	// is not an error.
 	const handleInvite = async () => {
 		if (navigator.share) {
 			try {
@@ -59,11 +61,42 @@ export function RoomMenuDrawer({
 					url: inviteUrl,
 				});
 				return;
-			} catch {
-				// Cancelled or unsupported: fall back to copying the link.
+			} catch (error) {
+				if (error instanceof DOMException && error.name === "AbortError") return;
 			}
 		}
-		await copyText(inviteUrl, "Invite link copied");
+		setIsInviteSheetOpen(true);
+	};
+
+	const handleCopyCode = async () => {
+		if (await copyToClipboard(room.code)) {
+			toast.success("Room code copied", { position: "top-center" });
+		} else {
+			setIsInviteSheetOpen(true);
+		}
+	};
+
+	const handleConnectGoogle = async () => {
+		try {
+			await linkGoogle();
+		} catch (error) {
+			toast.error("Couldn't connect Google.", {
+				description: error instanceof Error ? error.message : undefined,
+				position: "top-center",
+			});
+		}
+	};
+
+	const handleSignOut = async () => {
+		try {
+			await signOut();
+			navigate("/login", { replace: true });
+		} catch (error) {
+			toast.error("Couldn't sign out. Try again.", {
+				description: error instanceof Error ? error.message : undefined,
+				position: "top-center",
+			});
+		}
 	};
 
 	const items: Array<{
@@ -81,7 +114,7 @@ export function RoomMenuDrawer({
 			label: "Copy room code",
 			detail: room.code,
 			icon: CopyIcon,
-			onClick: close(() => void copyText(room.code, "Room code copied")),
+			onClick: close(() => void handleCopyCode()),
 		},
 		// {
 		// 	label: "All series and past champions",
@@ -103,6 +136,30 @@ export function RoomMenuDrawer({
 		},
 	];
 
+	const accountSectionItems: Array<{
+		label: string;
+		detail?: string;
+		icon: LucideIcon;
+		onClick: () => void;
+	}> = [
+		...(hasGoogleIdentity
+			? []
+			: [
+					{
+						label: "Connect Google",
+						detail: "Sign in with Google next time",
+						icon: LinkIcon,
+						onClick: close(() => void handleConnectGoogle()),
+					},
+				]),
+		{
+			label: "Sign out",
+			detail: user?.email ?? undefined,
+			icon: LogOutIcon,
+			onClick: close(() => void handleSignOut()),
+		},
+	];
+
 	const helpSectionItems: Array<{
 		label: string;
 		detail?: string;
@@ -117,6 +174,7 @@ export function RoomMenuDrawer({
 	];
 
 	return (
+		<>
 		<Drawer open={open} onOpenChange={onOpenChange}>
 			<DrawerContent>
 				<DrawerHeader>
@@ -158,6 +216,24 @@ export function RoomMenuDrawer({
 							</section>
 						),
 					)}
+					<section className='space-y-2'>
+						<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+							Account
+						</p>
+						{accountSectionItems.map(
+							({ label, detail, icon: Icon, onClick }) => (
+								<SettingsRow
+									key={label}
+									icon={
+										<Icon className='size-5 text-muted-foreground' />
+									}
+									label={label}
+									description={detail}
+									onClick={onClick}
+								/>
+							),
+						)}
+					</section>
 					{helpSectionItems.map(
 						({ label, detail, icon: Icon, onClick }) => (
 							<section className='space-y-2' key={label}>
@@ -178,5 +254,11 @@ export function RoomMenuDrawer({
 				</div>
 			</DrawerContent>
 		</Drawer>
+		<InviteSheet
+			room={room}
+			open={isInviteSheetOpen}
+			onOpenChange={setIsInviteSheetOpen}
+		/>
+		</>
 	);
 }

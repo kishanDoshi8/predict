@@ -5,6 +5,8 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Spinner } from "@/shared/ui/spinner";
 import { Brand } from "@/features/home";
+import { GoogleButton, OrDivider } from "@/features/auth/components/GoogleButton";
+import { takePostAuthRedirect } from "@/shared/lib/postAuthRedirect";
 
 export function LoginPage() {
 	const { signIn } = useAuth();
@@ -23,7 +25,7 @@ export function LoginPage() {
 		setIsLoading(true);
 		try {
 			await signIn(email, password);
-			navigate(from, { replace: true });
+			navigate(takePostAuthRedirect(from), { replace: true });
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to sign in.");
 		} finally {
@@ -37,6 +39,9 @@ export function LoginPage() {
 
 			<div className='flex flex-col gap-4 border-2 p-8 w-full max-w-sm'>
 				<h2 className='text-2xl font-bold'>Sign in</h2>
+
+				<GoogleButton onError={setError} />
+				<OrDivider />
 
 				<form
 					onSubmit={(e) => void handleSubmit(e)}

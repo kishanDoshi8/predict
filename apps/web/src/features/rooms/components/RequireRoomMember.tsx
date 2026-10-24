@@ -31,7 +31,9 @@ export function RequireRoomMember() {
 	const isMember = room.members.some((member) => member.player_id === player.id);
 
 	if (!isMember) {
-		return <Navigate to={`/rooms/${room.code}/join`} replace />;
+		// Keep where they were heading (e.g. a shared prediction) for after joining.
+		const next = encodeURIComponent(`${location.pathname}${location.search}`);
+		return <Navigate to={`/rooms/${room.code}/join?next=${next}`} replace />;
 	}
 
 	return <Outlet />;

@@ -51,7 +51,8 @@ grant execute on function public.get_room_weekly_leaderboard(uuid, text) to auth
 grant execute on function public.get_series_awards(uuid, uuid) to authenticated;
 grant execute on function public.get_series_leaderboard(uuid, uuid, text) to authenticated;
 grant execute on function public.get_series_placements(uuid, uuid) to authenticated;
-grant execute on function public.join_room(text) to authenticated;
+grant execute on function public.join_room(text, text) to authenticated;
+grant execute on function public.record_share(uuid, text) to authenticated;
 grant execute on function public.mark_how_to_play_seen() to authenticated;
 grant execute on function public.mark_ratings_tip_seen() to authenticated;
 grant execute on function public.mark_room_activities_seen(uuid) to authenticated;

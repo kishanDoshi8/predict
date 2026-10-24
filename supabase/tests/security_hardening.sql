@@ -195,7 +195,7 @@ select is(
     'get_room_stat_cards', 'get_room_weekly_leaderboard', 'get_series_awards',
     'get_series_leaderboard', 'get_series_placements', 'join_room',
     'mark_how_to_play_seen', 'mark_ratings_tip_seen', 'mark_room_activities_seen', 'place_bet',
-    'register_player', 'reset_room_preferences', 'resolve_prediction_v2', 'set_last_visited_room',
+    'record_share', 'register_player', 'reset_room_preferences', 'resolve_prediction_v2', 'set_last_visited_room',
     'update_global_preferences', 'update_room_preferences', 'update_series', 'upsert_user_push_subscription'
   ],
   'logged-in users can call exactly the RPCs the app uses'

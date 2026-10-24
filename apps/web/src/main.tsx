@@ -2,6 +2,9 @@ import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import App from "@/app/App";
 import "@/shared/assets/styles/global.css";
+import { captureReferral } from "@/shared/lib/referral";
+
+captureReferral();
 
 if ("serviceWorker" in navigator) {
 	void navigator.serviceWorker

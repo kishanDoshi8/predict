@@ -32,10 +32,17 @@ export function JoinRoomPage() {
 		return <Navigate to='/404' replace />;
 	}
 
+	// Only paths inside this room, so a crafted link can't send people elsewhere.
+	const requestedNext = new URLSearchParams(location.search).get("next");
+	const destination =
+		requestedNext?.startsWith(`/rooms/${room.code}/`) && !requestedNext.includes("//")
+			? requestedNext
+			: `/rooms/${room.code}`;
+
 	const isMember = room.members.some((member) => member.player_id === player.id);
 
 	if (isMember) {
-		return <Navigate to={`/rooms/${room.code}`} replace />;
+		return <Navigate to={destination} replace />;
 	}
 
 	const organizerName =
@@ -51,7 +58,10 @@ export function JoinRoomPage() {
 			{
 				onSuccess: (joinedRoom) => {
 					toast.success("Joined room successfully.");
-					navigate(`/rooms/${joinedRoom.code}`, { replace: true });
+					navigate(
+						joinedRoom.code === room.code ? destination : `/rooms/${joinedRoom.code}`,
+						{ replace: true },
+					);
 				},
 				onError: (error) => {
 					toast.error("Failed to join room.", {

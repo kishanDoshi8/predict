@@ -1,7 +1,7 @@
 import { Suspense, lazy, type ReactElement } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { HomePage } from "@/features/home";
-import { ProtectedRoute } from "@/features/auth";
+import { AuthCallbackPage, ProtectedRoute } from "@/features/auth";
 import { RouteFallback } from "@/app/router/RouteFallback";
 import { RouteErrorBoundary } from "@/app/router/RouteErrorBoundary";
 import RoomLayout from "@/app/layouts/RoomLayout";
@@ -99,6 +99,11 @@ export const router = createBrowserRouter([
 	{
 		path: "/reset-password",
 		element: withSuspense(<ResetPasswordPage />),
+		errorElement: <RouteErrorBoundary />,
+	},
+	{
+		path: "/auth/callback",
+		element: <AuthCallbackPage />,
 		errorElement: <RouteErrorBoundary />,
 	},
 	{

@@ -17,6 +17,8 @@ import { useRoomBetRealtime } from "@/features/rooms";
 import PredictionData from "./PredictionData";
 import { PlayerProfileDialog } from "@/features/leaderboard";
 import { useState } from "react";
+import { ShareResultButton } from "../components/ShareResultButton";
+import type { ResultShareData } from "../components/ResultShareCard";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -47,6 +49,40 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 
 	// Hooks above run on every render; bail out only after them.
 	if (!prediction) return null;
+
+	const optionLabel = (optionId: string) =>
+		prediction.prediction_options.find((option) => option.id === optionId)
+			?.label ?? "";
+	const myBet = bets?.find((bet) => bet.player_id === player?.id);
+	const shareData: ResultShareData | null =
+		prediction.status === "revealed" && prediction.winning_option_id && bets
+			? {
+					seriesLabel:
+						[
+							prediction.seriesPredictionNumber
+								? `#${prediction.seriesPredictionNumber}`
+								: null,
+							prediction.seriesTitle,
+						]
+							.filter(Boolean)
+							.join(" · ") || null,
+					question: prediction.title,
+					winner: optionLabel(prediction.winning_option_id),
+					calledIt: bets.filter(
+						(bet) => bet.option_id === prediction.winning_option_id,
+					).length,
+					participants: bets.length,
+					pool: bets.reduce((sum, bet) => sum + bet.amount, 0),
+					player:
+						myBet && player
+							? {
+									username: player.username,
+									pick: optionLabel(myBet.option_id),
+									net: (myBet.payout ?? 0) - myBet.amount,
+								}
+							: null,
+				}
+			: null;
 
 	const getPlayerName = (playerId: string) => {
 		if (player?.id === playerId) {
@@ -175,6 +211,15 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 					}
 				})()}
 			</FadeContent>
+
+			{shareData ? (
+				<div className={`w-full max-w-md mx-auto flex justify-end`}>
+					<ShareResultButton
+						data={shareData}
+						fileName={`verdict-${prediction.id.slice(0, 8)}`}
+					/>
+				</div>
+			) : null}
 
 			<div className={`max-w-md w-full mx-auto mt-4`}>
 				<div className={`flex mb-2`}>

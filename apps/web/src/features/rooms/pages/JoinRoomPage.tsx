@@ -2,12 +2,14 @@ import { usePlayer } from "@/features/home";
 import { useJoinRoom, useRoom } from "@/features/rooms/hooks/room";
 import { Button, Loading, Spinner } from "@/shared/ui";
 import { ChevronLeftIcon, UsersIcon, ZapIcon } from "lucide-react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { savePostAuthRedirect } from "@/shared/lib/postAuthRedirect";
 
 export function JoinRoomPage() {
 	const navigate = useNavigate();
 	const { roomCode } = useParams<{ roomCode: string }>();
+	const location = useLocation();
 	const { data: player, isPending: isPlayerLoading } = usePlayer();
 	const { data: room, isPending: isRoomLoading, isError } = useRoom(roomCode);
 	const { mutate: joinRoom, isPending: isJoining } = useJoinRoom();
@@ -21,6 +23,8 @@ export function JoinRoomPage() {
 	}
 
 	if (!player) {
+		// New here: pick a name first, then come straight back to this room.
+		savePostAuthRedirect(`${location.pathname}${location.search}`);
 		return <Navigate to='/create-player' replace />;
 	}
 

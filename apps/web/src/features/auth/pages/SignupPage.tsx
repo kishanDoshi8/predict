@@ -5,6 +5,7 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Spinner } from "@/shared/ui/spinner";
 import { Brand } from "@/features/home";
+import { GoogleButton, OrDivider } from "@/features/auth/components/GoogleButton";
 
 export function SignupPage() {
 	const { signUp } = useAuth();
@@ -15,6 +16,7 @@ export function SignupPage() {
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -32,8 +34,13 @@ export function SignupPage() {
 
 		setIsLoading(true);
 		try {
-			await signUp(email, password);
-			navigate("/create-player", { replace: true });
+			const isSignedIn = await signUp(email, password);
+			if (isSignedIn) {
+				// CreatePlayer continues to the saved destination (e.g. the invite).
+				navigate("/create-player", { replace: true });
+			} else {
+				setNeedsConfirmation(true);
+			}
 		} catch (err) {
 			setError(
 				err instanceof Error
@@ -51,6 +58,16 @@ export function SignupPage() {
 
 			<div className='flex flex-col gap-4 border-2 p-8 w-full max-w-sm'>
 				<h2 className='text-2xl font-bold'>Create account</h2>
+
+				{needsConfirmation ? (
+					<p className='rounded-md border border-accent/40 bg-accent/10 p-3 text-sm' role='status'>
+						Check {email} for a confirmation link, then come back and
+						sign in. Or skip the wait and continue with Google.
+					</p>
+				) : null}
+
+				<GoogleButton label='Sign up with Google' onError={setError} />
+				<OrDivider />
 
 				<form
 					onSubmit={(e) => void handleSubmit(e)}

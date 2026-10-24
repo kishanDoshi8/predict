@@ -1,10 +1,12 @@
 import { usePlayer } from "@/features/home";
 import { useRoom } from "@/features/rooms/hooks/room";
 import { Loading } from "@/shared/ui";
-import { Navigate, Outlet, useParams } from "react-router-dom";
+import { Navigate, Outlet, useParams, useLocation } from "react-router-dom";
+import { savePostAuthRedirect } from "@/shared/lib/postAuthRedirect";
 
 export function RequireRoomMember() {
 	const { roomCode } = useParams<{ roomCode: string }>();
+	const location = useLocation();
 	const { data: player, isPending: isPlayerLoading } = usePlayer();
 	const { data: room, isPending: isRoomLoading, isError } = useRoom(roomCode);
 
@@ -17,6 +19,8 @@ export function RequireRoomMember() {
 	}
 
 	if (!player) {
+		// New here: pick a name first, then come straight back to this room.
+		savePostAuthRedirect(`${location.pathname}${location.search}`);
 		return <Navigate to='/create-player' replace />;
 	}
 

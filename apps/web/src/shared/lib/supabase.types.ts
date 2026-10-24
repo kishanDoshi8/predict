@@ -1465,7 +1465,7 @@ export type Database = {
         Args: { p_bet_id: string; p_duel_id: string; p_player_id: string }
         Returns: Json
       }
-      join_room: { Args: { p_room_code: string }; Returns: Json }
+      join_room: { Args: { p_ref?: string; p_room_code: string }; Returns: Json }
       lock_prediction: { Args: { p_prediction_id: string }; Returns: Json }
       mark_how_to_play_seen: { Args: never; Returns: undefined }
       mark_ratings_tip_seen: { Args: never; Returns: undefined }
@@ -1477,6 +1477,7 @@ export type Database = {
         Args: { p_amount: number; p_option_id: string; p_prediction_id: string }
         Returns: Json
       }
+      record_share: { Args: { p_kind: string; p_room_id: string }; Returns: undefined }
       register_player: { Args: { p_username: string }; Returns: Json }
       reset_room_preferences: { Args: { p_room_id: string }; Returns: Json }
       resolve_duels_for_prediction: {

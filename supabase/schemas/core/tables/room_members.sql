@@ -11,6 +11,8 @@ create table if not exists public.room_members (
   joined_at timestamptz not null default now(),
   current_streak integer not null default 0 check (current_streak >= 0),
   highest_streak integer not null default 0 check (highest_streak >= 0),
+  -- The ?ref= of the shared link that brought this member in, if any.
+  joined_via text,
   unique (room_id, player_id)
 );
 create index if not exists idx_room_members_room_id on public.room_members(room_id);

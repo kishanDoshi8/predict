@@ -5,4 +5,6 @@ export interface Bet {
   option_id:     string
   amount:        number
   payout:        number | null
+  // When the pick was last placed or changed.
+  updated_at?:   string
 }

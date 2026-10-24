@@ -1,3 +1,4 @@
+import { clearReferral, peekReferral } from "@/shared/lib/referral";
 import { createRoom, getPlayerRooms, joinRoom, markRoomActivitiesSeen, spectateRoom } from "@/shared/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "@/shared/constants/queryKeys";
@@ -30,8 +31,9 @@ export const useCreateRoom = () => {
 export const useJoinRoom = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ roomCode }: { roomCode: string }) => joinRoom(roomCode),
+        mutationFn: ({ roomCode }: { roomCode: string }) => joinRoom(roomCode, peekReferral()),
         onSuccess: (data) => {
+            clearReferral();
             queryClient.setQueryData(roomKeys.byCode(data.code), data);
             void Promise.all([
                 queryClient.invalidateQueries({

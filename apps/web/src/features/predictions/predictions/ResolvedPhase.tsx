@@ -1,24 +1,16 @@
-import {
-	Alert,
-	AlertAction,
-	AlertDescription,
-	AlertTitle,
-	Badge,
-	FadeContent,
-	Skeleton,
-} from "@/shared/ui";
+import { Badge, FadeContent, Skeleton } from "@/shared/ui";
 import { Prediction, useBets } from "@/features/predictions";
 import PredictionTitle from "../components/PredictionTitle";
 import PredictionOptions from "../widgets/PredictionOptions";
-import { BicepsFlexed, CheckIcon, CrownIcon, FrownIcon } from "lucide-react";
+import { CheckIcon, CrownIcon } from "lucide-react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
 import { useRoomBetRealtime } from "@/features/rooms";
 import PredictionData from "./PredictionData";
 import { PlayerProfileDialog } from "@/features/leaderboard";
 import { useState } from "react";
-import { ShareResultButton } from "../components/ShareResultButton";
-import type { ResultShareData } from "../components/ResultShareCard";
+import { ResultBanner } from "../components/ResultBanner";
+import type { BragReceiptData } from "@/features/share";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -54,33 +46,28 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 		prediction.prediction_options.find((option) => option.id === optionId)
 			?.label ?? "";
 	const myBet = bets?.find((bet) => bet.player_id === player?.id);
-	const shareData: ResultShareData | null =
+	const receiptData: BragReceiptData | null =
 		prediction.status === "revealed" && prediction.winning_option_id && bets
 			? {
-					seriesLabel:
-						[
-							prediction.seriesPredictionNumber
-								? `#${prediction.seriesPredictionNumber}`
-								: null,
-							prediction.seriesTitle,
-						]
-							.filter(Boolean)
-							.join(" · ") || null,
+					roomName: room.name,
+					roomCode: room.code,
+					host: "",
+					seriesTitle: prediction.seriesTitle ?? null,
+					predictionNumber: prediction.seriesPredictionNumber ?? null,
 					question: prediction.title,
 					winner: optionLabel(prediction.winning_option_id),
 					calledIt: bets.filter(
 						(bet) => bet.option_id === prediction.winning_option_id,
 					).length,
 					participants: bets.length,
-					pool: bets.reduce((sum, bet) => sum + bet.amount, 0),
-					player:
-						myBet && player
-							? {
-									username: player.username,
-									pick: optionLabel(myBet.option_id),
-									net: (myBet.payout ?? 0) - myBet.amount,
-								}
-							: null,
+					call: myBet
+						? {
+								pick: optionLabel(myBet.option_id),
+								stake: myBet.amount,
+								calledAt: myBet.updated_at ?? prediction.deadline,
+								net: (myBet.payout ?? 0) - myBet.amount,
+							}
+						: null,
 				}
 			: null;
 
@@ -143,82 +130,17 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 				/>
 			</div>
 
-			<FadeContent
-				delay={contentDelays.result}
-				className={`w-full max-w-md mx-auto`}
-			>
-				{(() => {
-					if (!player || !bets) return null;
-					const playerBet = bets.find(
-						(b) => b.player_id === player.id,
-					);
-					if (!playerBet || !prediction.winning_option_id)
-						return null;
-					if (playerBet.option_id === prediction.winning_option_id) {
-						return (
-							<Alert variant='success'>
-								<BicepsFlexed className={`w-4 h-4 text-win`} />
-								<AlertTitle>Congratulations!</AlertTitle>
-								<AlertDescription>
-									You won the prediction.
-								</AlertDescription>
-								<AlertAction>
-									{playerBet.payout !== null && (
-										<p
-											className={`text-lg font-semibold ${playerBet.payout - playerBet.amount > 0 ? "text-win" : "text-loss"}`}
-										>
-											{playerBet.payout -
-												playerBet.amount >
-											0
-												? "+"
-												: ""}
-											{(
-												playerBet.payout -
-												playerBet.amount
-											).toLocaleString()}{" "}
-											PTS
-										</p>
-									)}
-								</AlertAction>
-							</Alert>
-						);
-					} else {
-						return (
-							<Alert variant='destructive'>
-								<FrownIcon className={`w-4 h-4 text-loss`} />
-								<AlertTitle>Better luck next time!</AlertTitle>
-								<AlertDescription>
-									You lost the prediction.
-								</AlertDescription>
-								<AlertAction>
-									{playerBet.payout !== null && (
-										<p
-											className={`text-lg font-semibold ${playerBet.payout - playerBet.amount > 0 ? "text-win" : "text-loss"}`}
-										>
-											{playerBet.payout -
-												playerBet.amount >
-											0
-												? "+"
-												: ""}
-											{playerBet.payout -
-												playerBet.amount}{" "}
-											PTS
-										</p>
-									)}
-								</AlertAction>
-							</Alert>
-						);
-					}
-				})()}
-			</FadeContent>
-
-			{shareData ? (
-				<div className={`w-full max-w-md mx-auto flex justify-end`}>
-					<ShareResultButton
-						data={shareData}
-						fileName={`verdict-${prediction.id.slice(0, 8)}`}
+			{receiptData ? (
+				<FadeContent
+					delay={contentDelays.result}
+					className={`w-full max-w-md mx-auto`}
+				>
+					<ResultBanner
+						roomId={room.id}
+						predictionId={prediction.id}
+						data={receiptData}
 					/>
-				</div>
+				</FadeContent>
 			) : null}
 
 			<div className={`max-w-md w-full mx-auto mt-4`}>

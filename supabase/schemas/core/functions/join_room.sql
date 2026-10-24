@@ -1,5 +1,6 @@
 create or replace function public.join_room(
-  p_room_code text
+  p_room_code text,
+  p_ref text default null
 )
 returns json
 language plpgsql
@@ -12,7 +13,14 @@ declare
   v_room      public.rooms%rowtype;
   v_member    public.room_members%rowtype;
   v_was_inserted boolean := false;
+  v_ref       text;
 begin
+  -- Which shared link brought them in, e.g. "brag-card"; anything else is dropped.
+  v_ref := lower(trim(p_ref));
+  if v_ref !~ '^[a-z][a-z-]{0,31}$' then
+    v_ref := null;
+  end if;
+
   v_player_id := private.get_player_id_from_auth();
 
   if v_player_id is null then
@@ -30,8 +38,8 @@ begin
     raise exception 'Room not found or closed' using errcode = 'P0002';
   end if;
 
-  insert into public.room_members (room_id, player_id, is_organizer)
-  values (v_room.id, v_player_id, false)
+  insert into public.room_members (room_id, player_id, is_organizer, joined_via)
+  values (v_room.id, v_player_id, false, v_ref)
   on conflict (room_id, player_id) do nothing
   returning * into v_member;
 

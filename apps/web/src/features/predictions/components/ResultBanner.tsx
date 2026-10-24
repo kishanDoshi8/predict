@@ -1,0 +1,83 @@
+import { useState } from "react";
+import { ReceiptTextIcon } from "lucide-react";
+import { Button } from "@/shared/ui";
+import { cn } from "@/shared/lib/utils";
+import {
+	BragReceipt,
+	receipt,
+	shareHost,
+	shareLink,
+	ShareSheet,
+	type BragReceiptData,
+} from "@/features/share";
+
+type Props = {
+	roomId: string;
+	predictionId: string;
+	data: BragReceiptData;
+};
+
+// The moment a result lands: your number, and the receipt to prove it.
+export function ResultBanner({ roomId, predictionId, data }: Readonly<Props>) {
+	const [isSheetOpen, setIsSheetOpen] = useState(false);
+	const { call } = data;
+	const won = !!call && call.pick === data.winner;
+
+	let headline = `${data.winner} won`;
+	if (call) headline = won ? "You called it" : `You picked ${call.pick}`;
+	const total = call
+		? `${call.net > 0 ? "+" : call.net < 0 ? "−" : "±"}${Math.abs(call.net).toLocaleString()}`
+		: null;
+
+	const message = won
+		? `I called it on Verdict: ${data.question}`
+		: `${data.winner} it is: ${data.question}`;
+
+	return (
+		<div className='flex items-center justify-between gap-4 rounded-2xl border bg-card px-4 py-3'>
+			<div className='min-w-0'>
+				<p className='truncate text-sm text-muted-foreground'>{headline}</p>
+				{total ? (
+					<p
+						className={cn(
+							"text-5xl font-extrabold leading-none",
+							call && call.net > 0 && "text-win",
+							call && call.net < 0 && "text-loss",
+						)}
+						style={{ fontFamily: receipt.display }}
+					>
+						{total}
+						<span className='ml-1 text-xl'>pts</span>
+					</p>
+				) : (
+					<p className='truncate text-lg font-semibold'>
+						{data.calledIt} of {data.participants} called it
+					</p>
+				)}
+			</div>
+			<Button
+				variant={won ? "linear" : "outline"}
+				onClick={() => setIsSheetOpen(true)}
+			>
+				<ReceiptTextIcon />
+				{call ? "Share receipt" : "Share result"}
+			</Button>
+			<ShareSheet
+				open={isSheetOpen}
+				onOpenChange={setIsSheetOpen}
+				title={call ? "Share your receipt" : "Share the result"}
+				description='Friends who tap the link can join the room and see this prediction.'
+				message={message}
+				link={shareLink(
+					data.roomCode,
+					"brag-card",
+					`/rooms/${data.roomCode}/predictions/${predictionId}`,
+				)}
+				kind='brag-card'
+				roomId={roomId}
+				fileName={`verdict-${predictionId.slice(0, 8)}`}
+				renderCard={(format) => <BragReceipt data={{ ...data, host: shareHost() }} format={format} />}
+			/>
+		</div>
+	);
+}

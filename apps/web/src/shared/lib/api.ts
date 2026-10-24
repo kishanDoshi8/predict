@@ -324,9 +324,16 @@ export async function spectateRoom(roomCode: string): Promise<Room> {
   }
 }
 
-export async function joinRoom(roomCode: string): Promise<Room> {
+// Logs a completed share so we can see which shareables get used.
+export async function recordShare(roomId: string, kind: string) {
+  const { error } = await supabase.rpc('record_share', { p_room_id: roomId, p_kind: kind })
+  if (error) throw error
+}
+
+export async function joinRoom(roomCode: string, ref?: string | null): Promise<Room> {
   const { data, error } = await supabase.rpc('join_room', {
     p_room_code: roomCode,
+    p_ref: ref ?? undefined,
   })
   const room = assertOk(data, error) as {
     id: string

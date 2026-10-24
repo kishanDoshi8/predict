@@ -6,6 +6,15 @@ import "@/shared/assets/styles/global.css";
 if ("serviceWorker" in navigator) {
 	void navigator.serviceWorker
 		.register("/sw.js", { scope: "/" })
+		.then((registration) => {
+			// An installed app can stay open for days; look for a new worker
+			// each time it comes back into view.
+			document.addEventListener("visibilitychange", () => {
+				if (document.visibilityState === "visible") {
+					registration.update().catch(() => {});
+				}
+			});
+		})
 		.catch((error) => {
 			console.error("Service worker registration failed:", error);
 		});

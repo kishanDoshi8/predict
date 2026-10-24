@@ -31,7 +31,6 @@ type Props = {
 	onOpenHowToPlay: () => void;
 };
 
-
 export function RoomMenuDrawer({
 	room,
 	open,
@@ -62,7 +61,11 @@ export function RoomMenuDrawer({
 				});
 				return;
 			} catch (error) {
-				if (error instanceof DOMException && error.name === "AbortError") return;
+				if (
+					error instanceof DOMException &&
+					error.name === "AbortError"
+				)
+					return;
 			}
 		}
 		setIsInviteSheetOpen(true);
@@ -141,6 +144,7 @@ export function RoomMenuDrawer({
 		detail?: string;
 		icon: LucideIcon;
 		onClick: () => void;
+		isDanger?: boolean;
 	}> = [
 		...(hasGoogleIdentity
 			? []
@@ -157,6 +161,7 @@ export function RoomMenuDrawer({
 			detail: user?.email ?? undefined,
 			icon: LogOutIcon,
 			onClick: close(() => void handleSignOut()),
+			isDanger: true,
 		},
 	];
 
@@ -175,90 +180,99 @@ export function RoomMenuDrawer({
 
 	return (
 		<>
-		<Drawer open={open} onOpenChange={onOpenChange}>
-			<DrawerContent>
-				<DrawerHeader>
-					<DrawerTitle>{room.name}</DrawerTitle>
-					<DrawerDescription>
-						{room.members.length} member
-						{room.members.length === 1 ? "" : "s"}
-					</DrawerDescription>
-				</DrawerHeader>
-				<div className='flex flex-col gap-1 space-y-5 overflow-y-auto px-4 pb-4'>
-					<ul>
-						{items.map(({ label, detail, icon: Icon, onClick }) => (
-							<li key={label}>
-								<SettingsRow
-									icon={
-										<Icon className='size-5 text-muted-foreground' />
-									}
-									label={label}
-									description={detail}
-									onClick={onClick}
-								/>
-							</li>
-						))}
-					</ul>
-					{settingsSectionItems.map(
-						({ label, detail, icon: Icon, onClick }) => (
-							<section className='space-y-2' key={label}>
-								<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
-									Settings
-								</p>
-								<SettingsRow
-									icon={
-										<Icon className='size-5 text-muted-foreground' />
-									}
-									label={label}
-									description={detail}
-									onClick={onClick}
-								/>
-							</section>
-						),
-					)}
-					<section className='space-y-2'>
-						<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
-							Account
-						</p>
-						{accountSectionItems.map(
+			<Drawer open={open} onOpenChange={onOpenChange}>
+				<DrawerContent>
+					<DrawerHeader>
+						<DrawerTitle>{room.name}</DrawerTitle>
+						<DrawerDescription>
+							{room.members.length} member
+							{room.members.length === 1 ? "" : "s"}
+						</DrawerDescription>
+					</DrawerHeader>
+					<div className='flex flex-col gap-1 space-y-5 overflow-y-auto px-4 pb-4'>
+						<ul>
+							{items.map(
+								({ label, detail, icon: Icon, onClick }) => (
+									<li key={label}>
+										<SettingsRow
+											icon={
+												<Icon className='size-5 text-muted-foreground' />
+											}
+											label={label}
+											description={detail}
+											onClick={onClick}
+										/>
+									</li>
+								),
+							)}
+						</ul>
+						{settingsSectionItems.map(
 							({ label, detail, icon: Icon, onClick }) => (
-								<SettingsRow
-									key={label}
-									icon={
-										<Icon className='size-5 text-muted-foreground' />
-									}
-									label={label}
-									description={detail}
-									onClick={onClick}
-								/>
+								<section className='space-y-2' key={label}>
+									<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+										Settings
+									</p>
+									<SettingsRow
+										icon={
+											<Icon className='size-5 text-muted-foreground' />
+										}
+										label={label}
+										description={detail}
+										onClick={onClick}
+									/>
+								</section>
 							),
 						)}
-					</section>
-					{helpSectionItems.map(
-						({ label, detail, icon: Icon, onClick }) => (
-							<section className='space-y-2' key={label}>
-								<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
-									Help
-								</p>
-								<SettingsRow
-									icon={
-										<Icon className='size-5 text-muted-foreground' />
-									}
-									label={label}
-									description={detail}
-									onClick={onClick}
-								/>
-							</section>
-						),
-					)}
-				</div>
-			</DrawerContent>
-		</Drawer>
-		<InviteSheet
-			room={room}
-			open={isInviteSheetOpen}
-			onOpenChange={setIsInviteSheetOpen}
-		/>
+						<section className='space-y-2'>
+							<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+								Account
+							</p>
+							{accountSectionItems.map(
+								({
+									label,
+									detail,
+									icon: Icon,
+									onClick,
+									isDanger,
+								}) => (
+									<SettingsRow
+										key={label}
+										icon={
+											<Icon className='size-5 text-muted-foreground' />
+										}
+										isDanger={isDanger}
+										label={label}
+										description={detail}
+										onClick={onClick}
+									/>
+								),
+							)}
+						</section>
+						{/* {helpSectionItems.map(
+							({ label, detail, icon: Icon, onClick }) => (
+								<section className='space-y-2' key={label}>
+									<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+										Help
+									</p>
+									<SettingsRow
+										icon={
+											<Icon className='size-5 text-muted-foreground' />
+										}
+										label={label}
+										description={detail}
+										onClick={onClick}
+									/>
+								</section>
+							),
+						)} */}
+					</div>
+				</DrawerContent>
+			</Drawer>
+			<InviteSheet
+				room={room}
+				open={isInviteSheetOpen}
+				onOpenChange={setIsInviteSheetOpen}
+			/>
 		</>
 	);
 }

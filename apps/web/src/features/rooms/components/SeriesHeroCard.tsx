@@ -4,9 +4,11 @@ import { useSeriesLeaderboard } from "@/features/leaderboard";
 import { useActivePredictions } from "@/features/predictions";
 import {
 	SeriesStatusBadge,
+	ShareStandingsButton,
 	useCurrentSeries,
 	useSeriesWallet,
 } from "@/features/series";
+import { TrophyIcon } from "lucide-react";
 import { describeDeadline } from "@/shared/lib/deadline";
 import { cn, formatSignedPoints } from "@/shared/lib/utils";
 import { Skeleton } from "@/shared/ui";
@@ -111,6 +113,21 @@ export function SeriesHeroCard() {
 				{wallet.escrow.toLocaleString()} in play ·{" "}
 				{wallet.available.toLocaleString()} to spend
 			</p>
+
+			{currentSeries.status === "completed" && standings[0] ? (
+				<div className='mt-3 flex items-center gap-3 rounded-xl border bg-muted/40 px-3 py-2'>
+					<TrophyIcon className='size-4 shrink-0 text-accent' />
+					<p className='min-w-0 flex-1 truncate text-sm'>
+						<span className='font-semibold'>{standings[0].username}</span> took
+						the title
+					</p>
+					<ShareStandingsButton
+						series={currentSeries}
+						className='h-8 px-3 text-xs'
+						label='Share'
+					/>
+				</div>
+			) : null}
 
 			{nextLock && nextLockWhen ? (
 				<Link

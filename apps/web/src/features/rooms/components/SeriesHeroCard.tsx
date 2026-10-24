@@ -17,8 +17,11 @@ import { Link } from "react-router-dom";
 export function SeriesHeroCard() {
 	const { room } = useRoomContext();
 	const { data: player } = usePlayer();
-	const { currentSeries, currentSeriesId, isPending: isSeriesLoading } =
-		useCurrentSeries(room.id);
+	const {
+		currentSeries,
+		currentSeriesId,
+		isPending: isSeriesLoading,
+	} = useCurrentSeries(room.id);
 	const { wallet, isPending: isWalletLoading } = useSeriesWallet(
 		room.id,
 		currentSeriesId,
@@ -33,11 +36,15 @@ export function SeriesHeroCard() {
 	);
 
 	if (isSeriesLoading || (currentSeriesId && isWalletLoading)) {
-		return <Skeleton className='h-36 w-full max-w-md mx-auto rounded-2xl' />;
+		return (
+			<Skeleton className='h-36 w-full max-w-md mx-auto rounded-2xl' />
+		);
 	}
 	if (!currentSeries || !wallet) return null;
 
-	const myRank = standings.find((entry) => entry.player_id === player?.id)?.rank;
+	const myRank = standings.find(
+		(entry) => entry.player_id === player?.id,
+	)?.rank;
 	const now = Date.now();
 	const nextLock = predictions
 		.filter(
@@ -56,7 +63,7 @@ export function SeriesHeroCard() {
 	return (
 		<section
 			aria-label={`${currentSeries.title} summary`}
-			className='w-full max-w-md mx-auto rounded-2xl border bg-card p-4'
+			className='w-full max-w-md mx-auto rounded-2xl border bg-card p-4 mt-4'
 		>
 			<div className='flex items-center justify-between gap-2'>
 				<p className='truncate text-sm font-medium text-muted-foreground'>
@@ -71,7 +78,7 @@ export function SeriesHeroCard() {
 					<p className='text-3xl font-bold leading-tight'>
 						{myRank ? `#${myRank}` : "–"}
 						{standings.length > 0 ? (
-							<span className='ml-1 text-base font-medium text-muted-foreground'>
+							<span className='ml-2 text-base font-medium text-muted-foreground'>
 								of {standings.length}
 							</span>
 						) : null}

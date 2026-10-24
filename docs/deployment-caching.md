@@ -104,8 +104,15 @@ World Cup 2026" under the ticket image. Tapping it opens the room's join page.
 Only the room's name and counts are shown, never member names or questions.
 
 Chat apps don't run the app's JavaScript, so a small Supabase function
-(`supabase/functions/invite-preview`) writes the preview, and nginx sends
-`/i/` to it. All of this is free on the current plans.
+(`supabase/functions/invite-preview`) writes the preview. nginx sends only
+link-preview crawlers (WhatsApp, iMessage, Telegram, ...) to it; people who tap
+the link are redirected straight to the join page. All of this is free on the
+current plans.
+
+People are never shown the function's page: Supabase serves HTML from
+functions with a strict security header (`Content-Security-Policy: default-src
+'none'; sandbox`) that blocks its styles and its redirect, which showed up as a
+white page with a single link.
 
 1. **Apply the migration and deploy the function** (from the repo root on
    your computer or the server, logged in with the Supabase CLI):
@@ -116,11 +123,17 @@ Chat apps don't run the app's JavaScript, so a small Supabase function
    npx supabase secrets set APP_URL=https://kishandoshi.me
    ```
 
-2. **Add the nginx block.** Paste the block from
-   [`deploy/nginx/verdict-invite.conf`](../deploy/nginx/verdict-invite.conf)
-   into the same `server { ... }` block as before. Replace `YOUR-PROJECT-REF`
-   in both places with your project ref: the part before `.supabase.co` in
-   `VITE_SUPABASE_URL`. Then run:
+2. **Add the nginx rules.**
+   - Copy [`deploy/nginx/verdict-invite-map.conf`](../deploy/nginx/verdict-invite-map.conf)
+     to `/etc/nginx/conf.d/verdict-invite-map.conf`. It tells crawlers apart
+     from people.
+   - Paste the block from
+     [`deploy/nginx/verdict-invite.conf`](../deploy/nginx/verdict-invite.conf)
+     into the same `server { ... }` block as before (replace the old `/i/`
+     block if you added it). Replace `YOUR-PROJECT-REF` in both places with
+     your project ref: the part before `.supabase.co` in `VITE_SUPABASE_URL`.
+
+   Then run:
 
    ```bash
    sudo nginx -t && sudo systemctl reload nginx
@@ -129,11 +142,14 @@ Chat apps don't run the app's JavaScript, so a small Supabase function
 3. **Check it** (use your room code):
 
    ```bash
-   curl -s https://kishandoshi.me/i/F4C36D | grep og:description
+   # People: an instant redirect to the join page
+   curl -sI https://kishandoshi.me/i/F4C36D | grep -i -E "^HTTP|^location"
+   # Chat apps: the room's preview
+   curl -s -A "WhatsApp/2.24" https://kishandoshi.me/i/F4C36D | grep og:description
    ```
 
-   You should see the room's counts. In a browser, the same link should land
-   on the join page.
+   The first should show `302` and `Location: .../rooms/F4C36D/join`; the
+   second, the room's counts.
 
 4. **Switch the app to short links.** Add this line to `apps/web/.env` on the
    server, then deploy as usual (`git pull && npm run build`):

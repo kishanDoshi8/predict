@@ -7,7 +7,15 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-	event.respondWith(fetch(event.request));
+	// Bundles, images and API calls go straight to the network untouched.
+	if (event.request.mode !== "navigate") return;
+	// Opening the app must never be answered by a stale cached page, so the
+	// page is always checked with the server (a cheap 304 when unchanged).
+	event.respondWith(
+		fetch(new Request(event.request, { cache: "no-cache" })).catch(() =>
+			fetch(event.request),
+		),
+	);
 });
 
 self.addEventListener("push", (event) => {

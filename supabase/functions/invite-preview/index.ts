@@ -18,6 +18,12 @@ type Preview = {
 const CODE = /^[A-Za-z0-9]{4,12}$/;
 const REF = /^[a-z][a-z-]{0,31}$/;
 
+// Link-preview crawlers get the page with preview tags; everyone else is sent
+// straight to the app. Keep in sync with deploy/nginx/verdict-invite-map.conf.
+// (iMessage previews identify as facebookexternalhit / Twitterbot.)
+const PREVIEW_BOT =
+	/facebookexternalhit|facebot|whatsapp|twitterbot|telegrambot|slackbot|discordbot|linkedinbot|skypeuripreview|applebot|googlebot|bingbot|embedly|pinterest|redditbot|vkshare|iframely|mastodon/i;
+
 function escapeHtml(value: string) {
 	return value
 		.replaceAll("&", "&amp;")
@@ -87,37 +93,55 @@ function page(options: {
 <meta name="twitter:description" content="${description}">
 <meta name="twitter:image" content="${escapeHtml(options.image)}">
 <meta http-equiv="refresh" content="0;url=${destination}">
-<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#09090b;color:#e9ebe6;font:16px ui-monospace,monospace}a{color:#f5a524}</style>
 </head>
-<body>
-<p><a href="${destination}">Open ${title}</a></p>
+<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#09090b;color:#e9ebe6;font:16px ui-monospace,monospace">
+<p><a href="${destination}" style="color:#f5a524">Open ${title}</a></p>
 <script>location.replace(${JSON.stringify(options.destination)});</script>
 </body>
 </html>`;
 }
 
+// The room's join page, keeping only a valid ref and a next path inside the room.
+function joinUrl(origin: string, code: string, ref: string | null, next: string | null) {
+	const params = new URLSearchParams();
+	if (ref && REF.test(ref)) params.set("ref", ref);
+	// Only paths inside this room, as the join page also checks.
+	if (next?.startsWith(`/rooms/${code}/`) && !next.includes("//")) {
+		params.set("next", next);
+	}
+	const query = params.toString();
+	return `${origin}/rooms/${code}/join${query ? `?${query}` : ""}`;
+}
+
 Deno.serve(async (request) => {
 	const url = new URL(request.url);
-	const code = url.pathname.split("/").filter(Boolean).pop() ?? "";
+	const rawCode = url.pathname.split("/").filter(Boolean).pop() ?? "";
+	const code = CODE.test(rawCode) ? rawCode.toUpperCase() : null;
 	const origin = appOrigin(request);
 	const ref = url.searchParams.get("ref");
 	const next = url.searchParams.get("next");
 
-	const preview = CODE.test(code) ? await loadPreview(code).catch(() => null) : null;
+	// People never see this page: a redirect is instant and needs no lookup.
+	// (Supabase serves function HTML with a sandboxing security policy, so a
+	// page-based redirect wouldn't run in a browser anyway.)
+	if (!PREVIEW_BOT.test(request.headers.get("user-agent") ?? "")) {
+		return new Response(null, {
+			status: 302,
+			headers: {
+				Location: code ? joinUrl(origin, code, ref, next) : `${origin}/`,
+				"Cache-Control": "no-store",
+			},
+		});
+	}
+
+	const preview = code ? await loadPreview(code).catch(() => null) : null;
 
 	let destination = `${origin}/`;
 	let title = "You're invited to Verdict";
 	let description = "Join your friends' prediction series. Same points for everyone, top balance wins.";
 
 	if (preview) {
-		const params = new URLSearchParams();
-		if (ref && REF.test(ref)) params.set("ref", ref);
-		// Only paths inside this room, as the join page also checks.
-		if (next?.startsWith(`/rooms/${preview.room_code}/`) && !next.includes("//")) {
-			params.set("next", next);
-		}
-		const query = params.toString();
-		destination = `${origin}/rooms/${preview.room_code}/join${query ? `?${query}` : ""}`;
+		destination = joinUrl(origin, preview.room_code, ref, next);
 		title = `Join ${preview.name} on Verdict`;
 		const parts = [
 			plural(preview.member_count, "friend playing", "friends playing"),
@@ -133,7 +157,7 @@ Deno.serve(async (request) => {
 			description,
 			destination,
 			image: `${origin}/og-image.jpg`,
-			pageUrl: `${origin}/i/${code}`,
+			pageUrl: `${origin}/i/${code ?? rawCode}`,
 		}),
 		{
 			status: preview ? 200 : 404,

@@ -1,4 +1,4 @@
-import { RoomActivity } from "@/features/activities/types/types";
+import { PredictionActivityMetadata, RoomActivity } from "@/features/activities/types/types";
 import { FEATURES } from "@/shared/constants/features";
 
 export function formatPoints(value: number | null | undefined) {
@@ -40,4 +40,14 @@ export function resolveActivityHref(activity: RoomActivity, roomCode: string) {
 	}
 
 	return null;
+}
+
+// "World Cup · #3", shown on prediction cards when the feed mixes series.
+export function formatPredictionSeries(
+	metadata: Pick<PredictionActivityMetadata, "seriesTitle" | "seriesPredictionNumber">,
+) {
+	if (!metadata.seriesTitle) return undefined;
+	return metadata.seriesPredictionNumber
+		? `${metadata.seriesTitle} · #${metadata.seriesPredictionNumber}`
+		: metadata.seriesTitle;
 }

@@ -10,6 +10,7 @@ type RoomActivitiesFeedProps = {
 	isError: boolean;
 	errorMessage?: string;
 	emptyMessage?: string;
+	showSeries?: boolean;
 };
 
 export function RoomActivitiesFeed({
@@ -19,6 +20,7 @@ export function RoomActivitiesFeed({
 	isError,
 	errorMessage,
 	emptyMessage,
+	showSeries,
 }: Readonly<RoomActivitiesFeedProps>) {
 	if (isLoading) {
 		return (
@@ -62,6 +64,7 @@ export function RoomActivitiesFeed({
 					key={activity.id}
 					activity={activity}
 					roomCode={roomCode}
+					showSeries={showSeries}
 				/>
 			))}
 		</div>

@@ -22,7 +22,10 @@ import { Spinner } from "@/shared/ui/spinner";
 import { useCreatePrediction } from "@/features/predictions";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { SeriesSelector, useCurrentSeries } from "@/features/series";
+import { describeDeadline } from "@/shared/lib/deadline";
 import { Link, useLocation } from "react-router-dom";
+
+const PRESET_HOURS: Record<string, number> = { "1h": 1, "6h": 6, "12h": 12 };
 
 export default function PredictionNew() {
 	const { room } = useRoomContext();
@@ -39,14 +42,13 @@ export default function PredictionNew() {
 	const [options, setOptions] = useState(initialOptions);
 	const [question, setQuestion] = useState("");
 	const [biddingDeadline, setBiddingDeadline] = useState("1h");
-	const [deadline, setDeadline] = useState("");
 	const [deadlineDate, setDeadlineDate] = useState(
 		new Date(Date.now() + 1 * 60 * 60 * 1000),
 	);
 	const [customDate, setCustomDate] = useState<Date | undefined>(
 		new Date(Date.now() + 24 * 60 * 60 * 1000),
 	);
-	const [customTime, setCustomTime] = useState<string>("22:00:00");
+	const [customTime, setCustomTime] = useState<string>("22:00");
 	const { currentSeries, hasActiveSeries, isPending: isSeriesLoading } =
 		useCurrentSeries(room?.id);
 	// Every prediction belongs to a series: default to the one the player is looking at.
@@ -101,6 +103,9 @@ export default function PredictionNew() {
 		if (!question.trim()) {
 			newErrors.push("question");
 		}
+		if (deadlineDate.getTime() <= Date.now()) {
+			newErrors.push("deadline");
+		}
 		options.forEach((option) => {
 			if (!option.text.trim()) {
 				newErrors.push(`option-${option.id}`);
@@ -134,80 +139,20 @@ export default function PredictionNew() {
 	};
 
 	const calculateDeadline = () => {
-		const now = new Date();
-		const value = biddingDeadline;
-		switch (value) {
-			case "1h": {
-				const formattedDate = new Date(
-					now.getTime() + 1 * 60 * 60 * 1000,
-				);
-				setDeadlineDate(formattedDate);
-				setDeadline(
-					formattedDate.toLocaleString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: true,
-					}),
-				);
-				break;
-			}
-			case "6h": {
-				const formattedDate = new Date(
-					now.getTime() + 6 * 60 * 60 * 1000,
-				);
-				setDeadlineDate(formattedDate);
-				setDeadline(
-					formattedDate.toLocaleString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: true,
-					}),
-				);
-				break;
-			}
-			case "12h": {
-				const formattedDate = new Date(
-					now.getTime() + 12 * 60 * 60 * 1000,
-				);
-				setDeadlineDate(formattedDate);
-				setDeadline(
-					formattedDate.toLocaleString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: true,
-					}),
-				);
-				break;
-			}
-			case "custom":
-				if (customDate && customTime) {
-					const [hours, minutes, seconds] = customTime
-						.split(":")
-						.map(Number);
-					const formattedDate = new Date(customDate);
-					formattedDate.setHours(hours, minutes, seconds);
-					setDeadline(
-						formattedDate.toLocaleString("en-US", {
-							month: "short",
-							day: "numeric",
-							hour: "numeric",
-							minute: "numeric",
-							hour12: true,
-						}),
-					);
-					setDeadlineDate(formattedDate);
-				}
-				break;
-			default:
-				setDeadline("");
+		if (biddingDeadline in PRESET_HOURS) {
+			const hours = PRESET_HOURS[biddingDeadline];
+			setDeadlineDate(new Date(Date.now() + hours * 60 * 60 * 1000));
+			return;
+		}
+		if (biddingDeadline === "custom" && customDate && customTime) {
+			const [hours, minutes] = customTime.split(":").map(Number);
+			const date = new Date(customDate);
+			date.setHours(hours, minutes, 0, 0);
+			setDeadlineDate(date);
 		}
 	};
+
+	const deadlineInfo = describeDeadline(deadlineDate);
 
 	if (!isSeriesLoading && !hasActiveSeries) {
 		return (
@@ -405,20 +350,48 @@ export default function PredictionNew() {
 								</div>
 								<Input
 									type='time'
-									step='1'
+									aria-label='Lock time'
 									value={customTime}
 									onChange={(e) => {
-										setCustomTime(e.target.value);
+										if (e.target.value) setCustomTime(e.target.value);
 									}}
-									className='appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none'
+									onClick={(e) => {
+										// Opens the clock where the browser supports it;
+										// elsewhere tapping the field opens the native picker.
+										try {
+											e.currentTarget.showPicker?.();
+										} catch {
+											// Not allowed in this context; typing still works.
+										}
+									}}
+									className='w-36 shrink-0 bg-background'
 								/>
 							</div>
 						)}
 
-						<Alert>
-							<Clock className={`text-muted-foreground`} />
+						<Alert
+							variant={deadlineInfo.isPast ? "destructive" : "default"}
+						>
+							<Clock
+								className={
+									deadlineInfo.isPast ? undefined : `text-muted-foreground`
+								}
+							/>
 							<AlertDescription>
-								Prediction locks at {deadline?.toLocaleString()}
+								{deadlineInfo.isPast ? (
+									<span>
+										That time has already passed. Pick a later one.
+									</span>
+								) : (
+									<span>
+										Locks{" "}
+										<span className='font-semibold text-foreground'>
+											{deadlineInfo.when}
+										</span>
+										{deadlineInfo.date ? ` · ${deadlineInfo.date}` : ""}
+										{` · ${deadlineInfo.relative}`}
+									</span>
+								)}
 							</AlertDescription>
 						</Alert>
 					</Field>

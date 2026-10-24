@@ -3,12 +3,24 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/shared/lib/supabase";
 import { roomKeys } from "@/shared/constants/queryKeys";
 import { playerQueryKey } from "@/features/home";
+import { invalidateRoomResults } from "@/shared/lib/roomCache";
 
 export function useRoomRealtime(roomId: string | null) {
 	const queryClient = useQueryClient();
 
 	useEffect(() => {
 		if (!roomId) return;
+
+		let hasSubscribed = false;
+		const catchUp = () => {
+			invalidateRoomResults(queryClient, roomId);
+			queryClient.invalidateQueries({
+				predicate: (query) =>
+					query.queryKey[0] === roomKeys.all[0] &&
+					query.queryKey[1] === roomId &&
+					query.queryKey[2] === "activities",
+			});
+		};
 
 		const channel = supabase
 			.channel(`room:${roomId}`)
@@ -34,21 +46,16 @@ export function useRoomRealtime(roomId: string | null) {
 					table: "predictions",
 					filter: `room_id=eq.${roomId}`,
 				},
-				() => {
-					queryClient.invalidateQueries({
-						queryKey: roomKeys.activePredictions(roomId),
-					});
-					// A result moves points, so wallets and standings change too.
-					queryClient.invalidateQueries({
-						queryKey: roomKeys.seriesWallets(roomId),
-					});
-					queryClient.invalidateQueries({
-						predicate: (query) =>
-							query.queryKey[0] === roomKeys.all[0] &&
-							query.queryKey[1] === roomId &&
-							(query.queryKey[2] === "seriesLeaderboard" ||
-								query.queryKey[2] === "overallStandings"),
-					});
+				(payload) => {
+					invalidateRoomResults(queryClient, roomId);
+					const predictionId =
+						(payload.new as { id?: string } | null)?.id ??
+						(payload.old as { id?: string } | null)?.id;
+					if (predictionId) {
+						queryClient.invalidateQueries({
+							queryKey: roomKeys.prediction(roomId, predictionId),
+						});
+					}
 				},
 			)
 			.on(
@@ -98,9 +105,22 @@ export function useRoomRealtime(roomId: string | null) {
 			)
 			.subscribe((status) => {
 				console.log("Realtime status:", status);
+				// Events sent while the socket was down are lost, so catch up
+				// after a reconnect.
+				if (status === "SUBSCRIBED") {
+					if (hasSubscribed) catchUp();
+					hasSubscribed = true;
+				}
 			});
 
+		// Phones pause the socket in the background; refresh on return.
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === "visible") catchUp();
+		};
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+
 		return () => {
+			document.removeEventListener("visibilitychange", handleVisibilityChange);
 			supabase.removeChannel(channel);
 		};
 	}, [roomId, queryClient]);

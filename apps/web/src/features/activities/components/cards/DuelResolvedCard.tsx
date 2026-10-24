@@ -20,12 +20,11 @@ export function DuelResolvedCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<CrownIcon className='size-4' />}
-			typeLabel='Duel'
+			typeLabel='Duel resolved'
 			tone='success'
 			actorLabel={
 				metadata.winner?.username ?? metadata.challenger.username
 			}
-			contextLabel='Resolved'
 			title='Duel resolved'
 			description={winnerLabel}
 			summary={

@@ -3,6 +3,7 @@ import { ActivityCard } from "@/features/activities/components/ActivityCard";
 import {
 	formatActivityTimestamp,
 	formatPoints,
+	formatPredictionSeries,
 	resolveActivityHref,
 } from "@/features/activities/lib/activity";
 import { PredictionLockedActivity } from "@/features/activities/types/types";
@@ -11,18 +12,18 @@ import { ActivityCardComponentProps } from "@/features/activities/components/car
 export function PredictionLockedCard({
 	activity,
 	roomCode,
+	showSeries,
 }: Readonly<ActivityCardComponentProps<PredictionLockedActivity>>) {
 	const metadata = activity.metadata;
 	return (
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<LockIcon className='size-4' />}
-			typeLabel='Prediction'
+			typeLabel='Locked'
 			tone='warning'
-			contextLabel='Locked'
 			title={metadata.title}
-			description='Prediction locked'
 			summary={`${metadata.totalBets} bets · ${formatPoints(metadata.totalWagered)} pts wagered`}
+			contextLabel={showSeries ? formatPredictionSeries(metadata) : undefined}
 			timestamp={formatActivityTimestamp(activity.createdAt)}
 			href={resolveActivityHref(activity, roomCode)}
 		/>

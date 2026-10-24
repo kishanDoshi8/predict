@@ -10,7 +10,14 @@ import {
 	X,
 } from "lucide-react";
 import { Player } from "@/features/home";
-import { useCancelBet, useMyBet, usePlaceBet } from "@/features/predictions";
+import {
+	useBets,
+	useCancelBet,
+	useMyBet,
+	usePlaceBet,
+	usePrediction,
+} from "@/features/predictions";
+import { previewWinnings } from "@/features/predictions/lib/payoutPreview";
 import { Spinner } from "@/shared/ui/spinner";
 import { toast } from "sonner";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
@@ -49,6 +56,8 @@ export default function DraftControls({
 		player.id,
 	);
 	const { mutate: cancelBet, isPending: isCancellingBet } = useCancelBet();
+	const { data: prediction } = usePrediction(room.id, predictionId);
+	const { data: bets = [] } = useBets(room.id, predictionId);
 
 	const [betAmount, setBetAmount] = React.useState<number>(1);
 	const [collapseControls, setCollapseControls] = useLocalStorage<boolean>(
@@ -59,6 +68,16 @@ export default function DraftControls({
 
 	// Bets spend points from this prediction's series wallet.
 	const availableBalance = (wallet?.available ?? 0) + (myBet?.amount ?? 0);
+
+	const optionLabel = (optionId: string | null) =>
+		prediction?.prediction_options.find((option) => option.id === optionId)
+			?.label ?? "";
+	const isSwitchingOption = !!myBet && selectedOption !== myBet.option_id;
+	const isAmountChanged = !!myBet && myBet.amount !== betAmount;
+	const hasChanges = isSwitchingOption || isAmountChanged;
+	const projectedGain = selectedOption
+		? previewWinnings(bets, player.id, selectedOption, betAmount)
+		: 0;
 
 
 	useEffect(() => {
@@ -76,6 +95,7 @@ export default function DraftControls({
 		setCanUpdateBet(!hasDuelInProgress);
 	}, [duels, player.id, predictionId, room.id]);
 
+	// Load the saved bet into the controls when it arrives or changes.
 	useEffect(() => {
 		if (myBet) {
 			setSelectedOption(myBet.option_id);
@@ -83,26 +103,23 @@ export default function DraftControls({
 		} else {
 			setBetAmount(1);
 		}
+	}, [myBet?.option_id, myBet?.amount]);
 
-		if (!myBet && !isMyBetLoading) {
+	useEffect(() => {
+		if (isMyBetLoading) return;
+		// Nothing placed yet, or a new option picked: show the full controls.
+		if (!myBet || (selectedOption && selectedOption !== myBet.option_id)) {
 			setCollapseControls(false);
 		}
+	}, [myBet, isMyBetLoading, selectedOption, setCollapseControls]);
 
-		if (selectedOption && !myBet && !isMyBetLoading) {
-			setCollapseControls(false);
+	useEffect(() => {
+		// Collapsing discards unsaved changes.
+		if (collapseControls && myBet) {
+			setBetAmount(myBet.amount);
+			setSelectedOption(myBet.option_id);
 		}
-
-		if (collapseControls && myBet?.amount !== betAmount) {
-			setBetAmount(myBet?.amount ?? 0);
-		}
-	}, [
-		myBet,
-		isMyBetLoading,
-		selectedOption,
-		setSelectedOption,
-		collapseControls,
-		setCollapseControls,
-	]);
+	}, [collapseControls]);
 
 	const handlePlaceBet = () => {
 		if (!player || !predictionId || !selectedOption) return;
@@ -147,6 +164,7 @@ export default function DraftControls({
 	const handleResetBetAmount = () => {
 		if (myBet) {
 			setBetAmount(myBet.amount);
+			setSelectedOption(myBet.option_id);
 		} else {
 			setBetAmount(1);
 		}
@@ -228,7 +246,7 @@ export default function DraftControls({
 								<p
 									className={`flex items-center justify-start gap-2 text-xs text-muted-foreground`}
 								>
-									{myBet && myBet.amount !== betAmount && (
+									{hasChanges && (
 										<RotateCcw className={`w-3! h-3!`} />
 									)}
 									Bet Amount
@@ -263,6 +281,27 @@ export default function DraftControls({
 						</p>
 					</div>
 				</div>
+				{selectedOption && !collapseControls && (
+					<p
+						className={`-mt-3 text-sm text-muted-foreground`}
+						aria-live='polite'
+					>
+						{projectedGain > 0 ? (
+							<>
+								If {optionLabel(selectedOption)} wins:{" "}
+								<span className={`font-semibold text-win`}>
+									≈ +{projectedGain.toLocaleString()} pts
+								</span>
+								<span className={`text-xs`}>
+									{" "}
+									· changes as others bet
+								</span>
+							</>
+						) : (
+							<>No one to win from on this pick yet.</>
+						)}
+					</p>
+				)}
 				{!collapseControls && (
 					<>
 						{selectedOption && (
@@ -362,14 +401,13 @@ export default function DraftControls({
 									<Button
 										variant={"linear"}
 										className={`flex-1`}
-										disabled={
-											isPlacingBet ||
-											myBet.amount === betAmount
-										}
+										disabled={isPlacingBet || !hasChanges}
 										onClick={handlePlaceBet}
 									>
 										{isPlacingBet && <Spinner />}
-										Update Bet
+										{isSwitchingOption
+											? `Switch to ${optionLabel(selectedOption)}`
+											: "Update Bet"}
 									</Button>
 								</div>
 							)}
@@ -410,8 +448,8 @@ export default function DraftControls({
 					)}
 					{myBet && (
 						<p className={`text-xs text-muted-foreground mt-2`}>
-							You can update your bet or cancel to change options
-							before the deadline.
+							Tap another option to switch, or change the amount,
+							until the deadline.
 						</p>
 					)}
 				</div>

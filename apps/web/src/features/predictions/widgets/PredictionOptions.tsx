@@ -9,11 +9,10 @@ import {
 	RadioGroupItem,
 	Skeleton,
 } from "@/shared/ui";
-import { useBets, useMyBet } from "@/features/predictions";
+import { useBets } from "@/features/predictions";
 import { Prediction } from "@/features/predictions";
 import React from "react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import { usePlayer } from "@/features/home";
 import { useOptionColor } from "@/shared/hooks/useOptionColor";
 
 type Props = {
@@ -30,13 +29,7 @@ export default function PredictionOptions({
 	fadeDelay,
 }: Readonly<Props>) {
 	const { room } = useRoomContext();
-	const { data: player } = usePlayer();
 	const { data: bets = [] } = useBets(room.id, prediction?.id);
-	const { data: myBet } = useMyBet(
-		room.id,
-		prediction?.id ?? "",
-		player?.id ?? "",
-	);
 
 	// totalBetAmount per option
 	const betAmountPerOption: Record<string, number> = {};
@@ -57,7 +50,8 @@ export default function PredictionOptions({
 						className={`mt-4`}
 						value={selectedOption}
 						onValueChange={setSelectedOption}
-						disabled={prediction.status !== "draft" || !!myBet}
+						// A placed bet can switch to another option until the deadline.
+						disabled={prediction.status !== "draft"}
 					>
 						{prediction.prediction_options.map((option) => (
 							<FieldLabel

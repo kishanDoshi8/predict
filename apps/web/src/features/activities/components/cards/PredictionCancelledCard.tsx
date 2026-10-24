@@ -2,6 +2,7 @@ import { BanIcon } from "lucide-react";
 import { ActivityCard } from "@/features/activities/components/ActivityCard";
 import {
 	formatActivityTimestamp,
+	formatPredictionSeries,
 	resolveActivityHref,
 } from "@/features/activities/lib/activity";
 import { PredictionCancelledActivity } from "@/features/activities/types/types";
@@ -10,18 +11,18 @@ import { ActivityCardComponentProps } from "@/features/activities/components/car
 export function PredictionCancelledCard({
 	activity,
 	roomCode,
+	showSeries,
 }: Readonly<ActivityCardComponentProps<PredictionCancelledActivity>>) {
 	const metadata = activity.metadata;
 	return (
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<BanIcon className='size-4' />}
-			typeLabel='Prediction'
+			typeLabel='Cancelled'
 			tone='danger'
-			contextLabel='Cancelled'
 			title={metadata.title}
-			description='Prediction cancelled'
 			summary={metadata.noResultReason ?? "All bets were refunded."}
+			contextLabel={showSeries ? formatPredictionSeries(metadata) : undefined}
 			timestamp={formatActivityTimestamp(activity.createdAt)}
 			href={resolveActivityHref(activity, roomCode)}
 		/>

@@ -1,7 +1,9 @@
 import { usePlayer } from "@/features/home";
 import { useJoinRoom, useRoom } from "@/features/rooms/hooks/room";
 import { Button, Loading, Spinner } from "@/shared/ui";
-import { ChevronLeftIcon, UsersIcon, ZapIcon } from "lucide-react";
+import { ChevronLeftIcon } from "lucide-react";
+import { receipt } from "@/features/share";
+import { TornEdge } from "@/features/share/components/Slip";
 import { Navigate, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { savePostAuthRedirect } from "@/shared/lib/postAuthRedirect";
@@ -81,62 +83,78 @@ export function JoinRoomPage() {
 		navigate("/", { replace: true });
 	};
 
+	const leaders: Array<[string, string]> = [
+		["Friends playing", memberCount.toLocaleString()],
+		["Predictions live", predictionCount.toLocaleString()],
+		["Organized by", organizerName],
+		["Room code", room.code],
+	];
+
 	return (
 		<div className='min-h-dvh flex flex-col'>
-			<header className='p-4 sticky top-0 left-0 right-0 z-10 bg-secondary/30 backdrop-blur-sm border-b'>
-				<div className='max-w-280 mx-auto flex items-center gap-3'>
-					<Button variant='linear' className='rounded-lg' onClick={handleBack}>
-						<ChevronLeftIcon />
-					</Button>
-					<h1 className='font-bold truncate'>{room.name}</h1>
-				</div>
+			<header className='p-4'>
+				<Button
+					variant='ghost'
+					size='icon'
+					className='rounded-lg'
+					onClick={handleBack}
+					aria-label='Back'
+				>
+					<ChevronLeftIcon />
+				</Button>
 			</header>
 
-			<main className='max-w-280 w-full mx-auto flex-1 px-4 pt-4 pb-28'>
-				<div className='border rounded-xl overflow-hidden bg-card'>
-					<div className='h-36 bg-linear-to-r from-primary/30 via-accent/20 to-primary/10 flex items-center justify-center border-b'>
-						<div className='size-14 rounded-full bg-background/90 text-2xl font-bold flex items-center justify-center'>
-							{room.name.slice(0, 1).toUpperCase()}
+			<main className='flex-1 w-full max-w-md mx-auto flex flex-col justify-center px-6 pb-32'>
+				{/* An admission ticket, in the same print as the shared cards. */}
+				<div
+					className='-rotate-1 drop-shadow-[0_18px_28px_rgba(0,0,0,0.45)]'
+					style={{ fontFamily: receipt.mono, color: receipt.print }}
+				>
+					<div
+						className='flex flex-col gap-5 px-6 pt-6 pb-5'
+						style={{ background: receipt.paper }}
+					>
+						<div className='flex justify-between gap-4 text-sm'>
+							<span className='font-bold'>Verdict</span>
+							<span className='font-semibold'>Admit one</span>
 						</div>
+						<div
+							className='border-t-2 border-dashed'
+							style={{ borderColor: receipt.faded }}
+						/>
+						<div>
+							<p className='text-sm font-bold'>You're invited to</p>
+							<h1
+								className='mt-1 text-6xl font-extrabold leading-[0.95] wrap-anywhere'
+								style={{ fontFamily: receipt.display, color: receipt.brand }}
+							>
+								{room.name}
+							</h1>
+						</div>
+						<dl className='flex flex-col gap-2 text-sm'>
+							{leaders.map(([label, value]) => (
+								<div key={label} className='flex items-baseline gap-2'>
+									<dt className='whitespace-nowrap'>{label}</dt>
+									<span
+										aria-hidden='true'
+										className='flex-1 -translate-y-1 border-b-2 border-dotted opacity-60'
+										style={{ borderColor: receipt.faded }}
+									/>
+									<dd className='truncate font-bold'>{value}</dd>
+								</div>
+							))}
+						</dl>
+						<p className='text-xs' style={{ color: receipt.faded }}>
+							Same points for everyone. Top balance when the series ends
+							takes the title.
+						</p>
 					</div>
-
-					<div className='p-4 space-y-3'>
-						<div className='flex items-start justify-between gap-3'>
-							<div>
-								<h2 className='text-xl font-semibold'>{room.name}</h2>
-								<p className='text-sm text-muted-foreground'>
-									Join this room to make predictions with other members.
-								</p>
-							</div>
-						</div>
-
-						<div className='flex items-center gap-4 text-sm text-muted-foreground'>
-							<div className='flex items-center gap-1'>
-								<UsersIcon className='w-4 h-4' />
-								<span>{memberCount} members</span>
-							</div>
-							<div className='flex items-center gap-1 text-primary'>
-								<ZapIcon className='w-4 h-4' />
-								<span>{predictionCount} live</span>
-							</div>
-						</div>
-
-						<div className='grid gap-2 text-sm'>
-							<div className='flex justify-between gap-4'>
-								<span className='text-muted-foreground'>Created by</span>
-								<span className='font-medium truncate'>{organizerName}</span>
-							</div>
-							<div className='flex justify-between gap-4'>
-								<span className='text-muted-foreground'>Room code</span>
-								<span className='font-medium'>{room.code}</span>
-							</div>
-						</div>
-					</div>
+					<TornEdge height={10} teeth={24} />
 				</div>
 			</main>
 
 			<div className='fixed inset-x-0 bottom-0 z-50 border-t bg-card/95 p-4 backdrop-blur-xl'>
-				<div className='max-w-280 mx-auto'>
+				<div className='max-w-md mx-auto'>
 					<Button
 						variant='linear'
 						size='lg'
@@ -145,7 +163,7 @@ export function JoinRoomPage() {
 						disabled={isJoining}
 					>
 						{isJoining && <Spinner />}
-						Join Room
+						Join {room.name}
 					</Button>
 				</div>
 			</div>

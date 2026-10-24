@@ -12,6 +12,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { copyToClipboard } from "@/shared/lib/clipboard";
 import type { Room } from "@/features/rooms/types/types";
+import { shareLink } from "@/features/share/lib/shareLink";
 
 type Props = {
 	room: Room;
@@ -20,7 +21,7 @@ type Props = {
 };
 
 export function inviteUrlFor(room: Room) {
-	return `${globalThis.location.origin}/rooms/${room.code}/join`;
+	return shareLink(room.code, "invite-link");
 }
 
 // Shown when the phone's share sheet isn't available: the link is visible and

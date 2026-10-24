@@ -20,7 +20,15 @@ import type { Room } from "@/features/rooms/types/types";
 import { SettingsRow } from "@/features/series/components/SeriesOrganizerActionsMenu";
 import { useAuth } from "@/features/auth";
 import { copyToClipboard } from "@/shared/lib/clipboard";
-import { InviteSheet, inviteUrlFor } from "./InviteSheet";
+import { InviteSheet } from "./InviteSheet";
+import { useCurrentSeries, useSeriesWallet } from "@/features/series/hooks/wallets";
+import {
+	InviteTicket,
+	shareHost,
+	shareLink,
+	ShareSheet,
+	type InviteTicketData,
+} from "@/features/share";
 
 type Props = {
 	room: Room;
@@ -38,35 +46,30 @@ export function RoomMenuDrawer({
 	const navigate = useNavigate();
 	const { user, hasGoogleIdentity, linkGoogle, signOut } = useAuth();
 	const [isInviteSheetOpen, setIsInviteSheetOpen] = useState(false);
-	const inviteUrl = inviteUrlFor(room);
+	const [isTicketOpen, setIsTicketOpen] = useState(false);
+	const { currentSeries } = useCurrentSeries(room.id);
+	const activeSeries = currentSeries?.status === "active" ? currentSeries : null;
+	const { wallet: activeWallet } = useSeriesWallet(room.id, activeSeries?.id);
+	const ticket: InviteTicketData = {
+		roomName: room.name,
+		roomCode: room.code,
+		host: shareHost(),
+		memberCount: room.member_count ?? room.members.length,
+		livePredictions: room.active_prediction_count ?? 0,
+		series:
+			activeSeries && activeWallet
+				? { title: activeSeries.title, startingStack: activeWallet.starting_stack }
+				: null,
+	};
 
 	const close = (then: () => void) => () => {
 		onOpenChange(false);
 		then();
 	};
 
-	// Share sheet first; if the phone has none (or sharing fails), show the
-	// Invite sheet with the link and copy buttons. Dismissing the share sheet
-	// is not an error.
-	const handleInvite = async () => {
-		if (navigator.share) {
-			try {
-				await navigator.share({
-					title: `Join ${room.name} on Verdict`,
-					text: `Join ${room.name} on Verdict. Room code ${room.code}.`,
-					url: inviteUrl,
-				});
-				return;
-			} catch (error) {
-				if (
-					error instanceof DOMException &&
-					error.name === "AbortError"
-				)
-					return;
-			}
-		}
-		setIsInviteSheetOpen(true);
-	};
+	// The ticket image with the link; copying the link or code stays in the
+	// Invite sheet.
+	const handleInvite = () => setIsTicketOpen(true);
 
 	const handleCopyCode = async () => {
 		if (await copyToClipboard(room.code)) {
@@ -239,6 +242,18 @@ export function RoomMenuDrawer({
 				room={room}
 				open={isInviteSheetOpen}
 				onOpenChange={setIsInviteSheetOpen}
+			/>
+			<ShareSheet
+				open={isTicketOpen}
+				onOpenChange={setIsTicketOpen}
+				title={`Invite friends to ${room.name}`}
+				description='Anyone with the link can join after signing in.'
+				message={`Join ${room.name} on Verdict. Room code ${room.code}.`}
+				link={shareLink(room.code, "invite-card")}
+				kind='invite-card'
+				roomId={room.id}
+				fileName={`verdict-invite-${room.code.toLowerCase()}`}
+				renderCard={(format) => <InviteTicket data={ticket} format={format} />}
 			/>
 		</>
 	);

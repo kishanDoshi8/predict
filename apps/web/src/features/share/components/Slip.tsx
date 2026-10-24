@@ -4,9 +4,9 @@ import { CARD_SIZE, receipt, type CardFormat } from "@/features/share/tokens";
 const TEETH = 28;
 
 // The torn bottom edge of the slip.
-function TornEdge() {
-	const points = Array.from({ length: TEETH * 2 + 1 }, (_, i) => {
-		const x = (i / (TEETH * 2)) * 100;
+export function TornEdge({ height = 22, teeth = TEETH }: Readonly<{ height?: number; teeth?: number }>) {
+	const points = Array.from({ length: teeth * 2 + 1 }, (_, i) => {
+		const x = (i / (teeth * 2)) * 100;
 		const y = i % 2 === 0 ? 0 : 100;
 		return `${x},${y}`;
 	}).join(" ");
@@ -14,7 +14,7 @@ function TornEdge() {
 		<svg
 			viewBox='0 0 100 100'
 			preserveAspectRatio='none'
-			style={{ display: "block", width: "100%", height: 22 }}
+			style={{ display: "block", width: "100%", height }}
 			aria-hidden='true'
 		>
 			<polygon points={`0,0 ${points} 100,0`} fill={receipt.paper} />

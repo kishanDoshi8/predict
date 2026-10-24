@@ -2,6 +2,7 @@ import { MinusCircleIcon } from "lucide-react";
 import { ActivityCard } from "@/features/activities/components/ActivityCard";
 import {
 	formatActivityTimestamp,
+	formatPredictionSeries,
 	resolveActivityHref,
 } from "@/features/activities/lib/activity";
 import { PredictionNoResultActivity } from "@/features/activities/types/types";
@@ -10,18 +11,18 @@ import { ActivityCardComponentProps } from "@/features/activities/components/car
 export function PredictionNoResultCard({
 	activity,
 	roomCode,
+	showSeries,
 }: Readonly<ActivityCardComponentProps<PredictionNoResultActivity>>) {
 	const metadata = activity.metadata;
 	return (
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<MinusCircleIcon className='size-4' />}
-			typeLabel='Prediction'
+			typeLabel='No result'
 			tone='warning'
-			contextLabel='No result'
-			title='Prediction settled with no result'
-			description={metadata.title}
+			title={metadata.title}
 			summary={metadata.noResultReason ?? "All bets were refunded."}
+			contextLabel={showSeries ? formatPredictionSeries(metadata) : undefined}
 			timestamp={formatActivityTimestamp(activity.createdAt)}
 			href={resolveActivityHref(activity, roomCode)}
 		/>

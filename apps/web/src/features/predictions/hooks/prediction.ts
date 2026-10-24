@@ -1,6 +1,7 @@
 import { createPrediction, getActivePrediction, getActivePredictions, getPrediction, resolvePrediction } from "@/shared/lib/api";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "@/shared/constants/queryKeys";
+import { invalidateRoomResults } from "@/shared/lib/roomCache";
 
 export const useActivePrediction = (roomId?: string) => {
     return useQuery({
@@ -63,14 +64,10 @@ export const useResolvePrediction = () => {
         mutationFn: (data: ResolvePredictionParams) =>
             resolvePrediction(data.predictionId, data.roomId, data.outcome, data.winningOptionId, data.noResultReason),
         onSuccess: (_, variables) => {
+            invalidateRoomResults(queryClient, variables.roomId);
+            // Covers the prediction, its bets and payouts.
             queryClient.invalidateQueries({
-                queryKey: roomKeys.activePrediction(variables.roomId),
-            });
-            queryClient.invalidateQueries({
-                queryKey: roomKeys.activePredictions(variables.roomId),
-            });
-            queryClient.invalidateQueries({
-                queryKey: roomKeys.stats(variables.roomId),
+                queryKey: roomKeys.prediction(variables.roomId, variables.predictionId),
             });
         },
         onError: (error) => {

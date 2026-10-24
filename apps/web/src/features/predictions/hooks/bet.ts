@@ -80,7 +80,33 @@ export const usePlaceBet = () => {
 
         adjustCachedWalletEscrow(queryClient, variables.roomId, variables.seriesId, escrowDelta);
 
-        return { previousWallets, previousBet };
+        // Move the bet in the list too, so option totals follow a switch at once.
+        const betsKey = roomKeys.bets(variables.roomId, variables.predictionId);
+        await queryClient.cancelQueries({ queryKey: betsKey });
+        const previousBets = queryClient.getQueryData<Bet[]>(betsKey);
+        queryClient.setQueryData<Bet[]>(betsKey, (old) => {
+            if (!old) return old;
+            const exists = old.some((bet) => bet.player_id === variables.playerId);
+            return exists
+                ? old.map((bet) =>
+                    bet.player_id === variables.playerId
+                        ? { ...bet, option_id: variables.optionId, amount: variables.amount }
+                        : bet
+                )
+                : [
+                    ...old,
+                    {
+                        id: `optimistic-${variables.playerId}`,
+                        prediction_id: variables.predictionId,
+                        player_id: variables.playerId,
+                        option_id: variables.optionId,
+                        amount: variables.amount,
+                        payout: null,
+                    },
+                ];
+        });
+
+        return { previousWallets, previousBet, previousBets };
         },
 
         onError: (_err, variables, context) => {
@@ -88,10 +114,17 @@ export const usePlaceBet = () => {
         if (context?.previousWallets) {
             queryClient.setQueryData(roomKeys.seriesWallets(variables.roomId), context.previousWallets);
         }
-        if (context?.previousBet) {
+        if (context) {
+            // A failed first bet leaves no bet behind.
             queryClient.setQueryData(
             roomKeys.myBet(variables.roomId, variables.predictionId, variables.playerId),
-            context.previousBet
+            context.previousBet ?? null
+            );
+        }
+        if (context?.previousBets) {
+            queryClient.setQueryData(
+            roomKeys.bets(variables.roomId, variables.predictionId),
+            context.previousBets
             );
         }
         },

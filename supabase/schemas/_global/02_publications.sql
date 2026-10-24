@@ -4,3 +4,4 @@ do $$ begin alter publication supabase_realtime add table public.room_members; e
 do $$ begin alter publication supabase_realtime add table public.rooms; exception when duplicate_object then null; end $$;
 do $$ begin alter publication supabase_realtime add table public.room_stats; exception when duplicate_object then null; end $$;
 do $$ begin alter publication supabase_realtime add table public.player_room_stats; exception when duplicate_object then null; end $$;
+do $$ begin alter publication supabase_realtime add table public.room_activities; exception when duplicate_object then null; end $$;

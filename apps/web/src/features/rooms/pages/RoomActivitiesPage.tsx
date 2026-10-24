@@ -98,6 +98,7 @@ export default function RoomActivitiesPage() {
 			<RoomActivitiesFeed
 				activities={activities}
 				roomCode={room.code}
+				showSeries={scope === "all"}
 				isLoading={isPending}
 				isError={isError}
 				errorMessage={error instanceof Error ? error.message : undefined}

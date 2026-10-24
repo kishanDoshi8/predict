@@ -3,6 +3,7 @@ import { ActivityCard } from "@/features/activities/components/ActivityCard";
 import {
 	formatActivityTimestamp,
 	formatPoints,
+	formatPredictionSeries,
 	resolveActivityHref,
 } from "@/features/activities/lib/activity";
 import { PredictionRevealedActivity } from "@/features/activities/types/types";
@@ -11,6 +12,7 @@ import { ActivityCardComponentProps } from "@/features/activities/components/car
 export function PredictionRevealedCard({
 	activity,
 	roomCode,
+	showSeries,
 }: Readonly<ActivityCardComponentProps<PredictionRevealedActivity>>) {
 	const metadata = activity.metadata;
 	const winnerLabel = metadata.winningOptionLabel ?? "Winner decided";
@@ -18,12 +20,11 @@ export function PredictionRevealedCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<TrophyIcon className='size-4' />}
-			typeLabel='Prediction'
+			typeLabel='Resolved'
 			tone='success'
-			contextLabel='Resolved'
 			title={metadata.title}
-			description='Prediction resolved'
 			summary={`${winnerLabel} · ${formatPoints(metadata.totalWagered)} pts pool`}
+			contextLabel={showSeries ? formatPredictionSeries(metadata) : undefined}
 			timestamp={formatActivityTimestamp(activity.createdAt)}
 			href={resolveActivityHref(activity, roomCode)}
 		/>

@@ -26,28 +26,31 @@ import { DuelCancelledCard } from "@/features/activities/components/cards/DuelCa
 import { DuelExpiredCard } from "@/features/activities/components/cards/DuelExpiredCard";
 import { AchievementStreakMilestoneCard } from "@/features/activities/components/cards/AchievementStreakMilestoneCard";
 import { FEATURES } from "@/shared/constants/features";
+import { ActivityCardComponentProps } from "@/features/activities/components/cards/types";
 
 type RegistryProps = {
 	activity: RoomActivity;
 	roomCode: string;
+	showSeries?: boolean;
 };
 
+type CardFor<TActivity extends RoomActivity> = (
+	props: ActivityCardComponentProps<TActivity>,
+) => JSX.Element;
+
 type RegistryMap = {
-	room_joined: (props: { activity: RoomJoinedActivity; roomCode: string }) => JSX.Element;
-	achievement_streak_milestone: (props: {
-		activity: AchievementStreakMilestoneActivity;
-		roomCode: string;
-	}) => JSX.Element;
-	prediction_created: (props: { activity: PredictionCreatedActivity; roomCode: string }) => JSX.Element;
-	prediction_locked: (props: { activity: PredictionLockedActivity; roomCode: string }) => JSX.Element;
-	prediction_revealed: (props: { activity: PredictionRevealedActivity; roomCode: string }) => JSX.Element;
-	prediction_cancelled: (props: { activity: PredictionCancelledActivity; roomCode: string }) => JSX.Element;
-	prediction_no_result: (props: { activity: PredictionNoResultActivity; roomCode: string }) => JSX.Element;
-	duel_created: (props: { activity: DuelCreatedActivity; roomCode: string }) => JSX.Element;
-	duel_matched: (props: { activity: DuelMatchedActivity; roomCode: string }) => JSX.Element;
-	duel_resolved: (props: { activity: DuelResolvedActivity; roomCode: string }) => JSX.Element;
-	duel_cancelled: (props: { activity: DuelCancelledActivity; roomCode: string }) => JSX.Element;
-	duel_expired: (props: { activity: DuelExpiredActivity; roomCode: string }) => JSX.Element;
+	room_joined: CardFor<RoomJoinedActivity>;
+	achievement_streak_milestone: CardFor<AchievementStreakMilestoneActivity>;
+	prediction_created: CardFor<PredictionCreatedActivity>;
+	prediction_locked: CardFor<PredictionLockedActivity>;
+	prediction_revealed: CardFor<PredictionRevealedActivity>;
+	prediction_cancelled: CardFor<PredictionCancelledActivity>;
+	prediction_no_result: CardFor<PredictionNoResultActivity>;
+	duel_created: CardFor<DuelCreatedActivity>;
+	duel_matched: CardFor<DuelMatchedActivity>;
+	duel_resolved: CardFor<DuelResolvedActivity>;
+	duel_cancelled: CardFor<DuelCancelledActivity>;
+	duel_expired: CardFor<DuelExpiredActivity>;
 };
 
 const registry: RegistryMap = {
@@ -72,13 +75,14 @@ function isHiddenActivity(activityType: RoomActivity["activityType"]) {
 	return !FEATURES.duels && activityType.startsWith("duel_");
 }
 
-export function ActivityCardRegistry({ activity, roomCode }: Readonly<RegistryProps>) {
+export function ActivityCardRegistry({
+	activity,
+	roomCode,
+	showSeries,
+}: Readonly<RegistryProps>) {
 	if (isHiddenActivity(activity.activityType)) return null;
 
-	const Card = registry[activity.activityType as keyof RegistryMap] as (props: {
-		activity: RoomActivity;
-		roomCode: string;
-	}) => JSX.Element;
+	const Card = registry[activity.activityType as keyof RegistryMap] as CardFor<RoomActivity>;
 
-	return <Card activity={activity} roomCode={roomCode} />;
+	return <Card activity={activity} roomCode={roomCode} showSeries={showSeries} />;
 }

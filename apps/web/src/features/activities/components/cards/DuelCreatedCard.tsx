@@ -17,10 +17,9 @@ export function DuelCreatedCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<SwordsIcon className='size-4' />}
-			typeLabel='Duel'
+			typeLabel='Duel created'
 			tone='duel'
 			actorLabel={metadata.challenger.username}
-			contextLabel='Created'
 			title='Duel created'
 			description={`${metadata.challenger.username} opened a duel on ${metadata.predictionTitle}`}
 			summary={`${formatPoints(metadata.stakeAmount)} pts stake`}

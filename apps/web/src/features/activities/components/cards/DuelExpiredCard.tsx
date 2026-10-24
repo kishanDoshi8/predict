@@ -16,10 +16,9 @@ export function DuelExpiredCard({
 		<ActivityCard
 			tier={activity.activityTier}
 			icon={<HourglassIcon className='size-4' />}
-			typeLabel='Duel'
+			typeLabel='Duel expired'
 			tone='warning'
 			actorLabel={metadata.challenger.username}
-			contextLabel='Expired'
 			title='Duel expired'
 			description={`${metadata.challenger.username}'s duel expired before a match`}
 			timestamp={formatActivityTimestamp(activity.createdAt)}

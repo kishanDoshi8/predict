@@ -95,3 +95,56 @@ the room menu.
 - **Deploy on push.** A GitHub Actions workflow (free for this size) can SSH into
   the server and run the same `git pull && npm ci && npm run build` whenever
   master changes.
+
+## Rich invite links (`/i/<code>`)
+
+Pasting `https://kishandoshi.me/i/F4C36D` into WhatsApp or iMessage shows
+"Join Friday Crew on Verdict" and "5 friends playing · 2 predictions live ·
+World Cup 2026" under the ticket image. Tapping it opens the room's join page.
+Only the room's name and counts are shown, never member names or questions.
+
+Chat apps don't run the app's JavaScript, so a small Supabase function
+(`supabase/functions/invite-preview`) writes the preview, and nginx sends
+`/i/` to it. All of this is free on the current plans.
+
+1. **Apply the migration and deploy the function** (from the repo root on
+   your computer or the server, logged in with the Supabase CLI):
+
+   ```bash
+   npm run db:migrate
+   npx supabase functions deploy invite-preview --no-verify-jwt
+   npx supabase secrets set APP_URL=https://kishandoshi.me
+   ```
+
+2. **Add the nginx block.** Paste the block from
+   [`deploy/nginx/verdict-invite.conf`](../deploy/nginx/verdict-invite.conf)
+   into the same `server { ... }` block as before. Replace `YOUR-PROJECT-REF`
+   in both places with your project ref: the part before `.supabase.co` in
+   `VITE_SUPABASE_URL`. Then run:
+
+   ```bash
+   sudo nginx -t && sudo systemctl reload nginx
+   ```
+
+3. **Check it** (use your room code):
+
+   ```bash
+   curl -s https://kishandoshi.me/i/F4C36D | grep og:description
+   ```
+
+   You should see the room's counts. In a browser, the same link should land
+   on the join page.
+
+4. **Switch the app to short links.** Add this line to `apps/web/.env` on the
+   server, then deploy as usual (`git pull && npm run build`):
+
+   ```
+   VITE_SHORT_INVITE_LINKS=true
+   ```
+
+   Until this is set, invites and shared cards keep using the longer
+   `/rooms/<code>/join` links, which work without the steps above.
+
+The ticket image in the preview is `apps/web/public/og-image.jpg`. Its
+source is `apps/web/og/invite-card.html`; regenerate it with
+`node og/render.mjs` from `apps/web`.

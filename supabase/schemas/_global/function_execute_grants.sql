@@ -53,6 +53,9 @@ grant execute on function public.get_series_leaderboard(uuid, uuid, text) to aut
 grant execute on function public.get_series_placements(uuid, uuid) to authenticated;
 grant execute on function public.join_room(text, text) to authenticated;
 grant execute on function public.record_share(uuid, text) to authenticated;
+
+-- Server-only: the invite-preview edge function, using the service key.
+grant execute on function public.get_room_invite_preview(text) to service_role;
 grant execute on function public.mark_how_to_play_seen() to authenticated;
 grant execute on function public.mark_ratings_tip_seen() to authenticated;
 grant execute on function public.mark_room_activities_seen(uuid) to authenticated;

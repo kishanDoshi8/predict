@@ -32,6 +32,10 @@ enabled = true
 [functions.send-push-notifications]
 verify_jwt = true
 
+# Public: serves link previews for /i/<code> invite links (no sign-in).
+[functions.invite-preview]
+verify_jwt = false
+
 [db.migrations]
 schema_paths = [
   "./schemas/_global/*.sql",

@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(7);
+select plan(11);
 
 -- Alice runs a room; Bob joins from a brag card; Carol from a bad link; Dave never joins.
 insert into auth.users (id, aud, role, email)
@@ -79,6 +79,28 @@ select throws_ok(
   $$ select count(*) from public.share_events $$,
   '42501', null,
   'share events are not readable by players'
+);
+reset role;
+
+-- Invite previews: counts only, and only for the server
+select is(
+  (public.get_room_invite_preview(lower(current_setting('test.room_code')))->>'member_count')::int,
+  3,
+  'the preview counts members'
+);
+select is(
+  (select count(*)::int from json_object_keys(public.get_room_invite_preview(current_setting('test.room_code')))),
+  5,
+  'the preview carries only name, code, counts and series'
+);
+select is(public.get_room_invite_preview('NOPE00')::text, null, 'an unknown code has no preview');
+
+select pg_temp.login('00000000-0000-0000-0000-000000000b0b');
+set local role authenticated;
+select throws_ok(
+  format($$ select public.get_room_invite_preview(%L) $$, current_setting('test.room_code')),
+  '42501', null,
+  'players cannot call the invite preview'
 );
 reset role;
 

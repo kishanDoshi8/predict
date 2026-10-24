@@ -106,7 +106,6 @@ export default function RoomLayout() {
 				leftAction={headerConfig?.leftAction ?? "home"}
 				title={headerConfig?.title}
 				onLeftAction={handleHeaderLeftAction}
-				onOpenHowToPlay={() => setShowHowToPlay(true)}
 			/>
 
 			<main className='max-w-280 w-full mx-auto flex-1 flex flex-col'>

@@ -26,7 +26,6 @@ type Props = {
 	leftAction?: RoomHeaderLeftAction;
 	title?: string;
 	onLeftAction?: () => void;
-	onOpenHowToPlay: () => void;
 };
 
 function RoomHeader({
@@ -34,7 +33,6 @@ function RoomHeader({
 	leftAction = "home",
 	title,
 	onLeftAction,
-	onOpenHowToPlay,
 }: Readonly<Props>) {
 	const { data: player } = usePlayer();
 	// The whole room view follows one series: points, Home, Standings, History.
@@ -61,7 +59,9 @@ function RoomHeader({
 						size='icon'
 						className={`cursor-pointer rounded-lg shrink-0`}
 						onClick={onLeftAction}
-						aria-label={leftAction === "back" ? "Back" : "Switch room"}
+						aria-label={
+							leftAction === "back" ? "Back" : "Switch room"
+						}
 					>
 						{leftAction === "back" ? (
 							<ChevronLeftIcon />
@@ -158,7 +158,6 @@ function RoomHeader({
 				open={isMenuOpen}
 				onOpenChange={setIsMenuOpen}
 				onOpenNotifications={() => setIsNotificationsOpen(true)}
-				onOpenHowToPlay={onOpenHowToPlay}
 			/>
 			<RoomPreferencesDialog
 				roomId={room.id}

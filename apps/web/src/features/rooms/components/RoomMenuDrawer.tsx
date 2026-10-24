@@ -7,7 +7,6 @@ import {
 } from "@/shared/ui";
 import {
 	BellIcon,
-	CircleQuestionMarkIcon,
 	CopyIcon,
 	LinkIcon,
 	LogOutIcon,
@@ -28,7 +27,6 @@ type Props = {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	onOpenNotifications: () => void;
-	onOpenHowToPlay: () => void;
 };
 
 export function RoomMenuDrawer({
@@ -36,7 +34,6 @@ export function RoomMenuDrawer({
 	open,
 	onOpenChange,
 	onOpenNotifications,
-	onOpenHowToPlay,
 }: Readonly<Props>) {
 	const navigate = useNavigate();
 	const { user, hasGoogleIdentity, linkGoogle, signOut } = useAuth();
@@ -165,19 +162,6 @@ export function RoomMenuDrawer({
 		},
 	];
 
-	const helpSectionItems: Array<{
-		label: string;
-		detail?: string;
-		icon: LucideIcon;
-		onClick: () => void;
-	}> = [
-		{
-			label: "How to play",
-			icon: CircleQuestionMarkIcon,
-			onClick: close(onOpenHowToPlay),
-		},
-	];
-
 	return (
 		<>
 			<Drawer open={open} onOpenChange={onOpenChange}>
@@ -248,23 +232,6 @@ export function RoomMenuDrawer({
 								),
 							)}
 						</section>
-						{/* {helpSectionItems.map(
-							({ label, detail, icon: Icon, onClick }) => (
-								<section className='space-y-2' key={label}>
-									<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
-										Help
-									</p>
-									<SettingsRow
-										icon={
-											<Icon className='size-5 text-muted-foreground' />
-										}
-										label={label}
-										description={detail}
-										onClick={onClick}
-									/>
-								</section>
-							),
-						)} */}
 					</div>
 				</DrawerContent>
 			</Drawer>

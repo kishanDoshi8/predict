@@ -1,6 +1,7 @@
 import { SeriesEditDialog } from "@/features/series/components/SeriesEditDialog";
 import { SeriesHallOfFameSection } from "@/features/series/components/SeriesHallOfFameSection";
 import { SeriesOverviewCard } from "@/features/series/components/SeriesOverviewCard";
+import { ShareStandingsButton } from "@/features/series/components/ShareStandingsButton";
 import type {
 	LeaderboardEntry,
 	PredictionHistoryEntry,
@@ -84,6 +85,12 @@ export function SeriesDetailView({
 				onArchive={onArchive}
 				onCloseSeries={onCloseSeries}
 			/>
+
+			{isSeriesClosed ? (
+				<div className='flex justify-end'>
+					<ShareStandingsButton series={series} variant='linear' />
+				</div>
+			) : null}
 
 			{isSeriesClosed ? (
 				<SeriesHallOfFameSection

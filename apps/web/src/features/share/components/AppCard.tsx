@@ -1,30 +1,81 @@
-import type { CSSProperties, ReactNode } from "react";
-import { app, CARD_SIZE, type CardFormat } from "@/features/share/tokens";
+import {
+	useLayoutEffect,
+	useRef,
+	useState,
+	type CSSProperties,
+	type ReactNode,
+} from "react";
+import { app, CARD_SIZE, STORY_PADDING, type CardFormat } from "@/features/share/tokens";
 
-// The 1080-wide field every card is drawn on. Stories get extra room at the
-// top and bottom, where Instagram and WhatsApp put their own controls.
+const columnStyle = (gap: number): CSSProperties => ({
+	display: "flex",
+	flexDirection: "column",
+	gap,
+});
+
+const textStyle: CSSProperties = {
+	background: app.base,
+	color: app.text,
+	fontFamily: app.font,
+	fontVariantNumeric: "tabular-nums",
+};
+
+// Shrinks its content to fit the space available, never cropping it.
+function FitBox({ available, children }: Readonly<{ available: number; children: ReactNode }>) {
+	const ref = useRef<HTMLDivElement>(null);
+	const [scale, setScale] = useState(1);
+
+	useLayoutEffect(() => {
+		const node = ref.current;
+		if (!node) return;
+		const fit = () => setScale(Math.min(1, available / node.offsetHeight));
+		fit();
+		// Fonts and images can change the height after the first layout.
+		const observer = new ResizeObserver(fit);
+		observer.observe(node);
+		return () => observer.disconnect();
+	}, [available]);
+
+	return (
+		<div ref={ref} style={{ width: "100%", transform: `scale(${scale})`, transformOrigin: "center center" }}>
+			{children}
+		</div>
+	);
+}
+
+// The 1080-wide field every card is drawn on. A chat image grows with its
+// content; a story keeps its 9:16 frame and centres the content in it.
 export function CardCanvas({
 	format,
 	gap = 40,
 	children,
 }: Readonly<{ format: CardFormat; gap?: number; children: ReactNode }>) {
 	const { width, height } = CARD_SIZE[format];
+
+	if (format === "story" && height) {
+		const available = height - STORY_PADDING.top - STORY_PADDING.bottom;
+		return (
+			<div
+				style={{
+					...textStyle,
+					width,
+					height,
+					boxSizing: "border-box",
+					padding: `${STORY_PADDING.top}px ${STORY_PADDING.side}px ${STORY_PADDING.bottom}px`,
+					display: "flex",
+					alignItems: "center",
+					overflow: "hidden",
+				}}
+			>
+				<FitBox available={available}>
+					<div style={columnStyle(gap)}>{children}</div>
+				</FitBox>
+			</div>
+		);
+	}
+
 	return (
-		<div
-			style={{
-				width,
-				height,
-				boxSizing: "border-box",
-				padding: format === "story" ? "180px 72px 200px" : 72,
-				background: app.base,
-				color: app.text,
-				fontFamily: app.font,
-				display: "flex",
-				flexDirection: "column",
-				gap,
-				fontVariantNumeric: "tabular-nums",
-			}}
-		>
+		<div style={{ ...textStyle, width, boxSizing: "border-box", padding: 72, ...columnStyle(gap) }}>
 			{children}
 		</div>
 	);
@@ -198,7 +249,6 @@ export function CardFooter({
 	return (
 		<div
 			style={{
-				marginTop: "auto",
 				display: "flex",
 				justifyContent: "space-between",
 				alignItems: "center",

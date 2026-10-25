@@ -23,7 +23,8 @@ export type InviteCardData = {
 };
 
 // What fits in the teaser on each format.
-const MAX_TEASER_OPTIONS = { post: 2, story: 4 } as const;
+// Everything is shown; this only guards against an absurd number of options.
+const MAX_TEASER_OPTIONS = 8;
 
 // The room's name is the loudest thing; long names step down to fit.
 function nameSize(name: string) {
@@ -44,7 +45,7 @@ export function InviteCard({
 	format,
 }: Readonly<{ data: InviteCardData; format: CardFormat }>) {
 	const { teaser } = data;
-	const options = teaser?.options.slice(0, MAX_TEASER_OPTIONS[format]) ?? [];
+	const options = teaser?.options.slice(0, MAX_TEASER_OPTIONS) ?? [];
 	const hasCalls = options.some((option) => option.share > 0);
 
 	return (
@@ -96,13 +97,10 @@ export function InviteCard({
 					</div>
 					<span
 						style={{
-							fontSize: format === "story" ? 52 : 44,
+							fontSize: 48,
 							fontWeight: 700,
 							lineHeight: 1.15,
-							display: "-webkit-box",
-							WebkitLineClamp: 2,
-							WebkitBoxOrient: "vertical",
-							overflow: "hidden",
+							overflowWrap: "anywhere",
 						}}
 					>
 						{teaser.question}
@@ -139,7 +137,7 @@ export function InviteCard({
 					: "Same points for everyone. Top balance when the series ends takes the title."}
 			</span>
 
-			<div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 18 }}>
+			<div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 				<div
 					style={{
 						borderRadius: 24,

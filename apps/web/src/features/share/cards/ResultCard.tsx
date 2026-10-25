@@ -25,7 +25,8 @@ export type ResultCardData = {
 	call: { pick: string; stake: number; net: number } | null;
 };
 
-const MAX_OPTIONS = { post: 4, story: 6 } as const;
+// Everything is shown; this only guards against an absurd number of options.
+const MAX_OPTIONS = 10;
 
 function seriesLine(data: ResultCardData) {
 	if (!data.seriesTitle) return null;
@@ -54,7 +55,7 @@ export function ResultCard({
 }: Readonly<{ data: ResultCardData; format: CardFormat }>) {
 	const { call } = data;
 	const total = data.options.reduce((sum, option) => sum + option.pool, 0);
-	const shown = data.options.slice(0, MAX_OPTIONS[format]);
+	const shown = data.options.slice(0, MAX_OPTIONS);
 	const hidden = data.options.length - shown.length;
 	const rare = rareCall(data);
 	const won = !!call && call.pick === data.winner;
@@ -87,10 +88,7 @@ export function ResultCard({
 						fontSize: 56,
 						fontWeight: 700,
 						lineHeight: 1.15,
-						display: "-webkit-box",
-						WebkitLineClamp: 3,
-						WebkitBoxOrient: "vertical",
-						overflow: "hidden",
+						overflowWrap: "anywhere",
 					}}
 				>
 					{data.question}

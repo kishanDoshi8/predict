@@ -17,9 +17,9 @@ export type StandingsCardData = {
 	awards: Array<{ label: string; username: string; value: string }>;
 };
 
-// What fits under the podium on each format; the rest is summarised.
-const MAX_ROWS = { post: 3, story: 7 } as const;
-const MAX_AWARDS = { post: 2, story: 4 } as const;
+// Everyone is shown; these only guard against a very large room.
+const MAX_ROWS = 12;
+const MAX_AWARDS = 6;
 
 type Entry = StandingsCardData["standings"][number];
 
@@ -105,9 +105,9 @@ export function StandingsCard({
 	format,
 }: Readonly<{ data: StandingsCardData; format: CardFormat }>) {
 	const [first, second, third] = data.standings;
-	const rest = data.standings.slice(3, 3 + MAX_ROWS[format]);
+	const rest = data.standings.slice(3, 3 + MAX_ROWS);
 	const hidden = data.standings.length - 3 - rest.length;
-	const awards = data.awards.slice(0, MAX_AWARDS[format]);
+	const awards = data.awards.slice(0, MAX_AWARDS);
 
 	return (
 		<CardCanvas format={format} gap={format === "story" ? 56 : 40}>
@@ -177,7 +177,8 @@ export function StandingsCard({
 								padding: "12px 22px",
 								background: index % 2 === 0 ? "rgba(34, 211, 238, 0.12)" : "rgba(251, 146, 60, 0.14)",
 								color: index % 2 === 0 ? "#67e8f9" : "#fdba74",
-								whiteSpace: "nowrap",
+								maxWidth: "100%",
+								boxSizing: "border-box",
 							}}
 						>
 							{award.label}: {award.username}, {award.value}

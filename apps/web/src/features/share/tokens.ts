@@ -21,9 +21,14 @@ export const app = {
 	font: '"Fira Code Variable", ui-monospace, monospace',
 } as const;
 
-export type CardFormat = "post" | "story";
+// "chat" images are as tall as their content, so nothing is ever cut off;
+// "story" keeps the 9:16 frame stories need and shrinks content to fit it.
+export type CardFormat = "chat" | "story";
 
-export const CARD_SIZE: Record<CardFormat, { width: number; height: number }> = {
-	post: { width: 1080, height: 1350 },
+export const CARD_SIZE: Record<CardFormat, { width: number; height?: number }> = {
+	chat: { width: 1080 },
 	story: { width: 1080, height: 1920 },
 };
+
+// Space a story keeps clear at the top and bottom for the app's own controls.
+export const STORY_PADDING = { top: 180, bottom: 200, side: 72 } as const;

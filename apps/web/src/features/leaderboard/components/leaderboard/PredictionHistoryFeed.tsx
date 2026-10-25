@@ -86,7 +86,7 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 		payoutSummary = (
 			<span className={`text-muted-foreground`}>
 				<TrendingUpIcon
-					className={`w-3 h-3 inline-block mr-2 text-green-500`}
+					className={`w-3 h-3 inline-block mr-2 text-win`}
 				/>
 				<span className={`text-sm text-foreground font-semibold`}>
 					+{entry.total_paid_to_winners.toLocaleString()} pts

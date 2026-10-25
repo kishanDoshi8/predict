@@ -162,7 +162,7 @@ function LeaderboardContentView({
 	return (
 		<div className={`flex flex-col gap-4`}>
 			<div
-				className={`text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-rose-500/5 p-5`}
+				className={`text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-primary/5 p-5`}
 			>
 				<div className={`flex gap-4 items-center`}>
 					{isLoading ? (

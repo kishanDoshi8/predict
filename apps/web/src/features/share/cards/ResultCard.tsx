@@ -7,6 +7,7 @@ import {
 	singleLine,
 } from "@/features/share/components/AppCard";
 import { app, type CardFormat } from "@/features/share/tokens";
+import { twColor } from "@/shared/lib/utils";
 
 export type ResultCardData = {
 	roomName: string;
@@ -74,8 +75,8 @@ export function ResultCard({
 			<div
 				style={{
 					borderRadius: 40,
-					border: "2px solid rgba(74, 222, 128, 0.3)",
-					background: `linear-gradient(160deg, rgba(74, 222, 128, 0.12), ${app.card} 45%)`,
+					border: `2px solid ${twColor("win", 0.3)}`,
+					background: `linear-gradient(160deg, ${twColor("win", 0.12)}, ${app.card} 45%)`,
 					padding: 52,
 					display: "flex",
 					flexDirection: "column",

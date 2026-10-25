@@ -7,6 +7,7 @@ import {
 	singleLine,
 } from "@/features/share/components/AppCard";
 import { app, type CardFormat } from "@/features/share/tokens";
+import { twColor } from "@/shared/lib/utils";
 
 export type StandingsCardData = {
 	roomName: string;
@@ -112,13 +113,13 @@ function Step({
 					boxSizing: "border-box",
 					borderRadius: "28px 28px 0 0",
 					background: isChampion
-						? "linear-gradient(180deg, #f43f5e, #fb923c)"
+						? "linear-gradient(180deg, var(--primary), var(--accent))"
 						: place === 2
-							? "linear-gradient(180deg, rgba(161,161,170,0.35), rgba(161,161,170,0.05))"
-							: "linear-gradient(180deg, rgba(251,146,60,0.35), rgba(251,146,60,0.05))",
+							? `linear-gradient(180deg, ${twColor("rank-2", 0.35)}, ${twColor("rank-2", 0.05)})`
+							: `linear-gradient(180deg, ${twColor("rank-3", 0.35)}, ${twColor("rank-3", 0.05)})`,
 					border: isChampion
 						? "none"
-						: `2px solid ${place === 2 ? "rgba(161,161,170,0.4)" : "rgba(251,146,60,0.4)"}`,
+						: `2px solid ${twColor(place === 2 ? "rank-2" : "rank-3", 0.4)}`,
 					borderBottom: "none",
 					display: "flex",
 					justifyContent: "center",
@@ -126,10 +127,10 @@ function Step({
 					fontSize: style.number,
 					fontWeight: 700,
 					color: isChampion
-						? "#ffffff"
+						? app.onGradient
 						: place === 2
-							? "#d4d4d8"
-							: "#fdba74",
+							? app.silver
+							: app.bronze,
 				}}
 			>
 				{place}
@@ -194,7 +195,7 @@ export function StandingsCard({
 								borderTop:
 									index === 0
 										? "none"
-										: "2px solid rgba(255, 255, 255, 0.06)",
+										: `2px solid ${twColor("foreground", 0.06)}`,
 							}}
 						>
 							<span style={{ width: 48, color: app.muted }}>
@@ -235,9 +236,9 @@ export function StandingsCard({
 								padding: "12px 22px",
 								background:
 									index % 2 === 0
-										? "rgba(34, 211, 238, 0.12)"
-										: "rgba(251, 146, 60, 0.14)",
-								color: index % 2 === 0 ? "#67e8f9" : "#fdba74",
+										? twColor("activity", 0.12)
+										: twColor("accent", 0.14),
+								color: index % 2 === 0 ? app.activity : app.accent,
 								maxWidth: "100%",
 								boxSizing: "border-box",
 							}}

@@ -176,6 +176,7 @@ export function ShareSheet({
 						>
 							<div
 								ref={setPreviewNode}
+								className='dark'
 								style={{
 									width,
 									transform: `scale(${scale})`,
@@ -219,7 +220,7 @@ export function ShareSheet({
 									pointerEvents: "none",
 								}}
 							>
-								<div ref={captureRef} style={{ width }}>
+								<div ref={captureRef} className='dark' style={{ width }}>
 									{renderCard(format)}
 								</div>
 							</div>,

@@ -35,19 +35,19 @@ export function DuelSummaryCard({
 			onClick={onClick}
 			className={cn(
 				"group relative overflow-hidden rounded-2xl w-full max-w-md mx-auto",
-				"border border-white/5",
-				"bg-linear-to-br from-zinc-900 via-zinc-900 to-[#171717]",
+				"border border-border/50",
+				"bg-card",
 				"shadow-xl shadow-black/30",
 				"transition-all duration-300",
 				"before:absolute before:inset-0 before:content-['']",
 				glowClass,
 				highlight &&
-					"hover:border-accent/40 hover:shadow-[0_0_30px_rgba(251,146,60,.12)]",
+					"hover:border-accent/40 hover:shadow-[0_0_30px] hover:shadow-accent/12",
 			)}
 		>
 			{/* background glow */}
-			<div className='absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,146,60,.10),transparent_60%)]' />
-			<div className='absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(244,63,94,.08),transparent_65%)]' />
+			<div className='absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--color-accent),transparent_60%)] opacity-10' />
+			<div className='absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,var(--color-primary),transparent_65%)] opacity-8' />
 
 			<div className='relative p-5'>
 				{/* HEADER */}
@@ -86,7 +86,7 @@ export function DuelSummaryCard({
 				{/* MAIN STATS */}
 				<div className='grid grid-cols-2 gap-3 mt-4'>
 					<SummaryBox
-						icon={<CoinsIcon className='text-orange-400 size-5' />}
+						icon={<CoinsIcon className='text-accent size-5' />}
 						label='Stake'
 						value={summary.totalStake}
 					/>
@@ -100,7 +100,7 @@ export function DuelSummaryCard({
 					) : (
 						<SummaryBox
 							icon={
-								<LandmarkIcon className='text-cyan-400 size-5' />
+								<LandmarkIcon className='text-activity size-5' />
 							}
 							label='Escrow'
 							value={summary.totalEscrow}
@@ -151,7 +151,7 @@ interface SummaryBoxProps {
 
 function SummaryBox({ icon, label, value }: Readonly<SummaryBoxProps>) {
 	return (
-		<div className='rounded-xl border border-white/5 bg-card/40 p-3'>
+		<div className='rounded-xl border border-border/50 bg-card/40 p-3'>
 			<div className='flex items-center justify-center gap-2'>
 				{icon}
 
@@ -222,7 +222,7 @@ function getDuelCardContent(
 			state: "waiting-opponent",
 			highlight: true,
 			glowClass:
-				"before:bg-[radial-gradient(circle_at_bottom_right,rgba(244,63,94,.12),transparent_45%)]",
+				"before:bg-[radial-gradient(circle_at_bottom_right,var(--color-primary),transparent_45%)] before:opacity-12",
 			subtitle: "Your duel is waiting",
 			title: "Check your duel",
 			description: "Share it or wait for someone to accept.",
@@ -234,7 +234,7 @@ function getDuelCardContent(
 			state: "queued",
 			highlight: true,
 			glowClass:
-				"before:bg-[radial-gradient(circle_at_bottom_right,rgba(59,130,246,.12),transparent_45%)]",
+				"before:bg-[radial-gradient(circle_at_bottom_right,var(--color-activity),transparent_45%)] before:opacity-12",
 			subtitle: "Getting matched",
 			title: "View matchmaking",
 			description: "You're currently queued for a duel.",
@@ -246,7 +246,7 @@ function getDuelCardContent(
 			state: "active",
 			highlight: false,
 			glowClass:
-				"before:bg-[radial-gradient(circle_at_bottom_right,rgba(34,197,94,.10),transparent_45%)]",
+				"before:bg-[radial-gradient(circle_at_bottom_right,var(--color-win),transparent_45%)] before:opacity-10",
 			subtitle: "Duels are happening",
 			title: "Browse duels",
 			description: "Watch or challenge active players.",
@@ -258,7 +258,7 @@ function getDuelCardContent(
 			state: "draft-create",
 			highlight: predictionStatus === "draft",
 			glowClass:
-				"before:bg-[radial-gradient(circle_at_bottom_right,rgba(251,146,60,.14),transparent_45%)]",
+				"before:bg-[radial-gradient(circle_at_bottom_right,var(--color-accent),transparent_45%)] before:opacity-14",
 			subtitle: "No duel yet",
 			title: "Create the first duel",
 			description: "Challenge someone before betting closes.",

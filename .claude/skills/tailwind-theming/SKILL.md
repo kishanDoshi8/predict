@@ -100,14 +100,17 @@ to the table in `apps/web/DESIGN.md`.
 ## Shareable images
 
 Cards under `src/features/share/` are captured to PNG with `html-to-image` and
-must look the same whatever theme the sharer uses. `html-to-image` copies
-computed styles, so wrap the capture root in `<div className="dark">` and use
-the normal token classes inside it. Don't add new hex values to
-`src/features/share/tokens.ts`.
+must look the same whatever theme the sharer uses. `ShareSheet` renders them
+inside a `.dark` wrapper, so theme variables resolve to dark values;
+`html-to-image` copies the resolved computed styles. The cards use inline
+styles from `src/features/share/tokens.ts`, which point at the variables
+(`var(--card)`), plus `twColor()` for tints. Keep new values there as
+variables, not hex.
 
-## Existing code
+## Remaining literals
 
-Some older files still use literal colors or palette classes (e.g.
-`DuelSummaryCard.tsx`, `DuelCard.tsx`, `useOptionColor.ts`, the auth pages'
-`text-red-500`). When you touch one, move what you touch to tokens; don't copy
-its pattern into new code.
+Intentional, with a reason: `GoogleButton.tsx` (brand colors), the canvas in
+`shared/ui/animations/electric-border.tsx`, the `[stroke='#ccc']` selectors in
+`shared/ui/charts.tsx` (they target Recharts' defaults), `bg-black/50` dialog
+scrims and `text-white` on destructive buttons in shadcn primitives.
+`apps/web/og/` and `public/manifest.json` are outside CSS and keep literals.

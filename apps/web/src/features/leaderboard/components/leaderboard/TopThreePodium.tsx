@@ -52,7 +52,7 @@ export function TopThreePodium({
 							className={cn(
 								"ring-2",
 								isFirst
-									? "ring-yellow-400 size-14"
+									? "ring-rank-1 size-14"
 									: "ring-muted size-10",
 								isSelf && "ring-win",
 							)}
@@ -100,7 +100,7 @@ export function TopThreePodium({
 							let podiumClass = "";
 							if (isFirst) {
 								podiumClass =
-									"bg-yellow-400/20 dark:bg-yellow-500/15 min-h-[3rem]";
+									"bg-rank-1/15 min-h-[3rem]";
 							} else if (visualRank === 2) {
 								podiumClass = "bg-muted/50 min-h-8";
 							} else {

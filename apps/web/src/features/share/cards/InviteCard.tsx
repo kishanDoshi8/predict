@@ -5,6 +5,7 @@ import {
 	Pill,
 } from "@/features/share/components/AppCard";
 import { app, type CardFormat } from "@/features/share/tokens";
+import { twColor } from "@/shared/lib/utils";
 
 export type InviteCardData = {
 	roomName: string;
@@ -83,8 +84,8 @@ export function InviteCard({
 				<div
 					style={{
 						borderRadius: 40,
-						border: "2px solid rgba(244, 63, 94, 0.35)",
-						background: `linear-gradient(160deg, rgba(244, 63, 94, 0.14), ${app.card} 50%)`,
+						border: `2px solid ${twColor("primary", 0.35)}`,
+						background: `linear-gradient(160deg, ${twColor("primary", 0.14)}, ${app.card} 50%)`,
 						padding: 48,
 						display: "flex",
 						flexDirection: "column",
@@ -146,7 +147,7 @@ export function InviteCard({
 						textAlign: "center",
 						fontSize: 40,
 						fontWeight: 700,
-						color: "#ffffff",
+						color: app.onGradient,
 						whiteSpace: "nowrap",
 						overflow: "hidden",
 						textOverflow: "ellipsis",

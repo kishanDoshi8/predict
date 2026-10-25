@@ -79,7 +79,7 @@ export default function PredictionOptions({
 														prediction.winning_option_id ===
 														option.id
 															? "text-win"
-															: "text-red-500";
+															: "text-loss";
 												} else {
 													optionTextClass =
 														useOptionColor(
@@ -133,8 +133,8 @@ export default function PredictionOptions({
 																100
 															: 0
 													}
-													className={`${prediction.winning_option_id === option.id ? "bg-win/30" : "bg-slate-400/50"}`}
-													indicatorBgClassName={`${option.id === prediction.winning_option_id ? "bg-win" : "bg-slate-400"} `}
+													className={`${prediction.winning_option_id === option.id ? "bg-win/30" : "bg-muted-foreground/50"}`}
+													indicatorBgClassName={`${option.id === prediction.winning_option_id ? "bg-win" : "bg-muted-foreground"} `}
 												/>
 											) : (
 												<Progress
@@ -147,7 +147,7 @@ export default function PredictionOptions({
 																100
 															: 0
 													}
-													className={`${selectedOption !== option.id && "[&>div]:bg-slate-400 bg-slate-400/50"}`}
+													className={`${selectedOption !== option.id && "[&>div]:bg-muted-foreground bg-muted-foreground/50"}`}
 												/>
 											)}
 										</div>

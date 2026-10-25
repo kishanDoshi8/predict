@@ -20,8 +20,8 @@ const STATUS_LABEL: Record<Duel["status"], string> = {
 
 const STATUS_BADGE_STYLE: Record<Duel["status"], string> = {
 	created: "bg-primary/15 text-primary border-primary/30",
-	queued: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
-	matched: "bg-violet-500/15 text-violet-400 border-violet-500/30",
+	queued: "bg-activity/15 text-activity border-activity/30",
+	matched: "bg-matched/15 text-matched border-matched/30",
 	resolved: "bg-win/15 text-win border-win/30",
 	cancelled: "bg-destructive/15 text-destructive border-destructive/30",
 	expired: "bg-muted text-muted-foreground border-border",
@@ -32,7 +32,7 @@ export function DuelCard({ duel }: Readonly<DuelCardProps>) {
 	if (!player) return null;
 
 	const isSelf = duel.challenger.id === player.id;
-	let backgroundClass = "from-cyan-500/15";
+	let backgroundClass = "from-activity/15";
 	if (duel.status === "cancelled") {
 		backgroundClass = "from-destructive/15 border-destructive/50";
 	} else if (isSelf) {

@@ -52,6 +52,10 @@ const JoinRoomPage = lazy(() =>
 );
 const PredictionNew = lazy(() => import("@/features/predictions/pages/New"));
 const ManagePage = lazy(() => import("@/features/rooms/pages/ManagePage"));
+const MembersPage = lazy(() => import("@/features/rooms/pages/MembersPage"));
+const RoomSettingsPage = lazy(
+	() => import("@/features/rooms/pages/RoomSettingsPage"),
+);
 const PredictionDuelsPage = lazy(() =>
 	import("@/features/duels/pages/PredictionDuelsPage").then((module) => ({
 		default: module.PredictionDuelsPage,
@@ -211,6 +215,26 @@ export const router = createBrowserRouter([
 											header: {
 												leftAction: "back",
 												title: "Manage",
+											},
+										},
+									},
+									{
+										path: "members",
+										element: withSuspense(<MembersPage />),
+										handle: {
+											header: {
+												leftAction: "back",
+												title: "Members",
+											},
+										},
+									},
+									{
+										path: "settings",
+										element: withSuspense(<RoomSettingsPage />),
+										handle: {
+											header: {
+												leftAction: "back",
+												title: "Room settings",
 											},
 										},
 									},

@@ -1,5 +1,9 @@
 import { Skeleton } from "@/shared/ui/skeleton";
-import { LeaderboardEntry } from "@/features/leaderboard";
+import {
+	LeaderboardEntry,
+	rankingRuleLabel,
+	splitStandings,
+} from "@/features/leaderboard";
 import { LeaderboardRow } from "./LeaderboardRow";
 
 type Props = {
@@ -25,6 +29,8 @@ export function LeaderboardList({
 		);
 	}
 
+	const { ranked, unranked } = splitStandings(entries);
+
 	if (entries.length === 0) {
 		return (
 			<div className='flex flex-col items-center gap-2 py-12 text-center'>
@@ -39,20 +45,48 @@ export function LeaderboardList({
 	return (
 		<div className='flex flex-col gap-2'>
 			{/* Divider */}
-			{entries.length > 3 && (
+			{ranked.length > 3 && (
 				<div className='my-1 border-t border-border/50' />
 			)}
 
-			<div className='flex flex-col gap-1'>
-				{entries.map((entry) => (
-					<LeaderboardRow
-						key={entry.player_id}
-						entry={entry}
-						currentPlayerId={currentPlayerId}
-						onClick={onRowClick}
-					/>
-				))}
-			</div>
+			{ranked.length > 0 ? (
+				<div className='flex flex-col gap-1'>
+					{ranked.map((entry) => (
+						<LeaderboardRow
+							key={entry.player_id}
+							entry={entry}
+							currentPlayerId={currentPlayerId}
+							onClick={onRowClick}
+						/>
+					))}
+				</div>
+			) : (
+				<p className='py-6 text-center text-sm text-muted-foreground'>
+					Nobody is ranked yet.
+				</p>
+			)}
+
+			{/* Players short of the minimum bets, kept out of the standings */}
+			{unranked.length > 0 && (
+				<div className='mt-2 flex flex-col gap-1'>
+					<div className='px-3'>
+						<p className='text-sm font-medium'>Not ranked yet</p>
+						<p className='text-xs text-muted-foreground'>
+							{rankingRuleLabel(unranked[0].required_bets)}
+						</p>
+					</div>
+					<div className='flex flex-col gap-1 opacity-75'>
+						{unranked.map((entry) => (
+							<LeaderboardRow
+								key={entry.player_id}
+								entry={entry}
+								currentPlayerId={currentPlayerId}
+								onClick={onRowClick}
+							/>
+						))}
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

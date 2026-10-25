@@ -4,7 +4,8 @@ create or replace function public.create_series(
   p_description text default null,
   p_expected_games integer default 0,
   p_starting_stack integer default 1000,
-  p_weekly_topup integer default 100
+  p_weekly_topup integer default 100,
+  p_min_bets_to_rank integer default 3
 )
 returns json
 language plpgsql
@@ -48,6 +49,10 @@ begin
     raise exception 'Weekly top-up cannot be negative' using errcode = 'P0001';
   end if;
 
+  if p_min_bets_to_rank is null or p_min_bets_to_rank not between 0 and 50 then
+    raise exception 'Minimum bets to be ranked must be between 0 and 50' using errcode = 'P0001';
+  end if;
+
   insert into public.series (
     room_id,
     title,
@@ -58,6 +63,7 @@ begin
     started_at,
     starting_stack,
     weekly_topup,
+    min_bets_to_rank,
     last_topup_week
   )
   values (
@@ -70,6 +76,7 @@ begin
     now(),
     p_starting_stack,
     p_weekly_topup,
+    p_min_bets_to_rank,
     -- The first top-up is paid the Monday after the series starts.
     private.current_week_key()
   )

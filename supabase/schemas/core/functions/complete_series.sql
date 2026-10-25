@@ -10,7 +10,7 @@ declare
   v_player_id uuid;
   v_series public.series%rowtype;
   v_unfinished_predictions integer;
-  v_minimum_predictions integer;
+  v_required_bets integer;
   v_completed_predictions integer;
 begin
   v_player_id := private.get_player_id_from_auth();
@@ -54,7 +54,8 @@ begin
     raise exception 'Series has unfinished predictions and cannot be completed' using errcode = 'P0001';
   end if;
 
-  v_minimum_predictions := coalesce(v_series.minimum_predictions_for_awards, 3);
+  -- The same bar decides who can place and who can win awards.
+  v_required_bets := private.series_required_bets(p_series_id);
 
   select count(*)::int
   into v_completed_predictions
@@ -78,6 +79,8 @@ begin
       false
     ) stats on stats.player_id = rm.player_id
     where rm.room_id = v_series.room_id
+      -- Only players who bet on enough settled predictions can place.
+      and coalesce(stats.total_bets, 0) >= v_required_bets
   ),
   -- The final balance decides the title; placements record net profit for the Hall of Fame.
   ranked as (
@@ -111,13 +114,15 @@ begin
       b.player_id,
       count(distinct b.prediction_id)::int as prediction_count
     from public.bets b
-    join series_predictions sp on sp.id = b.prediction_id
+    join series_predictions sp
+      on sp.id = b.prediction_id
+     and sp.status in ('revealed', 'no_result')
     group by b.player_id
   ),
   eligible_players as (
     select pp.player_id
     from player_participation pp
-    where pp.prediction_count >= v_minimum_predictions
+    where pp.prediction_count >= v_required_bets
   ),
   revealed_player_results as (
     select
@@ -189,7 +194,7 @@ begin
 
   insert into public.series_awards (series_id, player_id, award_type, value, description)
   with series_predictions as (
-    select p.id
+    select p.id, p.status
     from public.predictions p
     where p.series_id = p_series_id
   ),
@@ -198,13 +203,15 @@ begin
       b.player_id,
       count(distinct b.prediction_id)::int as prediction_count
     from public.bets b
-    join series_predictions sp on sp.id = b.prediction_id
+    join series_predictions sp
+      on sp.id = b.prediction_id
+     and sp.status in ('revealed', 'no_result')
     group by b.player_id
   ),
   eligible_players as (
     select pp.player_id
     from player_participation pp
-    where pp.prediction_count >= v_minimum_predictions
+    where pp.prediction_count >= v_required_bets
   ),
   player_biggest_profit as (
     select
@@ -246,12 +253,13 @@ begin
     from public.bets b
     join public.predictions p on p.id = b.prediction_id
     where p.series_id = p_series_id
+      and p.status in ('revealed', 'no_result')
     group by b.player_id
   ),
   eligible_players as (
     select pp.player_id
     from player_participation pp
-    where pp.prediction_count >= v_minimum_predictions
+    where pp.prediction_count >= v_required_bets
   ),
   duel_wins as (
     select
@@ -289,7 +297,7 @@ begin
 
   insert into public.series_awards (series_id, player_id, award_type, value, description)
   with series_predictions as (
-    select p.id
+    select p.id, p.status
     from public.predictions p
     where p.series_id = p_series_id
   ),
@@ -298,13 +306,15 @@ begin
       b.player_id,
       count(distinct b.prediction_id)::int as prediction_count
     from public.bets b
-    join series_predictions sp on sp.id = b.prediction_id
+    join series_predictions sp
+      on sp.id = b.prediction_id
+     and sp.status in ('revealed', 'no_result')
     group by b.player_id
   ),
   eligible_players as (
     select pp.player_id
     from player_participation pp
-    where pp.prediction_count >= v_minimum_predictions
+    where pp.prediction_count >= v_required_bets
   ),
   points_risked as (
     select
@@ -345,12 +355,13 @@ begin
     from public.bets b
     join public.predictions p on p.id = b.prediction_id
     where p.series_id = p_series_id
+      and p.status in ('revealed', 'no_result')
     group by b.player_id
   ),
   eligible_players as (
     select pp.player_id
     from player_participation pp
-    where pp.prediction_count >= v_minimum_predictions
+    where pp.prediction_count >= v_required_bets
   ),
   player_completed_participation as (
     select

@@ -158,7 +158,7 @@ export function SeriesOrganizerActionsMenu({
 									<PencilIcon className='size-5 text-muted-foreground' />
 								}
 								label='Edit details'
-								description='Title, description, games and points'
+								description='Title, description, games, points and ranking'
 								disabled={disableEditableRows}
 								onClick={onEdit}
 							/>

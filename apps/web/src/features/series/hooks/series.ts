@@ -20,6 +20,7 @@ type UpsertSeriesParams = {
 	expectedGames: number;
 	startingStack?: number;
 	weeklyTopup?: number;
+	minBetsToRank?: number;
 };
 
 export const useRoomSeries = (roomId?: string) => {

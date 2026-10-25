@@ -1,4 +1,4 @@
-import { LeaderboardEntry } from "@/features/leaderboard";
+import { betsNeededLabel, LeaderboardEntry } from "@/features/leaderboard";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { cn, formatSignedPoints } from "@/shared/lib/utils";
 import { CoinsIcon, FlameIcon } from "lucide-react";
@@ -19,7 +19,9 @@ export function LeaderboardRow({
 	const initials = entry.username.slice(0, 2).toUpperCase();
 
 	let rankLabel: string;
-	if (entry.rank === 1) {
+	if (entry.rank === null) {
+		rankLabel = "–";
+	} else if (entry.rank === 1) {
 		rankLabel = "🥇";
 	} else if (entry.rank === 2) {
 		rankLabel = "🥈";
@@ -85,9 +87,15 @@ export function LeaderboardRow({
 						</span>
 					)}
 				</p>
-				{entry.total_revealed_bets > 0 && (
-					<p className='text-xs text-muted-foreground tabular-nums text-left'>
-						{entry.winning_bets}/{entry.total_revealed_bets} wins
+				{entry.is_ranked ? (
+					entry.total_revealed_bets > 0 && (
+						<p className='text-xs text-muted-foreground tabular-nums text-left'>
+							{entry.winning_bets}/{entry.total_revealed_bets} wins
+						</p>
+					)
+				) : (
+					<p className='text-xs text-muted-foreground text-left'>
+						Not ranked yet · {betsNeededLabel(entry.bets_needed)}
 					</p>
 				)}
 			</div>

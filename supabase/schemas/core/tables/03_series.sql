@@ -10,8 +10,9 @@ create table if not exists public.series (
   started_at timestamptz,
   completed_at timestamptz,
   archived_at timestamptz,
-  minimum_predictions_for_awards integer not null default 3,
-  -- Every member's wallet starts at starting_stack and gains weekly_topup each Monday.
+  -- Players must bet on this many settled predictions to be ranked, win the title or get awards.
+  min_bets_to_rank integer not null default 3 check (min_bets_to_rank between 0 and 50),
+  -- Every member's wallet starts at starting_stack and gains weekly_topup each Monday if they bet the week before.
   starting_stack integer not null default 1000 check (starting_stack between 100 and 1000000),
   weekly_topup integer not null default 100 check (weekly_topup between 0 and 100000),
   topups_paid integer not null default 0 check (topups_paid >= 0),

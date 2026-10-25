@@ -4,7 +4,8 @@ create or replace function public.update_series(
   p_description text default null,
   p_expected_games integer default 0,
   p_starting_stack integer default null,
-  p_weekly_topup integer default null
+  p_weekly_topup integer default null,
+  p_min_bets_to_rank integer default null
 )
 returns json
 language plpgsql
@@ -47,6 +48,17 @@ begin
     raise exception 'Expected games cannot be negative' using errcode = 'P0001';
   end if;
 
+  -- Unlike points, the ranking bar can change while a series runs: it moves no one's balance.
+  if p_min_bets_to_rank is not null and p_min_bets_to_rank not between 0 and 50 then
+    raise exception 'Minimum bets to be ranked must be between 0 and 50' using errcode = 'P0001';
+  end if;
+
+  if p_min_bets_to_rank is not null
+    and p_min_bets_to_rank <> v_series.min_bets_to_rank
+    and v_series.status not in ('draft', 'active') then
+    raise exception 'Minimum bets to be ranked can only change before a series is closed' using errcode = 'P0001';
+  end if;
+
   v_points_changed :=
     (p_starting_stack is not null and p_starting_stack <> v_series.starting_stack)
     or (p_weekly_topup is not null and p_weekly_topup <> v_series.weekly_topup);
@@ -80,7 +92,8 @@ begin
     description = nullif(trim(coalesce(p_description, '')), ''),
     expected_games = p_expected_games,
     starting_stack = coalesce(p_starting_stack, starting_stack),
-    weekly_topup = coalesce(p_weekly_topup, weekly_topup)
+    weekly_topup = coalesce(p_weekly_topup, weekly_topup),
+    min_bets_to_rank = coalesce(p_min_bets_to_rank, min_bets_to_rank)
   where id = p_series_id
   returning * into v_series;
 

@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(37);
+select plan(45);
 
 -- ------------------------------------------------------------
 -- Fixtures: Alice organizes a room with Bob. Carol joins later.
@@ -164,17 +164,25 @@ select is((pg_temp.wallet('oscars', 'bob')).balance, 800, 'a cancelled predictio
 select is((pg_temp.wallet('oscars', 'bob')).escrow, 0, 'a cancelled prediction releases escrow');
 
 -- ------------------------------------------------------------
--- 5. Weekly top-ups
+-- 5. Weekly top-ups go to players who bet last week, or are broke
 -- ------------------------------------------------------------
 select is(private.pay_series_topups(), 0, 'no top-up in the week a series starts');
 
 update public.series set last_topup_week = '2000-W01' where id in (pg_temp.setting('cup'), pg_temp.setting('oscars'));
+-- Bob's bets were last week; Alice's World Cup bet is from this week.
+update public.bets set placed_at = now() - interval '7 days', updated_at = now() - interval '7 days'
+where player_id = (select id from public.players where username = 'bob');
+-- Alice has nothing left to bet with in the Oscars.
+update public.series_wallets set balance = 0
+where series_id = pg_temp.setting('oscars') and player_id = (select id from public.players where username = 'alice');
 
 select is(private.pay_series_topups(), 2, 'each active series gets its top-up');
 select is(private.pay_series_topups(), 0, 'a top-up is paid only once per week');
-select is((pg_temp.wallet('cup', 'bob')).balance, 900, 'the top-up is added to every wallet');
+select is((pg_temp.wallet('cup', 'bob')).balance, 900, 'a player who bet last week gets the top-up');
 select is((pg_temp.wallet('cup', 'bob')).granted, 1100, 'the top-up counts as granted, not profit');
+select is((pg_temp.wallet('cup', 'alice')).balance, 1200, 'a player who did not bet last week gets no top-up');
 select is((pg_temp.wallet('oscars', 'bob')).balance, 850, 'each series pays its own top-up amount');
+select is((pg_temp.wallet('oscars', 'alice')).balance, 50, 'a broke player still gets the top-up');
 
 -- ------------------------------------------------------------
 -- 6. Late joiners start level with everyone
@@ -186,6 +194,10 @@ reset role;
 
 select is((pg_temp.wallet('cup', 'carol')).balance, 1100, 'a late joiner gets the stack plus every top-up so far');
 
+-- Carol never bets but sits on the top balance, with no profit.
+update public.series_wallets set balance = 1500, granted = 1500
+where series_id = pg_temp.setting('cup') and player_id = (select id from public.players where username = 'carol');
+
 -- ------------------------------------------------------------
 -- 7. Standings and the series result
 -- ------------------------------------------------------------
@@ -193,12 +205,11 @@ select pg_temp.login('00000000-0000-0000-0000-000000000b0b');
 set local role authenticated;
 select is(
   array(
-    select e->>'username'
+    select e->>'username' || ':' || coalesce(e->>'rank', '-')
     from json_array_elements(public.get_series_leaderboard(pg_temp.setting('room_id'), pg_temp.setting('cup'), 'points')) e
-    order by (e->>'rank')::int
   ),
-  array['alice', 'carol', 'bob'],
-  'standings are ordered by balance'
+  array['alice:1', 'bob:2', 'carol:-'],
+  'ranked players come by balance, then the unranked'
 );
 select is(
   (
@@ -206,8 +217,51 @@ select is(
     from json_array_elements(public.get_series_leaderboard(pg_temp.setting('room_id'), pg_temp.setting('cup'), 'points')) e
     where e->>'username' = 'alice'
   ),
-  1300,
+  1200,
   'standings show the balance'
+);
+select is(
+  (
+    select (e->>'is_ranked') || '/' || (e->>'bets_needed') || '/' || (e->>'required_bets')
+    from json_array_elements(public.get_series_leaderboard(pg_temp.setting('room_id'), pg_temp.setting('cup'), 'points')) e
+    where e->>'username' = 'carol'
+  ),
+  'false/1/1',
+  'a player who has not bet is not ranked, and the bar is capped at what has settled'
+);
+select is(
+  (
+    select count(*)::int
+    from json_array_elements(public.get_series_leaderboard(pg_temp.setting('room_id'), pg_temp.setting('oscars'), 'points')) e
+    where (e->>'is_ranked')::boolean
+  ),
+  3,
+  'with nothing settled yet, everyone is ranked'
+);
+reset role;
+
+select pg_temp.login('00000000-0000-0000-0000-00000000a11c');
+set local role authenticated;
+select throws_ok(
+  format($$ select public.update_series(%L, 'World Cup', null, 0, null, null, 51) $$, pg_temp.setting('cup')),
+  'P0001', null,
+  'the ranking bar has limits'
+);
+select public.update_series(pg_temp.setting('cup'), 'World Cup', null, 0, null, null, 0);
+select is(
+  (
+    select e->>'rank'
+    from json_array_elements(public.get_series_leaderboard(pg_temp.setting('room_id'), pg_temp.setting('cup'), 'points')) e
+    where e->>'username' = 'carol'
+  ),
+  '1',
+  'the ranking bar can change while a series runs, and 0 ranks everyone'
+);
+select public.update_series(pg_temp.setting('cup'), 'World Cup', null, 0, null, null, 3);
+select is(
+  (public.create_series(pg_temp.setting('room_id'), 'Euros', null, 0, 1000, 100, 5)->>'min_bets_to_rank')::int,
+  5,
+  'a new series can set its ranking bar'
 );
 reset role;
 
@@ -219,7 +273,12 @@ reset role;
 select is(
   (select p.username::text from public.series_placements sp join public.players p on p.id = sp.player_id where sp.series_id = pg_temp.setting('cup') and sp.placement = 1),
   'alice',
-  'the top balance wins the series'
+  'the top ranked balance wins the series'
+);
+select is(
+  (select count(*)::int from public.series_placements sp where sp.series_id = pg_temp.setting('cup')),
+  2,
+  'unranked players cannot place'
 );
 select is(
   (select sp.points from public.series_placements sp join public.players p on p.id = sp.player_id where sp.series_id = pg_temp.setting('cup') and p.username = 'alice'),

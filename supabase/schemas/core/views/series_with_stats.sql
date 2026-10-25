@@ -42,6 +42,7 @@ select
     from public.bets b
     join public.predictions p on p.id = b.prediction_id
     where p.series_id = s.id
-  ) as has_bets
+  ) as has_bets,
+  s.min_bets_to_rank
 from public.series s
 left join series_prediction_stats sps on sps.series_id = s.id;

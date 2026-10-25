@@ -69,6 +69,7 @@ type SeriesPayload = {
   weekly_topup?: number
   topups_paid?: number
   has_bets?: boolean
+  min_bets_to_rank?: number
 }
 
 export type SeriesWallet = {
@@ -190,6 +191,7 @@ function mapSeriesPayload(series: SeriesPayload): Series {
     weeklyTopup: series.weekly_topup ?? 100,
     topupsPaid: series.topups_paid ?? 0,
     hasBets: series.has_bets ?? false,
+    minBetsToRank: series.min_bets_to_rank ?? 3,
   }
 }
 
@@ -411,6 +413,7 @@ type SeriesUpsertPayload = {
   expectedGames: number
   startingStack?: number
   weeklyTopup?: number
+  minBetsToRank?: number
 }
 
 export async function createSeries(roomId: string, payload: SeriesUpsertPayload): Promise<Series> {
@@ -421,6 +424,7 @@ export async function createSeries(roomId: string, payload: SeriesUpsertPayload)
     p_expected_games: payload.expectedGames,
     p_starting_stack: payload.startingStack,
     p_weekly_topup: payload.weeklyTopup,
+    p_min_bets_to_rank: payload.minBetsToRank,
   })
   return mapSeriesPayload(assertOk(data, error) as SeriesPayload)
 }
@@ -433,6 +437,7 @@ export async function updateSeries(seriesId: string, payload: SeriesUpsertPayloa
     p_expected_games: payload.expectedGames,
     p_starting_stack: payload.startingStack,
     p_weekly_topup: payload.weeklyTopup,
+    p_min_bets_to_rank: payload.minBetsToRank,
   })
   return mapSeriesPayload(assertOk(data, error) as SeriesPayload)
 }

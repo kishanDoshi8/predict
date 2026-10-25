@@ -1,23 +1,22 @@
 import { useState } from "react";
-import { ReceiptTextIcon } from "lucide-react";
+import { Share2Icon } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib/utils";
 import {
-	BragReceipt,
-	receipt,
+	ResultCard,
 	shareHost,
 	shareLink,
 	ShareSheet,
-	type BragReceiptData,
+	type ResultCardData,
 } from "@/features/share";
 
 type Props = {
 	roomId: string;
 	predictionId: string;
-	data: BragReceiptData;
+	data: ResultCardData;
 };
 
-// The moment a result lands: your number, and the receipt to prove it.
+// The moment a result lands: your number, and a card to share it.
 export function ResultBanner({ roomId, predictionId, data }: Readonly<Props>) {
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
 	const { call } = data;
@@ -40,11 +39,10 @@ export function ResultBanner({ roomId, predictionId, data }: Readonly<Props>) {
 				{total ? (
 					<p
 						className={cn(
-							"text-5xl font-extrabold leading-none",
+							"text-4xl font-bold leading-none",
 							call && call.net > 0 && "text-win",
 							call && call.net < 0 && "text-loss",
 						)}
-						style={{ fontFamily: receipt.display }}
 					>
 						{total}
 						<span className='ml-1 text-xl'>pts</span>
@@ -59,13 +57,13 @@ export function ResultBanner({ roomId, predictionId, data }: Readonly<Props>) {
 				variant={won ? "linear" : "outline"}
 				onClick={() => setIsSheetOpen(true)}
 			>
-				<ReceiptTextIcon />
-				{call ? "Share receipt" : "Share result"}
+				<Share2Icon />
+				Share result
 			</Button>
 			<ShareSheet
 				open={isSheetOpen}
 				onOpenChange={setIsSheetOpen}
-				title={call ? "Share your receipt" : "Share the result"}
+				title={call ? "Share your result" : "Share the result"}
 				description='Friends who tap the link can join the room and see this prediction.'
 				message={message}
 				link={shareLink(
@@ -76,7 +74,7 @@ export function ResultBanner({ roomId, predictionId, data }: Readonly<Props>) {
 				kind='brag-card'
 				roomId={roomId}
 				fileName={`verdict-${predictionId.slice(0, 8)}`}
-				renderCard={(format) => <BragReceipt data={{ ...data, host: shareHost() }} format={format} />}
+				renderCard={(format) => <ResultCard data={{ ...data, host: shareHost() }} format={format} />}
 			/>
 		</div>
 	);

@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- Source for public/og-image.jpg, the link-preview image. Regenerate: node og/render.mjs -->
-<!-- Same "receipt" language as the in-app share cards (src/features/share). -->
+<!-- Same look as the app and its share cards (src/features/share). -->
 <html>
 <head>
 <meta charset="utf-8" />
@@ -10,57 +10,43 @@
     src: url("../../../node_modules/@fontsource-variable/fira-code/files/fira-code-latin-wght-normal.woff2") format("woff2");
     font-weight: 300 700;
   }
-  @font-face {
-    font-family: "Big Shoulders Display";
-    src: url("../../../node_modules/@fontsource-variable/big-shoulders-display/files/big-shoulders-display-latin-wght-normal.woff2") format("woff2");
-    font-weight: 100 900;
-  }
   html, body { margin: 0; }
   body {
-    width: 1200px; height: 630px; overflow: hidden;
-    background: #09090b;
-    display: flex; align-items: center; justify-content: center;
-    font-family: "Fira Code", ui-monospace, monospace; color: #17181A;
+    width: 1200px; height: 630px; box-sizing: border-box; padding: 64px 72px;
+    background: #09090b; color: #fafafa; font-family: "Fira Code", ui-monospace, monospace;
+    display: flex; align-items: center; gap: 56px;
   }
-  .ticket { width: 1000px; transform: rotate(-1.5deg); filter: drop-shadow(0 24px 36px rgba(0,0,0,.55)); }
-  .paper {
-    background: #E9EBE6; padding: 44px 56px 36px;
-    display: grid; grid-template-columns: 1fr 380px; gap: 0 48px; font-size: 26px; line-height: 1.35;
-  }
-  .head { grid-column: 1 / -1; display: flex; justify-content: space-between; font-weight: 700; }
-  .cut { grid-column: 1 / -1; border-top: 3px dashed #5F625E; opacity: .7; margin: 20px 0 22px; }
-  .invited { font-weight: 700; font-size: 28px; }
-  .name { font-family: "Big Shoulders Display", sans-serif; font-weight: 800; font-size: 170px; line-height: .9; letter-spacing: -2px; color: #F0386B; margin-top: 6px; }
-  .stub { border-left: 3px dashed #5F625E; padding-left: 40px; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
-  .row { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; font-size: 24px; }
-  .row b { margin-left: auto; }
-  .dots { flex: 1; border-bottom: 4px dotted #5F625E; opacity: .6; transform: translateY(-7px); min-width: 16px; }
-  .note { grid-column: 1; color: #5F625E; margin-top: 18px; font-size: 24px; }
-  svg { display: block; width: 100%; height: 20px; }
+  .copy { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 28px; }
+  .brand { display: flex; align-items: center; gap: 20px; font-size: 36px; font-weight: 700; }
+  .tile { width: 72px; height: 72px; border-radius: 20px; background: linear-gradient(135deg, #f43f5e, #fb923c); display: flex; align-items: center; justify-content: center; }
+  h1 { margin: 0; font-size: 64px; font-weight: 700; line-height: 1.08; letter-spacing: -2px; }
+  .rule { font-size: 26px; color: #a1a1aa; line-height: 1.5; }
+  .card { width: 400px; flex-shrink: 0; border-radius: 32px; border: 2px solid rgba(244, 63, 94, 0.35); background: linear-gradient(160deg, rgba(244, 63, 94, 0.14), #18181b 55%); padding: 36px; display: flex; flex-direction: column; gap: 22px; box-sizing: border-box; }
+  .pill { align-self: flex-start; font-size: 20px; font-weight: 600; color: #fb7185; background: rgba(244, 63, 94, 0.18); border-radius: 999px; padding: 6px 16px; }
+  .q { font-size: 32px; font-weight: 700; line-height: 1.2; }
+  .opt { display: flex; flex-direction: column; gap: 8px; }
+  .row { display: flex; justify-content: space-between; font-size: 22px; }
+  .row span:last-child { color: #a1a1aa; }
+  .track { height: 10px; border-radius: 999px; background: #27272a; }
+  .fill { height: 10px; border-radius: 999px; background: linear-gradient(90deg, #f43f5e, #fb923c); }
 </style>
 </head>
 <body>
-  <div class="ticket">
-    <div class="paper">
-      <div class="head"><span>Admit one</span><span>Friends only</span></div>
-      <div class="cut"></div>
-      <div>
-        <div class="invited">You're invited to</div>
-        <div class="name">Verdict</div>
+  <div class="copy">
+    <div class="brand">
+      <div class="tile">
+        <svg width="48" height="48" viewBox="0 0 512 512" aria-hidden="true"><path d="M112 270 L225 383 L404 204" stroke="#ffffff" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><rect x="137" y="155" width="140" height="44" rx="10" transform="rotate(-45 207 177)" fill="#ffffff"></rect><rect x="229" y="197" width="60" height="60" rx="6" transform="rotate(45 259 227)" fill="#ffffff"></rect></svg>
       </div>
-      <div class="stub">
-        <div class="row"><span>Entry</span><span class="dots"></span><b>free</b></div>
-        <div class="row"><span>Stack</span><span class="dots"></span><b>same for all</b></div>
-        <div class="row"><span>Winner</span><span class="dots"></span><b>top balance</b></div>
-      </div>
-      <div class="note">Prediction series for friends. Tap to join the room.</div>
+      Verdict
     </div>
-    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polygon id="edge" fill="#E9EBE6"></polygon></svg>
+    <h1>Call it before your friends do.</h1>
+    <div class="rule">Prediction series for friends. Same points for everyone, top balance takes the title.</div>
   </div>
-  <script>
-    const teeth = 32, pts = [];
-    for (let i = 0; i <= teeth * 2; i++) pts.push(`${(i / (teeth * 2)) * 100},${i % 2 ? 100 : 0}`);
-    document.getElementById("edge").setAttribute("points", `0,0 ${pts.join(" ")} 100,0`);
-  </script>
+  <div class="card">
+    <span class="pill">● Live</span>
+    <span class="q">Who wins the final?</span>
+    <div class="opt"><div class="row"><span>France</span><span>58%</span></div><div class="track"><div class="fill" style="width: 58%"></div></div></div>
+    <div class="opt"><div class="row"><span>Brazil</span><span>42%</span></div><div class="track"><div class="fill" style="width: 42%"></div></div></div>
+  </div>
 </body>
 </html>

@@ -10,7 +10,7 @@ import PredictionData from "./PredictionData";
 import { PlayerProfileDialog } from "@/features/leaderboard";
 import { useState } from "react";
 import { ResultBanner } from "../components/ResultBanner";
-import type { BragReceiptData } from "@/features/share";
+import type { ResultCardData } from "@/features/share";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -46,7 +46,7 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 		prediction.prediction_options.find((option) => option.id === optionId)
 			?.label ?? "";
 	const myBet = bets?.find((bet) => bet.player_id === player?.id);
-	const receiptData: BragReceiptData | null =
+	const resultData: ResultCardData | null =
 		prediction.status === "revealed" && prediction.winning_option_id && bets
 			? {
 					roomName: room.name,
@@ -60,11 +60,19 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 						(bet) => bet.option_id === prediction.winning_option_id,
 					).length,
 					participants: bets.length,
+					playerName: player?.username ?? "",
+					options: prediction.prediction_options.map((option) => ({
+						label: option.label,
+						pool: bets
+							.filter((bet) => bet.option_id === option.id)
+							.reduce((sum, bet) => sum + bet.amount, 0),
+						isWinner: option.id === prediction.winning_option_id,
+						isMine: option.id === myBet?.option_id,
+					})),
 					call: myBet
 						? {
 								pick: optionLabel(myBet.option_id),
 								stake: myBet.amount,
-								calledAt: myBet.updated_at ?? prediction.deadline,
 								net: (myBet.payout ?? 0) - myBet.amount,
 							}
 						: null,
@@ -130,7 +138,7 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 				/>
 			</div>
 
-			{receiptData ? (
+			{resultData ? (
 				<FadeContent
 					delay={contentDelays.result}
 					className={`w-full max-w-md mx-auto`}
@@ -138,7 +146,7 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 					<ResultBanner
 						roomId={room.id}
 						predictionId={prediction.id}
-						data={receiptData}
+						data={resultData}
 					/>
 				</FadeContent>
 			) : null}

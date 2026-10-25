@@ -13,12 +13,17 @@ export type StandingsCardData = {
 	roomCode: string;
 	host: string;
 	seriesTitle: string;
-	standings: Array<{ rank: number; username: string; balance: number; netProfit: number }>;
+	standings: Array<{
+		rank: number;
+		username: string;
+		balance: number;
+		netProfit: number;
+	}>;
 	awards: Array<{ label: string; username: string; value: string }>;
 };
 
 // Everyone is shown; these only guard against a very large room.
-const MAX_ROWS = 12;
+const MAX_ROWS = 2;
 const MAX_AWARDS = 6;
 
 type Entry = StandingsCardData["standings"][number];
@@ -37,18 +42,32 @@ function signed(value: number) {
 function Crown() {
 	return (
 		<svg width='72' height='54' viewBox='0 0 24 18' aria-hidden='true'>
-			<path d='M2 16 L1 4 L7 9 L12 1 L17 9 L23 4 L22 16 Z' fill={app.gold} />
+			<path
+				d='M2 16 L1 4 L7 9 L12 1 L17 9 L23 4 L22 16 Z'
+				fill={app.gold}
+			/>
 		</svg>
 	);
 }
 
 // One step of the app's podium: avatar, name, balance and the numbered block.
-function Step({ entry, place }: Readonly<{ entry: Entry | undefined; place: 1 | 2 | 3 }>) {
+function Step({
+	entry,
+	place,
+}: Readonly<{ entry: Entry | undefined; place: 1 | 2 | 3 }>) {
 	if (!entry) return <div />;
 	const style = PLACES[place];
 	const isChampion = place === 1;
 	return (
-		<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, minWidth: 0 }}>
+		<div
+			style={{
+				display: "flex",
+				flexDirection: "column",
+				alignItems: "center",
+				gap: 16,
+				minWidth: 0,
+			}}
+		>
 			{isChampion ? <Crown /> : null}
 			<div
 				style={{
@@ -66,11 +85,25 @@ function Step({ entry, place }: Readonly<{ entry: Entry | undefined; place: 1 | 
 			>
 				{initials(entry.username)}
 			</div>
-			<span style={{ fontSize: isChampion ? 44 : 34, fontWeight: isChampion ? 700 : 600, maxWidth: "100%", ...singleLine }}>
+			<span
+				style={{
+					fontSize: isChampion ? 44 : 34,
+					fontWeight: isChampion ? 700 : 600,
+					maxWidth: "100%",
+					...singleLine,
+				}}
+			>
 				{entry.username}
 			</span>
-			<span style={{ fontSize: isChampion ? 28 : 26, color: isChampion ? app.gold : app.muted, whiteSpace: "nowrap" }}>
-				{entry.balance.toLocaleString()} pts{isChampion ? ` · ${signed(entry.netProfit)}` : ""}
+			<span
+				style={{
+					fontSize: isChampion ? 28 : 26,
+					color: isChampion ? app.gold : app.muted,
+					whiteSpace: "nowrap",
+				}}
+			>
+				{entry.balance.toLocaleString()} pts
+				{isChampion ? ` · ${signed(entry.netProfit)}` : ""}
 			</span>
 			<div
 				style={{
@@ -83,14 +116,20 @@ function Step({ entry, place }: Readonly<{ entry: Entry | undefined; place: 1 | 
 						: place === 2
 							? "linear-gradient(180deg, rgba(161,161,170,0.35), rgba(161,161,170,0.05))"
 							: "linear-gradient(180deg, rgba(251,146,60,0.35), rgba(251,146,60,0.05))",
-					border: isChampion ? "none" : `2px solid ${place === 2 ? "rgba(161,161,170,0.4)" : "rgba(251,146,60,0.4)"}`,
+					border: isChampion
+						? "none"
+						: `2px solid ${place === 2 ? "rgba(161,161,170,0.4)" : "rgba(251,146,60,0.4)"}`,
 					borderBottom: "none",
 					display: "flex",
 					justifyContent: "center",
 					paddingTop: 20,
 					fontSize: style.number,
 					fontWeight: 700,
-					color: isChampion ? "#ffffff" : place === 2 ? "#d4d4d8" : "#fdba74",
+					color: isChampion
+						? "#ffffff"
+						: place === 2
+							? "#d4d4d8"
+							: "#fdba74",
 				}}
 			>
 				{place}
@@ -152,16 +191,35 @@ export function StandingsCard({
 								gap: 24,
 								padding: "20px 0",
 								fontSize: 30,
-								borderTop: index === 0 ? "none" : "2px solid rgba(255, 255, 255, 0.06)",
+								borderTop:
+									index === 0
+										? "none"
+										: "2px solid rgba(255, 255, 255, 0.06)",
 							}}
 						>
-							<span style={{ width: 48, color: app.muted }}>{entry.rank}</span>
-							<span style={{ flex: 1, minWidth: 0, ...singleLine }}>{entry.username}</span>
-							<span style={{ color: app.muted }}>{entry.balance.toLocaleString()} pts</span>
+							<span style={{ width: 48, color: app.muted }}>
+								{entry.rank}
+							</span>
+							<span
+								style={{ flex: 1, minWidth: 0, ...singleLine }}
+							>
+								{entry.username}
+							</span>
+							<span style={{ color: app.muted }}>
+								{entry.balance.toLocaleString()} pts
+							</span>
 						</div>
 					))}
 					{hidden > 0 ? (
-						<span style={{ padding: "8px 0 18px 72px", fontSize: 26, color: app.muted }}>and {hidden} more</span>
+						<span
+							style={{
+								padding: "8px 0 18px 72px",
+								fontSize: 26,
+								color: app.muted,
+							}}
+						>
+							and {hidden} more
+						</span>
 					) : null}
 				</div>
 			) : null}
@@ -175,7 +233,10 @@ export function StandingsCard({
 								fontSize: 24,
 								borderRadius: 999,
 								padding: "12px 22px",
-								background: index % 2 === 0 ? "rgba(34, 211, 238, 0.12)" : "rgba(251, 146, 60, 0.14)",
+								background:
+									index % 2 === 0
+										? "rgba(34, 211, 238, 0.12)"
+										: "rgba(251, 146, 60, 0.14)",
 								color: index % 2 === 0 ? "#67e8f9" : "#fdba74",
 								maxWidth: "100%",
 								boxSizing: "border-box",
@@ -187,7 +248,11 @@ export function StandingsCard({
 				</div>
 			) : null}
 
-			<CardFooter label='Next series on Verdict' host={data.host} roomCode={data.roomCode} />
+			<CardFooter
+				label='Next series on Verdict'
+				host={data.host}
+				roomCode={data.roomCode}
+			/>
 		</CardCanvas>
 	);
 }

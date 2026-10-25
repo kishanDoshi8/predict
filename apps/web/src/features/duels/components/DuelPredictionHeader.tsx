@@ -38,7 +38,7 @@ export default function DuelPredictionHeader({
 				</AlertDescription>
 				<AlertAction>
 					<Button variant='ghost' size='icon-lg' className='p-0'>
-						<ChevronRightIcon className='size-5 text-cyan/70' />
+						<ChevronRightIcon className='size-5 text-activity/70' />
 					</Button>
 				</AlertAction>
 			</Alert>

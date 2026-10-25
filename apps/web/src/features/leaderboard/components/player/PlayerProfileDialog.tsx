@@ -363,7 +363,7 @@ export function PlayerProfileDialog({
 				</HeaderComponent>
 
 				{error && (
-					<div className='p-4 text-sm text-red-500'>{error}</div>
+					<div className='p-4 text-sm text-destructive'>{error}</div>
 				)}
 
 				<div className={`p-4 overflow-auto no-scrollbar`}>

@@ -22,7 +22,6 @@ import {
 	CarouselContent,
 	CarouselItem,
 } from "@/shared/ui/carousel";
-import { useOptionBgColor } from "@/shared/hooks/useOptionColor";
 import {
 	CheckIcon,
 	ChevronLeftIcon,
@@ -129,7 +128,7 @@ function PredictionCard({
 						<div className={`flex items-center gap-2`}>
 							<Badge
 								variant='outline'
-								className={`text-green-500 text-xs flex items-center gap-1`}
+								className={`text-win text-xs flex items-center gap-1`}
 							>
 								<CheckIcon className={`w-3 h-3`} />
 								Resolved
@@ -218,7 +217,6 @@ function PredictionCard({
 											100
 										: 0
 								}
-								className={`[&>div]:${useOptionBgColor(option.id)}`}
 								id={`progress-${option.id}`}
 							/>
 						</Field>
@@ -471,7 +469,7 @@ function InPlayPredictions({
 		carouselContent = (
 			<CarouselItem>
 				<div
-					className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full space-y-2`}
+					className={`border-2 border-activity/30 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full space-y-2`}
 				>
 					<Skeleton className={`h-5 w-22`} />
 					<Skeleton className={`h-7 mx-auto w-full`} />
@@ -489,7 +487,7 @@ function InPlayPredictions({
 		carouselContent = (
 			<CarouselItem>
 				<div
-					className={`border-2 border-cyan-900 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full`}
+					className={`border-2 border-activity/30 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full`}
 				>
 					<p className={`text-muted-foreground text-center py-4`}>
 						{emptyMessage}

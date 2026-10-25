@@ -1,9 +1,11 @@
+// Theme tokens (--option-1..5 in global.css). Complete class names, so Tailwind
+// generates them; don't build these strings at runtime.
 const optionColors = [
-  "text-purple-500",
-  "text-cyan-500",
-  "text-red-500",
-  "text-green-500",
-  "text-yellow-500",
+  "text-option-1",
+  "text-option-2",
+  "text-option-3",
+  "text-option-4",
+  "text-option-5",
 ]
 
 const optionColorMap: Record<string, string> = {}
@@ -19,10 +21,3 @@ export function getOptionColor(optionId: string) {
 }
 
 export const useOptionColor = getOptionColor
-
-export function useOptionBgColor(optionId: string) {
-  const color = getOptionColor(optionId)
-  
-  const bgColor = color.replace("text-", "bg-").replace("-500", "-100")
-  return bgColor
-}

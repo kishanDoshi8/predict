@@ -103,7 +103,7 @@ export function LeaderboardRow({
 			{/* Balance, then profit or loss this series */}
 			<div className='flex flex-col items-end gap-0.5 shrink-0 text-right'>
 				<p className='font-semibold tabular-nums'>
-					<CoinsIcon className='w-4 h-4 text-yellow-400 inline-block mr-0.5' />
+					<CoinsIcon className='w-4 h-4 text-rank-1 inline-block mr-0.5' />
 					{entry.balance.toLocaleString()}
 				</p>
 				<p

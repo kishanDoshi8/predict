@@ -38,7 +38,7 @@ export default function DraftPhase({
 	return (
 		<div className={`flex-1 flex flex-col gap-4 items-center`}>
 			<div
-				className={`w-full max-w-md mx-auto text-card-foreground flex flex-col gap-4 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-rose-500/5 p-5`}
+				className={`w-full max-w-md mx-auto text-card-foreground flex flex-col gap-4 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-primary/5 p-5`}
 			>
 				{prediction?.status === "draft" ? (
 					<Badge

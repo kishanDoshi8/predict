@@ -55,7 +55,7 @@ export default function LockedPhase({
 	return (
 		<div className={`flex-1 flex flex-col gap-4 items-center pb-4`}>
 			<div
-				className={`flex flex-col gap-4 justify-center w-full max-w-md mx-auto relative overflow-hidden rounded-2xl bg-linear-to-br from-accent-500/15 via-card to-primary-500/10 border border-orange-500/20 p-5`}
+				className={`flex flex-col gap-4 justify-center w-full max-w-md mx-auto relative overflow-hidden rounded-2xl bg-linear-to-br from-accent/15 via-card to-primary/10 border border-accent/20 p-5`}
 			>
 				{prediction?.status === "locked" ? (
 					<Badge

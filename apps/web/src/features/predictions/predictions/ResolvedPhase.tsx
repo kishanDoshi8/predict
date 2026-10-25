@@ -90,7 +90,7 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 	return (
 		<div className={`flex-1 flex flex-col gap-4 items-center pb-4 mt-4`}>
 			<div
-				className={`flex flex-col justify-center items-center gap-4 w-full max-w-md max-auto relative overflow-hidden rounded-2xl bg-linear-to-br from-win/20 via-card to-emerald-500/10 border border-green-500/30 p-5`}
+				className={`flex flex-col justify-center items-center gap-4 w-full max-w-md max-auto relative overflow-hidden rounded-2xl bg-linear-to-br from-win/20 via-card to-win/10 border border-win/30 p-5`}
 			>
 				{prediction?.status === "revealed" ? (
 					<Badge

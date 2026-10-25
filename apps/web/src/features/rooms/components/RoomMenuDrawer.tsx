@@ -8,9 +8,12 @@ import {
 import {
 	BellIcon,
 	CopyIcon,
+	FlagIcon,
 	LinkIcon,
 	LogOutIcon,
+	SettingsIcon,
 	Share2Icon,
+	UsersIcon,
 	type LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -21,6 +24,8 @@ import { SettingsRow } from "@/features/series/components/SeriesOrganizerActions
 import { useAuth } from "@/features/auth";
 import { copyToClipboard } from "@/shared/lib/clipboard";
 import { InviteSheet } from "./InviteSheet";
+import { useManageQueue } from "@/features/rooms/hooks/staff";
+import { useRoomRole } from "@/features/rooms/hooks/useRoomRole";
 import { useCurrentSeries, useSeriesWallet } from "@/features/series/hooks/wallets";
 import {
 	InviteCard,
@@ -50,6 +55,8 @@ export function RoomMenuDrawer({
 	const { user, hasGoogleIdentity, linkGoogle, signOut } = useAuth();
 	const [isInviteSheetOpen, setIsInviteSheetOpen] = useState(false);
 	const [isInviteCardOpen, setIsInviteCardOpen] = useState(false);
+	const { can } = useRoomRole(room);
+	const { data: manageQueue } = useManageQueue(room.id, can.resolve && open);
 	const { currentSeries } = useCurrentSeries(room.id);
 	const activeSeries = currentSeries?.status === "active" ? currentSeries : null;
 	const { wallet: activeWallet } = useSeriesWallet(room.id, activeSeries?.id);
@@ -168,6 +175,44 @@ export function RoomMenuDrawer({
 		// },
 	];
 
+	const toResolveCount = manageQueue?.to_resolve.length ?? 0;
+	// Staff tools first; everyone can see who's in the room and their roles.
+	const roomSectionItems: Array<{
+		label: string;
+		detail?: string;
+		icon: LucideIcon;
+		onClick: () => void;
+	}> = [
+		...(can.resolve
+			? [
+					{
+						label: "Needs you",
+						detail:
+							toResolveCount > 0
+								? `${toResolveCount} ${toResolveCount === 1 ? "result" : "results"} to reveal`
+								: "Nothing waiting on a result",
+						icon: FlagIcon,
+						onClick: close(() => navigate(`/rooms/${room.code}/manage`)),
+					},
+				]
+			: []),
+		{
+			label: can.own ? "Members & roles" : "Members",
+			icon: UsersIcon,
+			onClick: close(() => navigate(`/rooms/${room.code}/members`)),
+		},
+		...(can.own
+			? [
+					{
+						label: "Room settings",
+						detail: "Name, open predictions limit, result reminders",
+						icon: SettingsIcon,
+						onClick: close(() => navigate(`/rooms/${room.code}/settings`)),
+					},
+				]
+			: []),
+	];
+
 	const settingsSectionItems: Array<{
 		label: string;
 		detail?: string;
@@ -235,23 +280,8 @@ export function RoomMenuDrawer({
 								),
 							)}
 						</ul>
-						{settingsSectionItems.map(
-							({ label, detail, icon: Icon, onClick }) => (
-								<section className='space-y-2' key={label}>
-									<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
-										Settings
-									</p>
-									<SettingsRow
-										icon={
-											<Icon className='size-5 text-muted-foreground' />
-										}
-										label={label}
-										description={detail}
-										onClick={onClick}
-									/>
-								</section>
-							),
-						)}
+						<MenuSection title='Room' items={roomSectionItems} />
+						<MenuSection title='Settings' items={settingsSectionItems} />
 						<section className='space-y-2'>
 							<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
 								Account
@@ -298,5 +328,35 @@ export function RoomMenuDrawer({
 				renderCard={(format) => <InviteCard data={inviteCard} format={format} />}
 			/>
 		</>
+	);
+}
+
+function MenuSection({
+	title,
+	items,
+}: Readonly<{
+	title: string;
+	items: Array<{
+		label: string;
+		detail?: string;
+		icon: LucideIcon;
+		onClick: () => void;
+	}>;
+}>) {
+	return (
+		<section className='space-y-2'>
+			<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+				{title}
+			</p>
+			{items.map(({ label, detail, icon: Icon, onClick }) => (
+				<SettingsRow
+					key={label}
+					icon={<Icon className='size-5 text-muted-foreground' />}
+					label={label}
+					description={detail}
+					onClick={onClick}
+				/>
+			))}
+		</section>
 	);
 }

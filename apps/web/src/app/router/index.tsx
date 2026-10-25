@@ -51,6 +51,7 @@ const JoinRoomPage = lazy(() =>
 	})),
 );
 const PredictionNew = lazy(() => import("@/features/predictions/pages/New"));
+const ManagePage = lazy(() => import("@/features/rooms/pages/ManagePage"));
 const PredictionDuelsPage = lazy(() =>
 	import("@/features/duels/pages/PredictionDuelsPage").then((module) => ({
 		default: module.PredictionDuelsPage,
@@ -200,6 +201,16 @@ export const router = createBrowserRouter([
 										handle: {
 											header: {
 												leftAction: "back",
+											},
+										},
+									},
+									{
+										path: "manage",
+										element: withSuspense(<ManagePage />),
+										handle: {
+											header: {
+												leftAction: "back",
+												title: "Manage",
 											},
 										},
 									},

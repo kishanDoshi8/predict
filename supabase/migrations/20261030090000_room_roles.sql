@@ -2250,7 +2250,15 @@ begin
           select coalesce(sum(po.total_bet), 0)::int
           from public.prediction_options po
           where po.prediction_id = p.id
-        ) as total_pool
+        ) as total_pool,
+        (
+          select json_agg(
+            json_build_object('id', po.id, 'label', po.label, 'display_order', po.display_order)
+            order by po.display_order
+          )
+          from public.prediction_options po
+          where po.prediction_id = p.id
+        ) as options
       from public.predictions p
       left join public.series s on s.id = p.series_id
       where p.room_id = p_room_id

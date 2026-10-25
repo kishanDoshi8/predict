@@ -46,6 +46,10 @@ export const roomKeys = {
     sortBy = "points",
   ) => [...roomKeys.detail(roomId), "seriesLeaderboard", seriesId, sortBy] as const,
 
+  // Staff only: locked predictions to close and open ones, across series.
+  manageQueue: (roomId: string) =>
+    [...roomKeys.detail(roomId), "manageQueue"] as const,
+
   seriesWallets: (roomId: string) =>
     [...roomKeys.detail(roomId), "seriesWallets"] as const,
 

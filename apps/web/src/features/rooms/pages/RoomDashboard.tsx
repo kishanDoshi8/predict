@@ -1,4 +1,5 @@
 import { InPlayPredictions, UserStats } from "@/features/predictions";
+import { NeedsYouCard } from "@/features/rooms/components/NeedsYouCard";
 import { SeriesHeroCard } from "@/features/rooms/components/SeriesHeroCard";
 
 function RoomDashboard() {
@@ -6,6 +7,7 @@ function RoomDashboard() {
 		<div className={`px-4`}>
 			<div className={`mt-2`}>
 				<SeriesHeroCard />
+				<NeedsYouCard />
 			</div>
 
 			<div className={`mt-4`}>

@@ -51,6 +51,9 @@ const JoinRoomPage = lazy(() =>
 	})),
 );
 const PredictionNew = lazy(() => import("@/features/predictions/pages/New"));
+const EditPrediction = lazy(
+	() => import("@/features/predictions/pages/EditPrediction"),
+);
 const ManagePage = lazy(() => import("@/features/rooms/pages/ManagePage"));
 const MembersPage = lazy(() => import("@/features/rooms/pages/MembersPage"));
 const RoomSettingsPage = lazy(
@@ -196,6 +199,16 @@ export const router = createBrowserRouter([
 											header: {
 												leftAction: "back",
 												title: "New prediction",
+											},
+										},
+									},
+									{
+										path: "predictions/:predictionId/edit",
+										element: withSuspense(<EditPrediction />),
+										handle: {
+											header: {
+												leftAction: "back",
+												title: "Edit prediction",
 											},
 										},
 									},

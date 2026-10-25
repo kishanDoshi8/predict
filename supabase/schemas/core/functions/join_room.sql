@@ -38,8 +38,8 @@ begin
     raise exception 'Room not found or closed' using errcode = 'P0002';
   end if;
 
-  insert into public.room_members (room_id, player_id, is_organizer, joined_via)
-  values (v_room.id, v_player_id, false, v_ref)
+  insert into public.room_members (room_id, player_id, joined_via)
+  values (v_room.id, v_player_id, v_ref)
   on conflict (room_id, player_id) do nothing
   returning * into v_member;
 
@@ -80,6 +80,7 @@ begin
     'player_id',    v_player_id,
     'username',     v_player.username,
     'is_organizer', v_member.is_organizer,
+    'role',         v_member.role,
     'created_at',   v_room.created_at
   );
 end;

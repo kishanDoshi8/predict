@@ -2,7 +2,9 @@ create table if not exists public.room_members (
   id uuid primary key default gen_random_uuid(),
   room_id uuid not null references public.rooms(id) on delete cascade,
   player_id uuid not null references public.players(id) on delete cascade,
-  is_organizer boolean not null default false,
+  -- owner (one per room), organizer, resolver or member.
+  role text not null default 'member' check (role in ('owner', 'organizer', 'resolver', 'member')),
+  is_organizer boolean generated always as (role in ('owner', 'organizer')) stored,
   total_won_in_room integer not null default 0,
   prediction_rating integer not null default 1500,
   peak_prediction_rating integer not null default 1500,
@@ -16,6 +18,7 @@ create table if not exists public.room_members (
   unique (room_id, player_id)
 );
 create index if not exists idx_room_members_room_id on public.room_members(room_id);
+create unique index if not exists idx_room_members_one_owner on public.room_members(room_id) where role = 'owner';
 create index if not exists idx_room_members_player_id on public.room_members(player_id);
 create index if not exists idx_room_members_leaderboard on public.room_members(room_id, total_won_in_room desc);
 create index if not exists idx_room_members_prediction_rating on public.room_members(room_id, prediction_rating desc);

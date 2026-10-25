@@ -31,10 +31,10 @@ begin
   from public.room_members
   where room_id = v_prediction.room_id
     and player_id = v_player_id
-    and is_organizer = true;
+    and role in ('owner', 'organizer');
 
   if not found then
-    raise exception 'Only the organizer can lock this prediction' using errcode = 'P0012';
+    raise exception 'Only organizers can lock this prediction' using errcode = 'P0012';
   end if;
 
   update public.predictions

@@ -1,0 +1,65 @@
+-- Staff only. Everything waiting on staff across the room, oldest first:
+-- locked predictions to close, and predictions still open for picks.
+create or replace function public.get_room_manage_queue(
+  p_room_id uuid
+)
+returns json
+language plpgsql
+stable
+security definer
+set search_path = public, private
+as $$
+declare
+  v_player_id uuid;
+  v_role      text;
+begin
+  v_player_id := private.get_player_id_from_auth();
+
+  if v_player_id is null then
+    raise exception 'Player profile not found. Please complete registration.' using errcode = 'P0004';
+  end if;
+
+  select role into v_role
+  from public.room_members
+  where room_id = p_room_id
+    and player_id = v_player_id;
+
+  if v_role is null or v_role not in ('owner', 'organizer', 'resolver') then
+    raise exception 'Only room staff can see the manage queue' using errcode = 'P0012';
+  end if;
+
+  return (
+    with queue as (
+      select
+        p.id,
+        p.title,
+        p.status,
+        p.deadline,
+        p.series_id,
+        p.series_prediction_number,
+        s.title as series_title,
+        (select count(*)::int from public.bets b where b.prediction_id = p.id) as bet_count,
+        (
+          select coalesce(sum(po.total_bet), 0)::int
+          from public.prediction_options po
+          where po.prediction_id = p.id
+        ) as total_pool
+      from public.predictions p
+      left join public.series s on s.id = p.series_id
+      where p.room_id = p_room_id
+        and p.status in ('draft', 'locked')
+    )
+    select json_build_object(
+      'role', v_role,
+      'to_resolve', coalesce(
+        (select json_agg(q order by q.deadline, q.id) from queue q where q.status = 'locked'),
+        '[]'::json
+      ),
+      'open', coalesce(
+        (select json_agg(q order by q.deadline, q.id) from queue q where q.status = 'draft'),
+        '[]'::json
+      )
+    )
+  );
+end;
+$$;

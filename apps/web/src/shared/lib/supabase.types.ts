@@ -234,6 +234,7 @@ export type Database = {
           player_id: string
           prediction_live: boolean
           prediction_locked: boolean
+          result_needed: boolean
           result_revealed: boolean
           sounds_enabled: boolean
           updated_at: string
@@ -248,6 +249,7 @@ export type Database = {
           player_id: string
           prediction_live?: boolean
           prediction_locked?: boolean
+          result_needed?: boolean
           result_revealed?: boolean
           sounds_enabled?: boolean
           updated_at?: string
@@ -262,6 +264,7 @@ export type Database = {
           player_id?: string
           prediction_live?: boolean
           prediction_locked?: boolean
+          result_needed?: boolean
           result_revealed?: boolean
           sounds_enabled?: boolean
           updated_at?: string
@@ -462,7 +465,9 @@ export type Database = {
           id: string
           no_result_reason: string | null
           notified_1h: boolean
+          notified_result_needed: boolean
           resolved_at: string | null
+          resolved_by: string | null
           room_id: string
           series_id: string | null
           series_prediction_number: number | null
@@ -478,7 +483,9 @@ export type Database = {
           id?: string
           no_result_reason?: string | null
           notified_1h?: boolean
+          notified_result_needed?: boolean
           resolved_at?: string | null
+          resolved_by?: string | null
           room_id: string
           series_id?: string | null
           series_prediction_number?: number | null
@@ -494,7 +501,9 @@ export type Database = {
           id?: string
           no_result_reason?: string | null
           notified_1h?: boolean
+          notified_result_needed?: boolean
           resolved_at?: string | null
+          resolved_by?: string | null
           room_id?: string
           series_id?: string | null
           series_prediction_number?: number | null
@@ -712,6 +721,7 @@ export type Database = {
           prediction_rating: number
           rated_predictions_count: number
           rating_system_version: number
+          role: string
           room_id: string
           total_won_in_room: number
         }
@@ -727,6 +737,7 @@ export type Database = {
           prediction_rating?: number
           rated_predictions_count?: number
           rating_system_version?: number
+          role?: string
           room_id: string
           total_won_in_room?: number
         }
@@ -742,6 +753,7 @@ export type Database = {
           prediction_rating?: number
           rated_predictions_count?: number
           rating_system_version?: number
+          role?: string
           room_id?: string
           total_won_in_room?: number
         }
@@ -885,6 +897,7 @@ export type Database = {
           id: string
           name: string
           predictions_limit: number
+          result_reminder_hours: number
           room_code: string
           status: string
         }
@@ -894,6 +907,7 @@ export type Database = {
           id?: string
           name: string
           predictions_limit?: number
+          result_reminder_hours?: number
           room_code: string
           status?: string
         }
@@ -903,6 +917,7 @@ export type Database = {
           id?: string
           name?: string
           predictions_limit?: number
+          result_reminder_hours?: number
           room_code?: string
           status?: string
         }
@@ -1376,6 +1391,7 @@ export type Database = {
         Args: { p_room_id: string; p_sort_by?: string }
         Returns: Json
       }
+      get_room_manage_queue: { Args: { p_room_id: string }; Returns: Json }
       get_room_member_recent_predictions: {
         Args: {
           p_limit?: number
@@ -1504,6 +1520,14 @@ export type Database = {
         Returns: Json
       }
       set_last_visited_room: { Args: { p_room_id: string }; Returns: undefined }
+      set_member_role: {
+        Args: { p_player_id: string; p_role: string; p_room_id: string }
+        Returns: Json
+      }
+      transfer_ownership: {
+        Args: { p_player_id: string; p_room_id: string }
+        Returns: Json
+      }
       update_global_preferences: {
         Args: {
           p_dark_mode: boolean
@@ -1554,6 +1578,25 @@ export type Database = {
           p_winning_option_id: string
         }
         Returns: undefined
+      }
+      update_prediction: {
+        Args: {
+          p_deadline: string
+          p_options?: string[]
+          p_prediction_id: string
+          p_title: string
+        }
+        Returns: Json
+      }
+      update_room: {
+        Args: {
+          p_description: string
+          p_name: string
+          p_predictions_limit: number
+          p_result_reminder_hours: number
+          p_room_id: string
+        }
+        Returns: Json
       }
       update_series: {
         Args: {

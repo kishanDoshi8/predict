@@ -24,7 +24,7 @@ begin
   join public.room_members rm
     on rm.room_id = s.room_id
    and rm.player_id = v_player_id
-   and rm.is_organizer = true
+   and rm.role in ('owner', 'organizer')
   where s.id = p_series_id
   for update;
 

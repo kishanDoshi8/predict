@@ -52,7 +52,7 @@ begin
       from public.room_members rm
       join public.players pl on pl.id = rm.player_id
       where rm.room_id = v_room.id
-        and rm.is_organizer = true
+        and rm.role = 'owner'
       order by rm.joined_at
       limit 1
     )

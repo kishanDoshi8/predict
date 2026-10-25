@@ -11,7 +11,11 @@ create table if not exists public.predictions (
   affects_rating boolean not null default true,
   created_at timestamptz not null default now(),
   resolved_at timestamptz,
-  notified_1h boolean not null default false
+  -- Who revealed, marked no result, or cancelled it.
+  resolved_by uuid references public.players(id) on delete set null,
+  notified_1h boolean not null default false,
+  -- Set once staff have been pushed that the result is overdue.
+  notified_result_needed boolean not null default false
 );
 
 do $$

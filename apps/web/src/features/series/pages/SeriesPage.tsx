@@ -16,6 +16,7 @@ import {
 } from "@/features/series";
 import type { Series } from "@/features/series/types/series";
 import type { SeriesFormState } from "@/features/series/components/SeriesEditDialog";
+import { parseExpectedGames } from "@/features/series/components/SeriesGamesField";
 import {
 	getMinBetsError,
 	getSeriesPointsError,
@@ -28,6 +29,7 @@ import { toast } from "sonner";
 const defaultFormState: SeriesFormState = {
 	title: "",
 	description: "",
+	openEnded: true,
 	expectedGames: "0",
 	startingStack: "1000",
 	weeklyTopup: "100",
@@ -72,15 +74,18 @@ function saveSeriesEdit({
 	}
 
 	const title = formState.title.trim();
-	const expectedGames = Number(formState.expectedGames);
+	const expectedGames = parseExpectedGames(
+		formState.openEnded,
+		formState.expectedGames,
+	);
 
 	if (!title) {
 		toast("Series title is required.");
 		return;
 	}
 
-	if (!Number.isInteger(expectedGames) || expectedGames < 0) {
-		toast("Expected games must be a non-negative integer.");
+	if (expectedGames === null) {
+		toast("Expected games must be a whole number of at least 1.");
 		return;
 	}
 
@@ -231,6 +236,7 @@ export default function SeriesPage() {
 		setFormState({
 			title: series.title,
 			description: series.description ?? "",
+			openEnded: series.expectedGames === 0,
 			expectedGames: String(series.expectedGames),
 			startingStack: String(series.startingStack),
 			weeklyTopup: String(series.weeklyTopup),

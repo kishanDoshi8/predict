@@ -1,4 +1,5 @@
 import { SeriesStatusBadge } from "@/features/series/components/SeriesStatusBadge";
+import { getSeriesProgress } from "@/features/series/lib/progress";
 import type { Series } from "@/features/series/types/series";
 import { Field, FieldLabel, Progress } from "@/shared/ui";
 import { CheckCircle2Icon, ChevronRightIcon } from "lucide-react";
@@ -10,13 +11,7 @@ type SeriesTileProps = {
 };
 
 export function SeriesTile({ series, roomCode }: Readonly<SeriesTileProps>) {
-	const completedGames = Math.max(series.completedGames, 0);
-	const expectedGames = Math.max(series.expectedGames, 0);
-	const progressValue =
-		expectedGames > 0
-			? Math.floor(Math.min((completedGames / expectedGames) * 100, 100))
-			: 0;
-	const remainingGames = Math.max(expectedGames - completedGames, 0);
+	const progress = getSeriesProgress(series);
 	const isCompleted = series.status === "completed";
 
 	return (
@@ -39,25 +34,27 @@ export function SeriesTile({ series, roomCode }: Readonly<SeriesTileProps>) {
 					)}
 				</div>
 
-				<div>
-					<Field>
-						<FieldLabel>
-							<p className='text-xs text-muted-foreground mr-auto'>
-								{completedGames} / {expectedGames}
-							</p>
-							<p>{progressValue}%</p>
-						</FieldLabel>
-						<Progress
-							value={progressValue}
-							indicatorBgClassName={
-								isCompleted
-									? "bg-win"
-									: "bg-linear-to-r from-primary to-accent"
-							}
-							className={`-mt-1`}
-						/>
-					</Field>
-				</div>
+				{progress.isOpenEnded ? null : (
+					<div>
+						<Field>
+							<FieldLabel>
+								<p className='text-xs text-muted-foreground mr-auto'>
+									{progress.resolved} / {progress.expected}
+								</p>
+								<p>{progress.percent}%</p>
+							</FieldLabel>
+							<Progress
+								value={progress.percent}
+								indicatorBgClassName={
+									isCompleted
+										? "bg-win"
+										: "bg-linear-to-r from-primary to-accent"
+								}
+								className={`-mt-1`}
+							/>
+						</Field>
+					</div>
+				)}
 
 				<div className='text-sm text-muted-foreground'>
 					{isCompleted ? (
@@ -65,8 +62,12 @@ export function SeriesTile({ series, roomCode }: Readonly<SeriesTileProps>) {
 							<CheckCircle2Icon className='size-4' />
 							Completed
 						</span>
+					) : progress.isOpenEnded ? (
+						<span>
+							{progress.resolved} resolved · {progress.open} open
+						</span>
 					) : (
-						<span>{remainingGames} games left</span>
+						<span>{progress.remaining} games left</span>
 					)}
 				</div>
 			</div>

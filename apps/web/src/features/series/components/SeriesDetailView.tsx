@@ -173,6 +173,8 @@ export function SeriesDetailView({
 				isUpdatePending={isUpdatePending}
 				pointsLocked={series.hasBets}
 				rankingLocked={series.status !== "draft" && series.status !== "active"}
+				resolvedGames={series.completedGames}
+				openGames={series.activePredictions}
 				formState={formState}
 				onFormStateChange={onFormStateChange}
 				onCancel={onCancelEdit}

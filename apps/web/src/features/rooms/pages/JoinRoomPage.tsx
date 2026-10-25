@@ -1,9 +1,8 @@
 import { usePlayer } from "@/features/home";
 import { useJoinRoom, useRoom } from "@/features/rooms/hooks/room";
-import { Button, Loading, Spinner } from "@/shared/ui";
-import { ChevronLeftIcon } from "lucide-react";
-import { receipt } from "@/features/share";
-import { TornEdge } from "@/features/share/components/Slip";
+import { Badge, Button, Loading, Spinner } from "@/shared/ui";
+import { ChevronLeftIcon, UsersIcon } from "lucide-react";
+import { LogoTile } from "@/features/share";
 import { Navigate, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { savePostAuthRedirect } from "@/shared/lib/postAuthRedirect";
@@ -83,13 +82,6 @@ export function JoinRoomPage() {
 		navigate("/", { replace: true });
 	};
 
-	const leaders: Array<[string, string]> = [
-		["Friends playing", memberCount.toLocaleString()],
-		["Predictions live", predictionCount.toLocaleString()],
-		["Organized by", organizerName],
-		["Room code", room.code],
-	];
-
 	return (
 		<div className='min-h-dvh flex flex-col'>
 			<header className='p-4'>
@@ -104,53 +96,45 @@ export function JoinRoomPage() {
 				</Button>
 			</header>
 
-			<main className='flex-1 w-full max-w-md mx-auto flex flex-col justify-center px-6 pb-32'>
-				{/* An admission ticket, in the same print as the shared cards. */}
-				<div
-					className='-rotate-1 drop-shadow-[0_18px_28px_rgba(0,0,0,0.45)]'
-					style={{ fontFamily: receipt.mono, color: receipt.print }}
-				>
-					<div
-						className='flex flex-col gap-5 px-6 pt-6 pb-5'
-						style={{ background: receipt.paper }}
-					>
-						<div className='flex justify-between gap-4 text-sm'>
-							<span className='font-bold'>Verdict</span>
-							<span className='font-semibold'>Admit one</span>
-						</div>
-						<div
-							className='border-t-2 border-dashed'
-							style={{ borderColor: receipt.faded }}
-						/>
-						<div>
-							<p className='text-sm font-bold'>You're invited to</p>
-							<h1
-								className='mt-1 text-6xl font-extrabold leading-[0.95] wrap-anywhere'
-								style={{ fontFamily: receipt.display, color: receipt.brand }}
-							>
-								{room.name}
-							</h1>
-						</div>
-						<dl className='flex flex-col gap-2 text-sm'>
-							{leaders.map(([label, value]) => (
-								<div key={label} className='flex items-baseline gap-2'>
-									<dt className='whitespace-nowrap'>{label}</dt>
-									<span
-										aria-hidden='true'
-										className='flex-1 -translate-y-1 border-b-2 border-dotted opacity-60'
-										style={{ borderColor: receipt.faded }}
-									/>
-									<dd className='truncate font-bold'>{value}</dd>
-								</div>
-							))}
-						</dl>
-						<p className='text-xs' style={{ color: receipt.faded }}>
-							Same points for everyone. Top balance when the series ends
-							takes the title.
-						</p>
-					</div>
-					<TornEdge height={10} teeth={24} />
+			<main className='flex-1 w-full max-w-md mx-auto flex flex-col justify-center gap-6 px-4 pb-32'>
+				{/* The same look as the invite card that brought them here. */}
+				<div className='flex items-center gap-3'>
+					<LogoTile size={48} />
+					<span className='text-lg font-bold'>Verdict</span>
 				</div>
+
+				<div className='flex flex-col gap-3'>
+					<p className='text-muted-foreground'>You're invited to</p>
+					<h1 className='text-5xl font-bold leading-none tracking-tight wrap-anywhere'>
+						{room.name}
+					</h1>
+					<div className='flex flex-wrap gap-2 pt-1'>
+						<Badge variant='secondary' className='rounded-full px-3 py-1'>
+							<UsersIcon />
+							{memberCount} {memberCount === 1 ? "player" : "players"}
+						</Badge>
+						<Badge className='rounded-full bg-primary/15 px-3 py-1 text-primary'>
+							<span aria-hidden='true'>●</span>
+							{predictionCount} live
+						</Badge>
+					</div>
+				</div>
+
+				<dl className='grid gap-3 rounded-2xl border bg-card p-4 text-sm'>
+					<div className='flex justify-between gap-4'>
+						<dt className='text-muted-foreground'>Organized by</dt>
+						<dd className='truncate font-medium'>{organizerName}</dd>
+					</div>
+					<div className='flex justify-between gap-4'>
+						<dt className='text-muted-foreground'>Room code</dt>
+						<dd className='font-medium tracking-widest'>{room.code}</dd>
+					</div>
+				</dl>
+
+				<p className='text-sm text-muted-foreground'>
+					Same points for everyone. Top balance when the series ends takes the
+					title.
+				</p>
 			</main>
 
 			<div className='fixed inset-x-0 bottom-0 z-50 border-t bg-card/95 p-4 backdrop-blur-xl'>

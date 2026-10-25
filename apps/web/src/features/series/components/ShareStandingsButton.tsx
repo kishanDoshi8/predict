@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { ReceiptTextIcon } from "lucide-react";
+import { Share2Icon } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useSeriesLeaderboard } from "@/features/leaderboard";
 import { useSeriesAwards } from "@/features/series/hooks/series";
 import type { Series } from "@/features/series/types/series";
-import { ChampionPoster, type ChampionPosterData } from "@/features/share/cards/ChampionPoster";
+import { StandingsCard, type StandingsCardData } from "@/features/share/cards/StandingsCard";
 import { shareHost, shareLink, ShareSheet } from "@/features/share";
 import { getSeriesAwardLabel, getSeriesAwardValue } from "@/shared/lib/seriesRewards";
 import { FEATURES } from "@/shared/constants/features";
@@ -17,12 +17,12 @@ type Props = {
 	label?: string;
 };
 
-// "Longest Win Streak" reads as "Longest win streak" on the poster.
+// "Longest Win Streak" reads as "Longest win streak" on the card.
 function sentenceCase(label: string) {
 	return label.charAt(0) + label.slice(1).toLowerCase();
 }
 
-// Opens the share sheet with the series' final standings poster.
+// Opens the share sheet with the series' final standings card.
 export function ShareStandingsButton({
 	series,
 	variant = "outline",
@@ -35,7 +35,7 @@ export function ShareStandingsButton({
 	const { data: awards = [] } = useSeriesAwards(room.id, series.id);
 
 	const champion = standings[0];
-	const data: ChampionPosterData = {
+	const data: StandingsCardData = {
 		roomName: room.name,
 		roomCode: room.code,
 		host: shareHost(),
@@ -63,7 +63,7 @@ export function ShareStandingsButton({
 				onClick={() => setIsOpen(true)}
 				disabled={!champion}
 			>
-				<ReceiptTextIcon />
+				<Share2Icon />
 				{label}
 			</Button>
 			<ShareSheet
@@ -80,7 +80,7 @@ export function ShareStandingsButton({
 				kind='champion-card'
 				roomId={room.id}
 				fileName={`verdict-${series.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
-				renderCard={(format) => <ChampionPoster data={data} format={format} />}
+				renderCard={(format) => <StandingsCard data={data} format={format} />}
 			/>
 		</>
 	);

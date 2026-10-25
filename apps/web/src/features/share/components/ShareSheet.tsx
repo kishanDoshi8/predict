@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { toBlob } from "html-to-image";
 import { CheckIcon, CopyIcon, Share2Icon } from "lucide-react";
@@ -48,12 +48,25 @@ export function ShareSheet({
 	fileName,
 	renderCard,
 }: Readonly<Props>) {
-	const [format, setFormat] = useState<CardFormat>("post");
+	const [format, setFormat] = useState<CardFormat>("chat");
 	const [isSharing, setIsSharing] = useState(false);
 	const [copied, setCopied] = useState(false);
 	const captureRef = useRef<HTMLDivElement>(null);
-	const { width, height } = CARD_SIZE[format];
+	// The drawer mounts its content after opening, so measure from a callback ref.
+	const [previewNode, setPreviewNode] = useState<HTMLDivElement | null>(null);
+	const { width } = CARD_SIZE[format];
 	const scale = PREVIEW_WIDTH / width;
+	// Chat images are as tall as their content, so the preview measures it.
+	const [previewHeight, setPreviewHeight] = useState(0);
+
+	useLayoutEffect(() => {
+		if (!previewNode) return;
+		const measure = () => setPreviewHeight(previewNode.offsetHeight);
+		measure();
+		const observer = new ResizeObserver(measure);
+		observer.observe(previewNode);
+		return () => observer.disconnect();
+	}, [previewNode]);
 
 	const logShare = () => {
 		recordShare(roomId, kind).catch(() => {
@@ -79,7 +92,12 @@ export function ShareSheet({
 		setIsSharing(true);
 		try {
 			await document.fonts.ready;
-			const blob = await toBlob(node, { pixelRatio: 1, cacheBust: true, width, height });
+			const blob = await toBlob(node, {
+				pixelRatio: 1,
+				cacheBust: true,
+				width,
+				height: node.offsetHeight,
+			});
 			if (!blob) throw new Error("Couldn't make the image.");
 			const file = new File([blob], `${fileName}-${format}.png`, { type: "image/png" });
 			const text = `${message}\n${link}`;
@@ -135,8 +153,8 @@ export function ShareSheet({
 						onValueChange={(value) => value && setFormat(value as CardFormat)}
 						aria-label='Image format'
 					>
-						<ToggleGroupItem value='post' className='px-4'>
-							Chat or post
+						<ToggleGroupItem value='chat' className='px-4'>
+							Chat
 						</ToggleGroupItem>
 						<ToggleGroupItem value='story' className='px-4'>
 							Story
@@ -144,21 +162,29 @@ export function ShareSheet({
 					</ToggleGroup>
 
 					<div
-						className='overflow-hidden rounded-lg border'
-						style={{ width: PREVIEW_WIDTH, height: height * scale }}
+						className='max-h-[40vh] overflow-y-auto rounded-lg border'
+						style={{ width: PREVIEW_WIDTH }}
 						aria-label='Preview of the image'
 						role='img'
 					>
 						<div
 							style={{
-								width,
-								height,
-								transform: `scale(${scale})`,
-								transformOrigin: "top left",
-								pointerEvents: "none",
+								width: PREVIEW_WIDTH,
+								height: previewHeight * scale,
+								overflow: "hidden",
 							}}
 						>
-							{renderCard(format)}
+							<div
+								ref={setPreviewNode}
+								style={{
+									width,
+									transform: `scale(${scale})`,
+									transformOrigin: "top left",
+									pointerEvents: "none",
+								}}
+							>
+								{renderCard(format)}
+							</div>
 						</div>
 					</div>
 
@@ -193,7 +219,7 @@ export function ShareSheet({
 									pointerEvents: "none",
 								}}
 							>
-								<div ref={captureRef} style={{ width, height }}>
+								<div ref={captureRef} style={{ width }}>
 									{renderCard(format)}
 								</div>
 							</div>,

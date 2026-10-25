@@ -20,8 +20,13 @@ Read `apps/web/PRODUCT.md` and `apps/web/DESIGN.md` before UI work.
 - Colors come only from the theme tokens in
   `apps/web/src/shared/assets/styles/global.css` (`bg-card`,
   `text-muted-foreground`, `text-win`, `bg-accent/10`, ...).
-- Never hardcode colors: no hex/`rgb()`/`oklch()`, no arbitrary color values
-  (`[#...]`), no raw palette classes (`zinc-900`, `red-500`). Lint enforces this.
+- Use token classes wherever possible. Don't use hex/`rgb()`/`oklch()`,
+  arbitrary color values (`[#...]`) or raw palette classes (`zinc-900`,
+  `red-500`) when a token would work.
+- When a class can't be used (it's dynamic, inline style, SVG), still use the
+  token: `var(--win)` or `twColor("win", 0.2)` from `@/shared/lib/utils`.
+- Literal colors only as a last resort (canvas/WebGL, third-party brand marks),
+  with a comment saying why.
 - Need a new color? Add a token (`:root`, `.dark`, `@theme inline`), don't inline it.
 - Details and patterns: the `tailwind-theming` skill.
 

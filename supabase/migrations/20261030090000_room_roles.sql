@@ -247,6 +247,7 @@ begin
     'status',            v_room.status,
     'created_at',        v_room.created_at,
     'predictions_limit', v_room.predictions_limit,
+    'result_reminder_hours', v_room.result_reminder_hours,
     'is_member',         private.is_room_member(v_room.id),
     'member_count', (
       select count(*)::int

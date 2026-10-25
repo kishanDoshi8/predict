@@ -22,6 +22,7 @@ import type { SeriesFormState } from "@/features/series/components/SeriesEditDia
 type SeriesDetailViewProps = {
 	series: Series;
 	isOrganizer: boolean;
+	canArchive: boolean;
 	isActionPending: boolean;
 	isUpdatePending: boolean;
 	seriesOpenPredictions: Prediction[];
@@ -48,6 +49,7 @@ type SeriesDetailViewProps = {
 export function SeriesDetailView({
 	series,
 	isOrganizer,
+	canArchive,
 	isActionPending,
 	isUpdatePending,
 	seriesOpenPredictions,
@@ -80,6 +82,7 @@ export function SeriesDetailView({
 			<SeriesOverviewCard
 				series={series}
 				isOrganizer={isOrganizer}
+				canArchive={canArchive}
 				isActionPending={isActionPending}
 				onEdit={onEdit}
 				onArchive={onArchive}

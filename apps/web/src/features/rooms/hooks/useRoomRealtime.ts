@@ -36,6 +36,13 @@ export function useRoomRealtime(roomId: string | null) {
 					queryClient.invalidateQueries({
 						queryKey: roomKeys.detail(roomId),
 					});
+					// The room page reads members (and their roles) from the
+					// by-code query, so refresh it too.
+					queryClient.invalidateQueries({
+						predicate: (query) =>
+							query.queryKey[0] === roomKeys.all[0] &&
+							query.queryKey[1] === "code",
+					});
 				},
 			)
 			.on(

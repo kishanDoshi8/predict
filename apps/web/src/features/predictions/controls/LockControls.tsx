@@ -1,4 +1,4 @@
-import { usePlayer } from "@/features/home";
+import { useRoomRole } from "@/features/rooms";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import {
 	Alert,
@@ -44,16 +44,13 @@ export default function LockControls({
 	prediction,
 }: Readonly<LockControlsProps>) {
 	const { room } = useRoomContext();
-	const { data: player } = usePlayer();
 	const { mutate: resolveMutation, isPending: isResolvingPrediction } =
 		useResolvePrediction();
 
 	const [selectedOption, setSelectedOption] = useState<string | null>(null);
 	const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
-	const isRoomAdmin = room.members.find(
-		(m) => m.player_id === player?.id,
-	)?.is_organizer;
+	const isRoomAdmin = useRoomRole(room).can.resolve;
 
 	if (!isRoomAdmin) {
 		return null;

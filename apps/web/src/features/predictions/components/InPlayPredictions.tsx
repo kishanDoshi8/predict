@@ -1,3 +1,4 @@
+import { useRoomRole } from "@/features/rooms";
 import {
 	Countdown,
 	Prediction,
@@ -388,7 +389,6 @@ function InPlayPredictions({
 	showSectionHeader = true,
 }: Readonly<InPlayPredictionsProps> = {}) {
 	const { room } = useRoomContext();
-	const { data: player } = usePlayer();
 	// Home follows the series picked in the room header.
 	const { currentSeries, currentSeriesId } = useCurrentSeries(room.id);
 	const {
@@ -400,9 +400,7 @@ function InPlayPredictions({
 		currentSeriesId ?? undefined,
 		predictionsOverride === undefined,
 	);
-	const isOrganizer = room.members.some(
-		(member) => member.player_id === player?.id && member.is_organizer,
-	);
+	const isOrganizer = useRoomRole(room).can.organize;
 	const newPredictionAction =
 		isOrganizer && currentSeries?.status === "active" ? (
 			<Button variant='linear' size='sm' asChild>

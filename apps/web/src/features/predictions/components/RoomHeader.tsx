@@ -1,4 +1,5 @@
 import { Button } from "@/shared/ui/button";
+import { useRoomRole } from "@/features/rooms";
 import { Room, RoomMenuDrawer } from "@/features/rooms";
 import {
 	BellIcon,
@@ -15,7 +16,6 @@ import {
 	useCurrentSeries,
 	useSeriesWallet,
 } from "@/features/series";
-import { usePlayer } from "@/features/home";
 import { RoomPreferencesDialog } from "@/features/preferences";
 import { cn } from "@/shared/lib/utils";
 
@@ -34,7 +34,6 @@ function RoomHeader({
 	title,
 	onLeftAction,
 }: Readonly<Props>) {
-	const { data: player } = usePlayer();
 	// The whole room view follows one series: points, Home, Standings, History.
 	const { currentSeries, currentSeriesId } = useCurrentSeries(room.id);
 	const { wallet } = useSeriesWallet(room.id, currentSeriesId);
@@ -42,9 +41,7 @@ function RoomHeader({
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
-	const isOrganizer = room.members.some(
-		(member) => member.player_id === player?.id && member.is_organizer,
-	);
+	const isOrganizer = useRoomRole(room).can.organize;
 
 	return (
 		<header

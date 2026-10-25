@@ -48,7 +48,7 @@ export function JoinRoomPage() {
 
 	const organizerName =
 		room.organizer_username ??
-		room.members.find((member) => member.is_organizer)?.player.username ??
+		room.members.find((member) => member.role === "owner")?.player.username ??
 		"Unknown";
 	const memberCount = room.member_count ?? room.members.length;
 	const predictionCount = room.active_prediction_count ?? 0;

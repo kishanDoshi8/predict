@@ -31,6 +31,8 @@ import { type ReactNode, useMemo, useState } from "react";
 type SeriesOrganizerActionsMenuProps = {
 	series: Series;
 	isPending: boolean;
+	// Archiving is owner-only; organizers don't see the row.
+	canArchive: boolean;
 	onEdit: () => void;
 	onArchive: () => void;
 	onCloseSeries: () => void;
@@ -82,6 +84,7 @@ export function SettingsRow({
 export function SeriesOrganizerActionsMenu({
 	series,
 	isPending,
+	canArchive,
 	onEdit,
 	onArchive,
 	onCloseSeries,
@@ -178,21 +181,23 @@ export function SeriesOrganizerActionsMenu({
 								onClick={openCloseConfirmation}
 								isDanger
 							/>
-							<SettingsRow
-								icon={
-									<ArchiveIcon className='size-5 text-muted-foreground' />
-								}
-								label='Archive series'
-								description={
-									series.status === "completed"
-										? "Hides it from the series list."
-										: "Close the series first."
-								}
-								onClick={openArchiveConfirmation}
-								disabled={
-									isPending || series.status !== "completed"
-								}
-							/>
+							{canArchive ? (
+								<SettingsRow
+									icon={
+										<ArchiveIcon className='size-5 text-muted-foreground' />
+									}
+									label='Archive series'
+									description={
+										series.status === "completed"
+											? "Hides it from the series list."
+											: "Close the series first."
+									}
+									onClick={openArchiveConfirmation}
+									disabled={
+										isPending || series.status !== "completed"
+									}
+								/>
+							) : null}
 						</section>
 					</div>
 				</DrawerContent>

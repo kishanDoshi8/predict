@@ -23,12 +23,14 @@ import { useCreatePrediction } from "@/features/predictions";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { SeriesSelector, useCurrentSeries } from "@/features/series";
 import { describeDeadline } from "@/shared/lib/deadline";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
+import { useRoomRole } from "@/features/rooms";
 
 const PRESET_HOURS: Record<string, number> = { "1h": 1, "6h": 6, "12h": 12 };
 
 export default function PredictionNew() {
 	const { room } = useRoomContext();
+	const { can } = useRoomRole(room);
 	const location = useLocation();
 	const navigationState = location.state as { seriesId?: string } | null;
 	const { mutate: createPrediction, isPending: isLoading } =
@@ -153,6 +155,10 @@ export default function PredictionNew() {
 	};
 
 	const deadlineInfo = describeDeadline(deadlineDate);
+
+	if (!can.organize) {
+		return <Navigate to={`/rooms/${room.code}`} replace />;
+	}
 
 	if (!isSeriesLoading && !hasActiveSeries) {
 		return (

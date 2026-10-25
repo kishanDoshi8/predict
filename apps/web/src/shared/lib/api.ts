@@ -3,7 +3,7 @@ import { Player } from "@/features/home";
 import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, OverallStandingEntry, RoomMemberRecentPrediction, RoomMemberStats } from "@/features/leaderboard";
 import { Prediction, PredictionStatus } from "@/features/predictions";
 import { Series } from "@/features/series/types/series";
-import { Room } from "@/features/rooms";
+import { Room, RoomMember } from "@/features/rooms";
 import type { ActivityFilter, RoomActivitiesPage } from "@/features/activities/types/types";
 import type { Json } from '@/shared/lib/supabase.types'
 import type { SeriesAwardType } from "@/shared/lib/seriesRewards";
@@ -264,14 +264,14 @@ export async function createRoom(room_name: string): Promise<Room> {
   }
 }
 
-export async function getRoomMembers(roomId: string) {
+export async function getRoomMembers(roomId: string): Promise<RoomMember[]> {
   const { data, error } = await supabase
     .from("room_members")
     .select(`
       id,
       room_id,
       player_id,
-      is_organizer,
+      role,
       joined_at,
       total_won_in_room,
       player:players (
@@ -282,7 +282,7 @@ export async function getRoomMembers(roomId: string) {
     .eq("room_id", roomId)
 
   if (error) throw error
-  return data ?? []
+  return (data ?? []) as RoomMember[]
 }
 
 type RoomByCode = {

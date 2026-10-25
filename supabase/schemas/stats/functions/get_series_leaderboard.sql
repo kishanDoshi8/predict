@@ -12,6 +12,7 @@ declare
   v_caller_id uuid;
   v_is_member boolean;
   v_series public.series%rowtype;
+  v_required integer;
   v_result json;
 begin
   v_caller_id := private.get_player_id_from_auth();
@@ -40,6 +41,8 @@ begin
   if p_sort_by not in ('points', 'rating', 'accuracy', 'streak') then
     raise exception 'Invalid sort mode: %', p_sort_by using errcode = 'P0001';
   end if;
+
+  v_required := private.series_required_bets(p_series_id);
 
   with stats as (
     select *
@@ -81,7 +84,10 @@ begin
       case
         when coalesce(s.total_revealed_bets, 0) > 0 then
           coalesce(s.winning_bets, 0)::numeric / s.total_revealed_bets
-      end as accuracy_ratio
+      end as accuracy_ratio,
+      -- Only players who bet on enough settled predictions are ranked.
+      coalesce(s.total_bets, 0) >= v_required as is_ranked,
+      greatest(v_required - coalesce(s.total_bets, 0), 0)::int as bets_needed
     from public.room_members rm
     join public.players p on p.id = rm.player_id
     left join stats s on s.player_id = rm.player_id
@@ -91,7 +97,8 @@ begin
   ranked as (
     select
       bc.*,
-      rank() over (
+      case when bc.is_ranked then rank() over (
+        partition by bc.is_ranked
         order by
           case when p_sort_by = 'points' then bc.balance end desc nulls last,
           case when p_sort_by = 'points' then bc.winning_bets end desc nulls last,
@@ -102,10 +109,11 @@ begin
           case when p_sort_by = 'streak' then bc.current_streak end desc nulls last,
           case when p_sort_by = 'streak' then bc.highest_streak end desc nulls last,
           bc.joined_at asc nulls last
-      ) as rank
+      ) end as rank
     from base_current bc
   )
-  select json_agg(lb order by lb.rank, lb.player_id)
+  -- Ranked players first, then everyone still short of the bar, closest first.
+  select json_agg(lb order by lb.rank nulls last, lb.bets_needed, lb.username, lb.player_id)
   into v_result
   from (
     select
@@ -131,6 +139,9 @@ begin
       r.net_points as net_profit,
       r.win_percentage,
       r.rank,
+      r.is_ranked,
+      r.bets_needed,
+      v_required as required_bets,
       null::int as previous_rank,
       null::int as rank_change,
       null::numeric as previous_prediction_rating,

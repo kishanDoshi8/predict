@@ -31,7 +31,7 @@ grant execute on function public.collect_series_rewards(uuid) to authenticated;
 grant execute on function public.complete_series(uuid) to authenticated;
 grant execute on function public.create_prediction(uuid, text, text[], timestamp with time zone, uuid) to authenticated;
 grant execute on function public.create_room(text) to authenticated;
-grant execute on function public.create_series(uuid, text, text, integer, integer, integer) to authenticated;
+grant execute on function public.create_series(uuid, text, text, integer, integer, integer, integer) to authenticated;
 grant execute on function public.get_my_series_wallets(uuid) to authenticated;
 grant execute on function public.get_player() to authenticated;
 grant execute on function public.get_prediction_duel_summary(uuid) to authenticated;
@@ -66,5 +66,5 @@ grant execute on function public.resolve_prediction_v2(uuid, uuid, text, uuid, c
 grant execute on function public.set_last_visited_room(uuid) to authenticated;
 grant execute on function public.update_global_preferences(boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
 grant execute on function public.update_room_preferences(uuid, boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
-grant execute on function public.update_series(uuid, text, text, integer, integer, integer) to authenticated;
+grant execute on function public.update_series(uuid, text, text, integer, integer, integer, integer) to authenticated;
 grant execute on function public.upsert_user_push_subscription(jsonb) to authenticated;

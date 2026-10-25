@@ -917,7 +917,7 @@ export type Database = {
           description: string | null
           expected_games: number
           id: string
-          minimum_predictions_for_awards: number
+          min_bets_to_rank: number
           room_id: string
           started_at: string | null
           status: string
@@ -931,7 +931,7 @@ export type Database = {
           description?: string | null
           expected_games?: number
           id?: string
-          minimum_predictions_for_awards?: number
+          min_bets_to_rank?: number
           room_id: string
           started_at?: string | null
           status?: string
@@ -945,7 +945,7 @@ export type Database = {
           description?: string | null
           expected_games?: number
           id?: string
-          minimum_predictions_for_awards?: number
+          min_bets_to_rank?: number
           room_id?: string
           started_at?: string | null
           status?: string

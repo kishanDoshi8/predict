@@ -15,6 +15,7 @@ export type SeriesFormState = {
 	expectedGames: string;
 	startingStack: string;
 	weeklyTopup: string;
+	minBetsToRank: string;
 };
 
 type SeriesEditDialogProps = {
@@ -22,6 +23,8 @@ type SeriesEditDialogProps = {
 	isUpdatePending: boolean;
 	// Points settings can't change once anyone has bet in the series.
 	pointsLocked: boolean;
+	// The ranking bar is fixed once a series is closed.
+	rankingLocked: boolean;
 	formState: SeriesFormState;
 	onOpenChange: (open: boolean) => void;
 	onFormStateChange: (nextState: SeriesFormState) => void;
@@ -33,6 +36,7 @@ export function SeriesEditDialog({
 	open,
 	isUpdatePending,
 	pointsLocked,
+	rankingLocked,
 	formState,
 	onOpenChange,
 	onFormStateChange,
@@ -110,6 +114,25 @@ export function SeriesEditDialog({
 							bet.
 						</p>
 					) : null}
+					<label className='block space-y-1 text-sm'>
+						<span className='text-muted-foreground'>
+							Minimum bets to be ranked
+						</span>
+						<Input
+							type='number'
+							min={0}
+							max={50}
+							step={1}
+							value={formState.minBetsToRank}
+							onChange={updateField("minBetsToRank")}
+							disabled={isUpdatePending || rankingLocked}
+						/>
+						<span className='block text-xs text-muted-foreground'>
+							Players who bet on fewer settled predictions don't
+							appear in the standings or win the title. You can
+							change this while the series runs.
+						</span>
+					</label>
 					<div className='flex justify-end gap-2'>
 						<Button
 							variant='outline'

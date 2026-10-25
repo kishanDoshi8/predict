@@ -16,7 +16,10 @@ import {
 } from "@/features/series";
 import type { Series } from "@/features/series/types/series";
 import type { SeriesFormState } from "@/features/series/components/SeriesEditDialog";
-import { getSeriesPointsError } from "@/features/series/lib/points";
+import {
+	getMinBetsError,
+	getSeriesPointsError,
+} from "@/features/series/lib/points";
 import { Button, Skeleton } from "@/shared/ui";
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -28,6 +31,7 @@ const defaultFormState: SeriesFormState = {
 	expectedGames: "0",
 	startingStack: "1000",
 	weeklyTopup: "100",
+	minBetsToRank: "3",
 };
 
 type SeriesByStatus = {
@@ -60,6 +64,7 @@ function saveSeriesEdit({
 		expectedGames: number;
 		startingStack: number;
 		weeklyTopup: number;
+		minBetsToRank: number;
 	}) => void;
 }) {
 	if (!editingSeriesId) {
@@ -88,6 +93,12 @@ function saveSeriesEdit({
 		return;
 	}
 
+	const minBetsError = getMinBetsError(formState.minBetsToRank);
+	if (minBetsError) {
+		toast(minBetsError);
+		return;
+	}
+
 	updateSeries({
 		seriesId: editingSeriesId,
 		title,
@@ -95,6 +106,7 @@ function saveSeriesEdit({
 		expectedGames,
 		startingStack: Number(formState.startingStack),
 		weeklyTopup: Number(formState.weeklyTopup),
+		minBetsToRank: Number(formState.minBetsToRank),
 	});
 }
 
@@ -222,6 +234,7 @@ export default function SeriesPage() {
 			expectedGames: String(series.expectedGames),
 			startingStack: String(series.startingStack),
 			weeklyTopup: String(series.weeklyTopup),
+			minBetsToRank: String(series.minBetsToRank),
 		});
 		setIsEditorOpen(true);
 	};

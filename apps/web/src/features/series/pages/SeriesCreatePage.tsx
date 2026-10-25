@@ -12,7 +12,10 @@ import { Textarea } from "@/shared/ui/textarea";
 import { useMemo, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { getSeriesPointsError } from "@/features/series/lib/points";
+import {
+	getMinBetsError,
+	getSeriesPointsError,
+} from "@/features/series/lib/points";
 
 type FormState = {
 	title: string;
@@ -20,6 +23,7 @@ type FormState = {
 	expectedGames: string;
 	startingStack: string;
 	weeklyTopup: string;
+	minBetsToRank: string;
 };
 
 const DEFAULT_FORM: FormState = {
@@ -28,6 +32,7 @@ const DEFAULT_FORM: FormState = {
 	expectedGames: "3",
 	startingStack: "1000",
 	weeklyTopup: "100",
+	minBetsToRank: "3",
 };
 
 const DESCRIPTION_MAX_LENGTH = 240;
@@ -64,12 +69,14 @@ export default function SeriesCreatePage() {
 		form.startingStack,
 		form.weeklyTopup,
 	);
+	const minBetsError = getMinBetsError(form.minBetsToRank);
 
 	const canSubmit =
 		!isPending &&
 		titleError.length === 0 &&
 		expectedGamesError.length === 0 &&
 		pointsError.length === 0 &&
+		minBetsError.length === 0 &&
 		isOrganizer;
 
 	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -95,6 +102,11 @@ export default function SeriesCreatePage() {
 			return;
 		}
 
+		if (minBetsError.length > 0) {
+			toast(minBetsError);
+			return;
+		}
+
 		createSeries(
 			{
 				title: form.title.trim(),
@@ -102,6 +114,7 @@ export default function SeriesCreatePage() {
 				expectedGames: Number(form.expectedGames),
 				startingStack: Number(form.startingStack),
 				weeklyTopup: Number(form.weeklyTopup),
+				minBetsToRank: Number(form.minBetsToRank),
 			},
 			{
 				onSuccess: () => {
@@ -242,9 +255,35 @@ export default function SeriesCreatePage() {
 						</Field>
 					</div>
 					<FieldDescription>
-						Every member gets the starting points, plus the top-up
-						each Monday. Locked once anyone bets.
+						Every member gets the starting points. The top-up is
+						added each Monday for players who bet that week. Locked
+						once anyone bets.
 					</FieldDescription>
+					<Field>
+						<FieldLabel htmlFor='series-min-bets'>
+							Minimum bets to be ranked
+						</FieldLabel>
+						<Input
+							id='series-min-bets'
+							type='number'
+							min={0}
+							max={50}
+							step={1}
+							value={form.minBetsToRank}
+							onChange={(event) =>
+								setForm((current) => ({
+									...current,
+									minBetsToRank: event.target.value,
+								}))
+							}
+							disabled={isPending}
+						/>
+						<FieldDescription>
+							Players who bet on fewer settled predictions don't
+							appear in the standings or win the title. You can
+							change this while the series runs.
+						</FieldDescription>
+					</Field>
 				</FieldGroup>
 
 				<div className='flex justify-end gap-2'>

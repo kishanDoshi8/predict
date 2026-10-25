@@ -9,7 +9,12 @@ import {
 import { Suspense, lazy, useEffect, useState } from "react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
-import { LeaderboardEntry, useSeriesLeaderboard } from "@/features/leaderboard";
+import {
+	betsNeededLabel,
+	LeaderboardEntry,
+	splitStandings,
+	useSeriesLeaderboard,
+} from "@/features/leaderboard";
 import { useCurrentSeries } from "@/features/series";
 import { Room } from "@/features/rooms";
 import { twColor } from "@/shared/lib/utils";
@@ -102,15 +107,14 @@ function LeaderboardContent({
 			leaderboard.find((entry) => entry.player_id === player.id) ?? null;
 		setLeaderboardPlayer(currentPlayerEntry);
 
-		if (!currentPlayerEntry || currentPlayerEntry.rank === 1) {
+		const rank = currentPlayerEntry?.rank ?? null;
+		if (rank === null || rank === 1) {
 			setGapToNextPlayer(null);
 			return;
 		}
 
 		const nextPlayer =
-			leaderboard.find(
-				(entry) => entry.rank === currentPlayerEntry.rank - 1,
-			) ?? null;
+			leaderboard.find((entry) => entry.rank === rank - 1) ?? null;
 		setGapToNextPlayer(nextPlayer);
 	}, [leaderboard, player]);
 
@@ -169,7 +173,7 @@ function LeaderboardContentView({
 						<FadeContent
 							className={`relative w-14 h-14 flex items-center justify-center rounded-lg font-bold text-foreground text-2xl ${leaderboardPlayer?.rank === 1 ? "bg-rank-1 text-secondary" : "bg-linear-to-r from-primary to-accent"}`}
 						>
-							{leaderboardPlayer ? `#${leaderboardPlayer.rank}` : "—"}
+							{leaderboardPlayer?.rank ? `#${leaderboardPlayer.rank}` : "—"}
 							{leaderboardPlayer?.rank === 1 && (
 								<span>
 									<CrownIcon
@@ -197,6 +201,12 @@ function LeaderboardContentView({
 							<p className={`text-3xl font-extrabold`}>
 								{currentMetric.toLocaleString()}
 							</p>
+							{leaderboardPlayer && !leaderboardPlayer.is_ranked ? (
+								<p className={`text-xs text-muted-foreground`}>
+									Not ranked yet ·{" "}
+									{betsNeededLabel(leaderboardPlayer.bets_needed)}
+								</p>
+							) : null}
 						</FadeContent>
 					)}
 
@@ -352,7 +362,7 @@ function LeaderboardMiniRows({
 
 	return (
 		<div className={`flex flex-col gap-2`}>
-			{leaderboard.slice(0, 4).map((entry) => {
+			{splitStandings(leaderboard).ranked.slice(0, 4).map((entry) => {
 				const rankChipStyle = getRankChipStyle(entry.rank);
 
 				return (

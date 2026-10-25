@@ -24,7 +24,7 @@ const SLIDES = [
 		emoji: "🪙",
 		title: "Everyone starts level",
 		description:
-			"Each series, every player gets the same points, plus a top-up every Monday. Nobody carries a head start from last time.",
+			"Each series, every player gets the same points. Bet during the week and you get a top-up on Monday. Nobody carries a head start from last time.",
 	},
 	{
 		emoji: "💰",
@@ -36,7 +36,7 @@ const SLIDES = [
 		emoji: "🏆",
 		title: "Win the series",
 		description:
-			"Once the organizer calls a result, winners get paid. When the series closes, the top balance takes the title.",
+			"Once the organizer calls a result, winners get paid. Bet on enough predictions to be ranked: when the series closes, the top ranked balance takes the title.",
 	},
 ] as const;
 

@@ -3,6 +3,7 @@ import { usePlayer } from "@/features/home";
 import {
 	useRoomOverallStandings,
 	useSeriesLeaderboard,
+	splitStandings,
 	LeaderboardList,
 	OverallStandingsList,
 	TopThreePodium,
@@ -39,7 +40,7 @@ export function LeaderboardPage() {
 
 	const podium: PodiumEntry[] =
 		scope === "series"
-			? (currentSeriesId ? leaderboard : []).slice(0, 3).map((entry) => ({
+			? splitStandings(currentSeriesId ? leaderboard : []).ranked.slice(0, 3).map((entry) => ({
 					player_id: entry.player_id,
 					username: entry.username,
 					rank: entry.rank,
@@ -61,7 +62,11 @@ export function LeaderboardPage() {
 	if (scope === "all") {
 		subtitle = "Total profit across every series, with titles won.";
 	} else if (currentSeries?.status === "active") {
-		subtitle = "Top balance when the series closes wins the title.";
+		const requiredBets = leaderboard[0]?.required_bets ?? 0;
+		subtitle =
+			requiredBets > 0
+				? `Top balance among players with ${requiredBets}+ bets wins the title.`
+				: "Top balance when the series closes wins the title.";
 	} else if (currentSeries) {
 		subtitle = "Final standings.";
 	}

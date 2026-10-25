@@ -21,7 +21,12 @@ export type LeaderboardEntry = {
   total_payout:       number
   net_points:         number
   win_percentage:     number
-  rank:               number
+  // Null until the player has bet on enough settled predictions to be ranked.
+  rank:               number | null
+  is_ranked:          boolean
+  bets_needed:        number
+  // Settled predictions a player must have bet on to be ranked right now.
+  required_bets:      number
   previous_rank: number | null
   rank_change: number | null
   previous_prediction_rating: number | null

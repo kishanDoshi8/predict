@@ -1,6 +1,10 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
-import { useSeriesLeaderboard } from "@/features/leaderboard";
+import {
+	betsNeededLabel,
+	splitStandings,
+	useSeriesLeaderboard,
+} from "@/features/leaderboard";
 import { useActivePredictions } from "@/features/predictions";
 import {
 	SeriesStatusBadge,
@@ -44,9 +48,10 @@ export function SeriesHeroCard() {
 	}
 	if (!currentSeries || !wallet) return null;
 
-	const myRank = standings.find(
-		(entry) => entry.player_id === player?.id,
-	)?.rank;
+	const { ranked } = splitStandings(standings);
+	const me = standings.find((entry) => entry.player_id === player?.id);
+	const myRank = me?.rank;
+	const champion = ranked[0];
 	const now = Date.now();
 	const nextLock = predictions
 		.filter(
@@ -79,12 +84,17 @@ export function SeriesHeroCard() {
 					<p className='text-xs text-muted-foreground'>Your rank</p>
 					<p className='text-3xl font-bold leading-tight'>
 						{myRank ? `#${myRank}` : "–"}
-						{standings.length > 0 ? (
+						{myRank && ranked.length > 0 ? (
 							<span className='ml-2 text-base font-medium text-muted-foreground'>
-								of {standings.length}
+								of {ranked.length}
 							</span>
 						) : null}
 					</p>
+					{me && !me.is_ranked ? (
+						<p className='text-xs text-muted-foreground'>
+							Not ranked yet · {betsNeededLabel(me.bets_needed)}
+						</p>
+					) : null}
 				</div>
 				<div className='text-right'>
 					<p className='text-xs text-muted-foreground'>Balance</p>
@@ -114,11 +124,11 @@ export function SeriesHeroCard() {
 				{wallet.available.toLocaleString()} to spend
 			</p>
 
-			{currentSeries.status === "completed" && standings[0] ? (
+			{currentSeries.status === "completed" && champion ? (
 				<div className='mt-3 flex items-center gap-3 rounded-xl border bg-muted/40 px-3 py-2'>
 					<TrophyIcon className='size-4 shrink-0 text-accent' />
 					<p className='min-w-0 flex-1 truncate text-sm'>
-						<span className='font-semibold'>{standings[0].username}</span> took
+						<span className='font-semibold'>{champion.username}</span> took
 						the title
 					</p>
 					<ShareStandingsButton

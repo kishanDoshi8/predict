@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Share2Icon } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import { useSeriesLeaderboard } from "@/features/leaderboard";
+import { splitStandings, useSeriesLeaderboard } from "@/features/leaderboard";
 import { useSeriesAwards } from "@/features/series/hooks/series";
 import type { Series } from "@/features/series/types/series";
 import { StandingsCard, type StandingsCardData } from "@/features/share/cards/StandingsCard";
@@ -34,13 +34,15 @@ export function ShareStandingsButton({
 	const { data: standings = [] } = useSeriesLeaderboard(room.id, series.id);
 	const { data: awards = [] } = useSeriesAwards(room.id, series.id);
 
-	const champion = standings[0];
+	// Only ranked players make the card; the rest didn't bet enough to place.
+	const { ranked } = splitStandings(standings);
+	const champion = ranked[0];
 	const data: StandingsCardData = {
 		roomName: room.name,
 		roomCode: room.code,
 		host: shareHost(),
 		seriesTitle: series.title,
-		standings: standings.map((entry) => ({
+		standings: ranked.map((entry) => ({
 			rank: entry.rank,
 			username: entry.username,
 			balance: entry.balance,

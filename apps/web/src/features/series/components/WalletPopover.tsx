@@ -48,8 +48,8 @@ export function WalletPopover({ wallet }: Readonly<Props>) {
 				</dl>
 				{wallet.status === "active" && wallet.weekly_topup > 0 ? (
 					<p className='mt-3 rounded-md bg-accent/10 px-2 py-1.5 text-xs'>
-						+{wallet.weekly_topup.toLocaleString()} for everyone every
-						Monday.
+						+{wallet.weekly_topup.toLocaleString()} every Monday if you bet
+						that week.
 					</p>
 				) : null}
 			</PopoverContent>

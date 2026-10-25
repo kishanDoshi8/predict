@@ -6,12 +6,14 @@ import {
 	DialogTitle,
 	Input,
 } from "@/shared/ui";
+import { SeriesGamesField } from "@/features/series/components/SeriesGamesField";
 import { Textarea } from "@/shared/ui/textarea";
 import type { ChangeEvent } from "react";
 
 export type SeriesFormState = {
 	title: string;
 	description: string;
+	openEnded: boolean;
 	expectedGames: string;
 	startingStack: string;
 	weeklyTopup: string;
@@ -25,6 +27,9 @@ type SeriesEditDialogProps = {
 	pointsLocked: boolean;
 	// The ranking bar is fixed once a series is closed.
 	rankingLocked: boolean;
+	// Games already resolved, and still open, in this series.
+	resolvedGames: number;
+	openGames: number;
 	formState: SeriesFormState;
 	onOpenChange: (open: boolean) => void;
 	onFormStateChange: (nextState: SeriesFormState) => void;
@@ -37,6 +42,8 @@ export function SeriesEditDialog({
 	isUpdatePending,
 	pointsLocked,
 	rankingLocked,
+	resolvedGames,
+	openGames,
 	formState,
 	onOpenChange,
 	onFormStateChange,
@@ -44,7 +51,7 @@ export function SeriesEditDialog({
 	onSave,
 }: Readonly<SeriesEditDialogProps>) {
 	const updateField =
-		(field: keyof SeriesFormState) =>
+		(field: Exclude<keyof SeriesFormState, "openEnded">) =>
 		(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 			onFormStateChange({
 				...formState,
@@ -71,14 +78,25 @@ export function SeriesEditDialog({
 						onChange={updateField("description")}
 						disabled={isUpdatePending}
 					/>
-					<Input
-						type='number'
-						min={0}
-						step={1}
-						placeholder='Expected games'
-						value={formState.expectedGames}
-						onChange={updateField("expectedGames")}
+					<SeriesGamesField
+						openEnded={formState.openEnded}
+						expectedGames={formState.expectedGames}
 						disabled={isUpdatePending}
+						hint={`${resolvedGames} already resolved.`}
+						onOpenEndedChange={(openEnded) =>
+							onFormStateChange({
+								...formState,
+								openEnded,
+								// Switching to a fixed count starts from what's
+								// already been played.
+								expectedGames: openEnded
+									? formState.expectedGames
+									: String(Math.max(resolvedGames + openGames, 1)),
+							})
+						}
+						onExpectedGamesChange={(expectedGames) =>
+							onFormStateChange({ ...formState, expectedGames })
+						}
 					/>
 					<div className='grid grid-cols-2 gap-3'>
 						<label className='space-y-1 text-sm'>

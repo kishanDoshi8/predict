@@ -1,6 +1,10 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
 import { useCreateSeries } from "@/features/series";
+import {
+	parseExpectedGames,
+	SeriesGamesField,
+} from "@/features/series/components/SeriesGamesField";
 import { Button, Input } from "@/shared/ui";
 import {
 	Field,
@@ -20,6 +24,7 @@ import {
 type FormState = {
 	title: string;
 	description: string;
+	openEnded: boolean;
 	expectedGames: string;
 	startingStack: string;
 	weeklyTopup: string;
@@ -29,6 +34,7 @@ type FormState = {
 const DEFAULT_FORM: FormState = {
 	title: "",
 	description: "",
+	openEnded: false,
 	expectedGames: "3",
 	startingStack: "1000",
 	weeklyTopup: "100",
@@ -57,13 +63,14 @@ export default function SeriesCreatePage() {
 		return "Title is required.";
 	}, [form.title]);
 
-	const expectedGamesError = useMemo(() => {
-		const expectedGames = Number(form.expectedGames);
-		if (!Number.isInteger(expectedGames) || expectedGames < 0) {
-			return "Expected games must be a non-negative integer.";
-		}
-		return "";
-	}, [form.expectedGames]);
+	const expectedGames = parseExpectedGames(
+		form.openEnded,
+		form.expectedGames,
+	);
+	const expectedGamesError =
+		expectedGames === null
+			? "Expected games must be a whole number of at least 1."
+			: "";
 
 	const pointsError = getSeriesPointsError(
 		form.startingStack,
@@ -111,7 +118,7 @@ export default function SeriesCreatePage() {
 			{
 				title: form.title.trim(),
 				description: form.description.trim(),
-				expectedGames: Number(form.expectedGames),
+				expectedGames: expectedGames ?? 0,
 				startingStack: Number(form.startingStack),
 				weeklyTopup: Number(form.weeklyTopup),
 				minBetsToRank: Number(form.minBetsToRank),
@@ -191,28 +198,17 @@ export default function SeriesCreatePage() {
 						</FieldDescription>
 					</Field>
 
-					<Field>
-						<FieldLabel htmlFor='series-expected-games'>
-							Expected games
-						</FieldLabel>
-						<Input
-							id='series-expected-games'
-							type='number'
-							min={0}
-							step={1}
-							value={form.expectedGames}
-							onChange={(event) =>
-								setForm((current) => ({
-									...current,
-									expectedGames: event.target.value,
-								}))
-							}
-							disabled={isPending}
-						/>
-						<FieldDescription>
-							How many predictions are planned in this series.
-						</FieldDescription>
-					</Field>
+					<SeriesGamesField
+						openEnded={form.openEnded}
+						expectedGames={form.expectedGames}
+						disabled={isPending}
+						onOpenEndedChange={(openEnded) =>
+							setForm((current) => ({ ...current, openEnded }))
+						}
+						onExpectedGamesChange={(expectedGames) =>
+							setForm((current) => ({ ...current, expectedGames }))
+						}
+					/>
 
 					<div className='grid grid-cols-2 gap-3'>
 						<Field>

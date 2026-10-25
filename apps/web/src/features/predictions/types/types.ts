@@ -32,6 +32,8 @@ export interface Prediction {
   winning_option_id: string | null
   // created_at:        string
   resolved_at:       string | null
+  // Staff member who revealed, marked no result, or cancelled it.
+  resolved_by?:      string | null
   prediction_options: PredictionOption[]
   no_result_reason?: string | null
 }

@@ -17,6 +17,7 @@ export function PredictionCancelledCard({
 	return (
 		<ActivityCard
 			tier={activity.activityTier}
+			actorLabel={activity.createdBy?.username}
 			icon={<BanIcon className='size-4' />}
 			typeLabel='Cancelled'
 			tone='danger'

@@ -17,6 +17,7 @@ export function PredictionNoResultCard({
 	return (
 		<ActivityCard
 			tier={activity.activityTier}
+			actorLabel={activity.createdBy?.username}
 			icon={<MinusCircleIcon className='size-4' />}
 			typeLabel='No result'
 			tone='warning'

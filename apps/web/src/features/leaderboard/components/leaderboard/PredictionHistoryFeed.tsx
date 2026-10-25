@@ -251,6 +251,12 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 					<span>{winPct}% called it</span>
 				)}
 				{resolvedLabel && <span>{resolvedLabel}</span>}
+				{entry.resolver_username && (
+					<span>
+						{entry.status === "revealed" ? "Revealed" : "Closed"} by{" "}
+						{entry.resolver_username}
+					</span>
+				)}
 			</div>
 
 			<div className='flex flex-wrap items-center gap-x-2 rounded-md bg-muted/40 px-2.5 py-1.5 text-xs'>

@@ -104,6 +104,8 @@ export type RoomActivityBase<
 	metadata: TMetadata;
 	clickAction: ActivityClickAction | null;
 	createdAt: string;
+	// Who acted, e.g. the staff member who revealed a result.
+	createdBy?: ActivityPlayer | null;
 };
 
 export type RoomJoinedActivity = RoomActivityBase<

@@ -54,6 +54,8 @@ export type PredictionHistoryEntry = {
   created_at:           string
   winning_option_id:    string | null
   creator_username:     string
+  // Staff member who revealed, marked no result, or cancelled it.
+  resolver_username?:   string | null
   winning_option_label: string | null
   total_pool:           number
   participant_count:    number

@@ -51,6 +51,14 @@ const JoinRoomPage = lazy(() =>
 	})),
 );
 const PredictionNew = lazy(() => import("@/features/predictions/pages/New"));
+const EditPrediction = lazy(
+	() => import("@/features/predictions/pages/EditPrediction"),
+);
+const ManagePage = lazy(() => import("@/features/rooms/pages/ManagePage"));
+const MembersPage = lazy(() => import("@/features/rooms/pages/MembersPage"));
+const RoomSettingsPage = lazy(
+	() => import("@/features/rooms/pages/RoomSettingsPage"),
+);
 const PredictionDuelsPage = lazy(() =>
 	import("@/features/duels/pages/PredictionDuelsPage").then((module) => ({
 		default: module.PredictionDuelsPage,
@@ -195,11 +203,51 @@ export const router = createBrowserRouter([
 										},
 									},
 									{
+										path: "predictions/:predictionId/edit",
+										element: withSuspense(<EditPrediction />),
+										handle: {
+											header: {
+												leftAction: "back",
+												title: "Edit prediction",
+											},
+										},
+									},
+									{
 										path: "predictions/:predictionId",
 										element: <PredictionPage />,
 										handle: {
 											header: {
 												leftAction: "back",
+											},
+										},
+									},
+									{
+										path: "manage",
+										element: withSuspense(<ManagePage />),
+										handle: {
+											header: {
+												leftAction: "back",
+												title: "Manage",
+											},
+										},
+									},
+									{
+										path: "members",
+										element: withSuspense(<MembersPage />),
+										handle: {
+											header: {
+												leftAction: "back",
+												title: "Members",
+											},
+										},
+									},
+									{
+										path: "settings",
+										element: withSuspense(<RoomSettingsPage />),
+										handle: {
+											header: {
+												leftAction: "back",
+												title: "Room settings",
 											},
 										},
 									},

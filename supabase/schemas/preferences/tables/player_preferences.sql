@@ -5,6 +5,7 @@ create table if not exists public.player_preferences (
   deadline_1h boolean not null default true,
   result_revealed boolean not null default true,
   weekly_points_claim boolean not null default true,
+  result_needed boolean not null default true,
   dark_mode boolean not null default true,
   sounds_enabled boolean not null default false,
   created_at timestamptz not null default now(),

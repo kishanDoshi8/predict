@@ -3,7 +3,7 @@ import { Player } from "@/features/home";
 import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, OverallStandingEntry, RoomMemberRecentPrediction, RoomMemberStats } from "@/features/leaderboard";
 import { Prediction, PredictionStatus } from "@/features/predictions";
 import { Series } from "@/features/series/types/series";
-import { Room } from "@/features/rooms";
+import { ManageQueue, Room, RoomMember, RoomRole } from "@/features/rooms";
 import type { ActivityFilter, RoomActivitiesPage } from "@/features/activities/types/types";
 import type { Json } from '@/shared/lib/supabase.types'
 import type { SeriesAwardType } from "@/shared/lib/seriesRewards";
@@ -264,14 +264,14 @@ export async function createRoom(room_name: string): Promise<Room> {
   }
 }
 
-export async function getRoomMembers(roomId: string) {
+export async function getRoomMembers(roomId: string): Promise<RoomMember[]> {
   const { data, error } = await supabase
     .from("room_members")
     .select(`
       id,
       room_id,
       player_id,
-      is_organizer,
+      role,
       joined_at,
       total_won_in_room,
       player:players (
@@ -282,7 +282,7 @@ export async function getRoomMembers(roomId: string) {
     .eq("room_id", roomId)
 
   if (error) throw error
-  return data ?? []
+  return (data ?? []) as RoomMember[]
 }
 
 type RoomByCode = {
@@ -293,6 +293,7 @@ type RoomByCode = {
   status: string
   created_at: string
   predictions_limit: number
+  result_reminder_hours: number
   is_member: boolean
   member_count: number
   active_prediction_count: number
@@ -324,6 +325,62 @@ export async function spectateRoom(roomCode: string): Promise<Room> {
     members,
     has_unseen_activities: hasUnseenActivities,
   }
+}
+
+// Staff only. Locked predictions to close and open ones, across the room.
+export async function getRoomManageQueue(roomId: string) {
+  const { data, error } = await supabase.rpc('get_room_manage_queue', {
+    p_room_id: roomId,
+  })
+  return assertOk(data, error) as unknown as ManageQueue
+}
+
+// Owner only. Ownership moves with transferOwnership instead.
+export async function setMemberRole(roomId: string, playerId: string, role: Exclude<RoomRole, 'owner'>) {
+  const { data, error } = await supabase.rpc('set_member_role', {
+    p_room_id: roomId,
+    p_player_id: playerId,
+    p_role: role,
+  })
+  return assertOk(data, error)
+}
+
+export async function transferOwnership(roomId: string, playerId: string) {
+  const { data, error } = await supabase.rpc('transfer_ownership', {
+    p_room_id: roomId,
+    p_player_id: playerId,
+  })
+  return assertOk(data, error)
+}
+
+export type RoomSettings = {
+  name: string
+  description: string
+  predictionsLimit: number
+  resultReminderHours: number
+}
+
+export async function updateRoom(roomId: string, settings: RoomSettings) {
+  const { data, error } = await supabase.rpc('update_room', {
+    p_room_id: roomId,
+    p_name: settings.name,
+    p_description: settings.description,
+    p_predictions_limit: settings.predictionsLimit,
+    p_result_reminder_hours: settings.resultReminderHours,
+  })
+  return assertOk(data, error)
+}
+
+// Organizers only, while the prediction is open for picks. Pass options only
+// to change them; they're fixed once anyone has bet.
+export async function updatePrediction(predictionId: string, title: string, deadline: Date, options?: string[]) {
+  const { data, error } = await supabase.rpc('update_prediction', {
+    p_prediction_id: predictionId,
+    p_title: title,
+    p_deadline: deadline.toISOString(),
+    p_options: options,
+  })
+  return assertOk(data, error)
 }
 
 // Logs a completed share so we can see which shareables get used.

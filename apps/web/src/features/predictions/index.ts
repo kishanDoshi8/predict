@@ -10,6 +10,10 @@ export { default as InPlayPredictions } from "./components/InPlayPredictions";
 export { default as HistoryFeed } from "./components/HistoryFeed";
 export { default as UserStats } from "./components/stats/UserStats";
 export { RoomHeader } from "./components/RoomHeader";
+export {
+	CloseWithoutResultDialog,
+	ResolvePredictionDrawer,
+} from "./components/ResolvePredictionDrawer";
 export { NotificationPermissionBlockedDialog } from "./components/NotificationPermissionBlockedDialog";
 export { Countdown } from "./widgets/CountDown";
 export { PredictionPhaseView } from "./predictions/PredictionPhaseView";

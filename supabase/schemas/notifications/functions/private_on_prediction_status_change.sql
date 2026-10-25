@@ -48,10 +48,13 @@ begin
       v_extra_payload
     );
 
-  -- Organizer revealed the result (win, no_result, or cancelled)
+  -- Staff closed the prediction (win, no_result, or cancelled). Open
+  -- predictions can be cancelled too, which refunds everyone.
   elsif TG_OP = 'UPDATE'
-    and OLD.status = 'locked'
-    and NEW.status in ('revealed', 'no_result', 'cancelled')
+    and (
+      (OLD.status = 'locked' and NEW.status in ('revealed', 'no_result', 'cancelled'))
+      or (OLD.status = 'draft' and NEW.status = 'cancelled')
+    )
   then
     perform private.fire_push_notification(
       'result_revealed',

@@ -1,5 +1,5 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import { usePlayer } from "@/features/home";
+import { useRoomRole } from "@/features/rooms";
 import {
 	usePredictionHistory,
 	useSeriesLeaderboard,
@@ -120,7 +120,6 @@ export default function SeriesPage() {
 	const { seriesId } = useParams<{ seriesId?: string }>();
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { data: player } = usePlayer();
 	const { data: seriesByStatus, isPending } = useRoomSeries(room.id);
 	const { data: roomPredictions = [] } = useActivePredictions(
 		room.id,
@@ -136,9 +135,8 @@ export default function SeriesPage() {
 	const { mutate: archiveSeries, isPending: isArchiveSeriesPending } =
 		useArchiveSeries(room.id);
 
-	const isOrganizer = room.members.some(
-		(member) => member.player_id === player?.id && member.is_organizer,
-	);
+	const { can } = useRoomRole(room);
+	const isOrganizer = can.organize;
 
 	const [editingSeriesId, setEditingSeriesId] = useState<string | null>(null);
 	const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -323,6 +321,7 @@ export default function SeriesPage() {
 		<SeriesDetailView
 			series={selectedSeries}
 			isOrganizer={isOrganizer}
+			canArchive={can.own}
 			isActionPending={
 				isUpdatePending || isCompleteSeriesPending || isArchiveSeriesPending
 			}

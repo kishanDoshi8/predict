@@ -9,6 +9,7 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useRoomBetRealtime } from "@/features/rooms";
 import PredictionTitle from "../components/PredictionTitle";
 import PredictionData from "./PredictionData";
+import { StaffDraftActions } from "../components/StaffDraftActions";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -87,6 +88,10 @@ export default function DraftPhase({
 					fadeDelay={contentDelays.options}
 				/>
 			</div>
+
+			{prediction?.status === "draft" ? (
+				<StaffDraftActions predictionId={prediction.id} />
+			) : null}
 
 			<div className={`flex-1`}></div>
 

@@ -1,6 +1,7 @@
 import { Prediction } from "@/features/predictions";
 import PredictionOptions from "../widgets/PredictionOptions";
 import PredictionTitle from "../components/PredictionTitle";
+import { ResolvedByLine } from "../components/ResolvedByLine";
 import { Alert, AlertDescription, AlertTitle, Skeleton } from "@/shared/ui";
 import { InfoIcon } from "lucide-react";
 import { useBets } from "@/features/predictions";
@@ -32,10 +33,13 @@ function NoResult({ prediction }: Readonly<Props>) {
 		<div className={`flex-1 flex flex-col gap-4 items-center pb-4 mt-4`}>
 			<Alert className={`mb-4 border-primary w-full max-w-md mx-auto`}>
 				<InfoIcon />
-				<AlertTitle>No Result</AlertTitle>
+				<AlertTitle>
+					{prediction?.status === "cancelled" ? "Cancelled" : "No Result"}
+				</AlertTitle>
 				<AlertDescription className={`text-secondary-foreground `}>
 					{prediction?.no_result_reason ??
 						"All bets have been returned."}
+					{prediction ? <ResolvedByLine prediction={prediction} /> : null}
 				</AlertDescription>
 			</Alert>
 

@@ -7,6 +7,7 @@ import { Field, FieldLabel, Progress } from "@/shared/ui";
 type SeriesOverviewCardProps = {
 	series: Series;
 	isOrganizer: boolean;
+	canArchive: boolean;
 	isActionPending: boolean;
 	onEdit: () => void;
 	onArchive: () => void;
@@ -16,6 +17,7 @@ type SeriesOverviewCardProps = {
 export function SeriesOverviewCard({
 	series,
 	isOrganizer,
+	canArchive,
 	isActionPending,
 	onEdit,
 	onArchive,
@@ -45,6 +47,7 @@ export function SeriesOverviewCard({
 					<SeriesOrganizerActionsMenu
 						series={series}
 						isPending={isActionPending}
+						canArchive={canArchive}
 						onEdit={onEdit}
 						onArchive={onArchive}
 						onCloseSeries={onCloseSeries}

@@ -190,13 +190,13 @@ select is(
     'collect_series_rewards', 'complete_series',
     'create_prediction', 'create_room', 'create_series', 'get_my_series_wallets', 'get_player', 'get_prediction_duel_summary',
     'get_prediction_duels_view', 'get_preferences', 'get_room_activities', 'get_room_by_code',
-    'get_room_has_unseen_activities', 'get_room_member_recent_predictions',
+    'get_room_has_unseen_activities', 'get_room_manage_queue', 'get_room_member_recent_predictions',
     'get_room_member_stats', 'get_room_overall_standings', 'get_room_prediction_history', 'get_room_series', 'get_room_series_selector',
     'get_room_stat_cards', 'get_room_weekly_leaderboard', 'get_series_awards',
     'get_series_leaderboard', 'get_series_placements', 'join_room',
     'mark_how_to_play_seen', 'mark_ratings_tip_seen', 'mark_room_activities_seen', 'place_bet',
-    'record_share', 'register_player', 'reset_room_preferences', 'resolve_prediction_v2', 'set_last_visited_room',
-    'update_global_preferences', 'update_room_preferences', 'update_series', 'upsert_user_push_subscription'
+    'record_share', 'register_player', 'reset_room_preferences', 'resolve_prediction_v2', 'set_last_visited_room', 'set_member_role', 'transfer_ownership',
+    'update_global_preferences', 'update_prediction', 'update_room', 'update_room_preferences', 'update_series', 'upsert_user_push_subscription'
   ],
   'logged-in users can call exactly the RPCs the app uses'
 );

@@ -1,5 +1,5 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
-import { usePlayer } from "@/features/home";
+import { useRoomRole } from "@/features/rooms";
 import { useCreateSeries } from "@/features/series";
 import {
 	parseExpectedGames,
@@ -45,15 +45,12 @@ const DESCRIPTION_MAX_LENGTH = 240;
 
 export default function SeriesCreatePage() {
 	const { room } = useRoomContext();
-	const { data: player } = usePlayer();
 	const navigate = useNavigate();
 	const { mutate: createSeries, isPending } = useCreateSeries(room.id);
 
 	const [form, setForm] = useState<FormState>(DEFAULT_FORM);
 
-	const isOrganizer = room.members.some(
-		(member) => member.player_id === player?.id && member.is_organizer,
-	);
+	const isOrganizer = useRoomRole(room).can.organize;
 
 	const descriptionCount = form.description.length;
 	const titleError = useMemo(() => {

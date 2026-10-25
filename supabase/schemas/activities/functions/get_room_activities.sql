@@ -45,7 +45,8 @@ begin
       a.activity_tier,
       a.metadata,
       a.click_action,
-      a.created_at
+      a.created_at,
+      a.created_by_player_id
     from public.room_activities a
     where a.room_id = p_room_id
       and (
@@ -107,7 +108,13 @@ begin
           'activityTier', l.activity_tier,
           'metadata', l.metadata,
           'clickAction', l.click_action,
-          'createdAt', l.created_at
+          'createdAt', l.created_at,
+          -- Who acted, e.g. the staff member who revealed a result.
+          'createdBy', (
+            select json_build_object('id', pl.id, 'username', pl.username)
+            from public.players pl
+            where pl.id = l.created_by_player_id
+          )
         )
         order by l.created_at desc, l.id desc
       ),

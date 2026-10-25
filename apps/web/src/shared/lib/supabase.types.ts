@@ -234,6 +234,7 @@ export type Database = {
           player_id: string
           prediction_live: boolean
           prediction_locked: boolean
+          result_needed: boolean
           result_revealed: boolean
           sounds_enabled: boolean
           updated_at: string
@@ -248,6 +249,7 @@ export type Database = {
           player_id: string
           prediction_live?: boolean
           prediction_locked?: boolean
+          result_needed?: boolean
           result_revealed?: boolean
           sounds_enabled?: boolean
           updated_at?: string
@@ -262,6 +264,7 @@ export type Database = {
           player_id?: string
           prediction_live?: boolean
           prediction_locked?: boolean
+          result_needed?: boolean
           result_revealed?: boolean
           sounds_enabled?: boolean
           updated_at?: string
@@ -462,7 +465,9 @@ export type Database = {
           id: string
           no_result_reason: string | null
           notified_1h: boolean
+          notified_result_needed: boolean
           resolved_at: string | null
+          resolved_by: string | null
           room_id: string
           series_id: string | null
           series_prediction_number: number | null
@@ -478,7 +483,9 @@ export type Database = {
           id?: string
           no_result_reason?: string | null
           notified_1h?: boolean
+          notified_result_needed?: boolean
           resolved_at?: string | null
+          resolved_by?: string | null
           room_id: string
           series_id?: string | null
           series_prediction_number?: number | null
@@ -494,7 +501,9 @@ export type Database = {
           id?: string
           no_result_reason?: string | null
           notified_1h?: boolean
+          notified_result_needed?: boolean
           resolved_at?: string | null
+          resolved_by?: string | null
           room_id?: string
           series_id?: string | null
           series_prediction_number?: number | null
@@ -513,6 +522,13 @@ export type Database = {
           {
             foreignKeyName: "predictions_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predictions_resolved_by_fkey"
+            columns: ["resolved_by"]
             isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
@@ -704,14 +720,16 @@ export type Database = {
           current_streak: number
           highest_streak: number
           id: string
-          is_organizer: boolean
+          is_organizer: boolean | null
           joined_at: string
+          joined_via: string | null
           last_activity_seen_at: string | null
           peak_prediction_rating: number
           player_id: string
           prediction_rating: number
           rated_predictions_count: number
           rating_system_version: number
+          role: string
           room_id: string
           total_won_in_room: number
         }
@@ -719,14 +737,16 @@ export type Database = {
           current_streak?: number
           highest_streak?: number
           id?: string
-          is_organizer?: boolean
+          is_organizer?: boolean | null
           joined_at?: string
+          joined_via?: string | null
           last_activity_seen_at?: string | null
           peak_prediction_rating?: number
           player_id: string
           prediction_rating?: number
           rated_predictions_count?: number
           rating_system_version?: number
+          role?: string
           room_id: string
           total_won_in_room?: number
         }
@@ -734,14 +754,16 @@ export type Database = {
           current_streak?: number
           highest_streak?: number
           id?: string
-          is_organizer?: boolean
+          is_organizer?: boolean | null
           joined_at?: string
+          joined_via?: string | null
           last_activity_seen_at?: string | null
           peak_prediction_rating?: number
           player_id?: string
           prediction_rating?: number
           rated_predictions_count?: number
           rating_system_version?: number
+          role?: string
           room_id?: string
           total_won_in_room?: number
         }
@@ -885,6 +907,7 @@ export type Database = {
           id: string
           name: string
           predictions_limit: number
+          result_reminder_hours: number
           room_code: string
           status: string
         }
@@ -894,6 +917,7 @@ export type Database = {
           id?: string
           name: string
           predictions_limit?: number
+          result_reminder_hours?: number
           room_code: string
           status?: string
         }
@@ -903,6 +927,7 @@ export type Database = {
           id?: string
           name?: string
           predictions_limit?: number
+          result_reminder_hours?: number
           room_code?: string
           status?: string
         }
@@ -917,11 +942,15 @@ export type Database = {
           description: string | null
           expected_games: number
           id: string
+          last_topup_week: string | null
           min_bets_to_rank: number
           room_id: string
           started_at: string | null
+          starting_stack: number
           status: string
           title: string
+          topups_paid: number
+          weekly_topup: number
         }
         Insert: {
           archived_at?: string | null
@@ -931,11 +960,15 @@ export type Database = {
           description?: string | null
           expected_games?: number
           id?: string
+          last_topup_week?: string | null
           min_bets_to_rank?: number
           room_id: string
           started_at?: string | null
+          starting_stack?: number
           status?: string
           title: string
+          topups_paid?: number
+          weekly_topup?: number
         }
         Update: {
           archived_at?: string | null
@@ -945,11 +978,15 @@ export type Database = {
           description?: string | null
           expected_games?: number
           id?: string
+          last_topup_week?: string | null
           min_bets_to_rank?: number
           room_id?: string
           started_at?: string | null
+          starting_stack?: number
           status?: string
           title?: string
+          topups_paid?: number
+          weekly_topup?: number
         }
         Relationships: [
           {
@@ -1082,6 +1119,104 @@ export type Database = {
           },
         ]
       }
+      series_wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          escrow: number
+          granted: number
+          player_id: string
+          series_id: string
+          updated_at: string
+        }
+        Insert: {
+          balance: number
+          created_at?: string
+          escrow?: number
+          granted: number
+          player_id: string
+          series_id: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          escrow?: number
+          granted?: number
+          player_id?: string
+          series_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "series_wallets_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_wallets_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_wallets_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series_with_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      share_events: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          player_id: string
+          room_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          player_id: string
+          room_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          player_id?: string
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_events_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_events_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
+          },
+          {
+            foreignKeyName: "share_events_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_push_subscriptions: {
         Row: {
           created_at: string
@@ -1180,15 +1315,20 @@ export type Database = {
           created_by: string | null
           description: string | null
           expected_games: number | null
+          has_bets: boolean | null
           id: string | null
+          min_bets_to_rank: number | null
           prediction_count: number | null
           progress_percentage: number | null
           remaining_games: number | null
           room_id: string | null
           started_at: string | null
+          starting_stack: number | null
           status: string | null
           title: string | null
+          topups_paid: number | null
           total_predictions: number | null
+          weekly_topup: number | null
         }
         Relationships: [
           {
@@ -1274,6 +1414,7 @@ export type Database = {
         Returns: Json
       }
       claim_weekly_points: { Args: { p_auto_claimed?: boolean }; Returns: Json }
+      collect_series_rewards: { Args: { series_id: string }; Returns: Json }
       complete_series: { Args: { p_series_id: string }; Returns: Json }
       create_duel: {
         Args: {
@@ -1327,8 +1468,11 @@ export type Database = {
         Args: {
           p_description?: string
           p_expected_games?: number
+          p_min_bets_to_rank?: number
           p_room_id: string
+          p_starting_stack?: number
           p_title: string
+          p_weekly_topup?: number
         }
         Returns: Json
       }
@@ -1347,6 +1491,7 @@ export type Database = {
           week_start: string
         }[]
       }
+      get_my_series_wallets: { Args: { p_room_id: string }; Returns: Json }
       get_player: { Args: never; Returns: Json }
       get_prediction_duel_summary: {
         Args: { p_prediction_id: string }
@@ -1368,14 +1513,17 @@ export type Database = {
         }
         Returns: Json
       }
+      get_room_by_code: { Args: { p_room_code: string }; Returns: Json }
       get_room_has_unseen_activities: {
         Args: { p_room_id: string }
         Returns: boolean
       }
+      get_room_invite_preview: { Args: { p_room_code: string }; Returns: Json }
       get_room_leaderboard: {
         Args: { p_room_id: string; p_sort_by?: string }
         Returns: Json
       }
+      get_room_manage_queue: { Args: { p_room_id: string }; Returns: Json }
       get_room_member_recent_predictions: {
         Args: {
           p_limit?: number
@@ -1389,6 +1537,7 @@ export type Database = {
         Args: { p_player_id: string; p_room_id: string }
         Returns: Json
       }
+      get_room_overall_standings: { Args: { p_room_id: string }; Returns: Json }
       get_room_prediction_history: {
         Args: {
           p_cursor_created_at?: string
@@ -1465,7 +1614,10 @@ export type Database = {
         Args: { p_bet_id: string; p_duel_id: string; p_player_id: string }
         Returns: Json
       }
-      join_room: { Args: { p_ref?: string; p_room_code: string }; Returns: Json }
+      join_room: {
+        Args: { p_ref?: string; p_room_code: string }
+        Returns: Json
+      }
       lock_prediction: { Args: { p_prediction_id: string }; Returns: Json }
       mark_how_to_play_seen: { Args: never; Returns: undefined }
       mark_ratings_tip_seen: { Args: never; Returns: undefined }
@@ -1477,20 +1629,14 @@ export type Database = {
         Args: { p_amount: number; p_option_id: string; p_prediction_id: string }
         Returns: Json
       }
-      record_share: { Args: { p_kind: string; p_room_id: string }; Returns: undefined }
+      record_share: {
+        Args: { p_kind: string; p_room_id: string }
+        Returns: undefined
+      }
       register_player: { Args: { p_username: string }; Returns: Json }
       reset_room_preferences: { Args: { p_room_id: string }; Returns: Json }
       resolve_duels_for_prediction: {
         Args: { p_prediction_id: string }
-        Returns: Json
-      }
-      resolve_prediction: {
-        Args: {
-          p_organizer_token: string
-          p_outcome: string
-          p_prediction_id: string
-          p_winning_option_id?: string
-        }
         Returns: Json
       }
       resolve_prediction_v2: {
@@ -1504,6 +1650,14 @@ export type Database = {
         Returns: Json
       }
       set_last_visited_room: { Args: { p_room_id: string }; Returns: undefined }
+      set_member_role: {
+        Args: { p_player_id: string; p_role: string; p_room_id: string }
+        Returns: Json
+      }
+      transfer_ownership: {
+        Args: { p_player_id: string; p_room_id: string }
+        Returns: Json
+      }
       update_global_preferences: {
         Args: {
           p_dark_mode: boolean
@@ -1525,6 +1679,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_prediction: {
+        Args: {
+          p_deadline: string
+          p_options?: string[]
+          p_prediction_id: string
+          p_title: string
+        }
+        Returns: Json
+      }
       update_prediction_ratings: {
         Args: {
           p_prediction_id: string
@@ -1532,6 +1695,16 @@ export type Database = {
           p_winning_option_id: string
         }
         Returns: undefined
+      }
+      update_room: {
+        Args: {
+          p_description: string
+          p_name: string
+          p_predictions_limit: number
+          p_result_reminder_hours: number
+          p_room_id: string
+        }
+        Returns: Json
       }
       update_room_preferences: {
         Args: {
@@ -1559,8 +1732,11 @@ export type Database = {
         Args: {
           p_description?: string
           p_expected_games?: number
+          p_min_bets_to_rank?: number
           p_series_id: string
+          p_starting_stack?: number
           p_title: string
+          p_weekly_topup?: number
         }
         Returns: Json
       }
@@ -1600,12 +1776,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1629,11 +1805,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1654,11 +1830,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1679,11 +1855,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1696,11 +1872,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

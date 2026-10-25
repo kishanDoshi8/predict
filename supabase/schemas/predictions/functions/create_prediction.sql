@@ -30,15 +30,15 @@ begin
     raise exception 'Player profile not found. Please complete registration.' using errcode = 'P0004';
   end if;
 
-  -- Verify caller is the room organizer
+  -- Owners and organizers create predictions
   select * into v_member
   from public.room_members
   where room_id = p_room_id
     and player_id = v_player_id
-    and is_organizer = true;
+    and role in ('owner', 'organizer');
 
   if not found then
-    raise exception 'Only the organizer can create predictions' using errcode = 'P0012';
+    raise exception 'Only organizers can create predictions' using errcode = 'P0012';
   end if;
 
   -- Fetch room to get the predictions_limit

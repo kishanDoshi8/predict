@@ -6,7 +6,8 @@ type NotificationEventType =
 	| "prediction_locked"
 	| "deadline_1h"
 	| "result_revealed"
-	| "weekly_points_claim";
+	| "weekly_points_claim"
+	| "result_needed";
 
 const EVENT_TO_COLUMN: Record<NotificationEventType, string> = {
 	prediction_live: "prediction_live",
@@ -14,6 +15,7 @@ const EVENT_TO_COLUMN: Record<NotificationEventType, string> = {
 	deadline_1h: "deadline_1h",
 	result_revealed: "result_revealed",
 	weekly_points_claim: "weekly_points_claim",
+	result_needed: "result_needed",
 };
 
 const corsHeaders = {
@@ -34,6 +36,8 @@ type RequestBody = {
 		title?: string;
 		body?: string;
 		url?: string;
+		/** With room_id: only members with one of these roles, e.g. staff. */
+		roles?: string[];
 		[key: string]: unknown;
 	};
 	target_player_token?: string;
@@ -190,10 +194,15 @@ Deno.serve(async (req) => {
 		playerPreferencesQuery = playerPreferencesQuery.eq("player_id", targetPlayerId);
 	} else if (isPrivilegedRequest && body.room_id) {
 		// Scope broadcast to members of the specified room only.
-		const { data: memberRows, error: memberError } = await supabase
+		let memberQuery = supabase
 			.from("room_members")
 			.select("player_id")
 			.eq("room_id", body.room_id);
+		const roles = body.payload?.roles;
+		if (Array.isArray(roles) && roles.length > 0) {
+			memberQuery = memberQuery.in("role", roles);
+		}
+		const { data: memberRows, error: memberError } = await memberQuery;
 
 		if (memberError) {
 			return jsonResponse(

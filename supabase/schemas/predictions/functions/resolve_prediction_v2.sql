@@ -36,21 +36,22 @@ begin
     select 1 from public.room_members
     where room_id = p_room_id
       and player_id = v_player_id
-      and is_organizer = true
+      and role in ('owner', 'organizer', 'resolver')
   ) then
-    raise exception 'Only the room organizer can resolve predictions' using errcode = 'P0012';
+    raise exception 'Only room staff can close predictions' using errcode = 'P0012';
   end if;
 
   select * into v_prediction
   from public.predictions
   where id      = p_prediction_id
     and room_id = p_room_id
-    and status  = 'locked'
+    -- Locked predictions can be closed any way; open ones can only be cancelled.
+    and (status = 'locked' or (status = 'draft' and p_outcome = 'cancel'))
   -- Lock the prediction so a second resolve call waits, then finds it no longer locked.
   for update;
 
   if not found then
-    raise exception 'Prediction not found or not in locked phase' using errcode = 'P0006';
+    raise exception 'Prediction not found or already closed' using errcode = 'P0006';
   end if;
 
   if p_outcome in ('no_result', 'cancel') then
@@ -64,7 +65,8 @@ begin
     update public.predictions
     set status      = v_effective_outcome,
       no_result_reason = nullif(trim(p_no_result_reason), ''),
-      resolved_at = now()
+      resolved_at = now(),
+      resolved_by = v_player_id
     where id = p_prediction_id
     returning * into v_prediction;
 
@@ -136,7 +138,8 @@ begin
           nullif(trim(p_no_result_reason), ''),
           'Only one option had bets — all refunded'
         ),
-        resolved_at = now()
+        resolved_at = now(),
+        resolved_by = v_player_id
     where id = p_prediction_id
     returning * into v_prediction;
 
@@ -186,7 +189,8 @@ begin
           nullif(trim(p_no_result_reason), ''),
           'Nobody bet on the winning option — all refunded'
         ),
-        resolved_at = now()
+        resolved_at = now(),
+        resolved_by = v_player_id
     where id = p_prediction_id
     returning * into v_prediction;
 
@@ -314,7 +318,8 @@ begin
   update public.predictions
   set status            = 'revealed',
       winning_option_id = p_winning_option_id,
-      resolved_at       = now()
+      resolved_at       = now(),
+      resolved_by       = v_player_id
   where id = p_prediction_id
   returning * into v_prediction;
 

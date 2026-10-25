@@ -1,4 +1,4 @@
-import { createPrediction, getActivePrediction, getActivePredictions, getPrediction, resolvePrediction } from "@/shared/lib/api";
+import { createPrediction, getActivePrediction, getActivePredictions, getPrediction, resolvePrediction, updatePrediction } from "@/shared/lib/api";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { roomKeys } from "@/shared/constants/queryKeys";
 import { invalidateRoomResults } from "@/shared/lib/roomCache";
@@ -43,6 +43,9 @@ export const useCreatePrediction = () => {
             queryClient.invalidateQueries({
                 queryKey: roomKeys.activePredictions(data.room_id),
             });
+            queryClient.invalidateQueries({
+                queryKey: roomKeys.manageQueue(data.room_id),
+            });
         },
         onError: (error) => {
             console.error("Error creating prediction:", error);
@@ -81,5 +84,34 @@ export const usePrediction = (roomId?: string, predictionId?: string) => {
         queryKey: roomKeys.prediction(roomId ?? "", predictionId ?? ""),
         queryFn: () => getPrediction(predictionId ?? ""),
         enabled: !!predictionId && !!roomId,
+    });
+}
+
+type UpdatePredictionParams = {
+    roomId: string;
+    predictionId: string;
+    title: string;
+    deadline: Date;
+    // Leave out to keep the current options.
+    options?: string[];
+}
+
+// Organizers fix a prediction that's still open for picks.
+export const useUpdatePrediction = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (data: UpdatePredictionParams) =>
+            updatePrediction(data.predictionId, data.title, data.deadline, data.options),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({
+                queryKey: roomKeys.prediction(variables.roomId, variables.predictionId),
+            });
+            queryClient.invalidateQueries({
+                queryKey: roomKeys.activePredictions(variables.roomId),
+            });
+            queryClient.invalidateQueries({
+                queryKey: roomKeys.manageQueue(variables.roomId),
+            });
+        },
     });
 }

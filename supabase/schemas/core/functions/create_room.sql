@@ -24,8 +24,8 @@ begin
   values (trim(p_room_name), private.generate_room_code())
   returning * into v_room;
 
-  insert into public.room_members (room_id, player_id, is_organizer)
-  values (v_room.id, v_player_id, true);
+  insert into public.room_members (room_id, player_id, role)
+  values (v_room.id, v_player_id, 'owner');
 
   return json_build_object(
     'id',         v_room.id,

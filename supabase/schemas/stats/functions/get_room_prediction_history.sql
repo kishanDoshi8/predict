@@ -59,6 +59,7 @@ begin
       user_bet.payout     as my_payout,
       selected_opt.label  as selected_option_label,
       creator.username    as creator_username,
+      resolver.username   as resolver_username,
       winning_opt.label   as winning_option_label,
       (
         select coalesce(sum(po.total_bet), 0)
@@ -85,6 +86,7 @@ begin
     from public.predictions pred
     left join public.series s on s.id = pred.series_id
     join public.players creator on creator.id = pred.created_by
+    left join public.players resolver on resolver.id = pred.resolved_by
     left join public.prediction_options winning_opt
       on winning_opt.id = pred.winning_option_id
     left join public.bets user_bet

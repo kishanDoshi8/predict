@@ -35,6 +35,7 @@ begin
     'status',            v_room.status,
     'created_at',        v_room.created_at,
     'predictions_limit', v_room.predictions_limit,
+    'result_reminder_hours', v_room.result_reminder_hours,
     'is_member',         private.is_room_member(v_room.id),
     'member_count', (
       select count(*)::int
@@ -52,7 +53,7 @@ begin
       from public.room_members rm
       join public.players pl on pl.id = rm.player_id
       where rm.room_id = v_room.id
-        and rm.is_organizer = true
+        and rm.role = 'owner'
       order by rm.joined_at
       limit 1
     )

@@ -68,9 +68,9 @@ export function LeaderboardList({
 
 			{/* Players short of the minimum bets, kept out of the standings */}
 			{unranked.length > 0 && (
-				<div className='mt-2 flex flex-col gap-1'>
+				<div className='mt-4 flex flex-col gap-1'>
 					<div className='px-3'>
-						<p className='text-sm font-medium'>Not ranked yet</p>
+						<p className='font-medium'>Not ranked yet</p>
 						<p className='text-xs text-muted-foreground'>
 							{rankingRuleLabel(unranked[0].required_bets)}
 						</p>

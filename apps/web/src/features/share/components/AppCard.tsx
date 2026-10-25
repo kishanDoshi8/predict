@@ -6,6 +6,7 @@ import {
 	type ReactNode,
 } from "react";
 import { app, CARD_SIZE, STORY_PADDING, type CardFormat } from "@/features/share/tokens";
+import { twColor } from "@/shared/lib/utils";
 
 const columnStyle = (gap: number): CSSProperties => ({
 	display: "flex",
@@ -91,7 +92,7 @@ export function LogoTile({ size = 88 }: Readonly<{ size?: number }>) {
 				height: size,
 				flexShrink: 0,
 				borderRadius: size * 0.27,
-				background: "linear-gradient(135deg, #f43f5e, #fb923c)",
+				background: "linear-gradient(135deg, var(--primary), var(--accent))",
 				display: "flex",
 				alignItems: "center",
 				justifyContent: "center",
@@ -100,14 +101,14 @@ export function LogoTile({ size = 88 }: Readonly<{ size?: number }>) {
 			<svg width={size * 0.68} height={size * 0.68} viewBox='0 0 512 512' aria-hidden='true'>
 				<path
 					d='M112 270 L225 383 L404 204'
-					stroke='#ffffff'
+					stroke={app.onGradient}
 					strokeWidth='48'
 					strokeLinecap='round'
 					strokeLinejoin='round'
 					fill='none'
 				/>
-				<rect x='137' y='155' width='140' height='44' rx='10' transform='rotate(-45 207 177)' fill='#ffffff' />
-				<rect x='229' y='197' width='60' height='60' rx='6' transform='rotate(45 259 227)' fill='#ffffff' />
+				<rect x='137' y='155' width='140' height='44' rx='10' transform='rotate(-45 207 177)' fill={app.onGradient} />
+				<rect x='229' y='197' width='60' height='60' rx='6' transform='rotate(45 259 227)' fill={app.onGradient} />
 			</svg>
 		</div>
 	);
@@ -144,10 +145,10 @@ export const singleLine: CSSProperties = {
 type PillTone = "win" | "live" | "neutral" | "gradient";
 
 const PILL_TONES: Record<PillTone, CSSProperties> = {
-	win: { color: app.win, background: "rgba(74, 222, 128, 0.15)" },
-	live: { color: app.loss, background: "rgba(244, 63, 94, 0.18)" },
-	neutral: { color: "#e4e4e7", background: app.raised },
-	gradient: { color: "#ffffff", background: app.gradient },
+	win: { color: app.win, background: twColor("win", 0.15) },
+	live: { color: app.loss, background: twColor("loss", 0.18) },
+	neutral: { color: app.text, background: app.raised },
+	gradient: { color: app.onGradient, background: app.gradient },
 };
 
 // The app's status and info chips.
@@ -197,7 +198,7 @@ export function OptionRow({
 		<div
 			style={{
 				borderRadius: 24,
-				border: isWinner ? `3px solid ${app.win}` : `2px solid rgba(255, 255, 255, 0.08)`,
+				border: isWinner ? `3px solid ${app.win}` : `2px solid ${twColor("foreground", 0.08)}`,
 				background: app.base,
 				padding: compact ? "18px 24px" : "24px 28px",
 				display: "flex",

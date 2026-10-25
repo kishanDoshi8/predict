@@ -1,23 +1,23 @@
 // Shareables look like the app's own screens ("straight from the app"). They're
-// captured to PNG, so they use the app's dark theme as fixed inline values and
-// look the same whatever theme the person sharing uses.
+// captured to PNG, so ShareSheet renders them inside a .dark wrapper: these
+// theme variables resolve to the dark theme whatever theme the sharer uses.
 export const app = {
-	base: "#09090b",
-	card: "#18181b",
-	raised: "#27272a",
-	hairline: "rgba(255, 255, 255, 0.1)",
-	text: "#fafafa",
-	muted: "#a1a1aa",
-	faint: "#71717a",
-	rose: "#f43f5e",
-	orange: "#fb923c",
-	gradient: "linear-gradient(90deg, #f43f5e, #fb923c)",
-	win: "#4ade80",
-	loss: "#fb7185",
-	gold: "#facc15",
-	silver: "#a1a1aa",
-	bronze: "#fb923c",
-	cyan: "#22d3ee",
+	base: "var(--background)",
+	card: "var(--card)",
+	raised: "var(--secondary)",
+	hairline: "var(--border)",
+	text: "var(--foreground)",
+	muted: "var(--muted-foreground)",
+	faint: "color-mix(in srgb, var(--muted-foreground) 60%, transparent)",
+	accent: "var(--accent)",
+	onGradient: "var(--primary-foreground)",
+	gradient: "linear-gradient(90deg, var(--primary), var(--accent))",
+	win: "var(--win)",
+	loss: "var(--loss)",
+	gold: "var(--rank-1)",
+	silver: "var(--rank-2)",
+	bronze: "var(--rank-3)",
+	activity: "var(--activity)",
 	font: '"Fira Code Variable", ui-monospace, monospace',
 } as const;
 

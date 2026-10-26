@@ -1,4 +1,5 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
+import { useAppNavigation } from "@/shared/lib/navigation";
 import { useUpdateRoom } from "@/features/rooms/hooks/staff";
 import { useRoomRole } from "@/features/rooms/hooks/useRoomRole";
 import { Button, Input, Spinner } from "@/shared/ui";
@@ -10,7 +11,7 @@ import {
 } from "@/shared/ui/field";
 import { Textarea } from "@/shared/ui/textarea";
 import { useState, type FormEvent } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const NAME_MAX_LENGTH = 50;
@@ -25,7 +26,7 @@ function wholeNumberBetween(value: string, min: number, max: number) {
 export default function RoomSettingsPage() {
 	const { room } = useRoomContext();
 	const { can } = useRoomRole(room);
-	const navigate = useNavigate();
+	const { back } = useAppNavigation();
 	const { mutate: updateRoom, isPending } = useUpdateRoom(room.id);
 	const [form, setForm] = useState({
 		name: room.name,
@@ -68,7 +69,7 @@ export default function RoomSettingsPage() {
 			{
 				onSuccess: () => {
 					toast.success("Room settings saved.", { position: "top-center" });
-					navigate(`/rooms/${room.code}`);
+					back(`/rooms/${room.code}`);
 				},
 				onError: (error) => {
 					toast.error("Couldn't save room settings.", {
@@ -165,7 +166,7 @@ export default function RoomSettingsPage() {
 					<Button
 						type='button'
 						variant='outline'
-						onClick={() => navigate(-1)}
+						onClick={() => back(`/rooms/${room.code}`)}
 						disabled={isPending}
 					>
 						Cancel

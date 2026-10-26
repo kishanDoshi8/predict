@@ -1,4 +1,5 @@
 import Home, { HomeTab } from "@/features/home/components/Home";
+import { useAppNavigation } from "@/shared/lib/navigation";
 import { joinRoom } from "@/shared/lib/api";
 import { roomKeys } from "@/shared/constants/queryKeys";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,6 +12,7 @@ import { Loading } from "@/shared/ui";
 
 export function HomePage() {
 	const navigate = useNavigate();
+	const { switchRoom } = useAppNavigation();
 	const [searchParams] = useSearchParams();
 	const { data: player, isPending: isPlayerLoading } = usePlayer();
 	const queryClient = useQueryClient();
@@ -79,7 +81,7 @@ export function HomePage() {
 					queryKey: roomKeys.byCode(roomCode),
 					queryFn: () => joinRoom(roomCode),
 				});
-				navigate(`/rooms/${room.code}`);
+				switchRoom(room.code);
 			} catch (error) {
 				toast("Failed to enter room.", {
 					description: (error as Error).message,

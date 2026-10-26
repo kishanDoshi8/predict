@@ -1,6 +1,7 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { cn } from "@/shared/lib/utils";
 import { HistoryIcon, HomeIcon, MedalIcon, TrophyIcon } from "lucide-react";
+import { useAppNavigation } from "@/shared/lib/navigation";
 import { NavLink } from "react-router-dom";
 
 // Activity lives behind the bell in the room header.
@@ -13,6 +14,7 @@ const navItems = [
 
 export function RoomBottomNavigation() {
 	const { room } = useRoomContext();
+	const { switchTab } = useAppNavigation();
 
 	return (
 		<nav
@@ -32,6 +34,12 @@ export function RoomBottomNavigation() {
 								<NavLink
 									to={to}
 									end={segment.length === 0}
+									// Home stays at the bottom of history; other tabs
+									// replace each other one entry above it.
+									onClick={(event) => {
+										event.preventDefault();
+										switchTab(to);
+									}}
 									className={({ isActive }) =>
 										cn(
 											"w-full max-w-20 flex flex-col items-center justify-center gap-0.5 rounded-xl py-1.5 text-xs font-medium text-muted-foreground transition-colors",

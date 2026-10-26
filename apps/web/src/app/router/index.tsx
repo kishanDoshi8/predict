@@ -4,6 +4,7 @@ import { HomePage } from "@/features/home";
 import { AuthCallbackPage, ProtectedRoute } from "@/features/auth";
 import { RouteFallback } from "@/app/router/RouteFallback";
 import { RouteErrorBoundary } from "@/app/router/RouteErrorBoundary";
+import { AppShell } from "@/app/router/AppShell";
 import RoomLayout from "@/app/layouts/RoomLayout";
 import RoomTabsLayout from "@/app/layouts/RoomTabsLayout";
 import { RequireRoomMember } from "@/features/rooms";
@@ -118,177 +119,190 @@ export const router = createBrowserRouter([
 		element: <ProtectedRoute />,
 		errorElement: <RouteErrorBoundary />,
 		children: [
-			{ path: "/", element: <HomePage /> },
-			{ path: "/create-player", element: withSuspense(<CreatePlayer />) },
 			{
-				path: "/rooms/:roomCode",
+				element: <AppShell />,
 				children: [
+					{ path: "/", element: <HomePage /> },
+					{ path: "/create-player", element: withSuspense(<CreatePlayer />) },
 					{
-						path: "join",
-						element: withSuspense(<JoinRoomPage />),
-					},
-					{
-						element: <RequireRoomMember />,
-						errorElement: <RouteErrorBoundary />,
+						path: "/rooms/:roomCode",
 						children: [
 							{
-								element: <RoomLayout />,
+								path: "join",
+								element: withSuspense(<JoinRoomPage />),
+							},
+							{
+								element: <RequireRoomMember />,
 								errorElement: <RouteErrorBoundary />,
 								children: [
 									{
-										element: <RoomTabsLayout />,
+										element: <RoomLayout />,
+										errorElement: <RouteErrorBoundary />,
 										children: [
 											{
-												index: true,
-												element: <RoomDashboard />,
-												handle: {
-													header: {
-														leftAction: "home",
+												element: <RoomTabsLayout />,
+												children: [
+													{
+														index: true,
+														element: <RoomDashboard />,
+														handle: {
+															header: {
+																leftAction: "home",
+															},
+														},
 													},
-												},
-											},
-											{
-												path: "leaderboard",
-												element: <LeaderboardPage />,
-												handle: { header: {} },
-											},
-											{
-												path: "history",
-												element: <RoomHistoryPage />,
-												handle: { header: {} },
+													{
+														path: "leaderboard",
+														element: <LeaderboardPage />,
+														handle: { header: {} },
+													},
+													{
+														path: "history",
+														element: <RoomHistoryPage />,
+														handle: { header: {} },
+													},
+													{
+														path: "series",
+														element: <SeriesPage />,
+														handle: { header: {} },
+													},
+												],
 											},
 											{
 												path: "activities",
 												element: <RoomActivitiesPage />,
-												handle: { header: {} },
+												handle: {
+													header: {
+														leftAction: "back",
+														title: "Activity",
+													},
+												},
 											},
 											{
-												path: "series",
-												element: <SeriesPage />,
-												handle: { header: {} },
+												path: "series/new",
+												element: withSuspense(
+													<SeriesCreatePage />,
+												),
+												handle: {
+													header: {
+														leftAction: "back",
+														title: "New series",
+														parent: "series",
+													},
+												},
 											},
+											{
+												path: "series/:seriesId",
+												element: <SeriesPage />,
+												handle: {
+													header: {
+														leftAction: "back",
+														parent: "series",
+													},
+												},
+											},
+											{
+												path: "predictions/new",
+												element: withSuspense(
+													<PredictionNew />,
+												),
+												handle: {
+													header: {
+														leftAction: "back",
+														title: "New prediction",
+													},
+												},
+											},
+											{
+												path: "predictions/:predictionId/edit",
+												element: withSuspense(<EditPrediction />),
+												handle: {
+													header: {
+														leftAction: "back",
+														title: "Edit prediction",
+														parent: "predictions/:predictionId",
+													},
+												},
+											},
+											{
+												path: "predictions/:predictionId",
+												element: <PredictionPage />,
+												handle: {
+													header: {
+														leftAction: "back",
+													},
+												},
+											},
+											{
+												path: "manage",
+												element: withSuspense(<ManagePage />),
+												handle: {
+													header: {
+														leftAction: "back",
+														title: "Manage",
+													},
+												},
+											},
+											{
+												path: "members",
+												element: withSuspense(<MembersPage />),
+												handle: {
+													header: {
+														leftAction: "back",
+														title: "Members",
+													},
+												},
+											},
+											{
+												path: "settings",
+												element: withSuspense(<RoomSettingsPage />),
+												handle: {
+													header: {
+														leftAction: "back",
+														title: "Room settings",
+													},
+												},
+											},
+											// Duels are paused; their routes fall through to 404.
+											...(FEATURES.duels
+												? [
+													{
+														path: "predictions/:predictionId/duels",
+														element: withSuspense(
+															<PredictionDuelsPage />,
+														),
+														handle: {
+															header: {
+																leftAction: "back",
+															},
+														},
+													},
+													{
+														path: "predictions/:predictionId/duels/create",
+														element: withSuspense(
+															<PredictionDuelCreatePage />,
+														),
+														handle: {
+															header: {
+																leftAction: "back",
+															},
+														},
+													},
+													{
+														path: "predictions/:predictionId/duels/:duelId",
+														element: withSuspense(
+															<PredictionDuelDetailPage />,
+														),
+														handle: {
+															header: {
+																leftAction: "back",
+															},
+														},
+													},
+												]
+												: []),
 										],
 									},
-									{
-										path: "series/new",
-										element: withSuspense(
-											<SeriesCreatePage />,
-										),
-										handle: {
-											header: {
-												leftAction: "back",
-												title: "New series",
-											},
-										},
-									},
-									{
-										path: "series/:seriesId",
-										element: <SeriesPage />,
-										handle: {
-											header: {
-												leftAction: "back",
-											},
-										},
-									},
-									{
-										path: "predictions/new",
-										element: withSuspense(
-											<PredictionNew />,
-										),
-										handle: {
-											header: {
-												leftAction: "back",
-												title: "New prediction",
-											},
-										},
-									},
-									{
-										path: "predictions/:predictionId/edit",
-										element: withSuspense(<EditPrediction />),
-										handle: {
-											header: {
-												leftAction: "back",
-												title: "Edit prediction",
-											},
-										},
-									},
-									{
-										path: "predictions/:predictionId",
-										element: <PredictionPage />,
-										handle: {
-											header: {
-												leftAction: "back",
-											},
-										},
-									},
-									{
-										path: "manage",
-										element: withSuspense(<ManagePage />),
-										handle: {
-											header: {
-												leftAction: "back",
-												title: "Manage",
-											},
-										},
-									},
-									{
-										path: "members",
-										element: withSuspense(<MembersPage />),
-										handle: {
-											header: {
-												leftAction: "back",
-												title: "Members",
-											},
-										},
-									},
-									{
-										path: "settings",
-										element: withSuspense(<RoomSettingsPage />),
-										handle: {
-											header: {
-												leftAction: "back",
-												title: "Room settings",
-											},
-										},
-									},
-									// Duels are paused; their routes fall through to 404.
-									...(FEATURES.duels
-										? [
-											{
-												path: "predictions/:predictionId/duels",
-												element: withSuspense(
-													<PredictionDuelsPage />,
-												),
-												handle: {
-													header: {
-														leftAction: "back",
-													},
-												},
-											},
-											{
-												path: "predictions/:predictionId/duels/create",
-												element: withSuspense(
-													<PredictionDuelCreatePage />,
-												),
-												handle: {
-													header: {
-														leftAction: "back",
-													},
-												},
-											},
-											{
-												path: "predictions/:predictionId/duels/:duelId",
-												element: withSuspense(
-													<PredictionDuelDetailPage />,
-												),
-												handle: {
-													header: {
-														leftAction: "back",
-													},
-												},
-											},
-										]
-										: []),
 								],
 							},
 						],

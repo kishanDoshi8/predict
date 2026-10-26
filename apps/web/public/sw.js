@@ -52,10 +52,20 @@ self.addEventListener("notificationclick", (event) => {
 		clients
 			.matchAll({ type: "window", includeUncontrolled: true })
 			.then((clientList) => {
-				for (const client of clientList) {
-					if ("focus" in client && client.url === absoluteTargetUrl) {
-						return client.focus();
-					}
+				// The app is already open: bring it forward and let it move to
+				// the page itself, so Back returns to where the person was.
+				const appWindow = clientList.find(
+					(client) =>
+						new URL(client.url).origin === self.location.origin &&
+						"focus" in client,
+				);
+				if (appWindow) {
+					const target = new URL(absoluteTargetUrl);
+					appWindow.postMessage({
+						type: "navigate",
+						path: `${target.pathname}${target.search}${target.hash}`,
+					});
+					return appWindow.focus();
 				}
 
 				if (clients.openWindow) {

@@ -1,5 +1,5 @@
 import { Button } from "@/shared/ui/button";
-import { useNavigate } from "react-router";
+import { useAppNavigation } from "@/shared/lib/navigation";
 import { toast } from "sonner";
 import { useCreatePrediction } from "@/features/predictions";
 import { PredictionForm } from "@/features/predictions/components/PredictionForm";
@@ -15,7 +15,7 @@ export default function PredictionNew() {
 	const navigationState = location.state as { seriesId?: string } | null;
 	const { mutate: createPrediction, isPending: isLoading } =
 		useCreatePrediction();
-	const navigate = useNavigate();
+	const { back } = useAppNavigation();
 	const { currentSeries, hasActiveSeries, isPending: isSeriesLoading } =
 		useCurrentSeries(room?.id);
 
@@ -64,11 +64,8 @@ export default function PredictionNew() {
 						seriesId,
 					},
 					{
-						onSuccess: () => {
-							navigate("/rooms/" + room.code, {
-								replace: true,
-							});
-						},
+						// Back to wherever the form was opened from.
+						onSuccess: () => back(`/rooms/${room.code}`),
 						onError: (error) => {
 							toast("Failed to create prediction.", {
 								description: error.message,
@@ -77,7 +74,7 @@ export default function PredictionNew() {
 					},
 				)
 			}
-			onCancel={() => navigate("/rooms/" + room.code)}
+			onCancel={() => back(`/rooms/${room.code}`)}
 		/>
 	);
 }

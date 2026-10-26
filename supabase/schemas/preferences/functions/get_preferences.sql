@@ -53,6 +53,7 @@ begin
       'deadline_1h',         v_global.deadline_1h,
       'result_revealed',     v_global.result_revealed,
       'weekly_points_claim', v_global.weekly_points_claim,
+      'result_needed',       v_global.result_needed,
       'dark_mode',           v_global.dark_mode,
       'sounds_enabled',      v_global.sounds_enabled
     ),
@@ -62,6 +63,7 @@ begin
       'deadline_1h',         case when v_room.id is null then null else v_room.deadline_1h end,
       'result_revealed',     case when v_room.id is null then null else v_room.result_revealed end,
       'weekly_points_claim', case when v_room.id is null then null else v_room.weekly_points_claim end,
+      'result_needed',       case when v_room.id is null then null else v_room.result_needed end,
       'dark_mode',           case when v_room.id is null then null else v_room.dark_mode end,
       'sounds_enabled',      case when v_room.id is null then null else v_room.sounds_enabled end
     ),
@@ -71,6 +73,7 @@ begin
       'deadline_1h',         coalesce(v_room.deadline_1h, v_global.deadline_1h),
       'result_revealed',     coalesce(v_room.result_revealed, v_global.result_revealed),
       'weekly_points_claim', coalesce(v_room.weekly_points_claim, v_global.weekly_points_claim),
+      'result_needed',       coalesce(v_room.result_needed, v_global.result_needed),
       'dark_mode',           coalesce(v_room.dark_mode, v_global.dark_mode),
       'sounds_enabled',      coalesce(v_room.sounds_enabled, v_global.sounds_enabled)
     )

@@ -48,19 +48,11 @@ begin
     -- Counts every week a top-up round ran, so late joiners start level with active players.
     update public.series
     set topups_paid = topups_paid + 1,
-        last_topup_week = v_week_key
+        last_topup_week = v_week_key,
+        last_topup_recipients = v_paid
     where id = v_series.id;
 
-    if v_paid > 0 then
-      perform private.fire_push_notification(
-        'weekly_points_claim',
-        null,
-        v_series.room_id,
-        '+' || v_series.weekly_topup || ' points',
-        'Weekly top-ups for ' || v_series.title || ' are in for everyone who played last week.',
-        '/rooms/' || v_series.room_code
-      );
-    end if;
+    -- The Monday push goes out from private.notify_weekly_recap(), one per room.
 
     v_count := v_count + 1;
   end loop;

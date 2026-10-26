@@ -16,7 +16,9 @@ create table if not exists public.series (
   starting_stack integer not null default 1000 check (starting_stack between 100 and 1000000),
   weekly_topup integer not null default 100 check (weekly_topup between 0 and 100000),
   topups_paid integer not null default 0 check (topups_paid >= 0),
-  last_topup_week text
+  last_topup_week text,
+  -- How many players the latest top-up reached, for the Monday push.
+  last_topup_recipients integer not null default 0
 );
 
 create index if not exists idx_series_room_status on public.series(room_id, status, created_at desc);

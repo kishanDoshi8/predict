@@ -1,5 +1,5 @@
 import { AlertCircleIcon } from "lucide-react";
-import { Skeleton } from "@/shared/ui";
+import { ActivityFeedSkeleton } from "@/features/activities/components/ActivityCardSkeleton";
 import { ActivityCardRegistry } from "@/features/activities/components/ActivityCardRegistry";
 import { RoomActivity } from "@/features/activities/types/types";
 
@@ -23,13 +23,7 @@ export function RoomActivitiesFeed({
 	showSeries,
 }: Readonly<RoomActivitiesFeedProps>) {
 	if (isLoading) {
-		return (
-			<div className='space-y-3'>
-				{Array.from({ length: 4 }).map((_, index) => (
-					<Skeleton key={index} className='h-28 w-full rounded-2xl' />
-				))}
-			</div>
-		);
+		return <ActivityFeedSkeleton />;
 	}
 
 	if (isError) {

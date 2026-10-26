@@ -1,7 +1,8 @@
 import { SeriesSectionHeader } from "@/features/series/components/SeriesSectionHeader";
+import { SeriesListSkeleton } from "@/features/series/components/SeriesSkeletons";
 import { SeriesTile } from "@/features/series/components/SeriesTile";
 import type { Series } from "@/features/series/types/series";
-import { Button, Skeleton } from "@/shared/ui";
+import { Button } from "@/shared/ui";
 import { PlusIcon } from "lucide-react";
 
 type SeriesListViewProps = {
@@ -44,10 +45,7 @@ export function SeriesListView({
 			</div>
 
 			{isPending ? (
-				<div className='space-y-3'>
-					<Skeleton className='h-32 w-full rounded-2xl' />
-					<Skeleton className='h-32 w-full rounded-2xl' />
-				</div>
+				<SeriesListSkeleton />
 			) : (
 				<>
 					<section className='space-y-3'>

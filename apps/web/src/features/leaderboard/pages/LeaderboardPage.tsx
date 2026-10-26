@@ -16,6 +16,7 @@ import {
 	useCurrentSeries,
 } from "@/features/series";
 import { formatSignedPoints } from "@/shared/lib/utils";
+import { TopThreePodiumSkeleton } from "@/features/leaderboard/components/leaderboard/StandingsSkeletons";
 import React, { Suspense, lazy } from "react";
 
 const PlayerProfileDialog = lazy(() =>
@@ -40,8 +41,13 @@ export function LeaderboardPage() {
 
 	const { data: leaderboard = [], isPending: isLeaderboardLoading } =
 		useSeriesLeaderboard(room.id, currentSeriesId, scope === "series");
-	const { data: overall = [], isPending: isOverallLoading } =
+	const { data: overall = [], isPending: isOverallPending } =
 		useRoomOverallStandings(room.id, scope === "all");
+	const isOverallLoading = scope === "all" && isOverallPending;
+	const isSeriesStandingsLoading =
+		scope === "series" &&
+		(isSeriesPending || (!!currentSeriesId && isLeaderboardLoading));
+	const isStandingsLoading = isSeriesStandingsLoading || isOverallLoading;
 
 	const podium: PodiumEntry[] =
 		scope === "series"
@@ -109,16 +115,17 @@ export function LeaderboardPage() {
 			/>
 
 			<div className='flex flex-col gap-3'>
-				<TopThreePodium top={podium} currentPlayerId={player?.id ?? ""} />
+				{isStandingsLoading ? (
+					<TopThreePodiumSkeleton />
+				) : (
+					<TopThreePodium top={podium} currentPlayerId={player?.id ?? ""} />
+				)}
 
 				{scope === "series" ? (
 					<LeaderboardList
 						entries={currentSeriesId ? leaderboard : []}
 						currentPlayerId={player?.id ?? ""}
-						isLoading={
-							isSeriesPending ||
-							(!!currentSeriesId && isLeaderboardLoading)
-						}
+						isLoading={isStandingsLoading}
 						onRowClick={openProfile}
 					/>
 				) : (

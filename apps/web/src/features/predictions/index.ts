@@ -6,7 +6,10 @@ export * from "./types/bet";
 export { default as PredictionNew } from "./pages/New";
 export { PredictionPage } from "./pages/PredictionPage";
 
-export { default as InPlayPredictions } from "./components/InPlayPredictions";
+export {
+	default as InPlayPredictions,
+	PredictionCardSkeleton,
+} from "./components/InPlayPredictions";
 export { default as HistoryFeed } from "./components/HistoryFeed";
 export { default as UserStats } from "./components/stats/UserStats";
 export { RoomHeader } from "./components/RoomHeader";

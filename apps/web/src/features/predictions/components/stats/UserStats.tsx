@@ -171,9 +171,7 @@ function LeaderboardContentView({
 			>
 				<div className={`flex gap-4 items-center`}>
 					{isLoading ? (
-						<Skeleton
-							className={`w-14 h-14 rounded-lg`}
-						/>
+						<Skeleton className={`w-14 h-14`} />
 					) : (
 						<FadeContent
 							className={`relative w-14 h-14 flex items-center justify-center rounded-lg font-bold text-foreground text-2xl ${leaderboardPlayer?.rank === 1 ? "bg-rank-1 text-secondary" : "bg-linear-to-r from-primary to-accent"}`}
@@ -190,13 +188,9 @@ function LeaderboardContentView({
 					)}
 
 					{isLoading ? (
-						<div className={`flex-1`}>
-							<Skeleton
-								className={`w-1/2 h-4 rounded-lg mb-2`}
-							/>
-							<Skeleton
-								className={`w-1/2 h-8 rounded-lg`}
-							/>
+						<div className={`flex-1 flex flex-col gap-1.5`}>
+							<Skeleton className={`w-20 h-3`} />
+							<Skeleton className={`w-28 h-9`} />
 						</div>
 					) : (
 						<FadeContent
@@ -225,9 +219,10 @@ function LeaderboardContentView({
 					)}
 
 					{isLoading ? (
-						<Skeleton
-							className={`w-20 h-10 rounded-lg`}
-						/>
+						<div className={`flex flex-col items-end gap-1.5`}>
+							<Skeleton className={`w-16 h-3`} />
+							<Skeleton className={`w-12 h-6`} />
+						</div>
 					) : (
 						<>
 							{leaderboardPlayer &&
@@ -253,26 +248,18 @@ function LeaderboardContentView({
 				</div>
 
 				{isLoading ? (
-					<div className={`flex flex-col gap-2`}>
-						{[1, 2, 3, 4].map((i) => (
+					<div className={`flex flex-col gap-2`} aria-hidden='true'>
+						{[1, 2, 3].map((i) => (
 							<div
 								key={i}
 								className={`flex items-center gap-3 p-3 rounded-lg bg-secondary/60`}
 							>
-								<Skeleton
-									className={`w-6 h-6 text-sm font-bold rounded-md`}
-								/>
-								<Skeleton
-									className={`w-1/4 h-4 rounded-lg`}
-								/>
-								<Skeleton
-									className={`ml-auto w-10 h-4 rounded-lg`}
-								/>
+								<Skeleton className={`w-6 h-6 rounded-md`} />
+								<Skeleton className={`w-1/4 h-4`} />
+								<Skeleton className={`ml-auto w-14 h-4`} />
 							</div>
 						))}
-						<Skeleton
-							className={`h-6 w-20 ml-auto bg-secondary rounded-lg mt-2`}
-						/>
+						<Skeleton className={`h-4 w-16 ml-auto mt-2`} />
 					</div>
 				) : (
 					<LeaderboardMiniRows
@@ -286,12 +273,17 @@ function LeaderboardContentView({
 			</div>
 
 			{isLoading ? (
-				<div className={`flex gap-2`}>
+				<div className={`flex gap-2`} aria-hidden='true'>
 					{[1, 2, 3].map((i) => (
-						<Skeleton
+						// Same shell as StatTile: icon, value, label.
+						<div
 							key={i}
-							className={`flex-1 w-full h-24 rounded-lg`}
-						/>
+							className={`flex flex-col items-center gap-1.5 bg-card p-3 rounded-lg border flex-1`}
+						>
+							<Skeleton className={`size-5 rounded-full`} />
+							<Skeleton className={`h-7 w-12`} />
+							<Skeleton className={`h-2.5 w-14`} />
+						</div>
 					))}
 				</div>
 			) : (

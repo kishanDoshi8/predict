@@ -296,13 +296,7 @@ export function PredictionHistoryFeed({
 	emptyMessage,
 }: Readonly<FeedProps>) {
 	if (isLoading) {
-		return (
-			<div className='flex flex-col gap-4'>
-				{Array.from({ length: 4 }).map((_, i) => (
-					<Skeleton key={i} className='h-46 w-full rounded-xl' />
-				))}
-			</div>
-		);
+		return <PredictionHistorySkeleton />;
 	}
 
 	if (entries.length === 0) {
@@ -323,6 +317,51 @@ export function PredictionHistoryFeed({
 				<FadeContent key={entry.prediction_id}>
 					<PredictionHistoryCard entry={entry} />
 				</FadeContent>
+			))}
+		</div>
+	);
+}
+
+// Stands in for a history card: series line and result chip, title, winner,
+// two option bars, the meta lines and the payout strip.
+export function PredictionHistoryCardSkeleton() {
+	return (
+		<div
+			aria-hidden='true'
+			className='border-2 rounded-xl p-3 flex flex-col gap-2'
+		>
+			<div className='flex items-center gap-2'>
+				<Skeleton className='size-4 rounded-full' />
+				<Skeleton className='h-3 w-28 flex-1 max-w-28' />
+				<Skeleton className='ml-auto h-5 w-14' />
+			</div>
+			<Skeleton className='h-4 w-3/4' />
+			<Skeleton className='h-5 w-40' />
+			<div className='my-1 flex flex-col gap-1.5'>
+				{[0, 1].map((i) => (
+					<div key={i} className='flex items-center gap-2'>
+						<Skeleton className='h-3 w-16' />
+						<Skeleton className='h-2 flex-1' />
+						<Skeleton className='h-3 w-8' />
+					</div>
+				))}
+			</div>
+			<div className='grid grid-cols-[1fr_auto] gap-x-3 gap-y-1.5 px-2'>
+				<Skeleton className='h-3 w-24' />
+				<Skeleton className='h-3 w-20' />
+				<Skeleton className='h-3 w-20' />
+				<Skeleton className='h-3 w-24' />
+			</div>
+			<Skeleton className='h-7 w-full' />
+		</div>
+	);
+}
+
+export function PredictionHistorySkeleton({ count = 3 }: Readonly<{ count?: number }>) {
+	return (
+		<div className='flex flex-col gap-4'>
+			{Array.from({ length: count }).map((_, i) => (
+				<PredictionHistoryCardSkeleton key={i} />
 			))}
 		</div>
 	);

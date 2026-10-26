@@ -376,6 +376,40 @@ function SectionHeader({
 	);
 }
 
+// Stands in for PredictionCard: same shell, a status row, title, two
+// options with their bars, the pool row and the call to action.
+export function PredictionCardSkeleton() {
+	return (
+		<div
+			aria-hidden='true'
+			className={`flex flex-col rounded-xl border border-border shadow-sm bg-linear-to-br from-card to-primary/5 p-5 mb-4`}
+		>
+			<div className={`flex items-center justify-between mb-3`}>
+				<Skeleton className={`h-5 w-24`} />
+				<Skeleton className={`h-5 w-20`} />
+			</div>
+			<Skeleton className={`h-3 w-32`} />
+			<Skeleton className={`h-7 w-4/5 mt-2 mb-4`} />
+			<div className={`flex flex-col gap-4 mt-2`}>
+				{[0, 1].map((i) => (
+					<div key={i} className={`flex flex-col gap-2`}>
+						<div className={`flex justify-between`}>
+							<Skeleton className={`h-4 w-24`} />
+							<Skeleton className={`h-4 w-14`} />
+						</div>
+						<Skeleton className={`h-2 w-full`} />
+					</div>
+				))}
+			</div>
+			<div className={`flex justify-between mt-4`}>
+				<Skeleton className={`h-4 w-32`} />
+				<Skeleton className={`h-4 w-8`} />
+			</div>
+			<Skeleton className={`h-4 w-44 mt-6 ml-auto`} />
+		</div>
+	);
+}
+
 type InPlayPredictionsProps = {
 	predictionsOverride?: Prediction[];
 	// With predictionsOverride: whether those predictions are still loading.
@@ -476,19 +510,7 @@ function InPlayPredictions({
 	if (isPredictionLoading) {
 		carouselContent = (
 			<CarouselItem>
-				<div
-					className={`border-2 border-activity/30 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full space-y-2`}
-				>
-					<Skeleton className={`h-5 w-22`} />
-					<Skeleton className={`h-7 mx-auto w-full`} />
-					<Skeleton className={`h-11 mx-auto w-full`} />
-					<Skeleton className={`h-11 mx-auto w-full`} />
-					<span className={`flex justify-between items-center`}>
-						<Skeleton className={`h-6 w-34`} />
-						<Skeleton className={`h-6 w-20`} />
-					</span>
-					<Skeleton className={`h-6 ml-auto w-34`} />
-				</div>
+				<PredictionCardSkeleton />
 			</CarouselItem>
 		);
 	} else if (predictions.length === 0) {
@@ -524,11 +546,13 @@ function InPlayPredictions({
 
 	return (
 		<div className={`max-w-lg mx-auto`}>
-			{isPredictionLoading && (
-				<div className={`flex flex-col gap-4 my-4`}>
-					<Skeleton className={`h-8 w-35`} />
+			{isPredictionLoading && showSectionHeader ? (
+				// Same height as the "What's Hot" header.
+				<div className={`flex flex-col gap-1.5 my-4`} aria-hidden='true'>
+					<Skeleton className={`h-6 w-32`} />
+					<Skeleton className={`h-3 w-16`} />
 				</div>
-			)}
+			) : null}
 
 			{showSectionHeader &&
 				!isPredictionLoading &&

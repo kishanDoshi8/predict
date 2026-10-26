@@ -5,8 +5,9 @@ import {
 	usePredictionHistory,
 	useSeriesLeaderboard,
 } from "@/features/leaderboard";
-import { useActivePredictions } from "@/features/predictions";
+import { PredictionCardSkeleton, useActivePredictions } from "@/features/predictions";
 import { SeriesDetailView, SeriesListView } from "@/features/series/components";
+import { SeriesOverviewSkeleton } from "@/features/series/components/SeriesSkeletons";
 import {
 	useRoomSeries,
 	useSeriesAwards,
@@ -298,10 +299,12 @@ export default function SeriesPage() {
 
 	if (isPending) {
 		return (
-			<div className='mx-auto w-full max-w-md space-y-4 p-4'>
-				<Skeleton className='h-10 w-1/2 rounded-lg' />
-				<Skeleton className='h-40 w-full rounded-2xl' />
-				<Skeleton className='h-52 w-full rounded-2xl' />
+			<div className='mx-auto w-full max-w-md space-y-6 p-4'>
+				<SeriesOverviewSkeleton />
+				<section className='space-y-3'>
+					<Skeleton className='h-6 w-40' />
+					<PredictionCardSkeleton />
+				</section>
 			</div>
 		);
 	}

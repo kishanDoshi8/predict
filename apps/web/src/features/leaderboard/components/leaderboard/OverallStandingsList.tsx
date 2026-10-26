@@ -1,4 +1,4 @@
-import { Skeleton } from "@/shared/ui/skeleton";
+import { StandingsRowsSkeleton } from "./StandingsSkeletons";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { cn, formatSignedPoints } from "@/shared/lib/utils";
 import { TrophyIcon } from "lucide-react";
@@ -21,13 +21,7 @@ export function OverallStandingsList({
 	onRowClick,
 }: Readonly<Props>) {
 	if (isLoading) {
-		return (
-			<div className='flex flex-col gap-2'>
-				{Array.from({ length: 5 }).map((_, i) => (
-					<Skeleton key={i} className='h-14 w-full rounded-xl' />
-				))}
-			</div>
-		);
+		return <StandingsRowsSkeleton />;
 	}
 
 	if (entries.length === 0) {

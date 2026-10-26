@@ -7,6 +7,7 @@ create table if not exists public.room_preferences (
   deadline_1h boolean,
   result_revealed boolean,
   weekly_points_claim boolean,
+  result_needed boolean,
   dark_mode boolean,
   sounds_enabled boolean,
   created_at timestamptz not null default now(),

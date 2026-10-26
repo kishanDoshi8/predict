@@ -6,7 +6,8 @@ create or replace function public.update_room_preferences(
   p_result_revealed     boolean default null,
   p_weekly_points_claim boolean default null,
   p_dark_mode           boolean default null,
-  p_sounds_enabled      boolean default null
+  p_sounds_enabled      boolean default null,
+  p_result_needed       boolean default null
 )
 returns json
 language plpgsql
@@ -43,6 +44,7 @@ begin
     and p_weekly_points_claim is null
     and p_dark_mode is null
     and p_sounds_enabled is null
+    and p_result_needed is null
   then
     delete from public.room_preferences
     where room_id = p_room_id and player_id = v_player_id;
@@ -51,11 +53,11 @@ begin
 
   insert into public.room_preferences (
     room_id, player_id, prediction_live, prediction_locked, deadline_1h,
-    result_revealed, weekly_points_claim, dark_mode, sounds_enabled
+    result_revealed, weekly_points_claim, dark_mode, sounds_enabled, result_needed
   )
   values (
     p_room_id, v_player_id, p_prediction_live, p_prediction_locked, p_deadline_1h,
-    p_result_revealed, p_weekly_points_claim, p_dark_mode, p_sounds_enabled
+    p_result_revealed, p_weekly_points_claim, p_dark_mode, p_sounds_enabled, p_result_needed
   )
   on conflict (room_id, player_id) do update
   set
@@ -66,6 +68,7 @@ begin
     weekly_points_claim = excluded.weekly_points_claim,
     dark_mode           = excluded.dark_mode,
     sounds_enabled      = excluded.sounds_enabled,
+    result_needed       = excluded.result_needed,
     updated_at          = now();
 
   return public.get_preferences(p_room_id);

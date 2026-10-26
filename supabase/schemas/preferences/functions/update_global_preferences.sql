@@ -5,7 +5,9 @@ create or replace function public.update_global_preferences(
   p_result_revealed     boolean,
   p_weekly_points_claim boolean,
   p_dark_mode           boolean,
-  p_sounds_enabled      boolean
+  p_sounds_enabled      boolean,
+  -- Older clients don't send it; null keeps what's saved.
+  p_result_needed       boolean default null
 )
 returns json
 language plpgsql
@@ -27,11 +29,12 @@ begin
 
   insert into public.player_preferences (
     player_id, prediction_live, prediction_locked, deadline_1h,
-    result_revealed, weekly_points_claim, dark_mode, sounds_enabled
+    result_revealed, weekly_points_claim, dark_mode, sounds_enabled, result_needed
   )
   values (
     v_player_id, p_prediction_live, p_prediction_locked, p_deadline_1h,
-    p_result_revealed, p_weekly_points_claim, p_dark_mode, p_sounds_enabled
+    p_result_revealed, p_weekly_points_claim, p_dark_mode, p_sounds_enabled,
+    coalesce(p_result_needed, true)
   )
   on conflict (player_id) do update
   set
@@ -42,6 +45,8 @@ begin
     weekly_points_claim = excluded.weekly_points_claim,
     dark_mode           = excluded.dark_mode,
     sounds_enabled      = excluded.sounds_enabled,
+    -- Older clients don't send it; keep what's saved.
+    result_needed       = coalesce(p_result_needed, player_preferences.result_needed),
     updated_at          = now();
 
   return public.get_preferences(null);

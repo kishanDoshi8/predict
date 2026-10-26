@@ -24,6 +24,8 @@ import { NotificationPermissionBlockedDialog } from "@/features/predictions";
 
 type Props = {
 	roomId: string;
+	// Staff also see the "result needed" push.
+	isStaff?: boolean;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 };
@@ -33,14 +35,17 @@ type NotificationPreferenceKey =
 	| "prediction_locked"
 	| "deadline_1h"
 	| "result_revealed"
-	| "weekly_points_claim";
+	| "weekly_points_claim"
+	| "result_needed";
 
 const notificationLabels: Record<NotificationPreferenceKey, string> = {
 	prediction_live: "Prediction goes live",
 	prediction_locked: "Prediction locked",
 	deadline_1h: "Betting deadline (1h)",
 	result_revealed: "Result revealed",
-	weekly_points_claim: "Weekly top-up",
+	// One Monday push: the weekly standings and any top-up.
+	weekly_points_claim: "Weekly recap",
+	result_needed: "Result needed (staff)",
 };
 
 const notificationKeys: NotificationPreferenceKey[] = [
@@ -50,6 +55,9 @@ const notificationKeys: NotificationPreferenceKey[] = [
 	"result_revealed",
 	"weekly_points_claim",
 ];
+
+// Only room staff get the "result needed" push.
+const staffNotificationKeys: NotificationPreferenceKey[] = ["result_needed"];
 
 const cycleOverride = (value: boolean | null): boolean | null => {
 	if (value === null) return true;
@@ -74,9 +82,13 @@ const getErrorMessage = (error: unknown) =>
 
 export function RoomPreferencesDialog({
 	roomId,
+	isStaff = false,
 	open,
 	onOpenChange,
 }: Readonly<Props>) {
+	const visibleKeys = isStaff
+		? [...notificationKeys, ...staffNotificationKeys]
+		: notificationKeys;
 	const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
 	const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 	const { permission, requestPermission } = useNotificationPermission();
@@ -210,7 +222,7 @@ export function RoomPreferencesDialog({
 						<section className='space-y-3'>
 							<h3 className='font-semibold'>Defaults</h3>
 							<div className='space-y-2'>
-								{notificationKeys.map((key) => (
+								{visibleKeys.map((key) => (
 									<div
 										key={`global-${key}`}
 										className='flex items-center justify-between gap-4 border rounded-md p-3'
@@ -242,7 +254,7 @@ export function RoomPreferencesDialog({
 						<section className='space-y-3'>
 							<h3 className='font-semibold'>This Room</h3>
 							<div className='space-y-2'>
-								{notificationKeys.map((key) => (
+								{visibleKeys.map((key) => (
 									<div
 										key={`room-${key}`}
 										className='flex items-center justify-between gap-4 border rounded-md p-3'

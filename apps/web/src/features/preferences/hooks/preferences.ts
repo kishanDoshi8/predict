@@ -21,6 +21,7 @@ const mergeEffective = (
   result_revealed: roomOverrides.result_revealed ?? global.result_revealed,
   weekly_points_claim:
     roomOverrides.weekly_points_claim ?? global.weekly_points_claim,
+  result_needed: roomOverrides.result_needed ?? global.result_needed,
   dark_mode: roomOverrides.dark_mode ?? global.dark_mode,
   sounds_enabled: roomOverrides.sounds_enabled ?? global.sounds_enabled,
 });
@@ -114,6 +115,7 @@ export const useResetRoomPreferences = (roomId: string) => {
           deadline_1h: null,
           result_revealed: null,
           weekly_points_claim: null,
+          result_needed: null,
           dark_mode: null,
           sounds_enabled: null,
         };

@@ -67,9 +67,9 @@ grant execute on function public.resolve_prediction_v2(uuid, uuid, text, uuid, c
 grant execute on function public.set_last_visited_room(uuid) to authenticated;
 grant execute on function public.set_member_role(uuid, uuid, text) to authenticated;
 grant execute on function public.transfer_ownership(uuid, uuid) to authenticated;
-grant execute on function public.update_global_preferences(boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
+grant execute on function public.update_global_preferences(boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
 grant execute on function public.update_prediction(uuid, text, timestamp with time zone, text[]) to authenticated;
 grant execute on function public.update_room(uuid, text, text, integer, integer) to authenticated;
-grant execute on function public.update_room_preferences(uuid, boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
+grant execute on function public.update_room_preferences(uuid, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
 grant execute on function public.update_series(uuid, text, text, integer, integer, integer, integer) to authenticated;
 grant execute on function public.upsert_user_push_subscription(jsonb) to authenticated;

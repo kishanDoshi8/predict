@@ -3,6 +3,7 @@ import { useAppNavigation } from "@/shared/lib/navigation";
 import { toast } from "sonner";
 import { useCreatePrediction } from "@/features/predictions";
 import { PredictionForm } from "@/features/predictions/components/PredictionForm";
+import { PredictionFormSkeleton } from "@/features/predictions/components/PredictionFormSkeleton";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useCurrentSeries } from "@/features/series";
 import { Link, Navigate, useLocation } from "react-router-dom";
@@ -23,7 +24,12 @@ export default function PredictionNew() {
 		return <Navigate to={`/rooms/${room.code}`} replace />;
 	}
 
-	if (!isSeriesLoading && !hasActiveSeries) {
+	// Wait for the series, so the form opens with it already selected.
+	if (isSeriesLoading) {
+		return <PredictionFormSkeleton />;
+	}
+
+	if (!hasActiveSeries) {
 		return (
 			<div className={`p-4`}>
 				<div

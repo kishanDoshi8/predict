@@ -47,9 +47,13 @@ function HistoryFeed() {
 	const [filter, setFilter] = useState<PredictionHistoryFilter>("all");
 	const [searchInput, setSearchInput] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
-	const { currentSeries } = useCurrentSeries(room.id);
+	const { currentSeries, isPending: isSeriesPending } = useCurrentSeries(
+		room.id,
+	);
 	const [scope, setScope] = useState<SeriesScope>("series");
 	const seriesId = scope === "series" ? currentSeries?.id : undefined;
+	// The series scope waits for the series, so "all" never shows first.
+	const isSeriesResolving = scope === "series" && isSeriesPending;
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
@@ -62,7 +66,7 @@ function HistoryFeed() {
 
 	const {
 		data,
-		isPending: isHistoryLoading,
+		isPending: isHistoryPending,
 		hasNextPage,
 		isFetchingNextPage,
 		fetchNextPage,
@@ -71,7 +75,9 @@ function HistoryFeed() {
 		filter,
 		debouncedSearch,
 		seriesId,
+		!isSeriesResolving,
 	);
+	const isHistoryLoading = isSeriesResolving || isHistoryPending;
 
 	const history = useMemo(
 		() => data?.pages.flatMap((page) => page.items) ?? [],

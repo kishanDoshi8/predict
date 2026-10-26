@@ -123,7 +123,10 @@ export default function SeriesPage() {
 	const { back } = useAppNavigation();
 	const location = useLocation();
 	const { data: seriesByStatus, isPending } = useRoomSeries(room.id);
-	const { data: roomPredictions = [] } = useActivePredictions(
+	const {
+		data: roomPredictions = [],
+		isPending: isOpenPredictionsPending,
+	} = useActivePredictions(
 		room.id,
 		seriesId,
 	);
@@ -329,6 +332,7 @@ export default function SeriesPage() {
 			}
 			isUpdatePending={isUpdatePending}
 			seriesOpenPredictions={seriesOpenPredictions}
+			isOpenPredictionsLoading={!!seriesId && isOpenPredictionsPending}
 			seriesCompletedPredictions={seriesCompletedPredictions}
 			isCompletedPredictionsLoading={isSeriesHistoryPending}
 			seriesLeaderboard={seriesLeaderboard}

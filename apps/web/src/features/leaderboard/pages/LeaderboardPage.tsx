@@ -27,7 +27,11 @@ const PlayerProfileDialog = lazy(() =>
 export function LeaderboardPage() {
 	const { room } = useRoomContext();
 	const { data: player } = usePlayer();
-	const { currentSeries, currentSeriesId } = useCurrentSeries(room.id);
+	const {
+		currentSeries,
+		currentSeriesId,
+		isPending: isSeriesPending,
+	} = useCurrentSeries(room.id);
 	const [scope, setScope] = React.useState<SeriesScope>("series");
 	const [selectedPlayerId, setSelectedPlayerId] = React.useState<
 		string | null
@@ -111,7 +115,10 @@ export function LeaderboardPage() {
 					<LeaderboardList
 						entries={currentSeriesId ? leaderboard : []}
 						currentPlayerId={player?.id ?? ""}
-						isLoading={!!currentSeriesId && isLeaderboardLoading}
+						isLoading={
+							isSeriesPending ||
+							(!!currentSeriesId && isLeaderboardLoading)
+						}
 						onRowClick={openProfile}
 					/>
 				) : (

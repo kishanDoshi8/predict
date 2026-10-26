@@ -378,6 +378,8 @@ function SectionHeader({
 
 type InPlayPredictionsProps = {
 	predictionsOverride?: Prediction[];
+	// With predictionsOverride: whether those predictions are still loading.
+	isLoadingOverride?: boolean;
 	emptyMessage?: string;
 	showSectionHeader?: boolean;
 };
@@ -385,12 +387,17 @@ type InPlayPredictionsProps = {
 // ── Main component ─────────────────────────────────────────────────────────
 function InPlayPredictions({
 	predictionsOverride,
+	isLoadingOverride = false,
 	emptyMessage = "No predictions yet. The host will start one soon!",
 	showSectionHeader = true,
 }: Readonly<InPlayPredictionsProps> = {}) {
 	const { room } = useRoomContext();
 	// Home follows the series picked in the room header.
-	const { currentSeries, currentSeriesId } = useCurrentSeries(room.id);
+	const {
+		currentSeries,
+		currentSeriesId,
+		isPending: isSeriesPending,
+	} = useCurrentSeries(room.id);
 	const {
 		data: queriedPredictions = [],
 		isPending: isQueriedPredictionLoading,
@@ -398,7 +405,8 @@ function InPlayPredictions({
 	} = useActivePredictions(
 		room.id,
 		currentSeriesId ?? undefined,
-		predictionsOverride === undefined,
+		// Wait for the series so the room-wide list never shows first.
+		predictionsOverride === undefined && !isSeriesPending,
 	);
 	const isOrganizer = useRoomRole(room).can.organize;
 	const newPredictionAction =
@@ -415,7 +423,9 @@ function InPlayPredictions({
 		) : null;
 	const predictions = predictionsOverride ?? queriedPredictions;
 	const isPredictionLoading =
-		predictionsOverride === undefined ? isQueriedPredictionLoading : false;
+		predictionsOverride === undefined
+			? isSeriesPending || isQueriedPredictionLoading
+			: isLoadingOverride;
 	const refetchPredictions =
 		predictionsOverride === undefined ? refetch : () => {};
 

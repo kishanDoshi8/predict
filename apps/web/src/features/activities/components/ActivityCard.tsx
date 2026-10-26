@@ -59,12 +59,14 @@ const TONE_STYLES: Record<
 		summary: "border-win/25 bg-win/10 text-foreground/90",
 		openPill: "border-win/30 bg-win/10 text-win",
 	},
+	// New predictions: activity cyan, apart from the amber of locked and
+	// no-result cards.
 	prediction: {
-		shell: "bg-accent/10 border-accent/30",
-		icon: "border-accent/40 bg-accent/20 text-accent",
-		typeBadge: "border-accent/35 bg-accent/20 text-accent",
-		summary: "border-accent/30 bg-accent/15 text-foreground/90",
-		openPill: "border-accent/35 bg-accent/15 text-foreground/90",
+		shell: "bg-activity/10 border-activity/30",
+		icon: "border-activity/35 bg-activity/18 text-activity",
+		typeBadge: "border-activity/30 bg-activity/15 text-activity",
+		summary: "border-activity/25 bg-activity/12 text-foreground/90",
+		openPill: "border-activity/30 bg-activity/12 text-activity",
 	},
 	duel: {
 		shell: "bg-activity/10 border-activity/30",

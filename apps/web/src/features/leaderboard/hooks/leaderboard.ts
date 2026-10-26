@@ -60,6 +60,8 @@ export const usePredictionHistory = (
     filter: PredictionHistoryFilter = 'all',
     search = '',
     seriesId?: string,
+    // Off while the series is still resolving, so "all" isn't fetched first.
+    enabled = true,
 ) => {
     const initialCursor: PredictionHistoryCursor = {
         cursorCreatedAt: null,
@@ -98,7 +100,7 @@ export const usePredictionHistory = (
                 cursorId: lastPage.next_cursor_id,
             } satisfies PredictionHistoryCursor
         },
-        enabled: !!roomId,
+        enabled: !!roomId && enabled,
     })
 }
 

@@ -2,8 +2,8 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useAppNavigation } from "@/shared/lib/navigation";
 import { usePrediction, useUpdatePrediction } from "@/features/predictions/hooks/prediction";
 import { PredictionForm } from "@/features/predictions/components/PredictionForm";
+import { PredictionFormSkeleton } from "@/features/predictions/components/PredictionFormSkeleton";
 import { useRoomRole } from "@/features/rooms";
-import { Skeleton } from "@/shared/ui";
 import { Navigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -24,12 +24,7 @@ export default function EditPrediction() {
 	}
 
 	if (isPending) {
-		return (
-			<div className='mx-auto w-full max-w-md space-y-4 p-4'>
-				<Skeleton className='h-24 w-full rounded-xl' />
-				<Skeleton className='h-40 w-full rounded-xl' />
-			</div>
-		);
+		return <PredictionFormSkeleton showSeries={false} />;
 	}
 
 	// Once picks close there's nothing left to edit.

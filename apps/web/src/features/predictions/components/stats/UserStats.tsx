@@ -44,7 +44,9 @@ function UserStats({
 	showSeeAllLink = true,
 }: Readonly<UserStatsProps>) {
 	const { room } = useRoomContext();
-	const { currentSeriesId } = useCurrentSeries(room.id);
+	const { currentSeriesId, isPending: isSeriesPending } = useCurrentSeries(
+		room.id,
+	);
 
 	const { data: seriesLeaderboard = [], isPending: isSeriesLeaderboardLoading } =
 		useSeriesLeaderboard(
@@ -55,9 +57,10 @@ function UserStats({
 
 	const leaderboard =
 		leaderboardEntriesOverride ?? (currentSeriesId ? seriesLeaderboard : []);
+	// Still loading while the series resolves, so zeros never flash first.
 	const isLeaderboardLoading =
 		isLeaderboardLoadingOverride ??
-		(!!currentSeriesId && isSeriesLeaderboardLoading);
+		(isSeriesPending || (!!currentSeriesId && isSeriesLeaderboardLoading));
 
 	return (
 		<div className={`w-full max-w-md mx-auto`}>
@@ -169,7 +172,7 @@ function LeaderboardContentView({
 				<div className={`flex gap-4 items-center`}>
 					{isLoading ? (
 						<Skeleton
-							className={`w-14 h-14 rounded-lg bg-secondary animate-pulse`}
+							className={`w-14 h-14 rounded-lg`}
 						/>
 					) : (
 						<FadeContent
@@ -189,10 +192,10 @@ function LeaderboardContentView({
 					{isLoading ? (
 						<div className={`flex-1`}>
 							<Skeleton
-								className={`w-1/2 h-4 rounded-lg bg-secondary animate-pulse mb-2`}
+								className={`w-1/2 h-4 rounded-lg mb-2`}
 							/>
 							<Skeleton
-								className={`w-1/2 h-8 rounded-lg bg-secondary animate-pulse`}
+								className={`w-1/2 h-8 rounded-lg`}
 							/>
 						</div>
 					) : (
@@ -223,7 +226,7 @@ function LeaderboardContentView({
 
 					{isLoading ? (
 						<Skeleton
-							className={`w-20 h-10 rounded-lg bg-secondary animate-pulse`}
+							className={`w-20 h-10 rounded-lg`}
 						/>
 					) : (
 						<>
@@ -254,16 +257,16 @@ function LeaderboardContentView({
 						{[1, 2, 3, 4].map((i) => (
 							<div
 								key={i}
-								className={`flex items-center gap-3 p-3 rounded-lg bg-secondary/60 animate-pulse`}
+								className={`flex items-center gap-3 p-3 rounded-lg bg-secondary/60`}
 							>
 								<Skeleton
-									className={`w-6 h-6 text-sm font-bold rounded-md bg-secondary animate-pulse`}
+									className={`w-6 h-6 text-sm font-bold rounded-md`}
 								/>
 								<Skeleton
-									className={`w-1/4 h-4 rounded-lg bg-secondary animate-pulse`}
+									className={`w-1/4 h-4 rounded-lg`}
 								/>
 								<Skeleton
-									className={`ml-auto w-10 h-4 rounded-lg bg-secondary animate-pulse`}
+									className={`ml-auto w-10 h-4 rounded-lg`}
 								/>
 							</div>
 						))}
@@ -287,7 +290,7 @@ function LeaderboardContentView({
 					{[1, 2, 3].map((i) => (
 						<Skeleton
 							key={i}
-							className={`flex-1 w-full h-24 rounded-lg bg-secondary animate-pulse`}
+							className={`flex-1 w-full h-24 rounded-lg`}
 						/>
 					))}
 				</div>

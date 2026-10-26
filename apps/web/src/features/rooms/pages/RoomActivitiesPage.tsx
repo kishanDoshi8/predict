@@ -13,9 +13,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 export default function RoomActivitiesPage() {
 	const { room } = useRoomContext();
 	const filter: ActivityFilter = "all";
-	const { currentSeries } = useCurrentSeries(room.id);
+	const { currentSeries, isPending: isSeriesPending } = useCurrentSeries(
+		room.id,
+	);
 	const [scope, setScope] = useState<SeriesScope>("series");
 	const seriesId = scope === "series" ? currentSeries?.id : undefined;
+	// The series scope waits for the series, so "all" never shows first.
+	const isSeriesResolving = scope === "series" && isSeriesPending;
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 	const hasMarkedSeenRef = useRef(false);
 	const { mutate: markActivitiesSeen } = useMarkRoomActivitiesSeen(
@@ -25,13 +29,14 @@ export default function RoomActivitiesPage() {
 
 	const {
 		data,
-		isPending,
+		isPending: isActivitiesPending,
 		isError,
 		error,
 		hasNextPage,
 		isFetchingNextPage,
 		fetchNextPage,
-	} = useRoomActivities(room.id, filter, seriesId);
+	} = useRoomActivities(room.id, filter, seriesId, !isSeriesResolving);
+	const isPending = isSeriesResolving || isActivitiesPending;
 
 	const activities = useMemo(
 		() => data?.pages.flatMap((page) => page.items) ?? [],

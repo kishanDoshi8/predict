@@ -27,7 +27,7 @@ export function RoomCardsList({
 				{[1, 2].map((i) => (
 					<Skeleton
 						key={i}
-						className={`w-full h-21 rounded-lg bg-secondary animate-pulse`}
+						className={`w-full h-21 rounded-lg`}
 					/>
 				))}
 			</div>

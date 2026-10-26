@@ -26,6 +26,7 @@ type SeriesDetailViewProps = {
 	isActionPending: boolean;
 	isUpdatePending: boolean;
 	seriesOpenPredictions: Prediction[];
+	isOpenPredictionsLoading: boolean;
 	seriesCompletedPredictions: PredictionHistoryEntry[];
 	isCompletedPredictionsLoading: boolean;
 	seriesLeaderboard: LeaderboardEntry[];
@@ -53,6 +54,7 @@ export function SeriesDetailView({
 	isActionPending,
 	isUpdatePending,
 	seriesOpenPredictions,
+	isOpenPredictionsLoading,
 	seriesCompletedPredictions,
 	isCompletedPredictionsLoading,
 	seriesLeaderboard,
@@ -108,6 +110,7 @@ export function SeriesDetailView({
 					<h3 className='text-lg font-semibold'>Open predictions</h3>
 					<InPlayPredictions
 						predictionsOverride={seriesOpenPredictions}
+						isLoadingOverride={isOpenPredictionsLoading}
 						emptyMessage='No open predictions in this series yet.'
 						showSectionHeader={false}
 					/>

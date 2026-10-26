@@ -6,6 +6,18 @@
 @theme {
     --font-sans: "Fira Code Variable", ui-monospace, monospace;
     --font-fira: "Fira Code Variable", ui-monospace, monospace;
+
+    /* Loading skeletons: a soft band of light sweeping across. */
+    --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+
+    @keyframes shimmer {
+        from {
+            background-position: 150% 0;
+        }
+        to {
+            background-position: -50% 0;
+        }
+    }
 }
 
 @layer base {

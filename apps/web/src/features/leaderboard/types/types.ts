@@ -127,3 +127,26 @@ export type RoomMemberRecentPrediction = {
   result: "won" | "lost" | "no_result"
   resolved_at: string
 }
+
+
+// One player in the weekly recap. rank_change is places moved over the week
+// (positive is up); null when they weren't ranked the week before.
+export interface WeeklyRecapEntry {
+  rank:        number
+  username:    string
+  balance:     number
+  rank_change: number | null
+  is_new:      boolean
+}
+
+// The last completed week of a series: its top 5, biggest climber and
+// biggest faller. Compares the two latest Monday snapshots.
+export interface SeriesWeeklyRecap {
+  week_key:     string
+  week_number:  number
+  // False in a series' first week: nothing to compare with yet.
+  has_previous: boolean
+  standings:    WeeklyRecapEntry[]
+  climber:      Pick<WeeklyRecapEntry, 'username' | 'rank' | 'rank_change'> | null
+  faller:       Pick<WeeklyRecapEntry, 'username' | 'rank' | 'rank_change'> | null
+}

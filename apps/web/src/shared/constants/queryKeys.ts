@@ -62,6 +62,10 @@ export const roomKeys = {
   seriesAwards: (roomId: string, seriesId: string) =>
     [...roomKeys.detail(roomId), "seriesAwards", seriesId] as const,
 
+  // Last completed week of a series, for the weekly share card.
+  seriesWeeklyRecap: (roomId: string, seriesId: string) =>
+    [...roomKeys.detail(roomId), "seriesWeeklyRecap", seriesId] as const,
+
   seriesLeaderboardSelector: (
     roomId: string,
     selectedSeriesId = "default",

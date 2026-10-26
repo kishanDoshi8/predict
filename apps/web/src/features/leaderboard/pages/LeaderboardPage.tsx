@@ -12,6 +12,7 @@ import {
 import {
 	SeriesScopeToggle,
 	type SeriesScope,
+	ShareWeeklyButton,
 	useCurrentSeries,
 } from "@/features/series";
 import { formatSignedPoints } from "@/shared/lib/utils";
@@ -79,13 +80,22 @@ export function LeaderboardPage() {
 	return (
 		<div className='flex flex-col gap-4 p-4 max-w-lg mx-auto w-full'>
 			{/* Section heading */}
-			<div>
-				<h2 className='text-lg font-semibold'>
-					{scope === "all"
-						? "All series"
-						: (currentSeries?.title ?? "Standings")}
-				</h2>
-				<p className='text-sm text-muted-foreground'>{subtitle}</p>
+			<div className='flex items-start justify-between gap-3'>
+				<div className='min-w-0'>
+					<h2 className='text-lg font-semibold'>
+						{scope === "all"
+							? "All series"
+							: (currentSeries?.title ?? "Standings")}
+					</h2>
+					<p className='text-sm text-muted-foreground'>{subtitle}</p>
+				</div>
+				{scope === "series" && currentSeries?.status === "active" ? (
+					<ShareWeeklyButton
+						series={currentSeries}
+						className='h-8 shrink-0 px-3 text-xs'
+						label='Share week'
+					/>
+				) : null}
 			</div>
 
 			<SeriesScopeToggle

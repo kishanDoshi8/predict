@@ -5,7 +5,6 @@ import {
 	useActivePredictions,
 	useBets,
 } from "@/features/predictions";
-import { motion } from "framer-motion";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import {
 	Badge,
@@ -15,6 +14,7 @@ import {
 	Field,
 	FieldLabel,
 	Progress,
+	Reveal,
 	Skeleton,
 } from "@/shared/ui";
 import {
@@ -38,6 +38,9 @@ import { Link } from "react-router-dom";
 import React from "react";
 import { usePlayer } from "@/features/home";
 import { useCurrentSeries } from "@/features/series";
+
+const PREDICTION_CARD_SHELL =
+	"text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-primary/5 p-5 mb-4";
 
 // Threshold (as a percentage) above which an option is labelled "🔥 hot pick"
 const HOT_PICK_THRESHOLD_PERCENT = 60;
@@ -84,11 +87,7 @@ function PredictionCard({
 	};
 
 	return (
-		<motion.div
-			animate={{ height: "auto", opacity: 1 }}
-			transition={{ type: "spring", duration: 0.4 }}
-			className={`text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-primary/5 p-5 mb-4 ${borderClass}`}
-		>
+		<Reveal className={`${PREDICTION_CARD_SHELL} ${borderClass}`}>
 			<Link to={`/rooms/${roomCode}/predictions/${prediction.id}`}>
 				{/* Status badge per card */}
 				<div className={`flex items-center gap-2 mb-3`}>
@@ -298,7 +297,46 @@ function PredictionCard({
 					</span>
 				)}
 			</Link>
-		</motion.div>
+		</Reveal>
+	);
+}
+
+// The card's shape while predictions load: status row, series line, title,
+// two options with bars, the pool/players row and the call to action.
+function PredictionCardSkeleton() {
+	return (
+		<div aria-hidden='true' className={PREDICTION_CARD_SHELL}>
+			<div>
+				<div className='mb-3 flex items-center justify-between'>
+					<Skeleton className='h-5.5 w-24 rounded-full' />
+					<Skeleton className='h-8 w-24 rounded-lg' />
+				</div>
+				<div className='flex h-4 items-center'>
+					<Skeleton className='h-3 w-32' />
+				</div>
+				<div className='mb-4 flex h-7 items-center md:h-8'>
+					<Skeleton className='h-5 w-3/4' />
+				</div>
+				<div className='mt-2 flex flex-col gap-4'>
+					{[0, 1].map((option) => (
+						<div key={option} className='flex flex-col gap-3'>
+							<div className='flex h-5 items-center justify-between'>
+								<Skeleton className='h-3.5 w-24' />
+								<Skeleton className='h-3.5 w-12' />
+							</div>
+							<Skeleton className='h-2 w-full rounded-full' />
+						</div>
+					))}
+				</div>
+				<div className='mt-4 flex h-5 items-center justify-between'>
+					<Skeleton className='h-3.5 w-28' />
+					<Skeleton className='h-3.5 w-8' />
+				</div>
+				<div className='mt-6 flex h-6 items-center justify-end'>
+					<Skeleton className='h-3.5 w-36' />
+				</div>
+			</div>
+		</div>
 	);
 }
 
@@ -466,19 +504,7 @@ function InPlayPredictions({
 	if (isPredictionLoading) {
 		carouselContent = (
 			<CarouselItem>
-				<div
-					className={`border-2 border-activity/30 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full space-y-2`}
-				>
-					<Skeleton className={`h-5 w-22`} />
-					<Skeleton className={`h-7 mx-auto w-full`} />
-					<Skeleton className={`h-11 mx-auto w-full`} />
-					<Skeleton className={`h-11 mx-auto w-full`} />
-					<span className={`flex justify-between items-center`}>
-						<Skeleton className={`h-6 w-34`} />
-						<Skeleton className={`h-6 w-20`} />
-					</span>
-					<Skeleton className={`h-6 ml-auto w-34`} />
-				</div>
+				<PredictionCardSkeleton />
 			</CarouselItem>
 		);
 	} else if (predictions.length === 0) {
@@ -514,9 +540,15 @@ function InPlayPredictions({
 
 	return (
 		<div className={`max-w-lg mx-auto`}>
-			{isPredictionLoading && (
-				<div className={`flex flex-col gap-4 my-4`}>
-					<Skeleton className={`h-8 w-35`} />
+			{showSectionHeader && isPredictionLoading && (
+				<div
+					aria-hidden='true'
+					className={`flex items-center justify-between gap-2 my-4`}
+				>
+					<div className={`flex flex-col gap-1.5`}>
+						<Skeleton className={`h-5.5 w-28`} />
+						<Skeleton className={`h-3 w-14`} />
+					</div>
 				</div>
 			)}
 
@@ -553,6 +585,9 @@ function InPlayPredictions({
 
 				{/* Dot indicators */}
 				<div className='flex justify-center gap-2 mt-2 mx-auto'>
+					{isPredictionLoading && (
+						<Skeleton className={`h-2 w-6 rounded-full`} />
+					)}
 					{Array.from({ length: predictions.length }).map(
 						(_, index) => (
 							<button

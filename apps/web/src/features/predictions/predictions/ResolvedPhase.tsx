@@ -2,6 +2,7 @@ import { Badge, FadeContent, Skeleton } from "@/shared/ui";
 import { ResolvedByLine } from "../components/ResolvedByLine";
 import { Prediction, useBets } from "@/features/predictions";
 import PredictionTitle from "../components/PredictionTitle";
+import { BetListSkeleton } from "../components/BetListSkeleton";
 import PredictionOptions from "../widgets/PredictionOptions";
 import { CheckIcon, CrownIcon } from "lucide-react";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
@@ -101,7 +102,7 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 						REVEALED
 					</Badge>
 				) : (
-					<Skeleton className={`h-5 w-25 mx-auto`} />
+					<Skeleton className={`h-5.5 w-24 mx-auto rounded-full`} />
 				)}
 
 				<PredictionTitle
@@ -159,10 +160,7 @@ function ResolvedPhase({ prediction }: Readonly<Props>) {
 					<p className={`text-2xl`}>Payout</p>
 				</div>
 				{isBetsLoading ? (
-					<>
-						<Skeleton className={`h-15 w-full mx-auto mt-4`} />
-						<Skeleton className={`h-15 w-full mx-auto mt-4`} />
-					</>
+					<BetListSkeleton variant='payout' />
 				) : (
 					<FadeContent
 						delay={contentDelays.payout}

@@ -1,6 +1,6 @@
 import { PredictionHistoryEntry } from "@/features/leaderboard";
 import { Badge } from "@/shared/ui/badge";
-import { Skeleton } from "@/shared/ui/skeleton";
+import { Skeleton, SkeletonList } from "@/shared/ui/skeleton";
 import { cn, formatSignedPoints } from "@/shared/lib/utils";
 import {
 	CheckCircle2,
@@ -11,8 +11,10 @@ import {
 } from "lucide-react";
 import Dot from "@/shared/ui/dot";
 import { Link } from "react-router-dom";
-import { FadeContent } from "@/shared/ui";
+import { Reveal } from "@/shared/ui";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
+
+const CARD_SHELL = "border-2 rounded-xl p-3 flex flex-col gap-2";
 
 // ─── PredictionHistoryCard ────────────────────────────────────────────────────
 
@@ -133,7 +135,11 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 	return (
 		<Link
 			to={`/rooms/${room.code}/predictions/${entry.prediction_id}`}
-			className={`border-2 rounded-xl p-3 flex flex-col gap-2 hover:bg-secondary/50 transition-colors ${borderClass}`}
+			className={cn(
+				CARD_SHELL,
+				"hover:bg-secondary/50 transition-colors",
+				borderClass,
+			)}
 		>
 			{/* Header: where it sits in its series, and how it went for you */}
 			<div className={`space-y-1`}>
@@ -282,6 +288,58 @@ function PredictionHistoryCard({ entry }: Readonly<CardProps>) {
 	);
 }
 
+// A resolved card's sections (header, winner, option bars, meta, payout) at
+// their real line heights, so the feed doesn't grow when entries arrive.
+function PredictionHistoryCardSkeleton() {
+	return (
+		<div className={cn(CARD_SHELL, "border-muted/30")}>
+			<div className='space-y-1'>
+				<div className='flex h-5 items-center gap-2'>
+					<Skeleton className='size-4 rounded-full' />
+					<Skeleton className='h-3 w-28' />
+					<Skeleton className='ml-auto h-5 w-12' />
+				</div>
+				<div className='flex h-5 items-center'>
+					<Skeleton className='h-3.5 w-3/4' />
+				</div>
+			</div>
+			<div className='flex h-5.5 items-center gap-1.5'>
+				<Skeleton className='h-3 w-12' />
+				<Skeleton className='h-5.5 w-20 rounded-full' />
+			</div>
+			<div className='my-1 flex flex-col gap-1'>
+				{[0, 1].map((option) => (
+					<div key={option} className='flex h-4 items-center gap-2'>
+						<Skeleton className='h-3 w-13' />
+						<Skeleton className='h-2 flex-1 rounded-full' />
+						<Skeleton className='h-3 w-8' />
+					</div>
+				))}
+			</div>
+			<div className='grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5 px-2'>
+				{["w-24", "w-20", "w-20", "w-24", "w-32"].map((width, line) => (
+					<div key={line} className='flex h-4 items-center'>
+						<Skeleton className={cn("h-3", width)} />
+					</div>
+				))}
+			</div>
+			<Skeleton className='h-7 w-full' />
+		</div>
+	);
+}
+
+export function PredictionHistoryFeedSkeleton({
+	count,
+}: Readonly<{ count: number }>) {
+	return (
+		<SkeletonList
+			count={count}
+			className='flex flex-col gap-4'
+			renderItem={() => <PredictionHistoryCardSkeleton />}
+		/>
+	);
+}
+
 // ─── PredictionHistoryFeed ────────────────────────────────────────────────────
 
 type FeedProps = {
@@ -296,13 +354,7 @@ export function PredictionHistoryFeed({
 	emptyMessage,
 }: Readonly<FeedProps>) {
 	if (isLoading) {
-		return (
-			<div className='flex flex-col gap-4'>
-				{Array.from({ length: 4 }).map((_, i) => (
-					<Skeleton key={i} className='h-46 w-full rounded-xl' />
-				))}
-			</div>
-		);
+		return <PredictionHistoryFeedSkeleton count={4} />;
 	}
 
 	if (entries.length === 0) {
@@ -319,10 +371,14 @@ export function PredictionHistoryFeed({
 
 	return (
 		<div className='flex flex-col gap-4'>
-			{entries.map((entry) => (
-				<FadeContent key={entry.prediction_id}>
+			{entries.map((entry, index) => (
+				<Reveal
+					key={entry.prediction_id}
+					index={index}
+					className='flex flex-col'
+				>
 					<PredictionHistoryCard entry={entry} />
-				</FadeContent>
+				</Reveal>
 			))}
 		</div>
 	);

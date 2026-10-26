@@ -1,9 +1,11 @@
 import { SeriesStatusBadge } from "@/features/series/components/SeriesStatusBadge";
 import { getSeriesProgress } from "@/features/series/lib/progress";
 import type { Series } from "@/features/series/types/series";
-import { Field, FieldLabel, Progress } from "@/shared/ui";
+import { Field, FieldLabel, Progress, Skeleton } from "@/shared/ui";
 import { CheckCircle2Icon, ChevronRightIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+
+const TILE_SHELL = "block rounded-2xl border bg-card p-4";
 
 type SeriesTileProps = {
 	series: Series;
@@ -17,7 +19,7 @@ export function SeriesTile({ series, roomCode }: Readonly<SeriesTileProps>) {
 	return (
 		<Link
 			to={`/rooms/${roomCode}/series/${series.id}`}
-			className='block rounded-2xl border bg-card p-4 transition-colors hover:border-primary/50'
+			className={`${TILE_SHELL} transition-colors hover:border-primary/50`}
 		>
 			<div className='space-y-3'>
 				<div className='flex items-start justify-between gap-2'>
@@ -72,5 +74,32 @@ export function SeriesTile({ series, roomCode }: Readonly<SeriesTileProps>) {
 				</div>
 			</div>
 		</Link>
+	);
+}
+
+// Same tile with placeholders: status + chevron, title, progress, footer line.
+export function SeriesTileSkeleton() {
+	return (
+		<div aria-hidden='true' className={TILE_SHELL}>
+			<div className='space-y-3'>
+				<div className='flex items-start justify-between gap-2'>
+					<Skeleton className='h-5.5 w-16 rounded-full' />
+					<Skeleton className='size-4' />
+				</div>
+				<div className='flex h-6 items-center'>
+					<Skeleton className='h-4 w-40' />
+				</div>
+				<div className='flex flex-col gap-2'>
+					<div className='flex h-6 items-center justify-between'>
+						<Skeleton className='h-3 w-12' />
+						<Skeleton className='h-4 w-8' />
+					</div>
+					<Skeleton className='h-2 w-full rounded-full' />
+				</div>
+				<div className='flex h-5 items-center'>
+					<Skeleton className='h-3.5 w-24' />
+				</div>
+			</div>
+		</div>
 	);
 }

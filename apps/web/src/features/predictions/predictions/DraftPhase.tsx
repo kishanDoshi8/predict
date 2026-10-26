@@ -51,7 +51,7 @@ export default function DraftPhase({
 						In Play
 					</Badge>
 				) : (
-					<Skeleton className={`h-5 w-25 mx-auto`} />
+					<Skeleton className={`h-5.5 w-20 mx-auto rounded-full`} />
 				)}
 
 				<PredictionTitle
@@ -73,7 +73,7 @@ export default function DraftPhase({
 							)}
 					</>
 				) : (
-					<Skeleton className={`h-10 w-36 mx-auto`} />
+					<Skeleton className={`h-11.5 w-40 mx-auto rounded-lg`} />
 				)}
 
 				<PredictionData

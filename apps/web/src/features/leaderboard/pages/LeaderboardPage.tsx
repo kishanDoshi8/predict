@@ -105,7 +105,15 @@ export function LeaderboardPage() {
 			/>
 
 			<div className='flex flex-col gap-3'>
-				<TopThreePodium top={podium} currentPlayerId={player?.id ?? ""} />
+				<TopThreePodium
+					top={podium}
+					currentPlayerId={player?.id ?? ""}
+					isLoading={
+						scope === "series"
+							? !!currentSeriesId && isLeaderboardLoading
+							: isOverallLoading
+					}
+				/>
 
 				{scope === "series" ? (
 					<LeaderboardList

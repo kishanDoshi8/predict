@@ -26,12 +26,15 @@ import { DuelCancelledCard } from "@/features/activities/components/cards/DuelCa
 import { DuelExpiredCard } from "@/features/activities/components/cards/DuelExpiredCard";
 import { AchievementStreakMilestoneCard } from "@/features/activities/components/cards/AchievementStreakMilestoneCard";
 import { FEATURES } from "@/shared/constants/features";
+import { Reveal } from "@/shared/ui";
 import { ActivityCardComponentProps } from "@/features/activities/components/cards/types";
 
 type RegistryProps = {
 	activity: RoomActivity;
 	roomCode: string;
 	showSeries?: boolean;
+	/** Position in the feed, to stagger cards in as they load. */
+	index?: number;
 };
 
 type CardFor<TActivity extends RoomActivity> = (
@@ -79,10 +82,15 @@ export function ActivityCardRegistry({
 	activity,
 	roomCode,
 	showSeries,
+	index,
 }: Readonly<RegistryProps>) {
 	if (isHiddenActivity(activity.activityType)) return null;
 
 	const Card = registry[activity.activityType as keyof RegistryMap] as CardFor<RoomActivity>;
 
-	return <Card activity={activity} roomCode={roomCode} showSeries={showSeries} />;
+	return (
+		<Reveal index={index}>
+			<Card activity={activity} roomCode={roomCode} showSeries={showSeries} />
+		</Reveal>
+	);
 }

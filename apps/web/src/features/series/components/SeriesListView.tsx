@@ -1,7 +1,13 @@
-import { SeriesSectionHeader } from "@/features/series/components/SeriesSectionHeader";
-import { SeriesTile } from "@/features/series/components/SeriesTile";
+import {
+	SeriesSectionHeader,
+	SeriesSectionHeaderSkeleton,
+} from "@/features/series/components/SeriesSectionHeader";
+import {
+	SeriesTile,
+	SeriesTileSkeleton,
+} from "@/features/series/components/SeriesTile";
 import type { Series } from "@/features/series/types/series";
-import { Button, Skeleton } from "@/shared/ui";
+import { Button, Reveal, SkeletonList } from "@/shared/ui";
 import { PlusIcon } from "lucide-react";
 
 type SeriesListViewProps = {
@@ -44,10 +50,14 @@ export function SeriesListView({
 			</div>
 
 			{isPending ? (
-				<div className='space-y-3'>
-					<Skeleton className='h-32 w-full rounded-2xl' />
-					<Skeleton className='h-32 w-full rounded-2xl' />
-				</div>
+				<section aria-hidden='true' className='space-y-3'>
+					<SeriesSectionHeaderSkeleton />
+					<SkeletonList
+						count={2}
+						className='space-y-3'
+						renderItem={() => <SeriesTileSkeleton />}
+					/>
+				</section>
 			) : (
 				<>
 					<section className='space-y-3'>
@@ -61,12 +71,13 @@ export function SeriesListView({
 							</p>
 						) : (
 							<div className='space-y-3'>
-								{activeSeries.map((series) => (
-									<SeriesTile
-										key={series.id}
-										series={series}
-										roomCode={roomCode}
-									/>
+								{activeSeries.map((series, index) => (
+									<Reveal key={series.id} index={index}>
+										<SeriesTile
+											series={series}
+											roomCode={roomCode}
+										/>
+									</Reveal>
 								))}
 							</div>
 						)}
@@ -83,12 +94,13 @@ export function SeriesListView({
 							</p>
 						) : (
 							<div className='space-y-3'>
-								{completedSeries.map((series) => (
-									<SeriesTile
-										key={series.id}
-										series={series}
-										roomCode={roomCode}
-									/>
+								{completedSeries.map((series, index) => (
+									<Reveal key={series.id} index={index}>
+										<SeriesTile
+											series={series}
+											roomCode={roomCode}
+										/>
+									</Reveal>
 								))}
 							</div>
 						)}

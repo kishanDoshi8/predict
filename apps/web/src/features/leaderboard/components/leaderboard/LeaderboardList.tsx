@@ -1,10 +1,10 @@
-import { Skeleton } from "@/shared/ui/skeleton";
+import { Reveal } from "@/shared/ui";
 import {
 	LeaderboardEntry,
 	rankingRuleLabel,
 	splitStandings,
 } from "@/features/leaderboard";
-import { LeaderboardRow } from "./LeaderboardRow";
+import { LeaderboardRow, StandingsListSkeleton } from "./LeaderboardRow";
 
 type Props = {
 	entries: LeaderboardEntry[];
@@ -20,13 +20,7 @@ export function LeaderboardList({
 	onRowClick,
 }: Readonly<Props>) {
 	if (isLoading) {
-		return (
-			<div className='flex flex-col gap-2'>
-				{Array.from({ length: 5 }).map((_, i) => (
-					<Skeleton key={i} className='h-14 w-full rounded-xl' />
-				))}
-			</div>
-		);
+		return <StandingsListSkeleton />;
 	}
 
 	const { ranked, unranked } = splitStandings(entries);
@@ -51,13 +45,18 @@ export function LeaderboardList({
 
 			{ranked.length > 0 ? (
 				<div className='flex flex-col gap-1'>
-					{ranked.map((entry) => (
-						<LeaderboardRow
+					{ranked.map((entry, index) => (
+						<Reveal
 							key={entry.player_id}
-							entry={entry}
-							currentPlayerId={currentPlayerId}
-							onClick={onRowClick}
-						/>
+							index={index}
+							className='flex flex-col'
+						>
+							<LeaderboardRow
+								entry={entry}
+								currentPlayerId={currentPlayerId}
+								onClick={onRowClick}
+							/>
+						</Reveal>
 					))}
 				</div>
 			) : (

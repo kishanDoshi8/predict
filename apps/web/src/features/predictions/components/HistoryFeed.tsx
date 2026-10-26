@@ -1,12 +1,12 @@
 import {
 	PredictionHistoryFeed,
+	PredictionHistoryFeedSkeleton,
 	usePredictionHistory,
 	PredictionHistoryFilter,
 } from "@/features/leaderboard";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Input, Button } from "@/shared/ui";
-import { Skeleton } from "@/shared/ui/skeleton";
 import {
 	SeriesScopeToggle,
 	type SeriesScope,
@@ -152,16 +152,7 @@ function HistoryFeed() {
 
 			<div ref={loadMoreRef} className='h-4' />
 
-			{isFetchingNextPage && (
-				<div className='flex flex-col gap-4'>
-					{Array.from({ length: 2 }).map((_, index) => (
-						<Skeleton
-							key={index}
-							className='h-46 w-full rounded-xl'
-						/>
-					))}
-				</div>
-			)}
+			{isFetchingNextPage && <PredictionHistoryFeedSkeleton count={2} />}
 		</div>
 	);
 }

@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
-import { Counter, FadeContent } from "@/shared/ui";
+import { Collapse, Counter, FadeContent } from "@/shared/ui";
 import { usePredictionDuels } from "@/features/duels";
 import { useSeriesWallet } from "@/features/series";
 import { FEATURES } from "@/shared/constants/features";
@@ -304,8 +304,9 @@ export default function DraftControls({
 				)}
 				{!collapseControls && (
 					<>
-						{selectedOption && (
-							<FadeContent className={`flex flex-col gap-3`}>
+						{/* Grows in when an option is picked, instead of popping the panel taller. */}
+						<Collapse open={!!selectedOption}>
+							<div className={`flex flex-col gap-3`}>
 								<div className={`flex gap-2 *:flex-1`}>
 									<Button
 										variant={"outline"}
@@ -380,8 +381,8 @@ export default function DraftControls({
 										<PlusIcon className={`w-3 h-3`} />
 									</Button>
 								</div>
-							</FadeContent>
-						)}
+							</div>
+						</Collapse>
 					</>
 				)}
 				<div>

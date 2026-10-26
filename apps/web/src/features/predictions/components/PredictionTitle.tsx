@@ -21,7 +21,10 @@ export default function PredictionTitle({
 					</h4>
 				</FadeContent>
 			) : (
-				<Skeleton className={`h-7 max-w-md w-full mx-auto`} />
+				// Holds the heading's line height (text-xl, md:text-3xl).
+				<div className={`flex h-7 md:h-9 items-center justify-center`}>
+					<Skeleton className={`h-5 md:h-7 max-w-xs w-3/4`} />
+				</div>
 			)}
 		</>
 	);

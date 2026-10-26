@@ -1,4 +1,4 @@
-import { Badge } from "@/shared/ui";
+import { Badge, Skeleton } from "@/shared/ui";
 
 type SeriesSectionHeaderProps = {
 	label: string;
@@ -20,6 +20,15 @@ export function SeriesSectionHeader({
 			>
 				{count}
 			</Badge>
+		</div>
+	);
+}
+
+export function SeriesSectionHeaderSkeleton() {
+	return (
+		<div className='flex h-5.5 items-center justify-between'>
+			<Skeleton className='h-3 w-14' />
+			<Skeleton className='h-5.5 w-6 rounded-full' />
 		</div>
 	);
 }

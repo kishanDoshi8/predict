@@ -1,13 +1,15 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useRoomActivities, ActivityFilter } from "@/features/activities";
 import { useMarkRoomActivitiesSeen } from "@/features/rooms";
-import { RoomActivitiesFeed } from "@/features/activities/components";
+import {
+	ActivityFeedSkeleton,
+	RoomActivitiesFeed,
+} from "@/features/activities/components";
 import {
 	SeriesScopeToggle,
 	type SeriesScope,
 	useCurrentSeries,
 } from "@/features/series";
-import { Skeleton } from "@/shared/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function RoomActivitiesPage() {
@@ -111,13 +113,7 @@ export default function RoomActivitiesPage() {
 
 			<div ref={loadMoreRef} className='h-4' />
 
-			{isFetchingNextPage ? (
-				<div className='space-y-3'>
-					{Array.from({ length: 2 }).map((_, index) => (
-						<Skeleton key={index} className='h-24 w-full rounded-2xl' />
-					))}
-				</div>
-			) : null}
+			{isFetchingNextPage ? <ActivityFeedSkeleton count={2} /> : null}
 		</div>
 	);
 }

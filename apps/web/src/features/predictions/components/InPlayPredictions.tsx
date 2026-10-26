@@ -55,15 +55,27 @@ function PredictionCard({
 	roomCode: string;
 	refetchPredictions: () => void;
 }>) {
-	const { data: bets = [] } = useBets(roomId, prediction.id);
+	const { data: loadedBets } = useBets(roomId, prediction.id);
+	const bets = loadedBets ?? [];
 	const { data: player } = usePlayer();
 
+	// Each option's stored total covers the moment before the bets arrive,
+	// so amounts don't flash 0.
 	const betAmountPerOption: Record<string, number> = {};
-	for (const bet of bets) {
-		betAmountPerOption[bet.option_id] =
-			(betAmountPerOption[bet.option_id] ?? 0) + bet.amount;
+	if (loadedBets) {
+		for (const bet of loadedBets) {
+			betAmountPerOption[bet.option_id] =
+				(betAmountPerOption[bet.option_id] ?? 0) + bet.amount;
+		}
+	} else {
+		for (const option of prediction.prediction_options) {
+			betAmountPerOption[option.id] = option.total_bet;
+		}
 	}
-	const totalBetAmount = bets.reduce((sum, bet) => sum + bet.amount, 0);
+	const totalBetAmount = Object.values(betAmountPerOption).reduce(
+		(sum, amount) => sum + amount,
+		0,
+	);
 	const myBet = bets.find((b) => b.player_id === player?.id);
 
 	const isActive =

@@ -9,6 +9,7 @@ import {
 	LayoutGridIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Skeleton } from "@/shared/ui";
 import type { MouseEvent } from "react";
 import { useAppNavigation } from "@/shared/lib/navigation";
 import { useState } from "react";
@@ -37,7 +38,11 @@ function RoomHeader({
 	onLeftAction,
 }: Readonly<Props>) {
 	// The whole room view follows one series: points, Home, Standings, History.
-	const { currentSeries, currentSeriesId } = useCurrentSeries(room.id);
+	const {
+		currentSeries,
+		currentSeriesId,
+		isPending: isSeriesPending,
+	} = useCurrentSeries(room.id);
 	const { wallet } = useSeriesWallet(room.id, currentSeriesId);
 	const [isSeriesPickerOpen, setIsSeriesPickerOpen] = useState(false);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -107,10 +112,12 @@ function RoomHeader({
 								aria-label={`Series: ${currentSeries?.title ?? "none"}. Change series`}
 							>
 								<span className='truncate'>
-									{currentSeries?.title ??
+									{isSeriesPending ? (
+										<Skeleton className='my-0.5 h-3 w-24' />
+									) : (currentSeries?.title ??
 										(isOrganizer
 											? "Start a series"
-											: "No series yet")}
+											: "No series yet"))}
 								</span>
 								<ChevronDownIcon className='size-3.5 shrink-0' />
 							</button>

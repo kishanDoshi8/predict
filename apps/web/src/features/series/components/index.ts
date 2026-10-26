@@ -12,3 +12,4 @@ export { SeriesPickerDrawer } from "./SeriesPickerDrawer";
 export { WalletPopover } from "./WalletPopover";
 export { SeriesScopeToggle, type SeriesScope } from "./SeriesScopeToggle";
 export { ShareStandingsButton } from "./ShareStandingsButton";
+export { ShareWeeklyButton } from "./ShareWeeklyButton";

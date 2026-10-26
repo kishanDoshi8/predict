@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { cn, formatSignedPoints } from "@/shared/lib/utils";
 import { CoinsIcon, FlameIcon } from "lucide-react";
 import { Badge } from "@/shared/ui";
+import { RankChange } from "./RankChange";
 
 type Props = {
 	entry: LeaderboardEntry;
@@ -52,9 +53,10 @@ export function LeaderboardRow({
 				}
 			}}
 		>
-			{/* Rank */}
-			<span className='w-8 text-center text-sm text-muted-foreground shrink-0 tabular-nums'>
+			{/* Rank, and movement since Monday */}
+			<span className='flex w-8 shrink-0 flex-col items-center text-sm text-muted-foreground tabular-nums'>
 				{rankLabel}
+				<RankChange change={entry.rank_change} isNew={entry.rank_is_new} />
 			</span>
 
 			{/* Avatar */}

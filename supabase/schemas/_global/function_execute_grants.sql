@@ -48,10 +48,10 @@ grant execute on function public.get_room_prediction_history(uuid, integer, time
 grant execute on function public.get_room_series(uuid) to authenticated;
 grant execute on function public.get_room_series_selector(uuid, uuid, text) to authenticated;
 grant execute on function public.get_room_stat_cards(uuid, integer) to authenticated;
-grant execute on function public.get_room_weekly_leaderboard(uuid, text) to authenticated;
 grant execute on function public.get_series_awards(uuid, uuid) to authenticated;
 grant execute on function public.get_series_leaderboard(uuid, uuid, text) to authenticated;
 grant execute on function public.get_series_placements(uuid, uuid) to authenticated;
+grant execute on function public.get_series_weekly_recap(uuid, uuid) to authenticated;
 grant execute on function public.join_room(text, text) to authenticated;
 grant execute on function public.record_share(uuid, text) to authenticated;
 

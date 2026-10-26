@@ -4,11 +4,25 @@ import {
     getRoomPredictionHistory,
     getRoomMemberSeriesRecognition,
     getSeriesLeaderboard,
+    getSeriesWeeklyRecap,
     getRoomOverallStandings,
 } from '@/shared/lib/api'
 import { PredictionHistoryFilter, PredictionHistoryPage } from "@/features/leaderboard";
 import { InfiniteData, keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { roomKeys } from '@/shared/constants/queryKeys'
+
+// Last week's top 5 and biggest movers, for the weekly share card.
+export const useSeriesWeeklyRecap = (
+    roomId?: string,
+    seriesId?: string | null,
+    enabled = true,
+) => {
+    return useQuery({
+        queryKey: roomKeys.seriesWeeklyRecap(roomId ?? '', seriesId ?? ''),
+        queryFn: () => getSeriesWeeklyRecap(roomId ?? '', seriesId ?? ''),
+        enabled: !!roomId && !!seriesId && enabled,
+    })
+}
 
 // Series standings, ranked by wallet balance.
 export const useSeriesLeaderboard = (

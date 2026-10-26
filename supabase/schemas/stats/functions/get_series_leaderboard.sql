@@ -14,6 +14,8 @@ declare
   v_series public.series%rowtype;
   v_required integer;
   v_result json;
+  v_week_key text := private.current_week_key();
+  v_has_snapshot boolean;
 begin
   v_caller_id := private.get_player_id_from_auth();
   if v_caller_id is null then
@@ -43,6 +45,12 @@ begin
   end if;
 
   v_required := private.series_required_bets(p_series_id);
+
+  -- Movement is measured against this week's Monday snapshot.
+  select exists (
+    select 1 from public.series_standing_snapshots
+    where series_id = p_series_id and week_key = v_week_key
+  ) into v_has_snapshot;
 
   with stats as (
     select *
@@ -142,15 +150,27 @@ begin
       r.is_ranked,
       r.bets_needed,
       v_required as required_bets,
-      null::int as previous_rank,
-      null::int as rank_change,
+      -- Movement since Monday, for the points standings only.
+      case when p_sort_by = 'points' then snap.rank end as previous_rank,
+      case
+        when p_sort_by = 'points' and r.rank is not null and snap.rank is not null
+          then snap.rank - r.rank
+      end as rank_change,
+      -- Ranked now but not on Monday (joined late or just reached the bar).
+      (p_sort_by = 'points' and v_has_snapshot and r.rank is not null
+        and not coalesce(snap.is_ranked, false)) as rank_is_new,
       null::numeric as previous_prediction_rating,
       null::numeric as rating_change,
       null::numeric as previous_total_won_in_room,
       null::numeric as points_change
     from ranked r
+    left join public.series_standing_snapshots snap
+      on snap.series_id = p_series_id
+     and snap.player_id = r.player_id
+     and snap.week_key = v_week_key
   ) lb;
 
   return coalesce(v_result, '[]'::json);
 end;
 $$;
+

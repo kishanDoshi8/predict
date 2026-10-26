@@ -5,7 +5,7 @@ const KEY = "referral";
 const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const VALID_REF = /^[a-z][a-z-]{0,31}$/;
 
-export type ShareKind = "brag-card" | "champion-card" | "invite-link" | "invite-card";
+export type ShareKind = "brag-card" | "champion-card" | "invite-link" | "invite-card" | "weekly-card";
 
 type Stored = { ref: string; at: number };
 

@@ -28,7 +28,10 @@ export type LeaderboardEntry = {
   // Settled predictions a player must have bet on to be ranked right now.
   required_bets:      number
   previous_rank: number | null
+  // Places moved since this week's Monday snapshot; positive is up.
   rank_change: number | null
+  // Ranked now but not on Monday.
+  rank_is_new?: boolean
   previous_prediction_rating: number | null
   rating_change: number | null
   previous_total_won_in_room: number | null
@@ -123,4 +126,27 @@ export type RoomMemberRecentPrediction = {
   selected_option: string
   result: "won" | "lost" | "no_result"
   resolved_at: string
+}
+
+
+// One player in the weekly recap. rank_change is places moved over the week
+// (positive is up); null when they weren't ranked the week before.
+export interface WeeklyRecapEntry {
+  rank:        number
+  username:    string
+  balance:     number
+  rank_change: number | null
+  is_new:      boolean
+}
+
+// The last completed week of a series: its top 5, biggest climber and
+// biggest faller. Compares the two latest Monday snapshots.
+export interface SeriesWeeklyRecap {
+  week_key:     string
+  week_number:  number
+  // False in a series' first week: nothing to compare with yet.
+  has_previous: boolean
+  standings:    WeeklyRecapEntry[]
+  climber:      Pick<WeeklyRecapEntry, 'username' | 'rank' | 'rank_change'> | null
+  faller:       Pick<WeeklyRecapEntry, 'username' | 'rank' | 'rank_change'> | null
 }

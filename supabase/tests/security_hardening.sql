@@ -192,8 +192,8 @@ select is(
     'get_prediction_duels_view', 'get_preferences', 'get_room_activities', 'get_room_by_code',
     'get_room_has_unseen_activities', 'get_room_manage_queue', 'get_room_member_recent_predictions',
     'get_room_member_stats', 'get_room_overall_standings', 'get_room_prediction_history', 'get_room_series', 'get_room_series_selector',
-    'get_room_stat_cards', 'get_room_weekly_leaderboard', 'get_series_awards',
-    'get_series_leaderboard', 'get_series_placements', 'join_room',
+    'get_room_stat_cards', 'get_series_awards',
+    'get_series_leaderboard', 'get_series_placements', 'get_series_weekly_recap', 'join_room',
     'mark_how_to_play_seen', 'mark_ratings_tip_seen', 'mark_room_activities_seen', 'place_bet',
     'record_share', 'register_player', 'reset_room_preferences', 'resolve_prediction_v2', 'set_last_visited_room', 'set_member_role', 'transfer_ownership',
     'update_global_preferences', 'update_prediction', 'update_room', 'update_room_preferences', 'update_series', 'upsert_user_push_subscription'
@@ -223,7 +223,7 @@ select throws_ok(
   'a player cannot settle duels directly'
 );
 select throws_ok(
-  $$ select public.create_weekly_room_member_snapshots() $$,
+  $$ select private.snapshot_series_standings() $$,
   '42501', null,
   'a player cannot write weekly snapshots'
 );

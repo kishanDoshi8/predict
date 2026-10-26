@@ -21,6 +21,5 @@ export type DefaultRoomStat = BaseRoomStat & {
 
 export type PodiumRoomStat = BaseRoomStat & {
   type: "podium"
-  // variant: "all_time" | "weekly"
   entries: LeaderboardEntry[]
 }

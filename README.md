@@ -122,15 +122,8 @@ select cron.schedule(
   $cron$
 );
 
--- Weekly room-member snapshots every Monday at 08:00 UTC.
--- (Series top-ups are scheduled by the series_wallets migration as 'series-weekly-topup'.)
-select cron.schedule(
-  'run-weekly-processing',
-  '0 8 * * 1',
-  $cron$
-    select private.run_weekly_processing();
-  $cron$
-);
+-- Weekly standings snapshots and series top-ups run from the
+-- 'series-weekly-topup' job, which the migrations schedule.
 ```
 
 7. Frontend test trigger example:

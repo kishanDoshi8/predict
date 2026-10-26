@@ -1,6 +1,6 @@
 import { Duel, DuelSummary } from "@/features/duels";
 import { Player } from "@/features/home";
-import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, OverallStandingEntry, RoomMemberRecentPrediction, RoomMemberStats } from "@/features/leaderboard";
+import { PredictionHistoryPage, PredictionHistoryFilter, LeaderboardEntry, OverallStandingEntry, RoomMemberRecentPrediction, RoomMemberStats, SeriesWeeklyRecap } from "@/features/leaderboard";
 import { Prediction, PredictionStatus } from "@/features/predictions";
 import { Series } from "@/features/series/types/series";
 import { ManageQueue, Room, RoomMember, RoomRole } from "@/features/rooms";
@@ -1017,6 +1017,16 @@ export async function getSeriesLeaderboard(
     p_sort_by: sortBy,
   })
   return assertOk(data, error) as LeaderboardEntry[]
+}
+
+// Null until the series' first Monday snapshot.
+export async function getSeriesWeeklyRecap(roomId: string, seriesId: string) {
+  const { data, error } = await supabase.rpc('get_series_weekly_recap', {
+    p_room_id: roomId,
+    p_series_id: seriesId,
+  })
+  if (error) throw error
+  return (data ?? null) as SeriesWeeklyRecap | null
 }
 
 type GetRoomPredictionHistoryParams = {

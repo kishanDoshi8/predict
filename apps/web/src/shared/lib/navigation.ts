@@ -138,12 +138,14 @@ export function useSheetHistory(
 		}
 	}, [open, inStack, id, location, navigate, state]);
 
-	useEffect(
-		() => () => {
+	useEffect(() => {
+		// Unmounted and straight back (StrictMode's double mount, a sheet that
+		// mounts already open): keep the marker the unmount asked to pop.
+		closedSheets.delete(id);
+		return () => {
 			if (phase.current !== "idle") requestSheetPop(id);
-		},
-		[id],
-	);
+		};
+	}, [id]);
 }
 
 // ---------------------------------------------------------------------------

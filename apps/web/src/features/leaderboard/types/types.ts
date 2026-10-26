@@ -28,7 +28,10 @@ export type LeaderboardEntry = {
   // Settled predictions a player must have bet on to be ranked right now.
   required_bets:      number
   previous_rank: number | null
+  // Places moved since this week's Monday snapshot; positive is up.
   rank_change: number | null
+  // Ranked now but not on Monday.
+  rank_is_new?: boolean
   previous_prediction_rating: number | null
   rating_change: number | null
   previous_total_won_in_room: number | null

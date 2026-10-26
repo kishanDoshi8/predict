@@ -2,6 +2,7 @@ import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { usePlayer } from "@/features/home";
 import {
 	betsNeededLabel,
+	RankChange,
 	splitStandings,
 	useSeriesLeaderboard,
 } from "@/features/leaderboard";
@@ -88,6 +89,13 @@ export function SeriesHeroCard() {
 							<span className='ml-2 text-base font-medium text-muted-foreground'>
 								of {ranked.length}
 							</span>
+						) : null}
+						{me ? (
+							<RankChange
+								change={me.rank_change}
+								isNew={me.rank_is_new}
+								className='ml-2 align-middle'
+							/>
 						) : null}
 					</p>
 					{me && !me.is_ranked ? (

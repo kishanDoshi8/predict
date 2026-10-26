@@ -12,6 +12,7 @@ import { usePlayer } from "@/features/home";
 import {
 	betsNeededLabel,
 	LeaderboardEntry,
+	RankChange,
 	splitStandings,
 	useSeriesLeaderboard,
 } from "@/features/leaderboard";
@@ -206,6 +207,15 @@ function LeaderboardContentView({
 									Not ranked yet ·{" "}
 									{betsNeededLabel(leaderboardPlayer.bets_needed)}
 								</p>
+							) : leaderboardPlayer?.rank_is_new ||
+							  leaderboardPlayer?.rank_change != null ? (
+								<p className={`flex items-center gap-1 text-xs text-muted-foreground`}>
+									<RankChange
+										change={leaderboardPlayer.rank_change}
+										isNew={leaderboardPlayer.rank_is_new}
+									/>
+									<span aria-hidden='true'>since Monday</span>
+								</p>
 							) : null}
 						</FadeContent>
 					)}
@@ -383,6 +393,11 @@ function LeaderboardMiniRows({
 							>
 								{entry.rank}
 							</p>
+							<RankChange
+								change={entry.rank_change}
+								isNew={entry.rank_is_new}
+								className='-ml-1'
+							/>
 							<p className={`font-medium`}>
 								{entry.username}
 								{entry.current_streak >= 3 && (

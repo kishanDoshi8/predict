@@ -43,7 +43,9 @@ function RoomHeader({
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
-	const isOrganizer = useRoomRole(room).can.organize;
+	const { can } = useRoomRole(room);
+	const isOrganizer = can.organize;
+	const canResolve = can.resolve;
 	const { up } = useAppNavigation();
 	const roomHome = `/rooms/${room.code}`;
 	// The room name goes back to the room's Home and clears the pages above.
@@ -169,6 +171,7 @@ function RoomHeader({
 			/>
 			<RoomPreferencesDialog
 				roomId={room.id}
+				isStaff={canResolve}
 				open={isNotificationsOpen}
 				onOpenChange={setIsNotificationsOpen}
 			/>

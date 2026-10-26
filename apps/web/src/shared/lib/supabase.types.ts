@@ -730,6 +730,7 @@ export type Database = {
           player_id: string
           prediction_live: boolean | null
           prediction_locked: boolean | null
+          result_needed: boolean | null
           result_revealed: boolean | null
           room_id: string
           sounds_enabled: boolean | null
@@ -744,6 +745,7 @@ export type Database = {
           player_id: string
           prediction_live?: boolean | null
           prediction_locked?: boolean | null
+          result_needed?: boolean | null
           result_revealed?: boolean | null
           room_id: string
           sounds_enabled?: boolean | null
@@ -758,6 +760,7 @@ export type Database = {
           player_id?: string
           prediction_live?: boolean | null
           prediction_locked?: boolean | null
+          result_needed?: boolean | null
           result_revealed?: boolean | null
           room_id?: string
           sounds_enabled?: boolean | null
@@ -872,6 +875,7 @@ export type Database = {
           description: string | null
           expected_games: number
           id: string
+          last_topup_recipients: number
           last_topup_week: string | null
           min_bets_to_rank: number
           room_id: string
@@ -890,6 +894,7 @@ export type Database = {
           description?: string | null
           expected_games?: number
           id?: string
+          last_topup_recipients?: number
           last_topup_week?: string | null
           min_bets_to_rank?: number
           room_id: string
@@ -908,6 +913,7 @@ export type Database = {
           description?: string | null
           expected_games?: number
           id?: string
+          last_topup_recipients?: number
           last_topup_week?: string | null
           min_bets_to_rank?: number
           room_id?: string
@@ -1627,6 +1633,7 @@ export type Database = {
           p_deadline_1h: boolean
           p_prediction_live: boolean
           p_prediction_locked: boolean
+          p_result_needed?: boolean
           p_result_revealed: boolean
           p_sounds_enabled: boolean
           p_weekly_points_claim: boolean
@@ -1675,6 +1682,7 @@ export type Database = {
           p_deadline_1h?: boolean
           p_prediction_live?: boolean
           p_prediction_locked?: boolean
+          p_result_needed?: boolean
           p_result_revealed?: boolean
           p_room_id: string
           p_sounds_enabled?: boolean

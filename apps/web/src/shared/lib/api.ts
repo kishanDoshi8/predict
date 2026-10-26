@@ -15,6 +15,8 @@ export type PreferenceSettings = {
   deadline_1h: boolean
   result_revealed: boolean
   weekly_points_claim: boolean
+  // Staff: a result is overdue.
+  result_needed: boolean
   dark_mode: boolean
   sounds_enabled: boolean
 }
@@ -25,6 +27,7 @@ export type RoomPreferenceOverrides = {
   deadline_1h: boolean | null
   result_revealed: boolean | null
   weekly_points_claim: boolean | null
+  result_needed: boolean | null
   dark_mode: boolean | null
   sounds_enabled: boolean | null
 }
@@ -44,6 +47,7 @@ export type NotificationEventType =
   | 'deadline_1h'
   | 'result_revealed'
   | 'weekly_points_claim'
+  | 'result_needed'
 
 type SeriesPayload = {
   id: string
@@ -582,6 +586,7 @@ export async function updateGlobalPreferences(
     p_weekly_points_claim: preferences.weekly_points_claim,
     p_dark_mode: preferences.dark_mode,
     p_sounds_enabled: preferences.sounds_enabled,
+    p_result_needed: preferences.result_needed,
   })
 
   return assertOk(data, error) as PreferenceResponse
@@ -600,6 +605,7 @@ export async function updateRoomPreferences(
     p_weekly_points_claim: preferences.weekly_points_claim ?? undefined,
     p_dark_mode: preferences.dark_mode ?? undefined,
     p_sounds_enabled: preferences.sounds_enabled ?? undefined,
+    p_result_needed: preferences.result_needed ?? undefined,
   })
 
   return assertOk(data, error) as PreferenceResponse

@@ -185,10 +185,12 @@ Deno.serve(async (req) => {
 		targetPlayerId = player.id;
 	}
 
+	// Each player's default for this event; filtered below, after any room
+	// override is applied.
 	let playerPreferencesQuery = supabase
 		.from("player_preferences")
-		.select("player_id")
-		.eq(preferenceColumn, true);
+		.select(`player_id, ${preferenceColumn}`);
+	let overrideRoomId: string | null = null;
 
 	if (targetPlayerId) {
 		playerPreferencesQuery = playerPreferencesQuery.eq("player_id", targetPlayerId);
@@ -227,6 +229,7 @@ Deno.serve(async (req) => {
 		}
 
 		playerPreferencesQuery = playerPreferencesQuery.in("player_id", roomPlayerIds);
+		overrideRoomId = body.room_id;
 	}
 
 	const { data: preferenceRows, error: preferenceError } =
@@ -242,7 +245,48 @@ Deno.serve(async (req) => {
 		);
 	}
 
-	const playerIds = [...new Set((preferenceRows ?? []).map((row) => row.player_id))];
+	// The selected column is only known at runtime, so the rows are untyped.
+	type PreferenceRow = { player_id: string } & Record<string, unknown>;
+	const preferences = (preferenceRows ?? []) as unknown as PreferenceRow[];
+
+	// A room's own setting (Notifications > This room) wins over the default.
+	const roomOverrides = new Map<string, boolean | null>();
+	if (overrideRoomId) {
+		const { data: overrideRows, error: overrideError } = await supabase
+			.from("room_preferences")
+			.select(`player_id, ${preferenceColumn}`)
+			.eq("room_id", overrideRoomId)
+			.in(
+				"player_id",
+				preferences.map((row) => row.player_id),
+			);
+
+		if (overrideError) {
+			return jsonResponse(
+				{
+					error: "Failed to fetch room notification preferences.",
+					detail: overrideError.message,
+				},
+				500,
+			);
+		}
+
+		for (const row of (overrideRows ?? []) as unknown as PreferenceRow[]) {
+			const value = row[preferenceColumn];
+			roomOverrides.set(row.player_id, typeof value === "boolean" ? value : null);
+		}
+	}
+
+	const playerIds = [
+		...new Set(
+			preferences
+				.filter((row) => {
+					const override = roomOverrides.get(row.player_id) ?? null;
+					return (override ?? row[preferenceColumn]) === true;
+				})
+				.map((row) => row.player_id),
+		),
+	];
 	if (playerIds.length === 0) {
 		return jsonResponse({
 			sent_count: 0,

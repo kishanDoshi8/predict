@@ -2,6 +2,7 @@ import type { Room } from "@/features/rooms/types/types";
 import { Badge, Skeleton } from "@/shared/ui";
 import { ChevronRightIcon, UsersIcon, ZapIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAppNavigation } from "@/shared/lib/navigation";
 
 type Props = {
 	rooms?: Room[];
@@ -18,6 +19,8 @@ export function RoomCardsList({
 	emptyMessage = "You have not joined any rooms yet.",
 	onRoomSelect,
 }: Readonly<Props>) {
+	const { switchRoom } = useAppNavigation();
+
 	if (isLoading) {
 		return (
 			<div className={`flex flex-col gap-2`}>
@@ -50,7 +53,12 @@ export function RoomCardsList({
 					<Link
 						to={`/rooms/${room.code}`}
 						key={room.id}
-						onClick={() => onRoomSelect?.(room)}
+						onClick={(event) => {
+							// Rooms are top-level: the new room replaces history.
+							event.preventDefault();
+							onRoomSelect?.(room);
+							switchRoom(room.code);
+						}}
 						className='w-full flex justify-between items-center p-4 rounded-lg cursor-pointer bg-card hover:border-primary/50'
 					>
 						<div className={`flex flex-col`}>

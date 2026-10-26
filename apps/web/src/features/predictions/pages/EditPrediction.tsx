@@ -1,9 +1,10 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
+import { useAppNavigation } from "@/shared/lib/navigation";
 import { usePrediction, useUpdatePrediction } from "@/features/predictions/hooks/prediction";
 import { PredictionForm } from "@/features/predictions/components/PredictionForm";
 import { useRoomRole } from "@/features/rooms";
 import { Skeleton } from "@/shared/ui";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 // Organizers fix a prediction while it's open for picks: the question, the
@@ -12,7 +13,7 @@ export default function EditPrediction() {
 	const { room } = useRoomContext();
 	const { can } = useRoomRole(room);
 	const { predictionId } = useParams<{ predictionId: string }>();
-	const navigate = useNavigate();
+	const { back } = useAppNavigation();
 	const { data: prediction, isPending } = usePrediction(room.id, predictionId);
 	const { mutate: updatePrediction, isPending: isSaving } =
 		useUpdatePrediction();
@@ -66,7 +67,7 @@ export default function EditPrediction() {
 							toast.success("Prediction updated.", {
 								position: "top-center",
 							});
-							navigate(predictionPath, { replace: true });
+							back(predictionPath);
 						},
 						onError: (error) => {
 							toast.error("Couldn't update the prediction.", {
@@ -77,7 +78,7 @@ export default function EditPrediction() {
 					},
 				)
 			}
-			onCancel={() => navigate(predictionPath)}
+			onCancel={() => back(predictionPath)}
 		/>
 	);
 }

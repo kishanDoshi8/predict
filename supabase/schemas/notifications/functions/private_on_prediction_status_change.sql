@@ -6,11 +6,12 @@ set search_path = public, private
 as $$
 declare
   v_room_name text;
+  v_room_code text;
   v_series_title text;
   v_series_prediction_number integer;
   v_extra_payload jsonb;
 begin
-  select name into v_room_name from public.rooms where id = NEW.room_id;
+  select name, room_code into v_room_name, v_room_code from public.rooms where id = NEW.room_id;
   select s.title into v_series_title from public.series s where s.id = NEW.series_id;
   v_series_prediction_number := NEW.series_prediction_number;
   v_extra_payload := jsonb_build_object(
@@ -29,7 +30,7 @@ begin
       NEW.room_id,
       '🎯 New Prediction',
       coalesce(v_room_name, 'Your room') || ' · ' || NEW.title,
-      '/room/' || NEW.room_id::text,
+      '/rooms/' || v_room_code || '/predictions/' || NEW.id::text,
       v_extra_payload
     );
 
@@ -44,7 +45,7 @@ begin
       NEW.room_id,
       '🔒 Betting Closed',
       coalesce(v_room_name, 'Your room') || ' · ' || NEW.title,
-      '/room/' || NEW.room_id::text,
+      '/rooms/' || v_room_code || '/predictions/' || NEW.id::text,
       v_extra_payload
     );
 
@@ -62,7 +63,7 @@ begin
       NEW.room_id,
       '🏆 Result Is In',
       coalesce(v_room_name, 'Your room') || ' · ' || NEW.title,
-      '/room/' || NEW.room_id::text,
+      '/rooms/' || v_room_code || '/predictions/' || NEW.id::text,
       v_extra_payload
     );
   end if;

@@ -1,4 +1,5 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
+import { useAppNavigation } from "@/shared/lib/navigation";
 import { useRoomRole } from "@/features/rooms";
 import { useCreateSeries } from "@/features/series";
 import {
@@ -14,7 +15,6 @@ import {
 } from "@/shared/ui/field";
 import { Textarea } from "@/shared/ui/textarea";
 import { useMemo, useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
 	getMinBetsError,
@@ -45,7 +45,7 @@ const DESCRIPTION_MAX_LENGTH = 240;
 
 export default function SeriesCreatePage() {
 	const { room } = useRoomContext();
-	const navigate = useNavigate();
+	const { back } = useAppNavigation();
 	const { mutate: createSeries, isPending } = useCreateSeries(room.id);
 
 	const [form, setForm] = useState<FormState>(DEFAULT_FORM);
@@ -123,7 +123,7 @@ export default function SeriesCreatePage() {
 			{
 				onSuccess: () => {
 					toast("Series created.");
-					navigate(`/rooms/${room.code}/series`, { replace: true });
+					back(`/rooms/${room.code}/series`);
 				},
 				onError: (error) => {
 					toast("Failed to create series.", {
@@ -283,11 +283,7 @@ export default function SeriesCreatePage() {
 					<Button
 						type='button'
 						variant='outline'
-						onClick={() =>
-							navigate(`/rooms/${room.code}/series`, {
-								replace: true,
-							})
-						}
+						onClick={() => back(`/rooms/${room.code}/series`)}
 						disabled={isPending}
 					>
 						Cancel

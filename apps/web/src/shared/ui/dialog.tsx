@@ -3,12 +3,36 @@ import { XIcon } from "lucide-react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/shared/lib/utils"
+import { useSheetHistory } from "@/shared/lib/navigation"
 import { Button } from "@/shared/ui/button"
 
+// Open dialogs get a history entry, so the back gesture closes them.
 function Dialog({
+  open: openProp,
+  defaultOpen = false,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+  const [innerOpen, setInnerOpen] = React.useState(defaultOpen)
+  const isControlled = openProp !== undefined
+  const open = isControlled ? openProp : innerOpen
+  const handleOpenChange = React.useCallback(
+    (next: boolean) => {
+      if (!isControlled) setInnerOpen(next)
+      onOpenChange?.(next)
+    },
+    [isControlled, onOpenChange]
+  )
+  useSheetHistory(open, handleOpenChange)
+
+  return (
+    <DialogPrimitive.Root
+      data-slot="dialog"
+      open={open}
+      onOpenChange={handleOpenChange}
+      {...props}
+    />
+  )
 }
 
 function DialogTrigger({

@@ -9,6 +9,8 @@ import {
 	LayoutGridIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import type { MouseEvent } from "react";
+import { useAppNavigation } from "@/shared/lib/navigation";
 import { useState } from "react";
 import {
 	SeriesPickerDrawer,
@@ -42,6 +44,13 @@ function RoomHeader({
 	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
 	const isOrganizer = useRoomRole(room).can.organize;
+	const { up } = useAppNavigation();
+	const roomHome = `/rooms/${room.code}`;
+	// The room name goes back to the room's Home and clears the pages above.
+	const goHome = (event: MouseEvent<HTMLAnchorElement>) => {
+		event.preventDefault();
+		up(roomHome);
+	};
 
 	return (
 		<header
@@ -73,7 +82,8 @@ function RoomHeader({
 						<>
 							<h1 className='font-bold truncate'>{title}</h1>
 							<Link
-								to={`/rooms/${room.code}`}
+								to={roomHome}
+								onClick={goHome}
 								className='text-xs text-muted-foreground truncate'
 							>
 								{room.name}
@@ -82,7 +92,8 @@ function RoomHeader({
 					) : (
 						<>
 							<Link
-								to={`/rooms/${room.code}`}
+								to={roomHome}
+								onClick={goHome}
 								className='font-bold truncate'
 							>
 								<h1 className='truncate'>{room.name}</h1>

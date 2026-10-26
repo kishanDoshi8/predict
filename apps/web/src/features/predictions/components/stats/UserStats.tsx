@@ -20,6 +20,7 @@ import { useCurrentSeries } from "@/features/series";
 import { Room } from "@/features/rooms";
 import { twColor } from "@/shared/lib/utils";
 import { Link } from "react-router-dom";
+import { useAppNavigation } from "@/shared/lib/navigation";
 
 const PlayerProfileDialog = lazy(() =>
 	import("@/features/leaderboard/components/player/PlayerProfileDialog").then(
@@ -365,6 +366,7 @@ function LeaderboardMiniRows({
 	showSeeAllLink: boolean;
 }>) {
 	const { room } = useRoomContext();
+	const { switchTab } = useAppNavigation();
 	const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(
 		null,
 	);
@@ -436,6 +438,11 @@ function LeaderboardMiniRows({
 			{showSeeAllLink ? (
 				<Link
 					to={`/rooms/${roomCode}/leaderboard`}
+					onClick={(event) => {
+						// Standings is a tab: it sits one entry above Home.
+						event.preventDefault();
+						switchTab(`/rooms/${roomCode}/leaderboard`);
+					}}
 					className={`flex items-center justify-end text-sm text-accent text-right mt-2 cursor-pointer`}
 				>
 					see all

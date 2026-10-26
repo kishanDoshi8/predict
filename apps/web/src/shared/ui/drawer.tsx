@@ -2,11 +2,35 @@ import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/shared/lib/utils";
+import { useSheetHistory } from "@/shared/lib/navigation";
 
+// Open drawers get a history entry, so the back gesture closes them.
 function Drawer({
+	open: openProp,
+	defaultOpen = false,
+	onOpenChange,
 	...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
-	return <DrawerPrimitive.Root data-slot='drawer' {...props} />;
+	const [innerOpen, setInnerOpen] = React.useState(defaultOpen);
+	const isControlled = openProp !== undefined;
+	const open = isControlled ? openProp : innerOpen;
+	const handleOpenChange = React.useCallback(
+		(next: boolean) => {
+			if (!isControlled) setInnerOpen(next);
+			onOpenChange?.(next);
+		},
+		[isControlled, onOpenChange],
+	);
+	useSheetHistory(open, handleOpenChange);
+
+	return (
+		<DrawerPrimitive.Root
+			data-slot='drawer'
+			open={open}
+			onOpenChange={handleOpenChange}
+			{...props}
+		/>
+	);
 }
 
 function DrawerTrigger({

@@ -8,6 +8,7 @@ declare
   v_now       timestamptz := now();
   v_rec       record;
   v_room_name text;
+  v_room_code text;
 begin
   for v_rec in
     select
@@ -23,7 +24,7 @@ begin
       and p.notified_1h = false
       and p.deadline between v_now and v_now + interval '1 hour'
   loop
-    select name into v_room_name from public.rooms where id = v_rec.room_id;
+    select name, room_code into v_room_name, v_room_code from public.rooms where id = v_rec.room_id;
 
     -- Mark first so a concurrent run does not double-send.
     update public.predictions
@@ -38,7 +39,7 @@ begin
         v_rec.room_id,
         '⏰ 1 Hour Left to Bet!',
         coalesce(v_room_name, 'Your room') || ' · ' || v_rec.title,
-        '/room/' || v_rec.room_id::text,
+        '/rooms/' || v_room_code || '/predictions/' || v_rec.id::text,
         jsonb_build_object(
           'predictionId', v_rec.id,
           'predictionTitle', v_rec.title,

@@ -1,4 +1,5 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
+import { useAppNavigation } from "@/shared/lib/navigation";
 import { useRoomRole } from "@/features/rooms";
 import {
 	usePredictionHistory,
@@ -119,6 +120,7 @@ export default function SeriesPage() {
 	const { room } = useRoomContext();
 	const { seriesId } = useParams<{ seriesId?: string }>();
 	const navigate = useNavigate();
+	const { back } = useAppNavigation();
 	const location = useLocation();
 	const { data: seriesByStatus, isPending } = useRoomSeries(room.id);
 	const { data: roomPredictions = [] } = useActivePredictions(
@@ -206,7 +208,7 @@ export default function SeriesPage() {
 		archiveSeries(targetSeriesId, {
 			onSuccess: () => {
 				toast("Series archived.");
-				navigate(`/rooms/${room.code}/series`, { replace: true });
+				back(`/rooms/${room.code}/series`);
 			},
 			onError: (error) => {
 				toast("Failed to archive series.", {
@@ -309,7 +311,7 @@ export default function SeriesPage() {
 				</p>
 				<Button
 					variant='outline'
-					onClick={() => navigate(`/rooms/${room.code}/series`)}
+					onClick={() => back(`/rooms/${room.code}/series`)}
 				>
 					Back to series
 				</Button>

@@ -18,7 +18,8 @@ begin
       p.series_id,
       p.series_prediction_number,
       s.title as series_title,
-      r.name as room_name
+      r.name as room_name,
+      r.room_code
     from public.predictions p
     join public.rooms r on r.id = p.room_id
     left join public.series s on s.id = p.series_id
@@ -39,7 +40,7 @@ begin
         v_rec.room_id,
         '⚑ Result needed',
         coalesce(v_rec.room_name, 'Your room') || ' · ' || v_rec.title,
-        '/room/' || v_rec.room_id::text,
+        '/rooms/' || v_rec.room_code || '/predictions/' || v_rec.id::text,
         jsonb_build_object(
           'predictionId', v_rec.id,
           'predictionTitle', v_rec.title,

@@ -1,4 +1,5 @@
 import {
+	generatePath,
 	Outlet,
 	useMatches,
 	useNavigate,
@@ -17,6 +18,7 @@ import { Suspense, lazy, useEffect, useState } from "react";
 import { usePlayer, useSetLastVisitedRoom } from "@/features/home";
 import { usePreferences, useMarkHowToPlaySeen } from "@/features/preferences";
 import { Loading } from "@/shared/ui";
+import { useAppNavigation } from "@/shared/lib/navigation";
 
 const HowToPlayModal = lazy(
 	() => import("@/features/onboarding/components/HowToPlayModal"),
@@ -24,10 +26,12 @@ const HowToPlayModal = lazy(
 
 export default function RoomLayout() {
 	const navigate = useNavigate();
+	const { back } = useAppNavigation();
 	const matches = useMatches();
 	const activeMatch = matches.at(-1);
 	const { data: player, isPending: isPlayerLoading } = usePlayer();
-	const { roomCode } = useParams<{ roomCode: string }>();
+	const params = useParams();
+	const { roomCode } = params as { roomCode?: string };
 	const { data: room, isPending, isError } = useRoom(roomCode);
 	const headerConfig = (activeMatch?.handle as RoomRouteHandle | undefined)
 		?.header;
@@ -91,12 +95,11 @@ export default function RoomLayout() {
 			return;
 		}
 
-		if (globalThis.history.length > 1) {
-			navigate(-1);
-			return;
-		}
-
-		navigate(`/rooms/${room.code}`, { replace: true });
+		// Opened with nothing under it: go to the page it belongs to.
+		const parent = headerConfig?.parent
+			? `/rooms/${room.code}/${generatePath(headerConfig.parent, params)}`
+			: `/rooms/${room.code}`;
+		back(parent);
 	};
 
 	return (
@@ -141,6 +144,9 @@ export type RoomOutletContext = {
 type RoomHeaderHandle = {
 	leftAction: "home" | "back" | "none";
 	title?: string;
+	// Where Back goes when the page was opened from a link with nothing
+	// under it, relative to the room (e.g. "series"). Defaults to Home.
+	parent?: string;
 };
 
 type RoomRouteHandle = {

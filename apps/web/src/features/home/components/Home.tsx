@@ -23,7 +23,7 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "@/shared/ui";
-import { useNavigate } from "react-router-dom";
+import { useAppNavigation } from "@/shared/lib/navigation";
 
 const HowToPlayModal = lazy(
 	() => import("@/features/onboarding/components/HowToPlayModal"),
@@ -209,7 +209,7 @@ function JoinRoom({
 }
 
 function CreateRoom() {
-	const navigate = useNavigate();
+	const { switchRoom } = useAppNavigation();
 	const { mutate: createRoom, isPending: isLoading } = useCreateRoom();
 	const [roomName, setRoomName] = React.useState("");
 	const [error, setError] = React.useState<string | null>(null);
@@ -225,7 +225,7 @@ function CreateRoom() {
 			{ roomName },
 			{
 				onSuccess: (newRoom) => {
-					navigate(`/rooms/${newRoom.code}`);
+					switchRoom(newRoom.code);
 				},
 				onError: (error) => {
 					setError(

@@ -863,51 +863,6 @@ export type Database = {
         }
         Relationships: []
       }
-      series_standing_snapshots: {
-        Row: {
-          balance: number
-          created_at: string
-          is_ranked: boolean
-          player_id: string
-          rank: number | null
-          series_id: string
-          week_key: string
-        }
-        Insert: {
-          balance: number
-          created_at?: string
-          is_ranked: boolean
-          player_id: string
-          rank?: number | null
-          series_id: string
-          week_key: string
-        }
-        Update: {
-          balance?: number
-          created_at?: string
-          is_ranked?: boolean
-          player_id?: string
-          rank?: number | null
-          series_id?: string
-          week_key?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "series_standing_snapshots_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "series_standing_snapshots_series_id_fkey"
-            columns: ["series_id"]
-            isOneToOne: false
-            referencedRelation: "series"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       series: {
         Row: {
           archived_at: string | null
@@ -1087,6 +1042,58 @@ export type Database = {
           },
           {
             foreignKeyName: "series_placements_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series_with_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      series_standing_snapshots: {
+        Row: {
+          balance: number
+          created_at: string
+          is_ranked: boolean
+          player_id: string
+          rank: number | null
+          series_id: string
+          week_key: string
+        }
+        Insert: {
+          balance: number
+          created_at?: string
+          is_ranked: boolean
+          player_id: string
+          rank?: number | null
+          series_id: string
+          week_key: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          is_ranked?: boolean
+          player_id?: string
+          rank?: number | null
+          series_id?: string
+          week_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "series_standing_snapshots_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_standing_snapshots_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_standing_snapshots_series_id_fkey"
             columns: ["series_id"]
             isOneToOne: false
             referencedRelation: "series_with_stats"

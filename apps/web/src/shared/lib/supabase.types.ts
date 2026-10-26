@@ -645,76 +645,6 @@ export type Database = {
           },
         ]
       }
-      room_member_weekly_snapshots: {
-        Row: {
-          correct_predictions: number
-          created_at: string
-          current_streak: number
-          highest_streak: number
-          id: string
-          peak_prediction_rating: number
-          player_id: string
-          prediction_rating: number
-          rated_predictions_count: number
-          room_id: string
-          total_predictions: number
-          total_won_in_room: number
-          week_start: string
-        }
-        Insert: {
-          correct_predictions?: number
-          created_at?: string
-          current_streak: number
-          highest_streak: number
-          id?: string
-          peak_prediction_rating: number
-          player_id: string
-          prediction_rating: number
-          rated_predictions_count: number
-          room_id: string
-          total_predictions?: number
-          total_won_in_room: number
-          week_start: string
-        }
-        Update: {
-          correct_predictions?: number
-          created_at?: string
-          current_streak?: number
-          highest_streak?: number
-          id?: string
-          peak_prediction_rating?: number
-          player_id?: string
-          prediction_rating?: number
-          rated_predictions_count?: number
-          room_id?: string
-          total_predictions?: number
-          total_won_in_room?: number
-          week_start?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "room_member_weekly_snapshots_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "room_member_weekly_snapshots_room_id_fkey"
-            columns: ["room_id"]
-            isOneToOne: false
-            referencedRelation: "player_rooms_by_activity"
-            referencedColumns: ["room_id"]
-          },
-          {
-            foreignKeyName: "room_member_weekly_snapshots_room_id_fkey"
-            columns: ["room_id"]
-            isOneToOne: false
-            referencedRelation: "rooms"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       room_members: {
         Row: {
           current_streak: number
@@ -932,6 +862,51 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      series_standing_snapshots: {
+        Row: {
+          balance: number
+          created_at: string
+          is_ranked: boolean
+          player_id: string
+          rank: number | null
+          series_id: string
+          week_key: string
+        }
+        Insert: {
+          balance: number
+          created_at?: string
+          is_ranked: boolean
+          player_id: string
+          rank?: number | null
+          series_id: string
+          week_key: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          is_ranked?: boolean
+          player_id?: string
+          rank?: number | null
+          series_id?: string
+          week_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "series_standing_snapshots_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_standing_snapshots_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       series: {
         Row: {
@@ -1476,21 +1451,6 @@ export type Database = {
         }
         Returns: Json
       }
-      create_weekly_room_member_snapshots: { Args: never; Returns: Json }
-      get_latest_room_member_snapshot: {
-        Args: { p_player_id: string; p_room_id: string }
-        Returns: {
-          correct_predictions: number
-          current_streak: number
-          highest_streak: number
-          peak_prediction_rating: number
-          prediction_rating: number
-          rated_predictions_count: number
-          total_predictions: number
-          total_won_in_room: number
-          week_start: string
-        }[]
-      }
       get_my_series_wallets: { Args: { p_room_id: string }; Returns: Json }
       get_player: { Args: never; Returns: Json }
       get_prediction_duel_summary: {
@@ -1519,10 +1479,6 @@ export type Database = {
         Returns: boolean
       }
       get_room_invite_preview: { Args: { p_room_code: string }; Returns: Json }
-      get_room_leaderboard: {
-        Args: { p_room_id: string; p_sort_by?: string }
-        Returns: Json
-      }
       get_room_manage_queue: { Args: { p_room_id: string }; Returns: Json }
       get_room_member_recent_predictions: {
         Args: {
@@ -1563,10 +1519,6 @@ export type Database = {
         Args: { p_limit?: number; p_room_id: string }
         Returns: Json
       }
-      get_room_weekly_leaderboard: {
-        Args: { p_room_id: string; p_sort_by?: string }
-        Returns: Json
-      }
       get_series_active_predictions: {
         Args: { p_room_id: string; p_series_id: string }
         Returns: Json
@@ -1584,6 +1536,10 @@ export type Database = {
         Returns: Json
       }
       get_series_placements: {
+        Args: { p_room_id: string; p_series_id: string }
+        Returns: Json
+      }
+      get_series_weekly_recap: {
         Args: { p_room_id: string; p_series_id: string }
         Returns: Json
       }

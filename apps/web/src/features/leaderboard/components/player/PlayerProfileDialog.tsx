@@ -101,23 +101,62 @@ const resultBadgeMeta = {
 	},
 } as const;
 
+const STAT_TILE = "rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2";
+
+// Same tiles as the stats: one per stat, then Largest win and Win rate.
 function StatsSkeleton() {
 	return (
-		<div className='grid grid-cols-2 gap-4'>
-			{Array.from({ length: 4 }).map((_, i) => (
-				<Skeleton key={i} className='h-19 rounded-lg' />
+		<div className='grid grid-cols-2 gap-4' aria-hidden='true'>
+			{statsLabels.map(({ key }) => (
+				<div key={key} className={STAT_TILE}>
+					<Skeleton className='h-3 w-20' />
+					<Skeleton className='h-8 w-16' />
+				</div>
 			))}
-			{Array.from({ length: 2 }).map((_, i) => (
-				<Skeleton key={i} className='h-26 rounded-lg col-span-2' />
+			<div className={cn(STAT_TILE, "col-span-2")}>
+				<Skeleton className='h-3 w-20' />
+				<Skeleton className='h-8 w-32' />
+				<Skeleton className='h-3 w-40' />
+			</div>
+			<div className={cn(STAT_TILE, "col-span-2")}>
+				<Skeleton className='h-3 w-16' />
+				<div className='flex items-end justify-between'>
+					<Skeleton className='h-8 w-20' />
+					<Skeleton className='h-4 w-12' />
+				</div>
+				<Skeleton className='h-2 w-full' />
+			</div>
+		</div>
+	);
+}
+
+// The last five results as a row of round badges.
+function RecentPredictionsSkeleton() {
+	return (
+		<div className='flex gap-2' aria-hidden='true'>
+			{Array.from({ length: 5 }).map((_, i) => (
+				<Skeleton key={i} className='size-8 rounded-full' />
 			))}
 		</div>
 	);
 }
 
-function PredictionsSkeleton() {
+// Championship or award rows: icon tile, a small label, the series name.
+function RecognitionRowsSkeleton({ iconSize }: Readonly<{ iconSize: "size-12" | "size-10" }>) {
 	return (
-		<div className='space-y-2'>
-			<Skeleton className='h-10 rounded-lg' />
+		<div className='space-y-2' aria-hidden='true'>
+			{[0, 1].map((i) => (
+				<div
+					key={i}
+					className='flex items-center gap-3 rounded-2xl border bg-card p-3.5'
+				>
+					<Skeleton className={cn("shrink-0 rounded-xl", iconSize)} />
+					<div className='flex flex-1 flex-col gap-1.5'>
+						<Skeleton className='h-3 w-20' />
+						<Skeleton className='h-4 w-36' />
+					</div>
+				</div>
+			))}
 		</div>
 	);
 }
@@ -186,7 +225,7 @@ export function PlayerProfileDialog({
 
 	const recentPredictionsContent = (() => {
 		if (isHistoryLoading) {
-			return <PredictionsSkeleton />;
+			return <RecentPredictionsSkeleton />;
 		}
 
 		if (recentPredictions.length === 0) {
@@ -218,7 +257,7 @@ export function PlayerProfileDialog({
 
 	const championshipsContent = (() => {
 		if (isSeriesRecognitionLoading) {
-			return <PredictionsSkeleton />;
+			return <RecognitionRowsSkeleton iconSize='size-12' />;
 		}
 
 		if (seriesRecognition?.championships.length) {
@@ -277,7 +316,7 @@ export function PlayerProfileDialog({
 
 	const awardsContent = (() => {
 		if (isSeriesRecognitionLoading) {
-			return <PredictionsSkeleton />;
+			return <RecognitionRowsSkeleton iconSize='size-10' />;
 		}
 
 		if (visibleAwards.length) {
@@ -343,9 +382,16 @@ export function PlayerProfileDialog({
 					<TitleComponent
 						className={`flex items-center gap-2 text-2xl`}
 					>
-						{stats?.username ?? "Player profile"}
+						{isStatsLoading ? (
+							<Skeleton className='h-7 w-36' />
+						) : (
+							(stats?.username ?? "Player profile")
+						)}
 					</TitleComponent>
 					<DescriptionComponent className={`flex gap-2`}>
+						{isStatsLoading ? (
+							<Skeleton className='h-5 w-10 rounded-full' />
+						) : null}
 						{stats?.highest_win_streak !== undefined &&
 							stats.highest_win_streak !== 0 && (
 								<div className={`inline-block`}>
@@ -375,8 +421,11 @@ export function PlayerProfileDialog({
 								</p>
 								<p className='mt-1 flex items-center gap-2 text-xl font-semibold tabular-nums'>
 									<TrophyIcon className='h-5 w-5 text-rank-1' />
-									{seriesRecognition?.championships.length ??
-										0}
+									{isSeriesRecognitionLoading ? (
+										<Skeleton className='h-6 w-8' />
+									) : (
+										(seriesRecognition?.championships.length ?? 0)
+									)}
 								</p>
 							</div>
 							<div className='rounded-lg border border-border/60 bg-card p-3'>
@@ -385,7 +434,11 @@ export function PlayerProfileDialog({
 								</p>
 								<p className='mt-1 flex items-center gap-2 text-xl font-semibold tabular-nums'>
 									<MedalIcon className='h-5 w-5 text-accent' />
-									{visibleAwards.length ?? 0}
+									{isSeriesRecognitionLoading ? (
+										<Skeleton className='h-6 w-8' />
+									) : (
+										(visibleAwards.length ?? 0)
+									)}
 								</p>
 							</div>
 						</div>
@@ -412,9 +465,9 @@ export function PlayerProfileDialog({
 							<ChartColumnIcon className='h-4 w-4 text-activity' />
 							Stats
 						</h3>
-						{isStatsLoading || !stats ? (
+						{isStatsLoading ? (
 							<StatsSkeleton />
-						) : (
+						) : !stats ? null : (
 							<div className='grid grid-cols-2 gap-4'>
 								{statsLabels.map(({ key, label, icon }) => (
 									<FadeContent

@@ -3,6 +3,7 @@ import { Prediction } from "@/features/predictions";
 import LockedPhase from "./LockedPhase";
 import ResolvedPhase from "./ResolvedPhase";
 import NoResult from "./NoResult";
+import { PredictionPageSkeleton } from "./PredictionPageSkeleton";
 
 type Props = {
 	prediction: Prediction | null | undefined;
@@ -28,7 +29,11 @@ export function PredictionPhaseView(props: Readonly<Props>) {
 		);
 	}
 
-	if (prediction?.status === "draft" || isLoading) {
+	if (isLoading) {
+		return <PredictionPageSkeleton />;
+	}
+
+	if (prediction?.status === "draft") {
 		return <DraftPhase {...props} />;
 	} else if (prediction?.status === "locked") {
 		return <LockedPhase {...props} />;

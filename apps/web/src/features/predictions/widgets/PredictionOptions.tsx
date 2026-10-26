@@ -29,7 +29,10 @@ export default function PredictionOptions({
 	fadeDelay,
 }: Readonly<Props>) {
 	const { room } = useRoomContext();
-	const { data: bets = [] } = useBets(room.id, prediction?.id);
+	const { data: bets = [], isPending: isBetsPending } = useBets(
+		room.id,
+		prediction?.id,
+	);
 
 	// totalBetAmount per option
 	const betAmountPerOption: Record<string, number> = {};
@@ -44,7 +47,8 @@ export default function PredictionOptions({
 
 	return (
 		<>
-			{prediction ? (
+			{/* Wait for bets too, so percentages don't jump from 0%. */}
+			{prediction && !isBetsPending ? (
 				<FadeContent delay={fadeDelay} className={`w-full`}>
 					<RadioGroup
 						className={`mt-4`}
@@ -158,13 +162,36 @@ export default function PredictionOptions({
 					</RadioGroup>
 				</FadeContent>
 			) : (
-				<div
-					className={`max-w-md w-full mx-auto mt-4 flex flex-col gap-4`}
-				>
-					<Skeleton className={`h-18 mx-auto w-full`} />
-					<Skeleton className={`h-18 mx-auto w-full`} />
-				</div>
+				<PredictionOptionsSkeleton
+					count={prediction?.prediction_options.length ?? 2}
+				/>
 			)}
 		</>
+	);
+}
+
+// Stands in for the option cards: label, amount and bar, one per option.
+export function PredictionOptionsSkeleton({
+	count = 2,
+}: Readonly<{ count?: number }>) {
+	return (
+		<div
+			aria-hidden='true'
+			className={`max-w-md w-full mx-auto mt-4 flex flex-col gap-3`}
+		>
+			{Array.from({ length: count }).map((_, i) => (
+				<div key={i} className={`rounded-lg border p-4 flex gap-3`}>
+					<Skeleton className={`size-4 rounded-full mt-1`} />
+					<div className={`flex-1 flex flex-col gap-2`}>
+						<div className={`flex justify-between`}>
+							<Skeleton className={`h-6 w-28`} />
+							<Skeleton className={`h-5 w-10`} />
+						</div>
+						<Skeleton className={`h-3 w-16 ml-auto`} />
+						<Skeleton className={`h-2 w-full`} />
+					</div>
+				</div>
+			))}
+		</div>
 	);
 }

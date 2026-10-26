@@ -69,7 +69,12 @@ export function PredictionPage() {
 						)}
 					</>
 				)}
-				{prediction?.seriesTitle ? (
+				{isPredictionLoading ? (
+					// Where the series link lands, so the card doesn't move.
+					<div className='max-w-md mx-auto mb-2'>
+						<Skeleton className='h-4 w-32' />
+					</div>
+				) : prediction?.seriesTitle ? (
 					<Link
 						to={`/rooms/${room.code}/series/${prediction.seriesId}`}
 						className='block max-w-md mx-auto mb-2 text-xs text-muted-foreground hover:text-foreground'

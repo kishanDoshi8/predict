@@ -9,6 +9,7 @@ import { usePlayer } from "@/features/home";
 import { getOptionColor } from "@/shared/hooks/useOptionColor";
 import { ClockIcon, LockIcon } from "lucide-react";
 import LockControls from "../controls/LockControls";
+import { BetListSkeleton } from "../components/BetListSkeleton";
 import { useRoomBetRealtime } from "@/features/rooms";
 import PredictionData from "./PredictionData";
 
@@ -65,7 +66,7 @@ export default function LockedPhase({
 						BETS CLOSED
 					</Badge>
 				) : (
-					<Skeleton className={`h-5 w-25 mx-auto`} />
+					<Skeleton className={`h-5.5 w-28 mx-auto rounded-full`} />
 				)}
 
 				<PredictionTitle
@@ -88,7 +89,7 @@ export default function LockedPhase({
 						</FadeContent>
 					</Badge>
 				) : (
-					<Skeleton className={`h-10 w-36 mx-auto`} />
+					<Skeleton className={`h-10.5 w-44 mx-auto`} />
 				)}
 
 				<PredictionData
@@ -109,10 +110,7 @@ export default function LockedPhase({
 					<p className={`text-2xl`}>Who bet what?</p>
 				</div>
 				{isBetsLoading ? (
-					<>
-						<Skeleton className={`h-15 w-full mx-auto mt-4`} />
-						<Skeleton className={`h-15 w-full mx-auto mt-4`} />
-					</>
+					<BetListSkeleton />
 				) : (
 					<FadeContent
 						delay={contentDelays.bets}

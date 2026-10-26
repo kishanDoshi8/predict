@@ -6,6 +6,7 @@ import {
 	DialogTitle,
 	Badge,
 	Skeleton,
+	SkeletonList,
 	DrawerTitle,
 	DrawerHeader,
 	DrawerContent,
@@ -101,24 +102,54 @@ const resultBadgeMeta = {
 	},
 } as const;
 
+const STAT_TILE =
+	"rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2";
+
+// Stat tiles with the real tile shell: label line, then the 2xl figure (and
+// for the wide tiles, the detail line or the win-rate bar).
 function StatsSkeleton() {
 	return (
-		<div className='grid grid-cols-2 gap-4'>
+		<div aria-hidden='true' className='grid grid-cols-2 gap-4'>
 			{Array.from({ length: 4 }).map((_, i) => (
-				<Skeleton key={i} className='h-19 rounded-lg' />
+				<div key={i} className={STAT_TILE}>
+					<Skeleton className='my-0.5 h-3 w-16' />
+					<Skeleton className='my-1 h-6 w-14' />
+				</div>
 			))}
-			{Array.from({ length: 2 }).map((_, i) => (
-				<Skeleton key={i} className='h-26 rounded-lg col-span-2' />
-			))}
+			<div className={cn(STAT_TILE, "col-span-2")}>
+				<Skeleton className='my-0.5 h-3 w-20' />
+				<div>
+					<Skeleton className='my-1 h-6 w-28' />
+					<Skeleton className='my-0.5 h-3 w-36' />
+				</div>
+			</div>
+			<div className={cn(STAT_TILE, "col-span-2")}>
+				<Skeleton className='my-0.5 h-3 w-16' />
+				<div className='flex flex-col gap-3'>
+					<div className='flex items-center justify-between'>
+						<Skeleton className='my-1 h-6 w-16' />
+						<Skeleton className='h-4 w-10' />
+					</div>
+					<Skeleton className='h-2 w-full rounded-full' />
+				</div>
+			</div>
 		</div>
 	);
 }
 
-function PredictionsSkeleton() {
+// Sized like the "No … yet" box the section most often shows.
+function SectionSkeleton() {
+	return <Skeleton className='h-13.5 rounded-lg' />;
+}
+
+// The five result chips.
+function RecentPredictionsSkeleton() {
 	return (
-		<div className='space-y-2'>
-			<Skeleton className='h-10 rounded-lg' />
-		</div>
+		<SkeletonList
+			count={5}
+			className='flex gap-2'
+			itemClassName='size-8.5 rounded-full'
+		/>
 	);
 }
 
@@ -186,7 +217,7 @@ export function PlayerProfileDialog({
 
 	const recentPredictionsContent = (() => {
 		if (isHistoryLoading) {
-			return <PredictionsSkeleton />;
+			return <RecentPredictionsSkeleton />;
 		}
 
 		if (recentPredictions.length === 0) {
@@ -218,7 +249,7 @@ export function PlayerProfileDialog({
 
 	const championshipsContent = (() => {
 		if (isSeriesRecognitionLoading) {
-			return <PredictionsSkeleton />;
+			return <SectionSkeleton />;
 		}
 
 		if (seriesRecognition?.championships.length) {
@@ -277,7 +308,7 @@ export function PlayerProfileDialog({
 
 	const awardsContent = (() => {
 		if (isSeriesRecognitionLoading) {
-			return <PredictionsSkeleton />;
+			return <SectionSkeleton />;
 		}
 
 		if (visibleAwards.length) {
@@ -420,7 +451,7 @@ export function PlayerProfileDialog({
 									<FadeContent
 										key={key}
 										delay={50}
-										className='rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'
+										className={STAT_TILE}
 									>
 										<p className='flex justify-between text-xs text-muted-foreground'>
 											{label}
@@ -439,7 +470,7 @@ export function PlayerProfileDialog({
 								))}
 								<FadeContent
 									delay={100}
-									className='col-span-2 rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'
+									className={cn(STAT_TILE, "col-span-2")}
 								>
 									<h3 className='flex gap-2 items-center text-xs text-muted-foreground'>
 										<span>Largest Win</span>
@@ -476,7 +507,7 @@ export function PlayerProfileDialog({
 								</FadeContent>
 								<FadeContent
 									delay={100}
-									className='col-span-2 rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2'
+									className={cn(STAT_TILE, "col-span-2")}
 								>
 									<h3 className='flex items-center gap-2 text-xs text-muted-foreground'>
 										Win rate

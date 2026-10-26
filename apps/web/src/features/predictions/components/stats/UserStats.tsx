@@ -1,4 +1,4 @@
-import { Badge, FadeContent, Skeleton } from "@/shared/ui";
+import { Badge, FadeContent, Reveal, Skeleton } from "@/shared/ui";
 import {
 	ChevronRightIcon,
 	CrosshairIcon,
@@ -374,7 +374,7 @@ function LeaderboardMiniRows({
 
 	return (
 		<div className={`flex flex-col gap-2`}>
-			{splitStandings(leaderboard).ranked.slice(0, 4).map((entry) => {
+			{splitStandings(leaderboard).ranked.slice(0, 4).map((entry, index) => {
 				const rankChipStyle = getRankChipStyle(entry.rank);
 
 				return (
@@ -386,7 +386,8 @@ function LeaderboardMiniRows({
 						}}
 						className={`cursor-pointer`}
 					>
-						<FadeContent
+						<Reveal
+							index={index}
 							className={`flex items-center gap-3 p-3 rounded-lg ${entry.player_id === playerId ? "bg-linear-30 from-accent/10 border to-primary/10" : "bg-secondary/60"}`}
 						>
 							<p
@@ -431,7 +432,7 @@ function LeaderboardMiniRows({
 									pts
 								</span>
 							</p>
-						</FadeContent>
+						</Reveal>
 					</button>
 				);
 			})}

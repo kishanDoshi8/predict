@@ -161,6 +161,8 @@ function Section({
 	);
 }
 
+const QUEUE_ROW = "flex items-center gap-3 px-3 py-2.5";
+
 function QueueRow({
 	item,
 	roomCode,
@@ -178,7 +180,7 @@ function QueueRow({
 		: "";
 
 	return (
-		<div className='flex items-center gap-3 px-3 py-2.5'>
+		<div className={QUEUE_ROW}>
 			<Link
 				to={`/rooms/${roomCode}/predictions/${item.id}`}
 				className='min-w-0 flex-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50'
@@ -221,11 +223,19 @@ function EmptyRow({ children }: Readonly<{ children: ReactNode }>) {
 	);
 }
 
+// Two queue rows: title over meta, with the row's action on the right.
 function QueueSkeleton() {
-	return (
-		<div className='space-y-2 p-3'>
-			<Skeleton className='h-10 w-full' />
-			<Skeleton className='h-10 w-full' />
+	return [0, 1].map((row) => (
+		<div
+			key={row}
+			aria-hidden='true'
+			className={QUEUE_ROW}
+		>
+			<div className='flex min-w-0 flex-1 flex-col gap-2 py-1'>
+				<Skeleton className='h-3.5 w-2/3' />
+				<Skeleton className='h-3 w-1/2' />
+			</div>
+			<Skeleton className='h-8 w-16' />
 		</div>
-	);
+	));
 }

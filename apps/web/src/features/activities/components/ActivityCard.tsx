@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { ChevronRightIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/shared/lib/utils";
-import { Badge } from "@/shared/ui";
+import { Badge, Skeleton } from "@/shared/ui";
 
 type ActivityTone =
 	| "neutral"
@@ -28,6 +28,9 @@ type ActivityCardProps = {
 	timestamp: string;
 	href?: string | null;
 };
+
+const CARD_SHELL =
+	"rounded-2xl border px-4 py-3.5 transition-colors duration-200 motion-reduce:transition-none";
 
 const TIER_STYLES: Record<ActivityTier, string> = {
 	1: "border-activity/35 bg-activity/10",
@@ -60,11 +63,11 @@ const TONE_STYLES: Record<
 		openPill: "border-win/30 bg-win/10 text-win",
 	},
 	prediction: {
-		shell: "bg-accent/10 border-accent/30",
-		icon: "border-accent/40 bg-accent/20 text-accent",
-		typeBadge: "border-accent/35 bg-accent/20 text-accent",
-		summary: "border-accent/30 bg-accent/15 text-foreground/90",
-		openPill: "border-accent/35 bg-accent/15 text-foreground/90",
+		shell: "bg-activity/10 border-activity/30",
+		icon: "border-activity/35 bg-activity/18 text-activity",
+		typeBadge: "border-activity/30 bg-activity/15 text-activity",
+		summary: "border-activity/25 bg-activity/12 text-foreground/90",
+		openPill: "border-activity/30 bg-activity/12 text-activity",
 	},
 	duel: {
 		shell: "bg-activity/10 border-activity/30",
@@ -117,7 +120,7 @@ export function ActivityCard({
 	const body = (
 		<div
 			className={cn(
-				"rounded-2xl border px-4 py-3.5 transition-colors duration-200 motion-reduce:transition-none",
+				CARD_SHELL,
 				TIER_STYLES[tier],
 				toneStyles.shell,
 				href ? "shadow-xs" : undefined,
@@ -225,5 +228,35 @@ export function ActivityCard({
 		>
 			{body}
 		</Link>
+	);
+}
+
+// Same shell and rhythm as ActivityCard (icon, type badge + time, title, an
+// optional summary, the Open pill) so cards land without shifting the feed.
+export function ActivityCardSkeleton({
+	withSummary = false,
+}: Readonly<{ withSummary?: boolean }>) {
+	return (
+		<div className={cn(CARD_SHELL, TIER_STYLES[2])}>
+			<div className='flex items-start gap-3.5'>
+				<Skeleton className='mt-0.5 size-8.5 shrink-0 rounded-lg' />
+				<div className='min-w-0 flex-1'>
+					<div className='flex items-center justify-between gap-1.5'>
+						<Skeleton className='h-5 w-20 rounded-full' />
+						<Skeleton className='h-4 w-12' />
+					</div>
+					<div className='mt-2 flex h-6 items-center'>
+						<Skeleton className='h-4.5 w-4/5' />
+					</div>
+					{withSummary ? (
+						<Skeleton className='mt-2.5 h-8 w-full rounded-lg' />
+					) : null}
+					<div className={withSummary ? "mt-2.5" : "mt-1.5"} />
+				</div>
+			</div>
+			<div className='mt-2 flex justify-end'>
+				<Skeleton className='h-5.5 w-14 rounded-full' />
+			</div>
+		</div>
 	);
 }

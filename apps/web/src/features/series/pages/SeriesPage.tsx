@@ -6,7 +6,11 @@ import {
 	useSeriesLeaderboard,
 } from "@/features/leaderboard";
 import { useActivePredictions } from "@/features/predictions";
-import { SeriesDetailView, SeriesListView } from "@/features/series/components";
+import {
+	SeriesDetailView,
+	SeriesListView,
+	SeriesOverviewCardSkeleton,
+} from "@/features/series/components";
 import {
 	useRoomSeries,
 	useSeriesAwards,
@@ -295,10 +299,16 @@ export default function SeriesPage() {
 
 	if (isPending) {
 		return (
-			<div className='mx-auto w-full max-w-md space-y-4 p-4'>
-				<Skeleton className='h-10 w-1/2 rounded-lg' />
-				<Skeleton className='h-40 w-full rounded-2xl' />
-				<Skeleton className='h-52 w-full rounded-2xl' />
+			// Mirrors SeriesDetailView's top: overview, then the open predictions.
+			<div
+				aria-hidden='true'
+				className='mx-auto w-full max-w-md space-y-6 p-4'
+			>
+				<SeriesOverviewCardSkeleton />
+				<div className='space-y-3'>
+					<Skeleton className='my-1 h-5 w-40' />
+					<Skeleton className='h-80 w-full rounded-xl' />
+				</div>
 			</div>
 		);
 	}

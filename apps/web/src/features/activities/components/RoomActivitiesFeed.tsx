@@ -1,5 +1,6 @@
 import { AlertCircleIcon } from "lucide-react";
-import { Skeleton } from "@/shared/ui";
+import { SkeletonList } from "@/shared/ui";
+import { ActivityCardSkeleton } from "@/features/activities/components/ActivityCard";
 import { ActivityCardRegistry } from "@/features/activities/components/ActivityCardRegistry";
 import { RoomActivity } from "@/features/activities/types/types";
 
@@ -23,13 +24,7 @@ export function RoomActivitiesFeed({
 	showSeries,
 }: Readonly<RoomActivitiesFeedProps>) {
 	if (isLoading) {
-		return (
-			<div className='space-y-3'>
-				{Array.from({ length: 4 }).map((_, index) => (
-					<Skeleton key={index} className='h-28 w-full rounded-2xl' />
-				))}
-			</div>
-		);
+		return <ActivityFeedSkeleton count={4} />;
 	}
 
 	if (isError) {
@@ -59,14 +54,29 @@ export function RoomActivitiesFeed({
 
 	return (
 		<div className='space-y-3'>
-			{activities.map((activity) => (
+			{activities.map((activity, index) => (
 				<ActivityCardRegistry
 					key={activity.id}
+					index={index}
 					activity={activity}
 					roomCode={roomCode}
 					showSeries={showSeries}
 				/>
 			))}
 		</div>
+	);
+}
+
+// Placeholder feed: alternates plain cards with ones carrying a summary, the
+// two shapes most activity takes.
+export function ActivityFeedSkeleton({ count }: Readonly<{ count: number }>) {
+	return (
+		<SkeletonList
+			count={count}
+			className='space-y-3'
+			renderItem={(index) => (
+				<ActivityCardSkeleton withSummary={index % 2 === 1} />
+			)}
+		/>
 	);
 }

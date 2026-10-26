@@ -2,8 +2,12 @@ import { betsNeededLabel, LeaderboardEntry } from "@/features/leaderboard";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { cn, formatSignedPoints } from "@/shared/lib/utils";
 import { CoinsIcon, FlameIcon } from "lucide-react";
-import { Badge } from "@/shared/ui";
+import { Badge, Skeleton, SkeletonList } from "@/shared/ui";
 import { RankChange } from "./RankChange";
+
+// Shared by the series and all-series standings rows and their skeletons.
+export const STANDINGS_ROW_SHELL =
+	"flex items-center gap-3 px-3 py-2.5 rounded-xl border";
 
 type Props = {
 	entry: LeaderboardEntry;
@@ -35,7 +39,8 @@ export function LeaderboardRow({
 	return (
 		<button
 			className={cn(
-				"flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-colors",
+				STANDINGS_ROW_SHELL,
+				"transition-colors",
 				isSelf
 					? "border-win/30 bg-win/5"
 					: "border-transparent hover:bg-accent/25",
@@ -120,5 +125,36 @@ export function LeaderboardRow({
 				</p>
 			</div>
 		</button>
+	);
+}
+
+// A standings row's shape: rank, avatar, name over a stat line, points on the
+// right. Heights follow the real text lines so rows swap in without a shift.
+function StandingsRowSkeleton() {
+	return (
+		<div className={cn(STANDINGS_ROW_SHELL, "border-transparent")}>
+			<span className='flex w-8 shrink-0 justify-center'>
+				<Skeleton className='h-4 w-5' />
+			</span>
+			<Skeleton className='size-8 shrink-0 rounded-full' />
+			<div className='flex h-10.5 flex-1 flex-col justify-center gap-2'>
+				<Skeleton className='h-4 w-28' />
+				<Skeleton className='h-3 w-16' />
+			</div>
+			<div className='flex h-10.5 flex-col items-end justify-center gap-2'>
+				<Skeleton className='h-4 w-14' />
+				<Skeleton className='h-3 w-8' />
+			</div>
+		</div>
+	);
+}
+
+export function StandingsListSkeleton({ count = 5 }: Readonly<{ count?: number }>) {
+	return (
+		<SkeletonList
+			count={count}
+			className='flex flex-col gap-1'
+			renderItem={() => <StandingsRowSkeleton />}
+		/>
 	);
 }

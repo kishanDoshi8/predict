@@ -1,8 +1,9 @@
 import { Prediction } from "@/features/predictions";
 import PredictionOptions from "../widgets/PredictionOptions";
 import PredictionTitle from "../components/PredictionTitle";
+import { BetListSkeleton } from "../components/BetListSkeleton";
 import { ResolvedByLine } from "../components/ResolvedByLine";
-import { Alert, AlertDescription, AlertTitle, Skeleton } from "@/shared/ui";
+import { Alert, AlertDescription, AlertTitle } from "@/shared/ui";
 import { InfoIcon } from "lucide-react";
 import { useBets } from "@/features/predictions";
 import { useOptionColor } from "@/shared/hooks/useOptionColor";
@@ -62,10 +63,7 @@ function NoResult({ prediction }: Readonly<Props>) {
 					<p className={`text-xl`}>Who bet what?</p>
 				</div>
 				{isBetsLoading ? (
-					<>
-						<Skeleton className={`h-15 w-full mx-auto mt-4`} />
-						<Skeleton className={`h-15 w-full mx-auto mt-4`} />
-					</>
+					<BetListSkeleton layout='separate' />
 				) : (
 					<div>
 						{bets?.map((bet) => (

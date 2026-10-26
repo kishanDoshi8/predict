@@ -18,9 +18,11 @@ import {
 import { TrendingUpIcon, TrophyIcon } from "lucide-react";
 import { describeDeadline } from "@/shared/lib/deadline";
 import { cn, formatSignedPoints } from "@/shared/lib/utils";
-import { Skeleton } from "@/shared/ui";
+import { Reveal, Skeleton } from "@/shared/ui";
 import { ChevronRightIcon, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+
+const HERO_SHELL = "w-full max-w-md mx-auto rounded-2xl border bg-card p-4 mt-4";
 
 // Where you stand in the series you're looking at, and what locks next.
 export function SeriesHeroCard() {
@@ -50,9 +52,7 @@ export function SeriesHeroCard() {
 	);
 
 	if (isSeriesLoading || (currentSeriesId && isWalletLoading)) {
-		return (
-			<Skeleton className='h-36 w-full max-w-md mx-auto rounded-2xl' />
-		);
+		return <SeriesHeroCardSkeleton />;
 	}
 	if (!currentSeries || !wallet) return null;
 
@@ -76,9 +76,10 @@ export function SeriesHeroCard() {
 		: null;
 
 	return (
-		<section
+		<Reveal
+			as='section'
 			aria-label={`${currentSeries.title} summary`}
-			className='w-full max-w-md mx-auto rounded-2xl border bg-card p-4 mt-4'
+			className={HERO_SHELL}
 		>
 			<div className='flex items-center justify-between gap-2'>
 				<p className='truncate text-sm font-medium text-muted-foreground'>
@@ -185,6 +186,32 @@ export function SeriesHeroCard() {
 					<ChevronRightIcon className='size-4 shrink-0 text-muted-foreground' />
 				</Link>
 			) : null}
-		</section>
+		</Reveal>
+	);
+}
+
+// Same card with placeholders: title + status, rank and balance, the points
+// line, and one row for what locks next (the usual case mid-series).
+function SeriesHeroCardSkeleton() {
+	return (
+		<div aria-hidden='true' className={HERO_SHELL}>
+			<div className='flex h-5.5 items-center justify-between gap-2'>
+				<Skeleton className='h-3.5 w-32' />
+				<Skeleton className='h-5.5 w-16 rounded-full' />
+			</div>
+			<div className='mt-2 flex items-end justify-between gap-4'>
+				<div className='flex flex-col gap-1'>
+					<Skeleton className='h-3 w-16' />
+					<Skeleton className='h-8.5 w-20' />
+				</div>
+				<div className='flex flex-col items-end gap-1'>
+					<Skeleton className='h-3 w-14' />
+					<Skeleton className='h-8.5 w-28' />
+					<Skeleton className='h-3 w-24' />
+				</div>
+			</div>
+			<Skeleton className='mt-3 h-3 w-40' />
+			<Skeleton className='mt-3 h-13 w-full rounded-xl' />
+		</div>
 	);
 }

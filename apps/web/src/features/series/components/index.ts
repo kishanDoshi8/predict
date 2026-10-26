@@ -3,7 +3,7 @@ export { SeriesEditDialog } from "./SeriesEditDialog";
 export { SeriesHallOfFameSection } from "./SeriesHallOfFameSection";
 export { SeriesListView } from "./SeriesListView";
 export { SeriesOrganizerActionsMenu } from "./SeriesOrganizerActionsMenu";
-export { SeriesOverviewCard } from "./SeriesOverviewCard";
+export { SeriesOverviewCard, SeriesOverviewCardSkeleton } from "./SeriesOverviewCard";
 export { SeriesSectionHeader } from "./SeriesSectionHeader";
 export { SeriesStatusBadge } from "./SeriesStatusBadge";
 export { SeriesTile } from "./SeriesTile";

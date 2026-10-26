@@ -1,5 +1,8 @@
 import * as React from "react";
+import { motion } from "framer-motion";
 import { Progress as ProgressPrimitive } from "radix-ui";
+
+import { progressTransition } from "@/shared/lib/motion";
 
 import { cn } from "@/shared/lib/utils";
 
@@ -20,14 +23,19 @@ function Progress({
 			)}
 			{...props}
 		>
-			<ProgressPrimitive.Indicator
-				data-slot='progress-indicator'
-				className={cn(
-					"h-full w-full flex-1 transition-all rounded-full",
-					indicatorBgClassName || "bg-linear-to-r from-primary to-accent ",
-				)}
-				style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
-			/>
+			{/* Grows in from empty on mount, then follows value changes. */}
+			<ProgressPrimitive.Indicator asChild>
+				<motion.div
+					data-slot='progress-indicator'
+					className={cn(
+						"h-full w-full flex-1 rounded-full",
+						indicatorBgClassName || "bg-linear-to-r from-primary to-accent ",
+					)}
+					initial={{ x: "-100%" }}
+					animate={{ x: `-${100 - (value || 0)}%` }}
+					transition={progressTransition}
+				/>
+			</ProgressPrimitive.Indicator>
 		</ProgressPrimitive.Root>
 	);
 }

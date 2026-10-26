@@ -6,7 +6,9 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-	Spinner,
+	Reveal,
+	Skeleton,
+	SkeletonList,
 } from "@/shared/ui";
 import { useNotificationPermission } from "@/shared/hooks/useNotificationPermission";
 import { PreferenceSettings, RoomPreferenceOverrides } from "@/shared/lib/api";
@@ -37,6 +39,11 @@ type NotificationPreferenceKey =
 	| "result_revealed"
 	| "weekly_points_claim"
 	| "result_needed";
+
+const SETTINGS_SCROLL =
+	"-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4 space-y-6 bg-card/70 py-2";
+const SETTING_ROW =
+	"flex items-center justify-between gap-4 border rounded-md p-3";
 
 const notificationLabels: Record<NotificationPreferenceKey, string> = {
 	prediction_live: "Prediction goes live",
@@ -214,18 +221,34 @@ export function RoomPreferencesDialog({
 				) : null}
 
 				{!preferences || isPreferencesPending ? (
-					<div className='py-8 flex justify-center'>
-						<Spinner className='size-8' />
+					// Same scroll area, headings and toggle rows, so the
+					// dialog doesn't resize when settings arrive.
+					<div aria-hidden='true' className={SETTINGS_SCROLL}>
+						{["Defaults", "This Room"].map((title) => (
+							<section key={title} className='space-y-3'>
+								<h3 className='font-semibold'>{title}</h3>
+								<SkeletonList
+									count={visibleKeys.length}
+									className='space-y-2'
+									renderItem={() => (
+										<div className={SETTING_ROW}>
+											<Skeleton className='h-3.5 w-40' />
+											<Skeleton className='h-8 w-12' />
+										</div>
+									)}
+								/>
+							</section>
+						))}
 					</div>
 				) : (
-					<div className='-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4 space-y-6 bg-card/70 py-2'>
+					<Reveal className={SETTINGS_SCROLL}>
 						<section className='space-y-3'>
 							<h3 className='font-semibold'>Defaults</h3>
 							<div className='space-y-2'>
 								{visibleKeys.map((key) => (
 									<div
 										key={`global-${key}`}
-										className='flex items-center justify-between gap-4 border rounded-md p-3'
+										className={SETTING_ROW}
 									>
 										<p className='text-sm'>
 											{notificationLabels[key]}
@@ -257,7 +280,7 @@ export function RoomPreferencesDialog({
 								{visibleKeys.map((key) => (
 									<div
 										key={`room-${key}`}
-										className='flex items-center justify-between gap-4 border rounded-md p-3'
+										className={SETTING_ROW}
 									>
 										<div className='flex flex-col'>
 											<p className='text-sm'>
@@ -286,7 +309,7 @@ export function RoomPreferencesDialog({
 								))}
 							</div>
 						</section>
-					</div>
+					</Reveal>
 				)}
 
 				<DialogFooter className='gap-2'>

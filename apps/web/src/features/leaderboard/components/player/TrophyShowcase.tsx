@@ -128,27 +128,37 @@ function HeroTrophy({ trophy }: { trophy: Trophy }) {
 }
 
 // The runners-up beside each other, with full titles that wrap if needed.
-function SupportingTrophy({ trophy, index }: { trophy: Trophy; index: number }) {
+// A lone runner-up takes the full width as a slim row instead.
+function SupportingTrophy({
+	trophy,
+	index,
+	wide = false,
+}: {
+	trophy: Trophy;
+	index: number;
+	wide?: boolean;
+}) {
 	const visual = getTrophyVisual(trophy);
 
 	return (
 		<Reveal
 			index={index}
 			className={cn(
-				"relative flex min-w-0 flex-col gap-2 overflow-hidden rounded-xl border bg-card p-3",
+				"relative flex min-w-0 gap-2 overflow-hidden rounded-xl border bg-card p-3",
+				wide ? "col-span-2 items-center gap-3" : "flex-col",
 				getTierTileClassName(trophy.tier),
 			)}
 		>
 			{trophy.tier === "major" ? <MajorWash /> : null}
 			<div
 				className={cn(
-					"relative flex size-9 items-center justify-center rounded-full border",
+					"relative flex size-9 shrink-0 items-center justify-center rounded-full border",
 					visual.ringClassName,
 				)}
 			>
 				<visual.Icon className={cn("size-4.5", visual.textClassName)} />
 			</div>
-			<div className='relative min-w-0'>
+			<div className='relative min-w-0 flex-1'>
 				<p
 					className={cn(
 						"text-xs font-semibold text-balance",
@@ -161,6 +171,11 @@ function SupportingTrophy({ trophy, index }: { trophy: Trophy; index: number }) 
 					{trophy.seriesTitle}
 				</p>
 			</div>
+			{wide ? (
+				<p className='relative shrink-0 text-xs tabular-nums text-muted-foreground'>
+					{formatTrophyValue(trophy)}
+				</p>
+			) : null}
 		</Reveal>
 	);
 }
@@ -206,6 +221,7 @@ export function TrophyShowcase({
 						key={trophy.id}
 						trophy={trophy}
 						index={index + 1}
+						wide={supporting.length === 1}
 					/>
 				))}
 			</div>

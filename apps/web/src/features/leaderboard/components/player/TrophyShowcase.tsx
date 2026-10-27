@@ -6,10 +6,14 @@ import {
 import {
 	getAwardVisual,
 	getChampionshipVisual,
-	getTierVisual,
+	getTierTileClassName,
 	getTrophyVisual,
 } from "@/shared/lib/seriesRecognitionVisuals";
-import type { Trophy } from "@/shared/lib/trophyPrestige";
+import {
+	formatTrophyDate,
+	formatTrophyValue,
+	type Trophy,
+} from "@/shared/lib/trophyPrestige";
 import { cn } from "@/shared/lib/utils";
 import { ChevronRightIcon } from "lucide-react";
 
@@ -79,55 +83,98 @@ function buildTally(trophies: Trophy[]): TallyItem[] {
 	return [...placementItems, ...awardItems];
 }
 
-function FeaturedTrophy({ trophy, index }: { trophy: Trophy; index: number }) {
+// Soft podium-gold wash behind a major trophy.
+function MajorWash() {
+	return (
+		<div
+			aria-hidden='true'
+			className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,var(--color-rank-1),transparent_65%)] opacity-10'
+		/>
+	);
+}
+
+// The single most prestigious trophy: wide, with what it was won with.
+function HeroTrophy({ trophy }: { trophy: Trophy }) {
 	const visual = getTrophyVisual(trophy);
-	const tier = getTierVisual(trophy.tier);
+
+	return (
+		<Reveal
+			className={cn(
+				"relative col-span-2 flex items-center gap-4 overflow-hidden rounded-xl border bg-card p-4",
+				getTierTileClassName(trophy.tier),
+			)}
+		>
+			{trophy.tier === "major" ? <MajorWash /> : null}
+			<div
+				className={cn(
+					"relative flex size-14 shrink-0 items-center justify-center rounded-full border",
+					visual.ringClassName,
+				)}
+			>
+				<visual.Icon className={cn("size-7", visual.textClassName)} />
+			</div>
+			<div className='relative min-w-0 flex-1'>
+				<p className={cn("text-base font-semibold", visual.textClassName)}>
+					{visual.label}
+				</p>
+				<p className='text-sm text-foreground'>{trophy.seriesTitle}</p>
+				<p className='mt-0.5 flex flex-wrap gap-x-3 text-xs tabular-nums text-muted-foreground'>
+					<span>{formatTrophyValue(trophy)}</span>
+					<span>{formatTrophyDate(trophy.wonAt)}</span>
+				</p>
+			</div>
+		</Reveal>
+	);
+}
+
+// The runners-up beside each other, with full titles that wrap if needed.
+// A lone runner-up takes the full width as a slim row instead.
+function SupportingTrophy({
+	trophy,
+	index,
+	wide = false,
+}: {
+	trophy: Trophy;
+	index: number;
+	wide?: boolean;
+}) {
+	const visual = getTrophyVisual(trophy);
 
 	return (
 		<Reveal
 			index={index}
 			className={cn(
-				"relative flex min-w-0 flex-col items-center gap-2 overflow-hidden rounded-xl border bg-card px-2 pt-3 pb-2.5 text-center",
-				tier.tileClassName,
+				"relative flex min-w-0 gap-2 overflow-hidden rounded-xl border bg-card p-3",
+				wide ? "col-span-2 items-center gap-3" : "flex-col",
+				getTierTileClassName(trophy.tier),
 			)}
 		>
-			{trophy.tier === "major" ? (
-				// Soft podium-gold wash behind a major trophy.
-				<div
-					aria-hidden='true'
-					className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,var(--color-rank-1),transparent_70%)] opacity-10'
-				/>
-			) : null}
+			{trophy.tier === "major" ? <MajorWash /> : null}
 			<div
 				className={cn(
-					"relative flex size-11 items-center justify-center rounded-full border",
+					"relative flex size-9 shrink-0 items-center justify-center rounded-full border",
 					visual.ringClassName,
 				)}
 			>
-				<visual.Icon className={cn("size-5", visual.textClassName)} />
+				<visual.Icon className={cn("size-4.5", visual.textClassName)} />
 			</div>
-			<div className='relative w-full min-w-0'>
+			<div className='relative min-w-0 flex-1'>
 				<p
 					className={cn(
-						"truncate text-[11px] font-semibold uppercase tracking-wider",
+						"text-xs font-semibold text-balance",
 						visual.textClassName,
 					)}
 				>
 					{visual.label}
 				</p>
-				<p className='truncate text-xs text-foreground'>
+				<p className='line-clamp-2 text-xs text-muted-foreground'>
 					{trophy.seriesTitle}
 				</p>
 			</div>
-			{tier.tagClassName ? (
-				<span
-					className={cn(
-						"relative rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider",
-						tier.tagClassName,
-					)}
-				>
-					{tier.label}
-				</span>
+			{wide ? (
+				<p className='relative shrink-0 text-xs tabular-nums text-muted-foreground'>
+					{formatTrophyValue(trophy)}
+				</p>
 			) : null}
 		</Reveal>
 	);
@@ -136,10 +183,10 @@ function FeaturedTrophy({ trophy, index }: { trophy: Trophy; index: number }) {
 export function TrophyShowcaseSkeleton() {
 	return (
 		<div aria-hidden='true' className='flex flex-col gap-3'>
-			<div className='grid grid-cols-3 gap-2'>
-				{Array.from({ length: FEATURED_COUNT }).map((_, i) => (
-					<Skeleton key={i} className='h-30 rounded-xl' />
-				))}
+			<div className='grid grid-cols-2 gap-2'>
+				<Skeleton className='col-span-2 h-24 rounded-xl' />
+				<Skeleton className='h-26 rounded-xl' />
+				<Skeleton className='h-26 rounded-xl' />
 			</div>
 			<Skeleton className='h-6 w-48 rounded-full' />
 		</div>
@@ -162,14 +209,20 @@ export function TrophyShowcase({
 		);
 	}
 
-	const featured = trophies.slice(0, FEATURED_COUNT);
+	const [hero, ...supporting] = trophies.slice(0, FEATURED_COUNT);
 	const tally = buildTally(trophies);
 
 	return (
 		<div className='flex flex-col gap-3'>
-			<div className='grid grid-cols-3 gap-2'>
-				{featured.map((trophy, index) => (
-					<FeaturedTrophy key={trophy.id} trophy={trophy} index={index} />
+			<div className='grid grid-cols-2 gap-2'>
+				<HeroTrophy trophy={hero} />
+				{supporting.map((trophy, index) => (
+					<SupportingTrophy
+						key={trophy.id}
+						trophy={trophy}
+						index={index + 1}
+						wide={supporting.length === 1}
+					/>
 				))}
 			</div>
 

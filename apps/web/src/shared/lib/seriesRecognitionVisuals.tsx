@@ -12,11 +12,7 @@ import {
 	getSeriesAwardLabel,
 	type SeriesAwardType,
 } from "@/shared/lib/seriesRewards";
-import {
-	SERIES_TIER_LABEL,
-	type SeriesTier,
-	type Trophy,
-} from "@/shared/lib/trophyPrestige";
+import type { SeriesTier, Trophy } from "@/shared/lib/trophyPrestige";
 
 type ChampionshipPlacement = 1 | 2 | 3;
 
@@ -105,35 +101,11 @@ export function getAwardVisual(awardType: SeriesAwardType): RecognitionVisual {
 	return awardVisualMap[awardType] ?? fallbackAwardVisual;
 }
 
-type TierVisual = {
-	label: string;
-	// The small tier tag; null hides it (standard series need no tag).
-	tagClassName: string | null;
-	// Extra emphasis on a trophy tile.
-	tileClassName: string;
-};
-
-// Major trophies get the podium gold; minor ones step back.
-const tierVisualMap: Record<SeriesTier, TierVisual> = {
-	major: {
-		label: SERIES_TIER_LABEL.major,
-		tagClassName: "bg-rank-1/15 text-rank-1",
-		tileClassName: "border-rank-1/40 shadow-[0_0_24px] shadow-rank-1/10",
-	},
-	standard: {
-		label: SERIES_TIER_LABEL.standard,
-		tagClassName: null,
-		tileClassName: "border-border/60",
-	},
-	minor: {
-		label: SERIES_TIER_LABEL.minor,
-		tagClassName: "bg-muted text-muted-foreground",
-		tileClassName: "border-border/60",
-	},
-};
-
-export function getTierVisual(tier: SeriesTier): TierVisual {
-	return tierVisualMap[tier];
+// Major trophies get a podium-gold edge; the rest stay neutral.
+export function getTierTileClassName(tier: SeriesTier): string {
+	return tier === "major"
+		? "border-rank-1/40 shadow-[0_0_24px] shadow-rank-1/10"
+		: "border-border/60";
 }
 
 // Icon, colors and name for any trophy, placement or award.

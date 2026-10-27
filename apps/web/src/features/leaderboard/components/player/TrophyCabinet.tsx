@@ -1,8 +1,10 @@
 import { Reveal } from "@/shared/ui";
-import { getSeriesAwardValue } from "@/shared/lib/seriesRewards";
 import { getTrophyVisual } from "@/shared/lib/seriesRecognitionVisuals";
 import {
+	AWARD_TIER_LABEL,
 	SERIES_TIER_ORDER,
+	formatTrophyDate,
+	formatTrophyValue,
 	type SeriesTier,
 	type Trophy,
 } from "@/shared/lib/trophyPrestige";
@@ -20,19 +22,15 @@ const TIER_HEADING: Record<SeriesTier, string> = {
 	minor: "Minor series",
 };
 
-function formatWonAt(value: string) {
-	return new Date(value).toLocaleDateString(undefined, {
-		month: "short",
-		year: "numeric",
-	});
-}
-
 function TrophyRow({ trophy, index }: { trophy: Trophy; index: number }) {
 	const visual = getTrophyVisual(trophy);
-	const detail =
-		trophy.kind === "award"
-			? `${getSeriesAwardValue(trophy.awardType, trophy.value)} · ${formatWonAt(trophy.wonAt)}`
-			: formatWonAt(trophy.wonAt);
+	const detail = [
+		trophy.kind === "award" ? AWARD_TIER_LABEL[trophy.awardTier] : null,
+		formatTrophyValue(trophy),
+		formatTrophyDate(trophy.wonAt),
+	]
+		.filter(Boolean)
+		.join(" · ");
 
 	return (
 		<Reveal
@@ -52,9 +50,10 @@ function TrophyRow({ trophy, index }: { trophy: Trophy; index: number }) {
 				<p className='truncate text-sm font-semibold text-foreground'>
 					{trophy.seriesTitle}
 				</p>
-				<p className='truncate text-xs text-muted-foreground'>
-					<span className={visual.textClassName}>{visual.label}</span>
-					{" · "}
+				<p className={cn("text-xs font-medium", visual.textClassName)}>
+					{visual.label}
+				</p>
+				<p className='text-xs tabular-nums text-muted-foreground'>
 					{detail}
 				</p>
 			</div>

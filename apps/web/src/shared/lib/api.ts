@@ -143,6 +143,9 @@ export type RoomMemberSeriesRecognition = {
     series_title: string
     placement: number
     points: number
+    // Settled predictions in the series, which sets the trophy's tier.
+    series_games: number | null
+    series_completed_at: string | null
     collected_at: string | null
     created_at: string
   }>
@@ -153,6 +156,8 @@ export type RoomMemberSeriesRecognition = {
     award_type: SeriesAwardType
     description: string
     value: number
+    series_games: number | null
+    series_completed_at: string | null
     collected_at: string | null
     created_at: string
   }>
@@ -1214,9 +1219,37 @@ export async function getRoomMemberSeriesRecognition(
     created_at: row.created_at,
   }))
 
+  // Series size and finish date, so trophies can be weighted and dated.
+  const seriesIds = [
+    ...new Set([...championships, ...awards].map((row) => row.series_id)),
+  ]
+  const seriesMeta = new Map<string, { games: number; completed_at: string | null }>()
+
+  if (seriesIds.length > 0) {
+    const { data: seriesData, error: seriesError } = await untypedSupabase
+      .from('series_with_stats')
+      .select('id, completed_predictions, completed_at')
+      .in('id', seriesIds)
+
+    if (seriesError) throw seriesError
+
+    for (const row of (seriesData ?? []) as any[]) {
+      seriesMeta.set(row.id, {
+        games: Number(row.completed_predictions ?? 0),
+        completed_at: row.completed_at ?? null,
+      })
+    }
+  }
+
+  const withSeriesMeta = <T extends { series_id: string }>(row: T) => ({
+    ...row,
+    series_games: seriesMeta.get(row.series_id)?.games ?? null,
+    series_completed_at: seriesMeta.get(row.series_id)?.completed_at ?? null,
+  })
+
   return {
-    championships,
-    awards,
+    championships: championships.map(withSeriesMeta),
+    awards: awards.map(withSeriesMeta),
   } as RoomMemberSeriesRecognition
 }
 // #endregion Leaderboard

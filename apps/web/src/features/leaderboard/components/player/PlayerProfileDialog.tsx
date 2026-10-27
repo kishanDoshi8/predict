@@ -1,81 +1,42 @@
 import {
+	Avatar,
+	AvatarFallback,
 	Dialog,
 	DialogContent,
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
-	Badge,
-	Skeleton,
-	SkeletonList,
-	DrawerTitle,
-	DrawerHeader,
-	DrawerContent,
 	Drawer,
+	DrawerContent,
 	DrawerDescription,
-	Field,
-	FieldLabel,
-	Progress,
-	FadeContent,
+	DrawerHeader,
+	DrawerTitle,
+	Skeleton,
 } from "@/shared/ui";
 import {
 	useRoomMemberRecentPredictions,
 	useRoomMemberSeriesRecognition,
 	useRoomMemberStats,
-} from "@/features/leaderboard";
-import { getSeriesAwardLabel } from "@/shared/lib/seriesRewards";
+	useRoomOverallStandings,
+	useSeriesLeaderboard,
+} from "../../hooks/leaderboard";
+import { useCurrentSeries } from "@/features/series";
 import {
-	getAwardVisual,
-	getChampionshipVisual,
-} from "@/shared/lib/seriesRecognitionVisuals";
+	buildTrophies,
+	getIdentityTitle,
+	type IdentityTitle,
+} from "@/shared/lib/trophyPrestige";
+import { EASE_OUT } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
-import {
-	ChartColumnIcon,
-	CheckIcon,
-	CircleDollarSign,
-	CircleSlash,
-	CoinsIcon,
-	Crosshair,
-	FlameIcon,
-	MedalIcon,
-	TargetIcon,
-	TrophyIcon,
-	X,
-} from "lucide-react";
-import { useEffect, useState } from "react";
 import { FEATURES } from "@/shared/constants/features";
-
-const statsLabels = [
-	{
-		key: "current_points",
-		label: "Lifetime Winnings",
-		icon: <CoinsIcon className={`text-rank-1`} size={20} />,
-	},
-	// Ratings are hidden while the series standings are the one ranking.
-	// {
-	// 	key: "current_rating",
-	// 	label: "Current Rating",
-	// 	icon: <ZapIcon className={`text-cyan-500`} size={20} />, (re-import ZapIcon)
-	// },
-	{
-		key: "total_predictions",
-		label: "Predictions Made",
-		icon: <TargetIcon className={`text-primary`} size={20} />,
-	},
-	// { key: "peak_rating", label: "Peak Rating" },
-	// { key: "winning_predictions", label: "Winning Predictions" },
-	// { key: "total_rated_predictions", label: "Rated Predictions" },
-	{
-		key: "current_win_streak",
-		label: "Current Win Streak",
-		icon: <FlameIcon className={`text-rank-3`} size={20} />,
-	},
-	// { key: "highest_win_streak", label: "Highest Win Streak" },
-	// {
-	// 	key: "activity_streak",
-	// 	label: "Activity Streak",
-	// 	icon: <CalendarClockIcon className={`text-accent`} size={20} />,
-	// },
-] as const;
+import { AnimatePresence, motion } from "framer-motion";
+import { AwardIcon, CrownIcon, MedalIcon } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
+import { CareerStats } from "./CareerStats";
+import { LiveSeriesStrip } from "./LiveSeriesStrip";
+import { RecentForm } from "./RecentForm";
+import { TrophyCabinet } from "./TrophyCabinet";
+import { TrophyShowcase } from "./TrophyShowcase";
 
 type Props = {
 	roomId: string;
@@ -84,86 +45,49 @@ type Props = {
 	onOpenChange: (open: boolean) => void;
 };
 
-const resultBadgeMeta = {
-	won: {
-		id: "won",
-		className: "bg-win/20 text-win",
-		icon: <CheckIcon className={`w-4 h-4 text-win`} />,
+const identityToneMeta: Record<
+	IdentityTitle["tone"],
+	{ chipClassName: string; avatarClassName: string; Icon?: typeof CrownIcon }
+> = {
+	champion: {
+		chipClassName: "bg-rank-1/15 text-rank-1",
+		avatarClassName: "ring-2 ring-rank-1/70",
+		Icon: CrownIcon,
 	},
-	lost: {
-		id: "lost",
-		className: "bg-loss/20 text-loss",
-		icon: <X className={`w-4 h-4 text-loss`} />,
+	podium: {
+		chipClassName: "bg-rank-2/15 text-rank-2",
+		avatarClassName: "ring-2 ring-rank-2/60",
+		Icon: MedalIcon,
 	},
-	no_result: {
-		id: "no_result",
-		className: "bg-muted text-muted-foreground",
-		icon: <CircleSlash className={`w-4 h-4 text-muted-foreground`} />,
+	contender: {
+		chipClassName: "bg-accent/15 text-accent",
+		avatarClassName: "ring-1 ring-border",
+		Icon: AwardIcon,
 	},
-} as const;
+	neutral: {
+		chipClassName: "bg-muted text-muted-foreground",
+		avatarClassName: "ring-1 ring-border",
+	},
+};
 
-const STAT_TILE =
-	"rounded-lg p-3 bg-card border border-border/60 flex flex-col gap-2";
+const viewTransition = { duration: 0.2, ease: EASE_OUT };
 
-// Stat tiles with the real tile shell: label line, then the 2xl figure (and
-// for the wide tiles, the detail line or the win-rate bar).
-function StatsSkeleton() {
+function CardSection({
+	title,
+	children,
+}: {
+	title: string;
+	children: ReactNode;
+}) {
 	return (
-		<div aria-hidden='true' className='grid grid-cols-2 gap-4'>
-			{Array.from({ length: 4 }).map((_, i) => (
-				<div key={i} className={STAT_TILE}>
-					<Skeleton className='my-0.5 h-3 w-16' />
-					<Skeleton className='my-1 h-6 w-14' />
-				</div>
-			))}
-			<div className={cn(STAT_TILE, "col-span-2")}>
-				<Skeleton className='my-0.5 h-3 w-20' />
-				<div>
-					<Skeleton className='my-1 h-6 w-28' />
-					<Skeleton className='my-0.5 h-3 w-36' />
-				</div>
-			</div>
-			<div className={cn(STAT_TILE, "col-span-2")}>
-				<Skeleton className='my-0.5 h-3 w-16' />
-				<div className='flex flex-col gap-3'>
-					<div className='flex items-center justify-between'>
-						<Skeleton className='my-1 h-6 w-16' />
-						<Skeleton className='h-4 w-10' />
-					</div>
-					<Skeleton className='h-2 w-full rounded-full' />
-				</div>
-			</div>
-		</div>
+		<section className='flex flex-col gap-2'>
+			<h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
+				{title}
+			</h3>
+			{children}
+		</section>
 	);
 }
-
-// Sized like the "No … yet" box the section most often shows.
-function SectionSkeleton() {
-	return <Skeleton className='h-13.5 rounded-lg' />;
-}
-
-// The five result chips.
-function RecentPredictionsSkeleton() {
-	return (
-		<SkeletonList
-			count={5}
-			className='flex gap-2'
-			itemClassName='size-8.5 rounded-full'
-		/>
-	);
-}
-
-// function formatCollectedDate(value: string | null) {
-// 	if (!value) {
-// 		return "Not yet collected";
-// 	}
-
-// 	return `Collected ${new Date(value).toLocaleDateString(undefined, {
-// 		year: "numeric",
-// 		month: "short",
-// 		day: "numeric",
-// 	})}`;
-// }
 
 export function PlayerProfileDialog({
 	roomId,
@@ -187,176 +111,59 @@ export function PlayerProfileDialog({
 		isPending: isSeriesRecognitionLoading,
 		error: seriesRecognitionError,
 	} = useRoomMemberSeriesRecognition(roomId, playerId, enabled);
-	// Duel awards stay hidden while duels are switched off, as in the Hall of Fame.
-	const visibleAwards = (seriesRecognition?.awards ?? []).filter(
-		(award) => FEATURES.duels || award.award_type !== "MOST_DUEL_WINS",
+	const { data: overall = [] } = useRoomOverallStandings(roomId, enabled);
+	const { currentSeries, seriesOptions } = useCurrentSeries(roomId);
+
+	// The series running now: the one being viewed if it's live, else any live one.
+	const activeSeries =
+		currentSeries?.status === "active"
+			? currentSeries
+			: (seriesOptions.find((series) => series.status === "active") ??
+				null);
+	const { data: seriesLeaderboard = [], isPending: isSeriesLeaderboardLoading } =
+		useSeriesLeaderboard(roomId, activeSeries?.id, enabled && !!activeSeries);
+
+	// Which player's cabinet is open, so it closes when the card shows someone else.
+	const [cabinetPlayerId, setCabinetPlayerId] = useState<string | null>(null);
+	const showCabinet = !!playerId && cabinetPlayerId === playerId;
+
+	const trophies = useMemo(
+		() =>
+			buildTrophies(
+				seriesRecognition?.championships ?? [],
+				// Duel awards stay hidden while duels are switched off, as in the Hall of Fame.
+				(seriesRecognition?.awards ?? []).filter(
+					(award) => FEATURES.duels || award.award_type !== "MOST_DUEL_WINS",
+				),
+			),
+		[seriesRecognition],
 	);
 
-	const [error, setError] = useState<string | null>(null);
+	const latestCompletedSeriesId =
+		seriesOptions
+			.filter((series) => series.status === "completed" && series.completed_at)
+			.sort((a, b) =>
+				(b.completed_at ?? "").localeCompare(a.completed_at ?? ""),
+			)[0]?.id ?? null;
 
-	useEffect(() => {
-		if (statsError) {
-			setError(
-				statsError.message ||
-					"An error occurred while loading the player stats.",
-			);
-		} else if (historyError) {
-			setError(
-				historyError.message ||
-					"An error occurred while loading the player history.",
-			);
-		} else if (seriesRecognitionError) {
-			setError(
-				seriesRecognitionError.message ||
-					"An error occurred while loading player recognitions.",
-			);
-		} else {
-			setError(null);
-		}
-	}, [historyError, seriesRecognitionError, statsError]);
+	const identity =
+		stats && !isSeriesRecognitionLoading
+			? getIdentityTitle({
+					trophies,
+					totalPredictions: stats.total_predictions ?? 0,
+					latestCompletedSeriesId,
+				})
+			: null;
+	const identityMeta = identityToneMeta[identity?.tone ?? "neutral"];
+	const overallEntry = overall.find((entry) => entry.player_id === playerId);
+	const roomRank =
+		overallEntry && overallEntry.series_played > 0 ? overallEntry.rank : null;
+	const seriesEntry = seriesLeaderboard.find(
+		(entry) => entry.player_id === playerId,
+	);
 
-	const recentPredictionsContent = (() => {
-		if (isHistoryLoading) {
-			return <RecentPredictionsSkeleton />;
-		}
-
-		if (recentPredictions.length === 0) {
-			return (
-				<div className='rounded-lg border border-border/60 p-4 text-sm text-muted-foreground'>
-					No resolved predictions yet.
-				</div>
-			);
-		}
-
-		return (
-			<div className='flex gap-2'>
-				{recentPredictions.map((entry, i) => {
-					const resultMeta = resultBadgeMeta[entry.result];
-					return (
-						<Badge
-							key={entry.prediction_id}
-							className={`rounded-full p-2 border ${resultMeta.className} ${i === 0 ? "ring" : ""}`}
-						>
-							<div className={`flex flex-col items-center`}>
-								{resultMeta.icon}
-							</div>
-						</Badge>
-					);
-				})}
-			</div>
-		);
-	})();
-
-	const championshipsContent = (() => {
-		if (isSeriesRecognitionLoading) {
-			return <SectionSkeleton />;
-		}
-
-		if (seriesRecognition?.championships.length) {
-			return (
-				<div className='space-y-2'>
-					{seriesRecognition.championships.map((row) => {
-						const tierVisual = getChampionshipVisual(row.placement);
-						return (
-							<div
-								key={row.id}
-								className={cn(
-									"flex items-center gap-3 rounded-2xl border bg-card p-3.5",
-									tierVisual.ringClassName,
-								)}
-							>
-								<div
-									className={cn(
-										"flex size-12 shrink-0 items-center justify-center rounded-xl border",
-										tierVisual.ringClassName,
-									)}
-								>
-									<tierVisual.Icon
-										className={cn(
-											"size-6",
-											tierVisual.textClassName,
-										)}
-									/>
-								</div>
-
-								<div className='min-w-0 flex-1'>
-									<p
-										className={cn(
-											"text-[11px] font-semibold uppercase tracking-wider",
-											tierVisual.textClassName,
-										)}
-									>
-										{tierVisual.tierLabel}
-									</p>
-									<p className='truncate text-sm font-semibold text-foreground'>
-										{row.series_title}
-									</p>
-								</div>
-							</div>
-						);
-					})}
-				</div>
-			);
-		}
-
-		return (
-			<div className='rounded-lg border border-border/60 p-4 text-sm text-muted-foreground'>
-				No championships yet.
-			</div>
-		);
-	})();
-
-	const awardsContent = (() => {
-		if (isSeriesRecognitionLoading) {
-			return <SectionSkeleton />;
-		}
-
-		if (visibleAwards.length) {
-			return (
-				<div className='space-y-2'>
-					{visibleAwards.map((row) => {
-						const awardVisual = getAwardVisual(row.award_type);
-
-						return (
-							<div
-								key={row.id}
-								className='flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5'
-							>
-								<div
-									className={cn(
-										"flex size-10 shrink-0 items-center justify-center rounded-xl border",
-										awardVisual.ringClassName,
-									)}
-								>
-									<awardVisual.Icon
-										className={cn(
-											"size-5",
-											awardVisual.textClassName,
-										)}
-									/>
-								</div>
-
-								<div className='min-w-0 flex-1'>
-									<p className='truncate text-sm font-semibold text-foreground'>
-										{getSeriesAwardLabel(row.award_type)}
-									</p>
-									<p className='truncate text-[11px] text-muted-foreground'>
-										{row.series_title}
-									</p>
-								</div>
-							</div>
-						);
-					})}
-				</div>
-			);
-		}
-
-		return (
-			<div className='rounded-lg border border-border/60 p-4 text-sm text-muted-foreground'>
-				No awards yet.
-			</div>
-		);
-	})();
+	const loadError = statsError ?? historyError ?? seriesRecognitionError;
+	const username = stats?.username;
 
 	const isDesktop = window.innerWidth >= 768; // Example breakpoint for desktop
 	const MainComponent = isDesktop ? Dialog : Drawer;
@@ -369,202 +176,116 @@ export function PlayerProfileDialog({
 
 	return (
 		<MainComponent open={open} onOpenChange={onOpenChange}>
-			<ContentComponent className='sm:max-w-3xl max-h-[85vh]'>
-				<HeaderComponent className={`px-4`}>
-					<TitleComponent
-						className={`flex items-center gap-2 text-2xl`}
+			<ContentComponent className='flex max-h-[85vh] flex-col sm:max-w-md'>
+				<HeaderComponent className='items-center gap-2 px-4 pt-5 text-center sm:text-center'>
+					<Avatar
+						className={cn(
+							"size-16 transition-shadow",
+							identityMeta.avatarClassName,
+						)}
 					>
-						{stats?.username ?? "Player profile"}
+						<AvatarFallback className='bg-muted/70 text-lg font-semibold text-foreground/85'>
+							{username ? username.slice(0, 2).toUpperCase() : ""}
+						</AvatarFallback>
+					</Avatar>
+					<TitleComponent className='text-2xl'>
+						{username ?? (
+							// A span: the title is a heading, which can't hold a div.
+							<span className='mx-auto block h-7 w-32 animate-pulse rounded-md bg-muted-foreground/35' />
+						)}
 					</TitleComponent>
-					<DescriptionComponent className={`flex gap-2`}>
-						{stats?.highest_win_streak !== undefined &&
-							stats.highest_win_streak !== 0 && (
-								<div className={`inline-block`}>
-									<Badge
-										className={`flex gap-0 items-center justify-center bg-accent/20 text-accent text-xs`}
-									>
-										<FlameIcon
-											className={`w-2 h-2 text-rank-3`}
-										/>
-										{stats.highest_win_streak}
-									</Badge>
-								</div>
+					<DescriptionComponent
+						asChild
+						className='flex min-h-6 items-center justify-center gap-2 text-xs'
+					>
+						<div>
+							{identity ? (
+								<span
+									className={cn(
+										"inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold",
+										identityMeta.chipClassName,
+									)}
+								>
+									{identityMeta.Icon ? (
+										<identityMeta.Icon className='size-3.5' />
+									) : null}
+									{identity.label}
+								</span>
+							) : (
+								<Skeleton className='h-5 w-24 rounded-full' />
 							)}
+							{roomRank !== null ? (
+								<span className='tabular-nums text-muted-foreground'>
+									#{roomRank} in room
+								</span>
+							) : null}
+						</div>
 					</DescriptionComponent>
 				</HeaderComponent>
 
-				{error && (
-					<div className='p-4 text-sm text-destructive'>{error}</div>
-				)}
+				{loadError ? (
+					<p className='px-4 text-sm text-destructive'>
+						{loadError.message ||
+							"Something went wrong loading this player."}
+					</p>
+				) : null}
 
-				<div className={`p-4 overflow-auto no-scrollbar`}>
-					<section className='space-y-3'>
-						<div className='grid grid-cols-2 gap-3'>
-							<div className='rounded-lg border border-border/60 bg-card p-3'>
-								<p className='text-xs text-muted-foreground'>
-									Championships
-								</p>
-								<p className='mt-1 flex items-center gap-2 text-xl font-semibold tabular-nums'>
-									<TrophyIcon className='h-5 w-5 text-rank-1' />
-									{seriesRecognition?.championships.length ??
-										0}
-								</p>
-							</div>
-							<div className='rounded-lg border border-border/60 bg-card p-3'>
-								<p className='text-xs text-muted-foreground'>
-									Awards
-								</p>
-								<p className='mt-1 flex items-center gap-2 text-xl font-semibold tabular-nums'>
-									<MedalIcon className='h-5 w-5 text-accent' />
-									{visibleAwards.length ?? 0}
-								</p>
-							</div>
-						</div>
-
-						<div className='space-y-2 mt-6'>
-							<h3 className='flex items-center gap-2 text-sm font-semibold text-muted-foreground'>
-								<TrophyIcon className='h-4 w-4 text-rank-1' />
-								Championships
-							</h3>
-							{championshipsContent}
-						</div>
-
-						<div className='space-y-2 pb-2 mt-6'>
-							<h3 className='flex items-center gap-2 text-sm font-semibold text-muted-foreground'>
-								<MedalIcon className='h-4 w-4 text-accent' />
-								Awards
-							</h3>
-							{awardsContent}
-						</div>
-					</section>
-
-					<section className='space-y-2 mt-4'>
-						<h3 className='flex items-center gap-2 text-sm font-semibold text-muted-foreground'>
-							<ChartColumnIcon className='h-4 w-4 text-activity' />
-							Stats
-						</h3>
-						{isStatsLoading || !stats ? (
-							<StatsSkeleton />
+				<div className='min-h-0 overflow-auto no-scrollbar p-4 pt-2'>
+					<AnimatePresence mode='wait' initial={false}>
+						{showCabinet ? (
+							<motion.div
+								key='cabinet'
+								initial={{ opacity: 0, x: 16 }}
+								animate={{ opacity: 1, x: 0 }}
+								exit={{ opacity: 0, x: 16 }}
+								transition={viewTransition}
+							>
+								<TrophyCabinet
+									trophies={trophies}
+									onBack={() => setCabinetPlayerId(null)}
+								/>
+							</motion.div>
 						) : (
-							<div className='grid grid-cols-2 gap-4'>
-								{statsLabels.map(({ key, label, icon }) => (
-									<FadeContent
-										key={key}
-										delay={50}
-										className={STAT_TILE}
-									>
-										<p className='flex justify-between text-xs text-muted-foreground'>
-											{label}
-										</p>
-										<p className='font-semibold tabular-nums flex items-center gap-2'>
-											{icon}
-											<span className={`text-2xl`}>
-												{key === "current_points"
-													? stats[
-															key
-														]?.toLocaleString()
-													: stats[key]}
-											</span>
-										</p>
-									</FadeContent>
-								))}
-								<FadeContent
-									delay={100}
-									className={cn(STAT_TILE, "col-span-2")}
-								>
-									<h3 className='flex gap-2 items-center text-xs text-muted-foreground'>
-										<span>Largest Win</span>
-									</h3>
-									<div>
-										<p
-											className={`flex items-center gap-2 text-2xl font-semibold tabular-nums`}
-										>
-											<CircleDollarSign
-												className={`text-rank-1`}
-												size={20}
-											/>
-											<span>
-												{(
-													stats?.largest_win_payout ??
-													0
-												).toLocaleString()}{" "}
-												pts
-											</span>
-										</p>
-										<p className='text-xs text-muted-foreground'>
-											Bet{" "}
-											{(
-												stats?.largest_win_bet ?? 0
-											).toLocaleString()}{" "}
-											•{" "}
-											{(
-												stats?.largest_win_multiplier ??
-												0
-											).toFixed(2)}
-											x return
-										</p>
-									</div>
-								</FadeContent>
-								<FadeContent
-									delay={100}
-									className={cn(STAT_TILE, "col-span-2")}
-								>
-									<h3 className='flex items-center gap-2 text-xs text-muted-foreground'>
-										Win rate
-									</h3>
-									<Field className='w-full '>
-										<FieldLabel
-											htmlFor='progress-upload'
-											className={`flex items-end`}
-										>
-											<span
-												className={`flex items-center gap-2 text-2xl font-semibold tabular-nums`}
-											>
-												<Crosshair
-													className='text-primary'
-													size='20'
-												/>
-												{Math.round(
-													((stats?.winning_predictions ??
-														0) /
-														(stats?.total_rated_predictions ??
-															1)) *
-														100,
-												)}
-												%
-											</span>
-											<span className='ml-auto'>
-												{stats?.winning_predictions ??
-													0}{" "}
-												/{" "}
-												{stats?.total_rated_predictions ??
-													0}
-											</span>
-										</FieldLabel>
-										<Progress
-											value={
-												((stats?.winning_predictions ??
-													0) /
-													(stats?.total_rated_predictions ??
-														1)) *
-												100
-											}
-											id='progress-upload'
-										/>
-									</Field>
-								</FadeContent>
-							</div>
-						)}
-					</section>
+							<motion.div
+								key='card'
+								className='flex flex-col gap-5'
+								initial={{ opacity: 0, x: -16 }}
+								animate={{ opacity: 1, x: 0 }}
+								exit={{ opacity: 0, x: -16 }}
+								transition={viewTransition}
+							>
+								{activeSeries ? (
+									<LiveSeriesStrip
+										seriesTitle={activeSeries.title}
+										entry={seriesEntry}
+										isLoading={isSeriesLeaderboardLoading}
+									/>
+								) : null}
 
-					<section className='mt-6 mb-4'>
-						<FadeContent delay={100}>
-							<h3 className='text-sm font-semibold text-muted-foreground mb-2'>
-								Last 5 Predictions
-							</h3>
-							{recentPredictionsContent}
-						</FadeContent>
-					</section>
+								<CardSection title='Trophies'>
+									<TrophyShowcase
+										trophies={trophies}
+										isLoading={isSeriesRecognitionLoading}
+										onViewAll={() => setCabinetPlayerId(playerId)}
+									/>
+								</CardSection>
+
+								<CardSection title='Form'>
+									<RecentForm
+										predictions={recentPredictions}
+										isLoading={isHistoryLoading}
+									/>
+								</CardSection>
+
+								<CardSection title='Career'>
+									<CareerStats
+										stats={stats}
+										isLoading={isStatsLoading}
+									/>
+								</CardSection>
+							</motion.div>
+						)}
+					</AnimatePresence>
 				</div>
 			</ContentComponent>
 		</MainComponent>

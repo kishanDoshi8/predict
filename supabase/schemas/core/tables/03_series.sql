@@ -18,7 +18,12 @@ create table if not exists public.series (
   topups_paid integer not null default 0 check (topups_paid >= 0),
   last_topup_week text,
   -- How many players the latest top-up reached, for the Monday push.
-  last_topup_recipients integer not null default 0
+  last_topup_recipients integer not null default 0,
+  -- Snapshot taken when the series completes: settled predictions, players who
+  -- qualified, and the tier their trophies count at (see private.series_tier).
+  final_games integer check (final_games >= 0),
+  final_players integer check (final_players >= 0),
+  tier text check (tier in ('major', 'standard', 'minor'))
 );
 
 create index if not exists idx_series_room_status on public.series(room_id, status, created_at desc);

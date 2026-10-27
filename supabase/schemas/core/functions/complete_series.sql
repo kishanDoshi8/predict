@@ -12,6 +12,7 @@ declare
   v_unfinished_predictions integer;
   v_required_bets integer;
   v_completed_predictions integer;
+  v_eligible_players integer;
 begin
   v_player_id := private.get_player_id_from_auth();
 
@@ -63,6 +64,19 @@ begin
   where p.series_id = p_series_id
     and p.status in ('revealed', 'no_result');
 
+  -- Players who qualified, which (with games) sets how much the series' trophies are worth.
+  select count(*)::int
+  into v_eligible_players
+  from (
+    select b.player_id
+    from public.bets b
+    join public.predictions p on p.id = b.prediction_id
+    where p.series_id = p_series_id
+      and p.status in ('revealed', 'no_result')
+    group by b.player_id
+    having count(distinct b.prediction_id) >= v_required_bets
+  ) eligible;
+
   insert into public.series_placements (series_id, player_id, placement, points)
   with leaderboard as (
     select
@@ -98,7 +112,7 @@ begin
   from ranked r
   where r.placement <= 3;
 
-  insert into public.series_awards (series_id, player_id, award_type, value, description)
+  insert into public.series_awards (series_id, player_id, award_type, value, description, tier)
   with series_predictions as (
     select
       p.id,
@@ -185,14 +199,15 @@ begin
     ps.player_id,
     'LONGEST_STREAK'::public.series_award_type,
     ps.award_value,
-    'Achieved the longest winning streak in this Series.'
+    'Achieved the longest winning streak in this Series.',
+    private.series_award_tier('LONGEST_STREAK', ps.award_value, v_completed_predictions, v_series.starting_stack)
   from player_streaks ps
   cross join top_value tv
   where tv.value is not null
     and tv.value > 0
     and ps.award_value = tv.value;
 
-  insert into public.series_awards (series_id, player_id, award_type, value, description)
+  insert into public.series_awards (series_id, player_id, award_type, value, description, tier)
   with series_predictions as (
     select p.id, p.status
     from public.predictions p
@@ -231,14 +246,15 @@ begin
     pbp.player_id,
     'BIGGEST_PROFIT'::public.series_award_type,
     pbp.award_value,
-    'Recorded the biggest single prediction profit.'
+    'Recorded the biggest single prediction profit.',
+    private.series_award_tier('BIGGEST_PROFIT', pbp.award_value, v_completed_predictions, v_series.starting_stack)
   from player_biggest_profit pbp
   cross join top_value tv
   where tv.value is not null
     and tv.value > 0
     and pbp.award_value = tv.value;
 
-  insert into public.series_awards (series_id, player_id, award_type, value, description)
+  insert into public.series_awards (series_id, player_id, award_type, value, description, tier)
   with series_predictions as (
     select p.id, p.winning_option_id
     from public.predictions p
@@ -288,14 +304,15 @@ begin
     dw.player_id,
     'MOST_DUEL_WINS'::public.series_award_type,
     dw.award_value,
-    'Won the most duels during this Series.'
+    'Won the most duels during this Series.',
+    private.series_award_tier('MOST_DUEL_WINS', dw.award_value, v_completed_predictions, v_series.starting_stack)
   from duel_wins dw
   cross join top_value tv
   where tv.value is not null
     and tv.value > 0
     and dw.award_value = tv.value;
 
-  insert into public.series_awards (series_id, player_id, award_type, value, description)
+  insert into public.series_awards (series_id, player_id, award_type, value, description, tier)
   with series_predictions as (
     select p.id, p.status
     from public.predictions p
@@ -334,14 +351,15 @@ begin
     pr.player_id,
     'MOST_POINTS_RISKED'::public.series_award_type,
     pr.award_value,
-    'Risked the most points during this Series.'
+    'Risked the most points during this Series.',
+    private.series_award_tier('MOST_POINTS_RISKED', pr.award_value, v_completed_predictions, v_series.starting_stack)
   from points_risked pr
   cross join top_value tv
   where tv.value is not null
     and tv.value > 0
     and pr.award_value = tv.value;
 
-  insert into public.series_awards (series_id, player_id, award_type, value, description)
+  insert into public.series_awards (series_id, player_id, award_type, value, description, tier)
   with completed_predictions as (
     select p.id
     from public.predictions p
@@ -376,7 +394,8 @@ begin
     ep.player_id,
     'EVER_PRESENT'::public.series_award_type,
     v_completed_predictions::numeric,
-    'Participated in every completed prediction.'
+    'Participated in every completed prediction.',
+    private.series_award_tier('EVER_PRESENT', v_completed_predictions::numeric, v_completed_predictions, v_series.starting_stack)
   from eligible_players ep
   left join player_completed_participation pcp on pcp.player_id = ep.player_id
   where v_completed_predictions > 0
@@ -385,7 +404,10 @@ begin
   update public.series
   set
     status = 'completed',
-    completed_at = now()
+    completed_at = now(),
+    final_games = v_completed_predictions,
+    final_players = v_eligible_players,
+    tier = private.series_tier(v_completed_predictions, v_eligible_players)
   where id = p_series_id
   returning * into v_series;
 

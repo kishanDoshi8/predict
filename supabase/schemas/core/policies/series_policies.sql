@@ -9,4 +9,4 @@ drop policy if exists "series_no_direct_update" on public.series;
 create policy "series_no_direct_update" on public.series for update using (false);
 drop policy if exists "series_no_direct_delete" on public.series;
 create policy "series_no_direct_delete" on public.series for delete using (false);
-grant select (id, room_id, title, description, status, expected_games, created_by, created_at, started_at, completed_at, archived_at) on public.series to authenticated;
+grant select (id, room_id, title, description, status, expected_games, created_by, created_at, started_at, completed_at, archived_at, final_games, final_players, tier) on public.series to authenticated;

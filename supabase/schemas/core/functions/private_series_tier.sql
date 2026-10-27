@@ -1,0 +1,59 @@
+-- How much a finished series' trophies are worth, from its size.
+-- Players counts only those who qualified (see private.series_required_bets).
+create or replace function private.series_tier(
+  p_games integer,
+  p_players integer
+)
+returns text
+language sql
+immutable
+set search_path = public, private
+as $$
+  select case
+    when coalesce(p_games, 0) <= 7 or coalesce(p_players, 0) <= 2 then 'minor'
+    when p_games >= 20 and p_players >= 5 then 'major'
+    else 'standard'
+  end;
+$$;
+
+-- How impressive an award was for its series: gold, silver or bronze.
+create or replace function private.series_award_tier(
+  p_award_type public.series_award_type,
+  p_value numeric,
+  p_games integer,
+  p_starting_stack integer
+)
+returns text
+language sql
+immutable
+set search_path = public, private
+as $$
+  select case p_award_type
+    when 'LONGEST_STREAK' then case
+      when p_value >= 4 and p_value >= 0.25 * greatest(p_games, 1) then 'gold'
+      when p_value >= 3 and p_value >= 0.15 * greatest(p_games, 1) then 'silver'
+      else 'bronze'
+    end
+    when 'BIGGEST_PROFIT' then case
+      when p_value >= 1.0 * greatest(p_starting_stack, 1) then 'gold'
+      when p_value >= 0.5 * greatest(p_starting_stack, 1) then 'silver'
+      else 'bronze'
+    end
+    when 'MOST_POINTS_RISKED' then case
+      when p_value >= 5 * greatest(p_starting_stack, 1) then 'gold'
+      when p_value >= 2 * greatest(p_starting_stack, 1) then 'silver'
+      else 'bronze'
+    end
+    when 'EVER_PRESENT' then case
+      when p_value >= 20 then 'gold'
+      when p_value >= 10 then 'silver'
+      else 'bronze'
+    end
+    when 'MOST_DUEL_WINS' then case
+      when p_value >= 0.25 * greatest(p_games, 1) then 'gold'
+      when p_value >= 0.10 * greatest(p_games, 1) then 'silver'
+      else 'bronze'
+    end
+    else 'bronze'
+  end;
+$$;

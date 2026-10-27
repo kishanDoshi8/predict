@@ -874,6 +874,8 @@ export type Database = {
           created_by: string
           description: string | null
           expected_games: number
+          final_games: number | null
+          final_players: number | null
           id: string
           last_topup_recipients: number
           last_topup_week: string | null
@@ -883,6 +885,7 @@ export type Database = {
           starting_stack: number
           status: string
           title: string
+          tier: string | null
           topups_paid: number
           weekly_topup: number
         }
@@ -893,6 +896,8 @@ export type Database = {
           created_by: string
           description?: string | null
           expected_games?: number
+          final_games?: number | null
+          final_players?: number | null
           id?: string
           last_topup_recipients?: number
           last_topup_week?: string | null
@@ -902,6 +907,7 @@ export type Database = {
           starting_stack?: number
           status?: string
           title: string
+          tier?: string | null
           topups_paid?: number
           weekly_topup?: number
         }
@@ -912,6 +918,8 @@ export type Database = {
           created_by?: string
           description?: string | null
           expected_games?: number
+          final_games?: number | null
+          final_players?: number | null
           id?: string
           last_topup_recipients?: number
           last_topup_week?: string | null
@@ -921,6 +929,7 @@ export type Database = {
           starting_stack?: number
           status?: string
           title?: string
+          tier?: string | null
           topups_paid?: number
           weekly_topup?: number
         }
@@ -957,6 +966,7 @@ export type Database = {
           id: string
           player_id: string
           series_id: string
+          tier: string | null
           value: number
         }
         Insert: {
@@ -967,6 +977,7 @@ export type Database = {
           id?: string
           player_id: string
           series_id: string
+          tier?: string | null
           value: number
         }
         Update: {
@@ -977,6 +988,7 @@ export type Database = {
           id?: string
           player_id?: string
           series_id?: string
+          tier?: string | null
           value?: number
         }
         Relationships: [

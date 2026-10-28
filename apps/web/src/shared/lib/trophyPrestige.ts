@@ -194,3 +194,18 @@ export function formatTrophyDate(wonAt: string): string {
 		year: "numeric",
 	});
 }
+
+// What the trophy was won with: net points for a placement, the feat for an award.
+export function formatTrophyValue(trophy: Trophy): string {
+	if (trophy.kind === "placement") {
+		return `${formatSignedPoints(Math.round(trophy.points))} pts`;
+	}
+	return String(getSeriesAwardValue(trophy.awardType, trophy.value));
+}
+
+export function formatTrophyDate(wonAt: string): string {
+	return new Date(wonAt).toLocaleDateString(undefined, {
+		month: "short",
+		year: "numeric",
+	});
+}

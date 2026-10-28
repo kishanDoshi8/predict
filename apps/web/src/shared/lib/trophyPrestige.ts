@@ -114,24 +114,46 @@ export function buildTrophies(
 	);
 }
 
+// Titles for how someone plays, held right now (public.get_room_member_style).
+export type StyleTitle = "SHARPSHOOTER" | "GIANT_KILLER" | "HIGH_ROLLER" | "EVER_PRESENT";
+
+// Highest first: the card shows the first one a player holds.
+export const STYLE_TITLE_ORDER: StyleTitle[] = [
+	"SHARPSHOOTER",
+	"GIANT_KILLER",
+	"HIGH_ROLLER",
+	"EVER_PRESENT",
+];
+
+export const STYLE_TITLE_LABEL: Record<StyleTitle, string> = {
+	SHARPSHOOTER: "Sharpshooter",
+	GIANT_KILLER: "Giant Killer",
+	HIGH_ROLLER: "High Roller",
+	EVER_PRESENT: "Ever-Present",
+};
+
 export type IdentityTitle = {
 	label: string;
-	tone: "champion" | "podium" | "contender" | "neutral";
+	tone: "champion" | "podium" | "style" | "rookie";
+	style?: StyleTitle;
 };
 
 const ROOKIE_MAX_PREDICTIONS = 10;
-const PODIUM_REGULAR_MIN = 3;
+const PODIUM_FINISHER_MIN = 3;
 
-// A one-glance read of who this player is in the room. First match wins.
+// A one-glance read of who this player is in the room. First match wins;
+// a player with nothing that stands out yet has no title.
 export function getIdentityTitle({
 	trophies,
+	styleTitles,
 	totalPredictions,
 	latestCompletedSeriesId,
 }: {
 	trophies: Trophy[];
+	styleTitles: StyleTitle[];
 	totalPredictions: number;
 	latestCompletedSeriesId: string | null;
-}): IdentityTitle {
+}): IdentityTitle | null {
 	const placements = trophies.filter((t) => t.kind === "placement");
 	const titles = placements.filter((t) => t.placement === 1);
 
@@ -145,14 +167,17 @@ export function getIdentityTitle({
 		return { label: `${titles.length}× Champion`, tone: "champion" };
 	}
 	if (titles.length === 1) return { label: "Champion", tone: "champion" };
-	if (placements.length >= PODIUM_REGULAR_MIN) {
-		return { label: "Podium Regular", tone: "podium" };
+	if (placements.length >= PODIUM_FINISHER_MIN) {
+		return { label: "Podium Finisher", tone: "podium" };
 	}
-	if (trophies.length > 0) return { label: "Contender", tone: "contender" };
+	const style = STYLE_TITLE_ORDER.find((title) => styleTitles.includes(title));
+	if (style) {
+		return { label: STYLE_TITLE_LABEL[style], tone: "style", style };
+	}
 	if (totalPredictions < ROOKIE_MAX_PREDICTIONS) {
-		return { label: "Rookie", tone: "neutral" };
+		return { label: "Rookie", tone: "rookie" };
 	}
-	return { label: "Regular", tone: "neutral" };
+	return null;
 }
 
 // What the trophy was won with: net points for a placement, the feat for an award.

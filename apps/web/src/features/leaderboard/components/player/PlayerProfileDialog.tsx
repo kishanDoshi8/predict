@@ -16,7 +16,9 @@ import {
 import {
 	useRoomMemberRecentPredictions,
 	useRoomMemberSeriesRecognition,
+	useRoomMemberMilestones,
 	useRoomMemberStats,
+	useRoomMemberStyle,
 	useRoomOverallStandings,
 	useSeriesLeaderboard,
 } from "../../hooks/leaderboard";
@@ -25,15 +27,24 @@ import {
 	buildTrophies,
 	getIdentityTitle,
 	type IdentityTitle,
+	type StyleTitle,
 } from "@/shared/lib/trophyPrestige";
 import { EASE_OUT } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 import { FEATURES } from "@/shared/constants/features";
 import { AnimatePresence, motion } from "framer-motion";
-import { AwardIcon, CrownIcon, MedalIcon } from "lucide-react";
+import {
+	CalendarCheckIcon,
+	CoinsIcon,
+	CrosshairIcon,
+	CrownIcon,
+	MedalIcon,
+	RocketIcon,
+} from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 import { CareerStats } from "./CareerStats";
 import { LiveSeriesStrip } from "./LiveSeriesStrip";
+import { MilestoneRow } from "./MilestoneRow";
 import { RecentForm } from "./RecentForm";
 import { TrophyCabinet } from "./TrophyCabinet";
 import { TrophyShowcase } from "./TrophyShowcase";
@@ -59,15 +70,22 @@ const identityToneMeta: Record<
 		avatarClassName: "ring-2 ring-rank-2/60",
 		Icon: MedalIcon,
 	},
-	contender: {
+	style: {
 		chipClassName: "bg-accent/15 text-accent",
 		avatarClassName: "ring-1 ring-border",
-		Icon: AwardIcon,
 	},
-	neutral: {
+	rookie: {
 		chipClassName: "bg-muted text-muted-foreground",
 		avatarClassName: "ring-1 ring-border",
 	},
+};
+
+// Each play-style title carries its own icon.
+const styleTitleIcon: Record<StyleTitle, typeof CrownIcon> = {
+	SHARPSHOOTER: CrosshairIcon,
+	GIANT_KILLER: RocketIcon,
+	HIGH_ROLLER: CoinsIcon,
+	EVER_PRESENT: CalendarCheckIcon,
 };
 
 const viewTransition = { duration: 0.2, ease: EASE_OUT };
@@ -111,6 +129,13 @@ export function PlayerProfileDialog({
 		isPending: isSeriesRecognitionLoading,
 		error: seriesRecognitionError,
 	} = useRoomMemberSeriesRecognition(roomId, playerId, enabled);
+	const { data: milestones = [], isPending: isMilestonesLoading } =
+		useRoomMemberMilestones(roomId, playerId, enabled);
+	const { data: style, isPending: isStyleLoading } = useRoomMemberStyle(
+		roomId,
+		playerId,
+		enabled,
+	);
 	const { data: overall = [] } = useRoomOverallStandings(roomId, enabled);
 	const { currentSeries, seriesOptions } = useCurrentSeries(roomId);
 
@@ -146,15 +171,20 @@ export function PlayerProfileDialog({
 				(b.completed_at ?? "").localeCompare(a.completed_at ?? ""),
 			)[0]?.id ?? null;
 
-	const identity =
-		stats && !isSeriesRecognitionLoading
-			? getIdentityTitle({
-					trophies,
-					totalPredictions: stats.total_predictions ?? 0,
-					latestCompletedSeriesId,
-				})
-			: null;
-	const identityMeta = identityToneMeta[identity?.tone ?? "neutral"];
+	const isIdentityReady =
+		!!stats && !isSeriesRecognitionLoading && !isStyleLoading;
+	const identity = isIdentityReady
+		? getIdentityTitle({
+				trophies,
+				styleTitles: style?.titles ?? [],
+				totalPredictions: stats.total_predictions ?? 0,
+				latestCompletedSeriesId,
+			})
+		: null;
+	const identityMeta = identityToneMeta[identity?.tone ?? "rookie"];
+	const IdentityIcon = identity?.style
+		? styleTitleIcon[identity.style]
+		: identityMeta.Icon;
 	const overallEntry = overall.find((entry) => entry.player_id === playerId);
 	const roomRank =
 		overallEntry && overallEntry.series_played > 0 ? overallEntry.rank : null;
@@ -199,21 +229,21 @@ export function PlayerProfileDialog({
 						className='flex min-h-6 items-center justify-center gap-2 text-xs'
 					>
 						<div>
-							{identity ? (
+							{!isIdentityReady ? (
+								<Skeleton className='h-5 w-24 rounded-full' />
+							) : identity ? (
 								<span
 									className={cn(
 										"inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold",
 										identityMeta.chipClassName,
 									)}
 								>
-									{identityMeta.Icon ? (
-										<identityMeta.Icon className='size-3.5' />
+									{IdentityIcon ? (
+										<IdentityIcon className='size-3.5' />
 									) : null}
 									{identity.label}
 								</span>
-							) : (
-								<Skeleton className='h-5 w-24 rounded-full' />
-							)}
+							) : null}
 							{roomRank !== null ? (
 								<span className='tabular-nums text-muted-foreground'>
 									#{roomRank} in room
@@ -242,6 +272,7 @@ export function PlayerProfileDialog({
 							>
 								<TrophyCabinet
 									trophies={trophies}
+									milestones={milestones}
 									onBack={() => setCabinetPlayerId(null)}
 								/>
 							</motion.div>
@@ -267,6 +298,10 @@ export function PlayerProfileDialog({
 										trophies={trophies}
 										isLoading={isSeriesRecognitionLoading}
 										onViewAll={() => setCabinetPlayerId(playerId)}
+									/>
+									<MilestoneRow
+										milestones={milestones}
+										isLoading={isMilestonesLoading}
 									/>
 								</CardSection>
 

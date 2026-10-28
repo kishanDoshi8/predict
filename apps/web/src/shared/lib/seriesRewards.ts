@@ -4,6 +4,10 @@ export const SERIES_AWARD_META = {
 	MOST_DUEL_WINS: { label: "Duelist" },
 	MOST_POINTS_RISKED: { label: "High Roller" },
 	EVER_PRESENT: { label: "Ever-Present" },
+	SHARPSHOOTER: { label: "Sharpshooter" },
+	UNDERDOG: { label: "Underdog" },
+	COMEBACK: { label: "Comeback Kid" },
+	HOT_FINISH: { label: "Hot Finish" },
 } as const;
 
 export type SeriesAwardType = keyof typeof SERIES_AWARD_META;
@@ -14,6 +18,10 @@ const SERIES_AWARD_VALUES = (awardValue: number) => ({
 	MOST_DUEL_WINS: `${awardValue} wins`,
 	MOST_POINTS_RISKED: `${awardValue.toLocaleString()} risked`,
 	EVER_PRESENT: `${awardValue.toLocaleString()} games`,
+	SHARPSHOOTER: `${awardValue}% called`,
+	UNDERDOG: `won at ${awardValue}×`,
+	COMEBACK: `up ${awardValue} places`,
+	HOT_FINISH: `${awardValue} late wins`,
 });
 
 export function getSeriesAwardLabel(awardType: string) {

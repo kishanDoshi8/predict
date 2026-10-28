@@ -645,6 +645,58 @@ export type Database = {
           },
         ]
       }
+      room_member_milestones: {
+        Row: {
+          achieved_at: string
+          created_at: string
+          id: string
+          milestone_type: string
+          player_id: string
+          room_id: string
+          series_id: string | null
+        }
+        Insert: {
+          achieved_at: string
+          created_at?: string
+          id?: string
+          milestone_type: string
+          player_id: string
+          room_id: string
+          series_id?: string | null
+        }
+        Update: {
+          achieved_at?: string
+          created_at?: string
+          id?: string
+          milestone_type?: string
+          player_id?: string
+          room_id?: string
+          series_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_member_milestones_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_member_milestones_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_member_milestones_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       room_members: {
         Row: {
           current_streak: number
@@ -1518,6 +1570,10 @@ export type Database = {
         Args: { p_player_id: string; p_room_id: string }
         Returns: Json
       }
+      get_room_member_style: {
+        Args: { p_player_id: string; p_room_id: string }
+        Returns: Json
+      }
       get_room_overall_standings: { Args: { p_room_id: string }; Returns: Json }
       get_room_prediction_history: {
         Args: {
@@ -1744,6 +1800,10 @@ export type Database = {
         | "MOST_DUEL_WINS"
         | "MOST_POINTS_RISKED"
         | "EVER_PRESENT"
+        | "SHARPSHOOTER"
+        | "UNDERDOG"
+        | "COMEBACK"
+        | "HOT_FINISH"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1880,6 +1940,10 @@ export const Constants = {
         "MOST_DUEL_WINS",
         "MOST_POINTS_RISKED",
         "EVER_PRESENT",
+        "SHARPSHOOTER",
+        "UNDERDOG",
+        "COMEBACK",
+        "HOT_FINISH",
       ],
     },
   },

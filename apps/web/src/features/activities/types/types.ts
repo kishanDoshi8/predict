@@ -2,6 +2,7 @@ export type ActivityType =
 	| "room_joined"
 	| "achievement_rating_tier_reached"
 	| "achievement_streak_milestone"
+	| "achievement_milestone"
 	| "prediction_created"
 	| "prediction_locked"
 	| "prediction_revealed"
@@ -94,6 +95,12 @@ export type AchievementStreakMilestoneMetadata = {
 	milestone?: number | null;
 };
 
+export type AchievementMilestoneMetadata = {
+	member: ActivityPlayer;
+	milestoneType: string;
+	seriesId?: string | null;
+};
+
 export type RoomActivityBase<
 	TType extends ActivityType,
 	TMetadata,
@@ -119,6 +126,11 @@ export type AchievementRatingTierReachedActivity = RoomActivityBase<
 export type AchievementStreakMilestoneActivity = RoomActivityBase<
 	"achievement_streak_milestone",
 	AchievementStreakMilestoneMetadata
+>;
+
+export type AchievementMilestoneActivity = RoomActivityBase<
+	"achievement_milestone",
+	AchievementMilestoneMetadata
 >;
 
 export type PredictionCreatedActivity = RoomActivityBase<
@@ -167,6 +179,7 @@ export type RoomActivity =
 	| RoomJoinedActivity
 	| AchievementRatingTierReachedActivity
 	| AchievementStreakMilestoneActivity
+	| AchievementMilestoneActivity
 	| PredictionCreatedActivity
 	| PredictionLockedActivity
 	| PredictionRevealedActivity

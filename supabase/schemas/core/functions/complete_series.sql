@@ -401,6 +401,191 @@ begin
   where v_completed_predictions > 0
     and coalesce(pcp.completed_prediction_count, 0) = v_completed_predictions;
 
+  insert into public.series_awards (series_id, player_id, award_type, value, description, tier)
+  with
+  eligible_players as (
+    select b.player_id
+    from public.bets b
+    join public.predictions p on p.id = b.prediction_id
+    where p.series_id = p_series_id
+      and p.status in ('revealed', 'no_result')
+    group by b.player_id
+    having count(distinct b.prediction_id) >= v_required_bets
+  ),
+  -- Share of their settled bets that won, as a percentage.
+  candidates as (
+    select
+      b.player_id,
+      round(100.0 * count(*) filter (where b.option_id = p.winning_option_id) / count(*), 1) as award_value
+    from public.bets b
+    join public.predictions p on p.id = b.prediction_id
+    join eligible_players ep on ep.player_id = b.player_id
+    where p.series_id = p_series_id
+      and p.status = 'revealed'
+      and p.winning_option_id is not null
+    group by b.player_id
+    having count(*) >= greatest(v_required_bets, 3)
+  ),
+  top_value as (
+    select max(c.award_value) as value
+    from candidates c
+  )
+  select
+    p_series_id,
+    c.player_id,
+    'SHARPSHOOTER'::public.series_award_type,
+    c.award_value,
+    'Called the highest share of results in this Series.',
+    private.series_award_tier('SHARPSHOOTER', c.award_value, v_completed_predictions, v_series.starting_stack)
+  from candidates c
+  cross join top_value tv
+  where tv.value is not null
+    and tv.value > 0
+    and c.award_value = tv.value;
+
+  insert into public.series_awards (series_id, player_id, award_type, value, description, tier)
+  with
+  eligible_players as (
+    select b.player_id
+    from public.bets b
+    join public.predictions p on p.id = b.prediction_id
+    where p.series_id = p_series_id
+      and p.status in ('revealed', 'no_result')
+    group by b.player_id
+    having count(distinct b.prediction_id) >= v_required_bets
+  ),
+  -- The longest odds they won at: the whole pool over the stake on the winning side.
+  odds as (
+    select
+      p.id,
+      p.winning_option_id,
+      sum(b.amount)::numeric / nullif(sum(b.amount) filter (where b.option_id = p.winning_option_id), 0) as value
+    from public.predictions p
+    join public.bets b on b.prediction_id = p.id
+    where p.series_id = p_series_id
+      and p.status = 'revealed'
+    group by p.id, p.winning_option_id
+  ),
+  candidates as (
+    select
+      b.player_id,
+      max(round(o.value, 2)) as award_value
+    from public.bets b
+    join odds o on o.id = b.prediction_id and b.option_id = o.winning_option_id
+    join eligible_players ep on ep.player_id = b.player_id
+    group by b.player_id
+  ),
+  top_value as (
+    select max(c.award_value) as value
+    from candidates c
+  )
+  select
+    p_series_id,
+    c.player_id,
+    'UNDERDOG'::public.series_award_type,
+    c.award_value,
+    'Won against the longest odds in this Series.',
+    private.series_award_tier('UNDERDOG', c.award_value, v_completed_predictions, v_series.starting_stack)
+  from candidates c
+  cross join top_value tv
+  where tv.value is not null
+    and tv.value >= 2
+    and c.award_value = tv.value;
+
+  insert into public.series_awards (series_id, player_id, award_type, value, description, tier)
+  with
+  eligible_players as (
+    select b.player_id
+    from public.bets b
+    join public.predictions p on p.id = b.prediction_id
+    where p.series_id = p_series_id
+      and p.status in ('revealed', 'no_result')
+    group by b.player_id
+    having count(distinct b.prediction_id) >= v_required_bets
+  ),
+  -- Places climbed from their lowest weekly rank to where they finished.
+  final_ranks as (
+    select st.player_id, st.rank
+    from private.series_standings(p_series_id) st
+    where st.is_ranked
+  ),
+  lowest_ranks as (
+    select ss.player_id, max(ss.rank) as rank
+    from public.series_standing_snapshots ss
+    where ss.series_id = p_series_id
+      and ss.is_ranked
+      and ss.rank is not null
+    group by ss.player_id
+  ),
+  candidates as (
+    select fr.player_id, (lr.rank - fr.rank)::numeric as award_value
+    from final_ranks fr
+    join lowest_ranks lr on lr.player_id = fr.player_id
+    join eligible_players ep on ep.player_id = fr.player_id
+  ),
+  top_value as (
+    select max(c.award_value) as value
+    from candidates c
+  )
+  select
+    p_series_id,
+    c.player_id,
+    'COMEBACK'::public.series_award_type,
+    c.award_value,
+    'Climbed the most places from their lowest point in this Series.',
+    private.series_award_tier('COMEBACK', c.award_value, v_completed_predictions, v_series.starting_stack)
+  from candidates c
+  cross join top_value tv
+  where tv.value is not null
+    and tv.value >= 2
+    and c.award_value = tv.value;
+
+  insert into public.series_awards (series_id, player_id, award_type, value, description, tier)
+  with
+  eligible_players as (
+    select b.player_id
+    from public.bets b
+    join public.predictions p on p.id = b.prediction_id
+    where p.series_id = p_series_id
+      and p.status in ('revealed', 'no_result')
+    group by b.player_id
+    having count(distinct b.prediction_id) >= v_required_bets
+  ),
+  -- Wins over the series' last few settled predictions.
+  finish as (
+    select p.id, p.winning_option_id
+    from public.predictions p
+    where p.series_id = p_series_id
+      and p.status = 'revealed'
+      and p.winning_option_id is not null
+    order by coalesce(p.series_prediction_number, 2147483647) desc, p.created_at desc, p.id desc
+    limit private.series_finish_window(v_completed_predictions)
+  ),
+  candidates as (
+    select b.player_id, count(*)::numeric as award_value
+    from public.bets b
+    join finish f on f.id = b.prediction_id
+    join eligible_players ep on ep.player_id = b.player_id
+    where b.option_id = f.winning_option_id
+    group by b.player_id
+  ),
+  top_value as (
+    select max(c.award_value) as value
+    from candidates c
+  )
+  select
+    p_series_id,
+    c.player_id,
+    'HOT_FINISH'::public.series_award_type,
+    c.award_value,
+    'Won the most predictions in the final stretch of this Series.',
+    private.series_award_tier('HOT_FINISH', c.award_value, v_completed_predictions, v_series.starting_stack)
+  from candidates c
+  cross join top_value tv
+  where tv.value is not null
+    and v_completed_predictions >= 6 and tv.value >= 2
+    and c.award_value = tv.value;
+
   update public.series
   set
     status = 'completed',
@@ -410,6 +595,9 @@ begin
     tier = private.series_tier(v_completed_predictions, v_eligible_players)
   where id = p_series_id
   returning * into v_series;
+
+  -- Titles, back-to-backs and Ever-Present seasons can unlock career milestones.
+  perform private.award_milestones(v_series.room_id);
 
   return row_to_json(v_series);
 end;

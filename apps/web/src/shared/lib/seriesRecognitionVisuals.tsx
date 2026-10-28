@@ -1,18 +1,28 @@
 import type { LucideIcon } from "lucide-react";
 import {
+	ArrowUpFromLine,
 	CalendarCheck,
+	CalendarRange,
+	Hash,
+	Repeat,
 	Coins,
+	Crosshair,
 	Crown,
 	Flame,
 	Medal,
+	Rocket,
+	Sparkles,
+	Trophy as TrophyIcon,
 	Swords,
 	TrendingUp,
+	Zap,
 } from "lucide-react";
 import {
 	getSeriesAwardLabel,
 	type SeriesAwardType,
 } from "@/shared/lib/seriesRewards";
 import type { SeriesTier, Trophy } from "@/shared/lib/trophyPrestige";
+import { MILESTONE_META, type MilestoneType } from "@/shared/lib/milestones";
 
 type ChampionshipPlacement = 1 | 2 | 3;
 
@@ -74,6 +84,26 @@ const awardVisualMap: Record<SeriesAwardType, RecognitionVisual> = {
 		textClassName: "text-accent",
 		ringClassName: "border-accent/30 bg-accent/10",
 	},
+	SHARPSHOOTER: {
+		Icon: Crosshair,
+		textClassName: "text-primary",
+		ringClassName: "border-primary/30 bg-primary/10",
+	},
+	UNDERDOG: {
+		Icon: Rocket,
+		textClassName: "text-accent",
+		ringClassName: "border-accent/30 bg-accent/10",
+	},
+	COMEBACK: {
+		Icon: ArrowUpFromLine,
+		textClassName: "text-win",
+		ringClassName: "border-win/30 bg-win/10",
+	},
+	HOT_FINISH: {
+		Icon: Zap,
+		textClassName: "text-hot",
+		ringClassName: "border-hot/30 bg-hot/10",
+	},
 };
 
 const fallbackChampionshipVisual: ChampionshipVisual = {
@@ -121,3 +151,22 @@ export function getTrophyVisual(trophy: Trophy): RecognitionVisual & {
 		label: getSeriesAwardLabel(trophy.awardType),
 	};
 }
+
+// Milestones sit apart from trophies, so they share one quiet look and differ by icon.
+const milestoneIconMap: Record<MilestoneType, LucideIcon> = {
+	FIRST_TITLE: Sparkles,
+	HAT_TRICK: TrophyIcon,
+	BACK_TO_BACK: Repeat,
+	CENTURY: Hash,
+	MOONSHOT: Rocket,
+	IRON_SEASON: CalendarRange,
+};
+
+export function getMilestoneVisual(type: MilestoneType) {
+	return {
+		Icon: milestoneIconMap[type],
+		label: MILESTONE_META[type].label,
+		description: MILESTONE_META[type].description,
+	};
+}
+

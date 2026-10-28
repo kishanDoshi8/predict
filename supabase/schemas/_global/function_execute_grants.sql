@@ -44,6 +44,7 @@ grant execute on function public.get_room_manage_queue(uuid) to authenticated;
 grant execute on function public.get_room_member_recent_predictions(uuid, uuid, integer, integer) to authenticated;
 grant execute on function public.get_room_member_stats(uuid, uuid) to authenticated;
 grant execute on function public.get_room_overall_standings(uuid) to authenticated;
+grant execute on function public.get_room_member_style(uuid, uuid) to authenticated;
 grant execute on function public.get_room_prediction_history(uuid, integer, timestamp with time zone, uuid, text, text, uuid) to authenticated;
 grant execute on function public.get_room_series(uuid) to authenticated;
 grant execute on function public.get_room_series_selector(uuid, uuid, text) to authenticated;

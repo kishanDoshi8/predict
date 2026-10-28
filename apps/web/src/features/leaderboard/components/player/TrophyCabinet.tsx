@@ -1,5 +1,9 @@
 import { Reveal } from "@/shared/ui";
-import { getTrophyVisual } from "@/shared/lib/seriesRecognitionVisuals";
+import type { RoomMemberMilestone } from "@/shared/lib/api";
+import {
+	getMilestoneVisual,
+	getTrophyVisual,
+} from "@/shared/lib/seriesRecognitionVisuals";
 import {
 	AWARD_TIER_LABEL,
 	SERIES_TIER_ORDER,
@@ -13,6 +17,7 @@ import { ChevronLeftIcon } from "lucide-react";
 
 type Props = {
 	trophies: Trophy[];
+	milestones: RoomMemberMilestone[];
 	onBack: () => void;
 };
 
@@ -62,7 +67,11 @@ function TrophyRow({ trophy, index }: { trophy: Trophy; index: number }) {
 }
 
 // Every trophy, grouped by how big the series was.
-export function TrophyCabinet({ trophies, onBack }: Readonly<Props>) {
+export function TrophyCabinet({
+	trophies,
+	milestones,
+	onBack,
+}: Readonly<Props>) {
 	const groups = SERIES_TIER_ORDER.map((tier) => ({
 		tier,
 		items: trophies.filter((trophy) => trophy.tier === tier),
@@ -92,6 +101,39 @@ export function TrophyCabinet({ trophies, onBack }: Readonly<Props>) {
 					</ul>
 				</section>
 			))}
+			{milestones.length > 0 ? (
+				<section className='flex flex-col gap-2'>
+					<h3 className='flex items-baseline justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
+						Milestones
+						<span className='tabular-nums'>{milestones.length}</span>
+					</h3>
+					<ul className='flex flex-col gap-2'>
+						{milestones.map((milestone, index) => {
+							const visual = getMilestoneVisual(milestone.milestone_type);
+							return (
+								<Reveal
+									as='li'
+									key={milestone.id}
+									index={index}
+									className='flex items-center gap-3 rounded-xl border border-border/60 bg-card p-3'
+								>
+									<div className='flex size-10 shrink-0 items-center justify-center rounded-full border border-border/60 bg-muted/40'>
+										<visual.Icon className='size-5 text-foreground/80' />
+									</div>
+									<div className='min-w-0 flex-1'>
+										<p className='text-sm font-semibold text-foreground'>
+											{visual.label}
+										</p>
+										<p className='text-xs text-muted-foreground'>
+											{visual.description} {formatTrophyDate(milestone.achieved_at)}
+										</p>
+									</div>
+								</Reveal>
+							);
+						})}
+					</ul>
+				</section>
+			) : null}
 		</div>
 	);
 }

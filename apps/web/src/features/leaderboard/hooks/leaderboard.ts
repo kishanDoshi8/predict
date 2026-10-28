@@ -3,6 +3,8 @@ import {
     getRoomMemberStats,
     getRoomPredictionHistory,
     getRoomMemberSeriesRecognition,
+    getRoomMemberMilestones,
+    getRoomMemberStyle,
     getSeriesLeaderboard,
     getSeriesWeeklyRecap,
     getRoomOverallStandings,
@@ -148,6 +150,30 @@ export const useRoomMemberSeriesRecognition = (
     return useQuery({
         queryKey: roomKeys.roomMemberSeriesRecognition(roomId ?? "", playerId ?? ""),
         queryFn: () => getRoomMemberSeriesRecognition(roomId ?? "", playerId ?? ""),
+        enabled: !!roomId && !!playerId && enabled,
+    })
+}
+
+export const useRoomMemberMilestones = (
+    roomId?: string,
+    playerId?: string | null,
+    enabled = true,
+) => {
+    return useQuery({
+        queryKey: roomKeys.roomMemberMilestones(roomId ?? "", playerId ?? ""),
+        queryFn: () => getRoomMemberMilestones(roomId ?? "", playerId ?? ""),
+        enabled: !!roomId && !!playerId && enabled,
+    })
+}
+
+export const useRoomMemberStyle = (
+    roomId?: string,
+    playerId?: string | null,
+    enabled = true,
+) => {
+    return useQuery({
+        queryKey: roomKeys.roomMemberStyle(roomId ?? "", playerId ?? ""),
+        queryFn: () => getRoomMemberStyle(roomId ?? "", playerId ?? ""),
         enabled: !!roomId && !!playerId && enabled,
     })
 }

@@ -1,4 +1,5 @@
 import {
+	AchievementMilestoneActivity,
 	AchievementStreakMilestoneActivity,
 	DuelCancelledActivity,
 	DuelCreatedActivity,
@@ -25,6 +26,7 @@ import { DuelResolvedCard } from "@/features/activities/components/cards/DuelRes
 import { DuelCancelledCard } from "@/features/activities/components/cards/DuelCancelledCard";
 import { DuelExpiredCard } from "@/features/activities/components/cards/DuelExpiredCard";
 import { AchievementStreakMilestoneCard } from "@/features/activities/components/cards/AchievementStreakMilestoneCard";
+import { AchievementMilestoneCard } from "@/features/activities/components/cards/AchievementMilestoneCard";
 import { FEATURES } from "@/shared/constants/features";
 import { Reveal } from "@/shared/ui";
 import { ActivityCardComponentProps } from "@/features/activities/components/cards/types";
@@ -44,6 +46,7 @@ type CardFor<TActivity extends RoomActivity> = (
 type RegistryMap = {
 	room_joined: CardFor<RoomJoinedActivity>;
 	achievement_streak_milestone: CardFor<AchievementStreakMilestoneActivity>;
+	achievement_milestone: CardFor<AchievementMilestoneActivity>;
 	prediction_created: CardFor<PredictionCreatedActivity>;
 	prediction_locked: CardFor<PredictionLockedActivity>;
 	prediction_revealed: CardFor<PredictionRevealedActivity>;
@@ -59,6 +62,7 @@ type RegistryMap = {
 const registry: RegistryMap = {
 	room_joined: RoomJoinedCard,
 	achievement_streak_milestone: AchievementStreakMilestoneCard,
+	achievement_milestone: AchievementMilestoneCard,
 	prediction_created: PredictionCreatedCard,
 	prediction_locked: PredictionLockedCard,
 	prediction_revealed: PredictionRevealedCard,

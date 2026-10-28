@@ -7,7 +7,8 @@ import { ManageQueue, Room, RoomMember, RoomRole } from "@/features/rooms";
 import type { ActivityFilter, RoomActivitiesPage } from "@/features/activities/types/types";
 import type { Json } from '@/shared/lib/supabase.types'
 import type { SeriesAwardType } from "@/shared/lib/seriesRewards";
-import type { AwardTier, SeriesTier } from "@/shared/lib/trophyPrestige";
+import type { AwardTier, SeriesTier, StyleTitle } from "@/shared/lib/trophyPrestige";
+import { isMilestoneType, type MilestoneType } from "@/shared/lib/milestones";
 import { supabase } from './supabase'
 
 export type PreferenceSettings = {
@@ -1235,5 +1236,36 @@ export async function getRoomMemberSeriesRecognition(
     championships,
     awards,
   } as RoomMemberSeriesRecognition
+}
+export type RoomMemberMilestone = {
+  id: string
+  milestone_type: MilestoneType
+  achieved_at: string
+  series_id: string | null
+}
+
+// Career milestones, newest first.
+export async function getRoomMemberMilestones(roomId: string, playerId: string) {
+  const { data, error } = await supabase
+    .from('room_member_milestones')
+    .select('id, milestone_type, achieved_at, series_id')
+    .eq('room_id', roomId)
+    .eq('player_id', playerId)
+    .order('achieved_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []).filter((row): row is RoomMemberMilestone =>
+    isMilestoneType(row.milestone_type),
+  )
+}
+
+// The play-style titles a player holds in a room right now.
+export async function getRoomMemberStyle(roomId: string, playerId: string) {
+  const { data, error } = await supabase.rpc('get_room_member_style', {
+    p_room_id: roomId,
+    p_player_id: playerId,
+  })
+
+  return assertOk(data, error) as { titles: StyleTitle[] }
 }
 // #endregion Leaderboard

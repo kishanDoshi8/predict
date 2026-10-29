@@ -43,6 +43,30 @@ self.addEventListener("push", (event) => {
 	);
 });
 
+// The browser replaced this device's push subscription (it can rotate them).
+// Subscribe again with the same key and tell any open app to save it; if the
+// app is closed, it re-saves the subscription the next time it opens.
+self.addEventListener("pushsubscriptionchange", (event) => {
+	const options = event.oldSubscription?.options;
+	event.waitUntil(
+		(async () => {
+			if (!event.newSubscription && options?.applicationServerKey) {
+				await globalThis.self.registration.pushManager.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: options.applicationServerKey,
+				});
+			}
+			const clientList = await clients.matchAll({
+				type: "window",
+				includeUncontrolled: true,
+			});
+			for (const client of clientList) {
+				client.postMessage({ type: "push-subscription-changed" });
+			}
+		})(),
+	);
+});
+
 self.addEventListener("notificationclick", (event) => {
 	event.notification.close();
 	const targetUrl = event.notification.data?.url ?? "/";

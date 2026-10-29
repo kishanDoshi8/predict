@@ -9,6 +9,7 @@ import {
 	BellIcon,
 	CopyIcon,
 	FlagIcon,
+	LayoutGridIcon,
 	LinkIcon,
 	LogOutIcon,
 	SettingsIcon,
@@ -26,99 +27,30 @@ import { copyToClipboard } from "@/shared/lib/clipboard";
 import { InviteSheet } from "./InviteSheet";
 import { useManageQueue } from "@/features/rooms/hooks/staff";
 import { useRoomRole } from "@/features/rooms/hooks/useRoomRole";
-import { useCurrentSeries, useSeriesWallet } from "@/features/series/hooks/wallets";
-import {
-	InviteCard,
-	shareHost,
-	shareLink,
-	ShareSheet,
-	type InviteCardData,
-} from "@/features/share";
-import { useActivePredictions } from "@/features/predictions/hooks/prediction";
-import { useBets } from "@/features/predictions/hooks/bet";
-import { describeDeadline } from "@/shared/lib/deadline";
+import { useRoomActions } from "@/shared/lib/roomActions";
 
 type Props = {
 	room: Room;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	onOpenNotifications: () => void;
 };
 
 export function RoomMenuDrawer({
 	room,
 	open,
 	onOpenChange,
-	onOpenNotifications,
 }: Readonly<Props>) {
 	const navigate = useNavigate();
 	const { user, hasGoogleIdentity, linkGoogle, signOut } = useAuth();
 	const [isInviteSheetOpen, setIsInviteSheetOpen] = useState(false);
-	const [isInviteCardOpen, setIsInviteCardOpen] = useState(false);
+	const { openInvite, openNotifications, openRoomSwitcher } = useRoomActions();
 	const { can } = useRoomRole(room);
 	const { data: manageQueue } = useManageQueue(room.id, can.resolve && open);
-	const { currentSeries } = useCurrentSeries(room.id);
-	const activeSeries = currentSeries?.status === "active" ? currentSeries : null;
-	const { wallet: activeWallet } = useSeriesWallet(room.id, activeSeries?.id);
-
-	// The open prediction that locks soonest, shown on the invite card. Only
-	// fetched once the card is open.
-	const { data: activePredictions = [] } = useActivePredictions(
-		room.id,
-		activeSeries?.id,
-		isInviteCardOpen && !!activeSeries,
-	);
-	const now = Date.now();
-	const nextLock = activePredictions
-		.filter(
-			(prediction) =>
-				prediction.status === "draft" &&
-				new Date(prediction.deadline).getTime() > now,
-		)
-		.sort(
-			(a, b) =>
-				new Date(a.deadline).getTime() - new Date(b.deadline).getTime(),
-		)[0];
-	const { data: nextLockBets = [] } = useBets(room.id, nextLock?.id);
-	const nextLockPool = nextLockBets.reduce((sum, bet) => sum + bet.amount, 0);
-
-	const inviteCard: InviteCardData = {
-		roomName: room.name,
-		roomCode: room.code,
-		host: shareHost(),
-		memberCount: room.member_count ?? room.members.length,
-		livePredictions: room.active_prediction_count ?? 0,
-		series:
-			activeSeries && activeWallet
-				? { title: activeSeries.title, startingStack: activeWallet.starting_stack }
-				: null,
-		teaser: nextLock
-			? {
-					question: nextLock.title,
-					locks: describeDeadline(new Date(nextLock.deadline)).when,
-					options: nextLock.prediction_options.map((option) => ({
-						label: option.label,
-						share:
-							nextLockPool > 0
-								? (nextLockBets
-										.filter((bet) => bet.option_id === option.id)
-										.reduce((sum, bet) => sum + bet.amount, 0) /
-										nextLockPool) *
-									100
-								: 0,
-					})),
-				}
-			: null,
-	};
-
 	const close = (then: () => void) => () => {
 		onOpenChange(false);
 		then();
 	};
 
-	// The invite card image with the link; copying the link or code stays in the
-	// Invite sheet.
-	const handleInvite = () => setIsInviteCardOpen(true);
 
 	const handleCopyCode = async () => {
 		if (await copyToClipboard(room.code)) {
@@ -160,7 +92,13 @@ export function RoomMenuDrawer({
 		{
 			label: "Invite friends",
 			icon: Share2Icon,
-			onClick: close(() => void handleInvite()),
+			onClick: close(openInvite),
+		},
+		{
+			label: "Switch room",
+			detail: "Your other rooms, or join a new one",
+			icon: LayoutGridIcon,
+			onClick: close(openRoomSwitcher),
 		},
 		{
 			label: "Copy room code",
@@ -222,7 +160,7 @@ export function RoomMenuDrawer({
 		{
 			label: "Notifications",
 			icon: BellIcon,
-			onClick: close(onOpenNotifications),
+			onClick: close(openNotifications),
 		},
 	];
 
@@ -314,18 +252,6 @@ export function RoomMenuDrawer({
 				room={room}
 				open={isInviteSheetOpen}
 				onOpenChange={setIsInviteSheetOpen}
-			/>
-			<ShareSheet
-				open={isInviteCardOpen}
-				onOpenChange={setIsInviteCardOpen}
-				title={`Invite friends to ${room.name}`}
-				description='Anyone with the link can join after signing in.'
-				message={`Join ${room.name} on Verdict. Room code ${room.code}.`}
-				link={shareLink(room.code, "invite-card")}
-				kind='invite-card'
-				roomId={room.id}
-				fileName={`verdict-invite-${room.code.toLowerCase()}`}
-				renderCard={(format) => <InviteCard data={inviteCard} format={format} />}
 			/>
 		</>
 	);

@@ -37,7 +37,6 @@ export type RoomPreferenceOverrides = {
 export type PreferenceResponse = {
   room_id: string | null
   has_seen_how_to_play: boolean
-  has_seen_ratings_tip: boolean
   global: PreferenceSettings
   room_overrides: RoomPreferenceOverrides
   effective: PreferenceSettings
@@ -640,6 +639,13 @@ export async function upsertPushSubscription(
   })
 
   return assertOk(data, error) as string
+}
+
+export async function deletePushSubscription(endpoint: string) {
+  const { error } = await supabase.rpc('delete_my_push_subscription', {
+    p_endpoint: endpoint,
+  })
+  if (error) throw error
 }
 
 // #endregion Preferences

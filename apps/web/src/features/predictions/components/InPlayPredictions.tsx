@@ -1,4 +1,4 @@
-import { useRoomRole } from "@/features/rooms";
+import { RoomNextSteps, useRoomRole } from "@/features/rooms";
 import {
 	Countdown,
 	Prediction,
@@ -423,7 +423,7 @@ type InPlayPredictionsProps = {
 // ── Main component ─────────────────────────────────────────────────────────
 function InPlayPredictions({
 	predictionsOverride,
-	emptyMessage = "No predictions yet. The host will start one soon!",
+	emptyMessage,
 	showSectionHeader = true,
 }: Readonly<InPlayPredictionsProps> = {}) {
 	const { room } = useRoomContext();
@@ -439,8 +439,10 @@ function InPlayPredictions({
 		predictionsOverride === undefined,
 	);
 	const isOrganizer = useRoomRole(room).can.organize;
-	const newPredictionAction =
-		isOrganizer && currentSeries?.status === "active" ? (
+	const hasActiveSeries = currentSeries?.status === "active";
+	let newPredictionAction: React.ReactNode = null;
+	if (isOrganizer && hasActiveSeries) {
+		newPredictionAction = (
 			<Button variant='linear' size='sm' asChild>
 				<Link
 					to={`/rooms/${room.code}/predictions/new`}
@@ -450,7 +452,23 @@ function InPlayPredictions({
 					New prediction
 				</Link>
 			</Button>
-		) : null;
+		);
+	} else if (isOrganizer && !currentSeries) {
+		newPredictionAction = (
+			<Button variant='linear' size='sm' asChild>
+				<Link to={`/rooms/${room.code}/series/new`}>
+					<PlusIcon />
+					Start a series
+				</Link>
+			</Button>
+		);
+	}
+	let defaultEmptyMessage = "No predictions yet. The host will start one soon!";
+	if (!currentSeries) {
+		defaultEmptyMessage = isOrganizer
+			? "Start a series to open the first predictions."
+			: "No series yet. Your host will start one soon.";
+	}
 	const predictions = predictionsOverride ?? queriedPredictions;
 	const isPredictionLoading =
 		predictionsOverride === undefined ? isQueriedPredictionLoading : false;
@@ -514,13 +532,16 @@ function InPlayPredictions({
 					className={`border-2 border-activity/30 rounded-xl p-4 flex flex-col gap-2 bg-secondary text-accent-foreground w-full`}
 				>
 					<p className={`text-muted-foreground text-center py-4`}>
-						{emptyMessage}
+						{emptyMessage ?? defaultEmptyMessage}
 					</p>
-					{predictionsOverride === undefined &&
-					newPredictionAction ? (
-						<div className='flex justify-center pb-2'>
-							{newPredictionAction}
-						</div>
+					{predictionsOverride === undefined ? (
+						newPredictionAction ? (
+							<div className='flex justify-center pb-2'>
+								{newPredictionAction}
+							</div>
+						) : (
+							<RoomNextSteps className='pb-2' />
+						)
 					) : null}
 				</div>
 			</CarouselItem>

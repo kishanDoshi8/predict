@@ -74,3 +74,4 @@ grant execute on function public.update_room(uuid, text, text, integer, integer)
 grant execute on function public.update_room_preferences(uuid, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean) to authenticated;
 grant execute on function public.update_series(uuid, text, text, integer, integer, integer, integer) to authenticated;
 grant execute on function public.upsert_user_push_subscription(jsonb) to authenticated;
+grant execute on function public.delete_my_push_subscription(text) to authenticated;

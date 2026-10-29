@@ -685,6 +685,13 @@ export type Database = {
             foreignKeyName: "room_member_milestones_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
+          },
+          {
+            foreignKeyName: "room_member_milestones_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
             referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
@@ -693,6 +700,13 @@ export type Database = {
             columns: ["series_id"]
             isOneToOne: false
             referencedRelation: "series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_member_milestones_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series_with_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -936,8 +950,8 @@ export type Database = {
           started_at: string | null
           starting_stack: number
           status: string
-          title: string
           tier: string | null
+          title: string
           topups_paid: number
           weekly_topup: number
         }
@@ -958,8 +972,8 @@ export type Database = {
           started_at?: string | null
           starting_stack?: number
           status?: string
-          title: string
           tier?: string | null
+          title: string
           topups_paid?: number
           weekly_topup?: number
         }
@@ -980,8 +994,8 @@ export type Database = {
           started_at?: string | null
           starting_stack?: number
           status?: string
-          title?: string
           tier?: string | null
+          title?: string
           topups_paid?: number
           weekly_topup?: number
         }
@@ -1527,6 +1541,10 @@ export type Database = {
           p_weekly_topup?: number
         }
         Returns: Json
+      }
+      delete_my_push_subscription: {
+        Args: { p_endpoint: string }
+        Returns: undefined
       }
       get_my_series_wallets: { Args: { p_room_id: string }; Returns: Json }
       get_player: { Args: never; Returns: Json }

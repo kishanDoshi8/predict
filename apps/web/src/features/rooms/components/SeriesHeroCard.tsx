@@ -20,6 +20,8 @@ import { describeDeadline } from "@/shared/lib/deadline";
 import { cn, formatSignedPoints } from "@/shared/lib/utils";
 import { Reveal, Skeleton } from "@/shared/ui";
 import { ChevronRightIcon, Clock } from "lucide-react";
+import { InfoHint } from "@/shared/ui";
+import { RankingRuleHint } from "@/features/leaderboard";
 import { Link } from "react-router-dom";
 
 const HERO_SHELL = "w-full max-w-md mx-auto rounded-2xl border bg-card p-4 mt-4";
@@ -107,8 +109,11 @@ export function SeriesHeroCard() {
 						) : null}
 					</p>
 					{me && !me.is_ranked ? (
-						<p className='text-xs text-muted-foreground'>
+						<p className='flex items-center gap-1 text-xs text-muted-foreground'>
 							Not ranked yet · {betsNeededLabel(me.bets_needed)}
+							<InfoHint label='How ranking works'>
+								<RankingRuleHint requiredBets={me.required_bets} />
+							</InfoHint>
 						</p>
 					) : null}
 				</div>

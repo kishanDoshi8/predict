@@ -23,7 +23,31 @@ const corsHeaders = {
 	"Access-Control-Allow-Headers":
 		"authorization, x-client-info, apikey, content-type, x-notification-secret",
 };
-const PUSH_TTL_SECONDS = 60;
+// How long a push service keeps trying a phone that is asleep or offline.
+// A minute (the old value) dropped most pushes to idle phones.
+const DELIVERY: Record<
+	NotificationEventType,
+	{ ttl: number; urgency: "normal" | "high" }
+> = {
+	prediction_live: { ttl: 6 * 3600, urgency: "normal" },
+	prediction_locked: { ttl: 2 * 3600, urgency: "normal" },
+	deadline_1h: { ttl: 3600, urgency: "high" },
+	result_revealed: { ttl: 12 * 3600, urgency: "normal" },
+	weekly_points_claim: { ttl: 24 * 3600, urgency: "normal" },
+	result_needed: { ttl: 12 * 3600, urgency: "high" },
+};
+// Keeps .in() filters well under URL length limits in big rooms.
+const ID_BATCH_SIZE = 150;
+// Endpoints that will never work again: gone, or made for another VAPID key.
+const DEAD_ENDPOINT_STATUSES = new Set([403, 404, 410]);
+
+function chunk<T>(items: T[], size: number) {
+	const chunks: T[][] = [];
+	for (let i = 0; i < items.length; i += size) {
+		chunks.push(items.slice(i, i + size));
+	}
+	return chunks;
+}
 
 type RequestBody = {
 	event_type: NotificationEventType;
@@ -185,17 +209,14 @@ Deno.serve(async (req) => {
 		targetPlayerId = player.id;
 	}
 
-	// Each player's default for this event; filtered below, after any room
-	// override is applied.
-	let playerPreferencesQuery = supabase
-		.from("player_preferences")
-		.select(`player_id, ${preferenceColumn}`);
+	// Who could get this push: one player, a room's members, or (for a
+	// privileged broadcast with no room) every player with preferences.
+	let candidateIds: string[] | null = null;
 	let overrideRoomId: string | null = null;
 
 	if (targetPlayerId) {
-		playerPreferencesQuery = playerPreferencesQuery.eq("player_id", targetPlayerId);
+		candidateIds = [targetPlayerId];
 	} else if (isPrivilegedRequest && body.room_id) {
-		// Scope broadcast to members of the specified room only.
 		let memberQuery = supabase
 			.from("room_members")
 			.select("player_id")
@@ -216,77 +237,85 @@ Deno.serve(async (req) => {
 			);
 		}
 
-		const roomPlayerIds = (memberRows ?? [])
-			.map((r) => r.player_id)
-			.filter((id): id is string => id != null);
-		if (roomPlayerIds.length === 0) {
-			return jsonResponse({
-				sent_count: 0,
-				failed_count: 0,
-				pruned_count: 0,
-				target_count: 0,
-			});
-		}
-
-		playerPreferencesQuery = playerPreferencesQuery.in("player_id", roomPlayerIds);
+		candidateIds = [
+			...new Set(
+				(memberRows ?? [])
+					.map((r) => r.player_id)
+					.filter((id): id is string => id != null),
+			),
+		];
 		overrideRoomId = body.room_id;
 	}
 
-	const { data: preferenceRows, error: preferenceError } =
-		await playerPreferencesQuery;
-
-	if (preferenceError) {
-		return jsonResponse(
-			{
-				error: "Failed to fetch notification preferences.",
-				detail: preferenceError.message,
-			},
-			500,
-		);
+	if (candidateIds?.length === 0) {
+		return jsonResponse({
+			sent_count: 0,
+			failed_count: 0,
+			pruned_count: 0,
+			target_count: 0,
+		});
 	}
 
 	// The selected column is only known at runtime, so the rows are untyped.
 	type PreferenceRow = { player_id: string } & Record<string, unknown>;
-	const preferences = (preferenceRows ?? []) as unknown as PreferenceRow[];
 
-	// A room's own setting (Notifications > This room) wins over the default.
-	const roomOverrides = new Map<string, boolean | null>();
-	if (overrideRoomId) {
-		const { data: overrideRows, error: overrideError } = await supabase
-			.from("room_preferences")
-			.select(`player_id, ${preferenceColumn}`)
-			.eq("room_id", overrideRoomId)
-			.in(
-				"player_id",
-				preferences.map((row) => row.player_id),
-			);
+	// Each player's default for this event. A player with no preferences row
+	// gets the defaults (every event on) instead of nothing.
+	const defaults = new Map<string, boolean>();
+	const preferenceBatches = candidateIds ? chunk(candidateIds, ID_BATCH_SIZE) : [null];
+	for (const ids of preferenceBatches) {
+		let query = supabase
+			.from("player_preferences")
+			.select(`player_id, ${preferenceColumn}`);
+		if (ids) query = query.in("player_id", ids);
+		const { data, error } = await query;
 
-		if (overrideError) {
+		if (error) {
 			return jsonResponse(
 				{
-					error: "Failed to fetch room notification preferences.",
-					detail: overrideError.message,
+					error: "Failed to fetch notification preferences.",
+					detail: error.message,
 				},
 				500,
 			);
 		}
 
-		for (const row of (overrideRows ?? []) as unknown as PreferenceRow[]) {
-			const value = row[preferenceColumn];
-			roomOverrides.set(row.player_id, typeof value === "boolean" ? value : null);
+		for (const row of (data ?? []) as unknown as PreferenceRow[]) {
+			defaults.set(row.player_id, row[preferenceColumn] !== false);
 		}
 	}
 
-	const playerIds = [
-		...new Set(
-			preferences
-				.filter((row) => {
-					const override = roomOverrides.get(row.player_id) ?? null;
-					return (override ?? row[preferenceColumn]) === true;
-				})
-				.map((row) => row.player_id),
-		),
-	];
+	// A room's own setting (Notifications > This room) wins over the default.
+	const roomOverrides = new Map<string, boolean | null>();
+	if (overrideRoomId && candidateIds) {
+		for (const ids of chunk(candidateIds, ID_BATCH_SIZE)) {
+			const { data, error } = await supabase
+				.from("room_preferences")
+				.select(`player_id, ${preferenceColumn}`)
+				.eq("room_id", overrideRoomId)
+				.in("player_id", ids);
+
+			if (error) {
+				return jsonResponse(
+					{
+						error: "Failed to fetch room notification preferences.",
+						detail: error.message,
+					},
+					500,
+				);
+			}
+
+			for (const row of (data ?? []) as unknown as PreferenceRow[]) {
+				const value = row[preferenceColumn];
+				roomOverrides.set(row.player_id, typeof value === "boolean" ? value : null);
+			}
+		}
+	}
+
+	const playerIds = (candidateIds ?? [...defaults.keys()]).filter((id) => {
+		const override = roomOverrides.get(id) ?? null;
+		return override ?? defaults.get(id) ?? true;
+	});
 	if (playerIds.length === 0) {
 		return jsonResponse({
 			sent_count: 0,
@@ -296,19 +325,24 @@ Deno.serve(async (req) => {
 		});
 	}
 
-	const { data: subscriptions, error: subscriptionsError } = await supabase
-		.from("user_push_subscriptions")
-		.select("id, user_id, subscription")
-		.in("user_id", playerIds);
+	const subscriptions: Array<{ id: string; user_id: string; subscription: unknown }> = [];
+	for (const ids of chunk(playerIds, ID_BATCH_SIZE)) {
+		const { data, error } = await supabase
+			.from("user_push_subscriptions")
+			.select("id, user_id, subscription")
+			.in("user_id", ids);
 
-	if (subscriptionsError) {
-		return jsonResponse(
-			{
-				error: "Failed to fetch push subscriptions.",
-				detail: subscriptionsError.message,
-			},
-			500,
-		);
+		if (error) {
+			return jsonResponse(
+				{
+					error: "Failed to fetch push subscriptions.",
+					detail: error.message,
+				},
+				500,
+			);
+		}
+
+		subscriptions.push(...(data ?? []));
 	}
 
 	const payload = {
@@ -325,15 +359,17 @@ Deno.serve(async (req) => {
 	let failedCount = 0;
 	const staleSubscriptionIds: string[] = [];
 
+	const delivery = DELIVERY[eventType];
+
 	await Promise.all(
-		(subscriptions ?? []).map(async (row) => {
+		subscriptions.map(async (row) => {
 			try {
 				await webpush.sendNotification(
 					row.subscription as unknown as Record<string, unknown>,
 					JSON.stringify(payload),
 					{
-						TTL: PUSH_TTL_SECONDS,
-						urgency: "normal",
+						TTL: delivery.ttl,
+						urgency: delivery.urgency,
 					},
 				);
 				sentCount += 1;
@@ -341,7 +377,15 @@ Deno.serve(async (req) => {
 				failedCount += 1;
 				const statusCode = getStatusCode(error);
 
-				if (statusCode === 404 || statusCode === 410) {
+				const endpoint = (row.subscription as { endpoint?: string })?.endpoint;
+				console.error("Push failed", {
+					event_type: eventType,
+					status: statusCode ?? null,
+					host: endpoint ? new URL(endpoint).host : null,
+					user_id: row.user_id,
+				});
+
+				if (statusCode !== undefined && DEAD_ENDPOINT_STATUSES.has(statusCode)) {
 					staleSubscriptionIds.push(row.id);
 				}
 			}
@@ -355,7 +399,9 @@ Deno.serve(async (req) => {
 			.delete({ count: "exact" })
 			.in("id", staleSubscriptionIds);
 
-		if (!deleteError) {
+		if (deleteError) {
+			console.error("Failed to prune dead push subscriptions", deleteError.message);
+		} else {
 			prunedCount = count ?? 0;
 		}
 	}
@@ -364,6 +410,6 @@ Deno.serve(async (req) => {
 		sent_count: sentCount,
 		failed_count: failedCount,
 		pruned_count: prunedCount,
-		target_count: subscriptions?.length ?? 0,
+		target_count: subscriptions.length,
 	});
 });

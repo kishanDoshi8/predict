@@ -12,3 +12,4 @@ export {
 	PredictionHistoryFeedSkeleton,
 } from "./components/leaderboard/PredictionHistoryFeed";
 export { PlayerProfileDialog } from "./components/player/PlayerProfileDialog";
+export { RankingRuleHint } from "./components/leaderboard/RankingRuleHint";

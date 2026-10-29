@@ -8,7 +8,7 @@ import {
 	EllipsisVerticalIcon,
 	LayoutGridIcon,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import type { MouseEvent } from "react";
 import { useAppNavigation } from "@/shared/lib/navigation";
 import { useState } from "react";
@@ -18,7 +18,7 @@ import {
 	useCurrentSeries,
 	useSeriesWallet,
 } from "@/features/series";
-import { RoomPreferencesDialog } from "@/features/preferences";
+import { useRoomActions } from "@/shared/lib/roomActions";
 import { cn } from "@/shared/lib/utils";
 
 export type RoomHeaderLeftAction = "home" | "back" | "none";
@@ -41,17 +41,23 @@ function RoomHeader({
 	const { wallet } = useSeriesWallet(room.id, currentSeriesId);
 	const [isSeriesPickerOpen, setIsSeriesPickerOpen] = useState(false);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
-	const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+	const { openRoomSwitcher } = useRoomActions();
+	const { pathname } = useLocation();
 
 	const { can } = useRoomRole(room);
 	const isOrganizer = can.organize;
-	const canResolve = can.resolve;
 	const { up } = useAppNavigation();
 	const roomHome = `/rooms/${room.code}`;
-	// The room name goes back to the room's Home and clears the pages above.
+	const isOnHome = pathname.replace(/\/$/, "") === roomHome;
+	// The room name goes back to the room's Home and clears the pages above;
+	// on Home itself it opens the room switcher.
 	const goHome = (event: MouseEvent<HTMLAnchorElement>) => {
 		event.preventDefault();
-		up(roomHome);
+		if (isOnHome) {
+			openRoomSwitcher();
+		} else {
+			up(roomHome);
+		}
 	};
 
 	return (
@@ -103,9 +109,15 @@ function RoomHeader({
 							<button
 								type='button'
 								onClick={() => setIsSeriesPickerOpen(true)}
-								className='flex items-center gap-0.5 self-start max-w-full text-xs text-muted-foreground hover:text-foreground'
+								className='mt-0.5 flex items-center gap-1 self-start max-w-full rounded-full border border-border/70 bg-muted/50 py-0.5 pl-2 pr-1.5 text-xs font-medium text-foreground/85 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50'
 								aria-label={`Series: ${currentSeries?.title ?? "none"}. Change series`}
 							>
+								{currentSeries?.status === "active" ? (
+									<span
+										aria-hidden='true'
+										className='size-1.5 shrink-0 rounded-full bg-live'
+									/>
+								) : null}
 								<span className='truncate'>
 									{currentSeries?.title ??
 										(isOrganizer
@@ -167,13 +179,6 @@ function RoomHeader({
 				room={room}
 				open={isMenuOpen}
 				onOpenChange={setIsMenuOpen}
-				onOpenNotifications={() => setIsNotificationsOpen(true)}
-			/>
-			<RoomPreferencesDialog
-				roomId={room.id}
-				isStaff={canResolve}
-				open={isNotificationsOpen}
-				onOpenChange={setIsNotificationsOpen}
 			/>
 		</header>
 	);

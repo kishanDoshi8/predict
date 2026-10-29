@@ -7,6 +7,7 @@ import {
 } from "react";
 import { type Session, type User } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
+import { removePushSubscription } from "@/shared/lib/pushNotifications";
 import { supabase } from "@/shared/lib/supabase";
 
 interface AuthContextValue {
@@ -113,6 +114,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user?.identities?.some((identity) => identity.provider === "google") ?? false;
 
   const signOut = async () => {
+    // Stop pushes to this device before the session (needed to do it) ends.
+    await removePushSubscription();
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     queryClient.clear();

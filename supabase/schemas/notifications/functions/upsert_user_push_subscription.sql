@@ -8,7 +8,6 @@ set search_path = public, private
 as $$
 declare
   v_user_id              uuid;
-  v_existing_user_id     uuid;
   v_subscription_id      uuid;
 begin
   if coalesce(p_subscription->>'endpoint', '') = '' then
@@ -21,18 +20,14 @@ begin
     raise exception 'Player profile not found' using errcode = 'P0004';
   end if;
 
-  select user_id into v_existing_user_id
-  from public.user_push_subscriptions
-  where subscription->>'endpoint' = p_subscription->>'endpoint';
-
-  if v_existing_user_id is not null and v_existing_user_id <> v_user_id then
-    raise exception 'Push subscription endpoint belongs to another user' using errcode = 'P0011';
-  end if;
-
+  -- An endpoint is one browser on one device. Whoever is signed in there now
+  -- owns it, so a shared phone or an account switch moves it over.
   insert into public.user_push_subscriptions (user_id, subscription)
   values (v_user_id, p_subscription)
   on conflict ((subscription->>'endpoint')) do update
-  set subscription = excluded.subscription
+  set
+    user_id = excluded.user_id,
+    subscription = excluded.subscription
   returning id into v_subscription_id;
 
   return v_subscription_id;

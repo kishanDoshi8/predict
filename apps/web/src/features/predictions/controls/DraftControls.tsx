@@ -21,12 +21,15 @@ import { previewWinnings } from "@/features/predictions/lib/payoutPreview";
 import { Spinner } from "@/shared/ui/spinner";
 import { toast } from "sonner";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
+import { useRoomActions } from "@/shared/lib/roomActions";
 import { useLocalStorage } from "@/shared/hooks/useLocalStorage";
 import { localStorageKeys } from "@/shared/constants/queryKeys";
 import { Collapse, Counter, FadeContent } from "@/shared/ui";
 import { usePredictionDuels } from "@/features/duels";
 import { useSeriesWallet } from "@/features/series";
 import { FEATURES } from "@/shared/constants/features";
+
+const NOTIFICATIONS_OFFERED_KEY = "notifications-offered-after-bet";
 
 type Props = {
 	player: Player;
@@ -44,6 +47,7 @@ export default function DraftControls({
 	setSelectedOption,
 }: Readonly<Props>) {
 	const { room } = useRoomContext();
+	const { openNotifications } = useRoomActions();
 	const { mutate: placeBet, isPending: isPlacingBet } = usePlaceBet();
 	const { data: duels } = usePredictionDuels(
 		room.id,
@@ -60,6 +64,8 @@ export default function DraftControls({
 	const { data: bets = [] } = useBets(room.id, predictionId);
 
 	const [betAmount, setBetAmount] = React.useState<number>(1);
+	// The suggested stake fills in until the player picks their own amount.
+	const [hasPickedAmount, setHasPickedAmount] = React.useState(false);
 	const [collapseControls, setCollapseControls] = useLocalStorage<boolean>(
 		false,
 		localStorageKeys.userPreference.bettingControls.collapsed,
@@ -68,6 +74,7 @@ export default function DraftControls({
 
 	// Bets spend points from this prediction's series wallet.
 	const availableBalance = (wallet?.available ?? 0) + (myBet?.amount ?? 0);
+	const suggestedStake = defaultStake(availableBalance);
 
 	const optionLabel = (optionId: string | null) =>
 		prediction?.prediction_options.find((option) => option.id === optionId)
@@ -100,10 +107,10 @@ export default function DraftControls({
 		if (myBet) {
 			setSelectedOption(myBet.option_id);
 			setBetAmount(myBet.amount);
-		} else {
-			setBetAmount(1);
+		} else if (!hasPickedAmount) {
+			setBetAmount(suggestedStake);
 		}
-	}, [myBet?.option_id, myBet?.amount]);
+	}, [myBet?.option_id, myBet?.amount, suggestedStake]);
 
 	useEffect(() => {
 		if (isMyBetLoading) return;
@@ -139,6 +146,9 @@ export default function DraftControls({
 				amount: betAmount,
 			},
 			{
+				onSuccess: () => {
+					if (!myBet) offerNotifications();
+				},
 				onError: (error) => {
 					console.error("Failed to place bet:", error);
 					toast.error("Failed to place bet. Please try again.", {
@@ -148,6 +158,26 @@ export default function DraftControls({
 				},
 			},
 		);
+	};
+
+	// Right after a first bet is when hearing about the result matters, so
+	// offer notifications once per device, if the player hasn't decided yet.
+	const offerNotifications = () => {
+		if (!("Notification" in globalThis) || Notification.permission !== "default") {
+			return;
+		}
+		try {
+			if (localStorage.getItem(NOTIFICATIONS_OFFERED_KEY)) return;
+			localStorage.setItem(NOTIFICATIONS_OFFERED_KEY, "1");
+		} catch {
+			return;
+		}
+		toast("Want to know when it's settled?", {
+			description: "Get a notification when results are in.",
+			position: "top-center",
+			duration: 10000,
+			action: { label: "Turn on", onClick: openNotifications },
+		});
 	};
 
 	const cannotBetMessage = () => {
@@ -166,7 +196,8 @@ export default function DraftControls({
 			setBetAmount(myBet.amount);
 			setSelectedOption(myBet.option_id);
 		} else {
-			setBetAmount(1);
+			setBetAmount(suggestedStake);
+			setHasPickedAmount(false);
 		}
 	};
 
@@ -198,40 +229,39 @@ export default function DraftControls({
 		);
 	};
 
-	const handleAddAmount = (number?: number, isButtonPress?: boolean) => {
-		setBetAmount((prev) => {
-			if (prev === 1 && isButtonPress) {
-				return Math.min(number ?? 1, availableBalance);
-			}
-			return Math.min(prev + (number ?? 1), availableBalance);
-		});
+	const handleAddAmount = (number?: number) => {
+		setHasPickedAmount(true);
+		setBetAmount((prev) => Math.min(prev + (number ?? 1), availableBalance));
 	};
 
 	const handleSubtractAmount = () => {
+		setHasPickedAmount(true);
 		setBetAmount((prev) => Math.max(prev - 1, 1));
 	};
 
 	const removeSelectedOption = () => {
 		setSelectedOption(null);
-		setBetAmount(0);
+		setBetAmount(suggestedStake);
+		setHasPickedAmount(false);
 		setCollapseControls(true);
 	};
 
 	return (
 		<div className={`relative p-4 border rounded-md bg-background`}>
-			<Button
-				variant={"secondary"}
-				className={`absolute -top-1 left-1/2 -translate-x-1/2 bg-background hover:bg-background/80 data-[state=open]:bg-background/80 border rounded-lg rounded-tr-none rounded-tl-none`}
-				size={"icon-lg"}
-				disabled={!myBet}
-				onClick={() =>
-					setCollapseControls((prev) => (myBet ? !prev : prev))
-				}
-			>
-				<ChevronDown
-					className={`w-4 h-4 duration-300 ${collapseControls ? "rotate-180" : ""}`}
-				/>
-			</Button>
+			{/* Folds the controls away once there's a bet to keep. */}
+			{myBet ? (
+				<Button
+					variant={"secondary"}
+					className={`absolute -top-1 left-1/2 -translate-x-1/2 bg-background hover:bg-background/80 data-[state=open]:bg-background/80 border rounded-lg rounded-tr-none rounded-tl-none`}
+					size={"icon-lg"}
+					aria-label={collapseControls ? "Show bet controls" : "Hide bet controls"}
+					onClick={() => setCollapseControls((prev) => !prev)}
+				>
+					<ChevronDown
+						className={`w-4 h-4 duration-300 ${collapseControls ? "rotate-180" : ""}`}
+					/>
+				</Button>
+			) : null}
 			<div
 				className={`flex flex-col ${collapseControls ? "gap-2" : "gap-6"}`}
 			>
@@ -311,7 +341,7 @@ export default function DraftControls({
 									<Button
 										variant={"outline"}
 										size={"sm"}
-										onClick={() => handleAddAmount(5, true)}
+										onClick={() => handleAddAmount(5)}
 										disabled={
 											betAmount === availableBalance
 										}
@@ -322,7 +352,7 @@ export default function DraftControls({
 										variant={"outline"}
 										size={"sm"}
 										onClick={() =>
-											handleAddAmount(20, true)
+											handleAddAmount(20)
 										}
 										disabled={
 											betAmount === availableBalance
@@ -334,7 +364,7 @@ export default function DraftControls({
 										variant={"outline"}
 										size={"sm"}
 										onClick={() =>
-											handleAddAmount(50, true)
+											handleAddAmount(50)
 										}
 										disabled={
 											betAmount === availableBalance
@@ -346,7 +376,7 @@ export default function DraftControls({
 										variant={"outline"}
 										size={"sm"}
 										onClick={() =>
-											handleAddAmount(100, true)
+											handleAddAmount(100)
 										}
 										disabled={
 											betAmount === availableBalance
@@ -368,9 +398,10 @@ export default function DraftControls({
 										max={availableBalance}
 										step={1}
 										value={[betAmount]}
-										onValueChange={(value) =>
-											setBetAmount(value[0])
-										}
+										onValueChange={(value) => {
+											setHasPickedAmount(true);
+											setBetAmount(value[0]);
+										}}
 										disabled={isPlacingBet}
 									/>
 									<Button
@@ -458,3 +489,12 @@ export default function DraftControls({
 		</div>
 	);
 }
+
+// A tenth of the wallet, rounded to a clean multiple of 10: at least 10 and
+// never more than the player has.
+function defaultStake(available: number) {
+	if (available <= 0) return 1;
+	const tenth = Math.round((available * 0.1) / 10) * 10;
+	return Math.min(Math.max(tenth, 10), available);
+}
+

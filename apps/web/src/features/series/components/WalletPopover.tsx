@@ -36,15 +36,13 @@ export function WalletPopover({ wallet }: Readonly<Props>) {
 			<PopoverContent align='end' className='w-64'>
 				<p className='text-xs text-muted-foreground'>Your points in</p>
 				<p className='font-semibold truncate'>{wallet.title}</p>
-				<p className='mt-1 text-xs text-muted-foreground'>
-					Everyone starts with the same points. The top balance when the
-					series ends wins it.
-				</p>
 				<dl className='mt-3 flex flex-col gap-2 text-sm'>
 					{rows.map(([label, value, tone]) => (
 						<div key={label} className='flex justify-between gap-3'>
 							<dt className='text-muted-foreground'>{label}</dt>
-							<dd className={cn("tabular-nums font-medium", tone)}>
+							<dd
+								className={cn("tabular-nums font-medium", tone)}
+							>
 								{value}
 							</dd>
 						</div>
@@ -52,8 +50,8 @@ export function WalletPopover({ wallet }: Readonly<Props>) {
 				</dl>
 				{wallet.status === "active" && wallet.weekly_topup > 0 ? (
 					<p className='mt-3 rounded-md bg-accent/10 px-2 py-1.5 text-xs'>
-						+{wallet.weekly_topup.toLocaleString()} every Monday if you bet
-						that week.
+						+{wallet.weekly_topup.toLocaleString()} every Monday if
+						you bet that week.
 					</p>
 				) : null}
 			</PopoverContent>

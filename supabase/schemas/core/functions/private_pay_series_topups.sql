@@ -45,7 +45,7 @@ begin
       );
     get diagnostics v_paid = row_count;
 
-    -- Counts every week a top-up round ran, so late joiners start level with active players.
+    -- Counts every week a top-up round ran; caps what a late joiner can start with.
     update public.series
     set topups_paid = topups_paid + 1,
         last_topup_week = v_week_key,

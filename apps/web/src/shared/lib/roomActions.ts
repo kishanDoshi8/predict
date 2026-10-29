@@ -1,11 +1,13 @@
 import { createContext, useContext } from "react";
 
 // Room-wide sheets any part of a room page can open: the room switcher, the
-// invite card and this room's notification settings. Provided by RoomLayout.
+// series picker, the invite card and this room's notification settings.
+// Provided by RoomLayout.
 export type RoomActions = {
 	openRoomSwitcher: () => void;
 	openInvite: () => void;
 	openNotifications: () => void;
+	openSeriesPicker: () => void;
 };
 
 export const RoomActionsContext = createContext<RoomActions | null>(null);

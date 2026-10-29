@@ -18,6 +18,7 @@ import {
 	useUpdateSeries,
 	useCompleteSeries,
 	useArchiveSeries,
+	useCurrentSeries,
 } from "@/features/series";
 import type { Series } from "@/features/series/types/series";
 import type { SeriesFormState } from "@/features/series/components/SeriesEditDialog";
@@ -142,6 +143,7 @@ export default function SeriesPage() {
 		useArchiveSeries(room.id);
 
 	const { can } = useRoomRole(room);
+	const { currentSeriesId } = useCurrentSeries(room.id);
 	const isOrganizer = can.organize;
 
 	const [editingSeriesId, setEditingSeriesId] = useState<string | null>(null);
@@ -291,6 +293,7 @@ export default function SeriesPage() {
 				activeSeries={activeSeries}
 				completedSeries={completedSeries}
 				roomCode={room.code}
+				currentSeriesId={currentSeriesId}
 				isOrganizer={isOrganizer}
 				onCreateNew={() => navigate(`/rooms/${room.code}/series/new`)}
 			/>

@@ -4,27 +4,42 @@ import type { Series } from "@/features/series/types/series";
 import { Field, FieldLabel, Progress, Skeleton } from "@/shared/ui";
 import { CheckCircle2Icon, ChevronRightIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+import { cn } from "@/shared/lib/utils";
 
 const TILE_SHELL = "block rounded-2xl border bg-card p-4";
 
 type SeriesTileProps = {
 	series: Series;
 	roomCode: string;
+	/** The series the room view is following right now. */
+	isCurrent?: boolean;
 };
 
-export function SeriesTile({ series, roomCode }: Readonly<SeriesTileProps>) {
+export function SeriesTile({
+	series,
+	roomCode,
+	isCurrent = false,
+}: Readonly<SeriesTileProps>) {
 	const progress = getSeriesProgress(series);
 	const isCompleted = series.status === "completed";
 
 	return (
 		<Link
 			to={`/rooms/${roomCode}/series/${series.id}`}
-			className={`${TILE_SHELL} transition-colors hover:border-primary/50`}
+			className={cn(
+				TILE_SHELL,
+				"transition-colors hover:border-primary/50",
+				isCurrent && "border-primary/40",
+			)}
+			aria-current={isCurrent ? "true" : undefined}
 		>
 			<div className='space-y-3'>
 				<div className='flex items-start justify-between gap-2'>
 					<SeriesStatusBadge status={series.status} />
-					<ChevronRightIcon className='size-4 text-muted-foreground' />
+					<span className='flex items-center gap-2'>
+						{isCurrent ? <ViewingMark /> : null}
+						<ChevronRightIcon className='size-4 text-muted-foreground' />
+					</span>
 				</div>
 
 				<div className='space-y-1'>
@@ -101,5 +116,15 @@ export function SeriesTileSkeleton() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+// Quiet marker for the series the whole room view is showing.
+export function ViewingMark() {
+	return (
+		<span className='flex items-center gap-1 text-xs text-muted-foreground'>
+			<span aria-hidden='true' className='size-1.5 rounded-full bg-primary' />
+			Viewing
+		</span>
 	);
 }

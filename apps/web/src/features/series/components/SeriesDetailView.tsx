@@ -12,7 +12,9 @@ import type { Prediction } from "@/features/predictions";
 import type { Series } from "@/features/series/types/series";
 import type { SeriesAward, SeriesPlacement } from "@/shared/lib/api";
 import { Button } from "@/shared/ui";
-import { RocketIcon } from "lucide-react";
+import { EyeIcon, RocketIcon } from "lucide-react";
+import { toast } from "sonner";
+import { ViewingMark } from "@/features/series/components/SeriesTile";
 import { useNavigate } from "react-router-dom";
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useCurrentSeries } from "@/features/series/hooks/wallets";
@@ -74,7 +76,8 @@ export function SeriesDetailView({
 }: Readonly<SeriesDetailViewProps>) {
 	const { room } = useRoomContext();
 	const navigate = useNavigate();
-	const { setCurrentSeriesId } = useCurrentSeries(room.id);
+	const { currentSeriesId, setCurrentSeriesId } = useCurrentSeries(room.id);
+	const isCurrent = currentSeriesId === series.id;
 	const isSeriesClosed =
 		series.status === "completed" || series.status === "archived";
 	return (
@@ -88,6 +91,30 @@ export function SeriesDetailView({
 				onArchive={onArchive}
 				onCloseSeries={onCloseSeries}
 			/>
+
+			{/* The room view (Home, Standings, History) follows one series. */}
+			{isCurrent ? (
+				<div className='-mt-3 flex justify-end'>
+					<ViewingMark />
+				</div>
+			) : series.status !== "archived" ? (
+				<div className='-mt-3 flex justify-end'>
+					<Button
+						variant='ghost'
+						size='sm'
+						className='text-muted-foreground'
+						onClick={() => {
+							setCurrentSeriesId(series.id);
+							toast.success(`Now showing ${series.title} across the room`, {
+								position: "top-center",
+							});
+						}}
+					>
+						<EyeIcon />
+						View this series
+					</Button>
+				</div>
+			) : null}
 
 			{isSeriesClosed ? (
 				<div className='flex justify-end'>

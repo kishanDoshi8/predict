@@ -16,6 +16,7 @@ import {
 	useRoomRole,
 } from "@/features/rooms";
 import { RoomPreferencesDialog } from "@/features/preferences";
+import { SeriesPickerDrawer } from "@/features/series";
 import { RoomActionsContext, type RoomActions } from "@/shared/lib/roomActions";
 import { RoomHeader } from "@/features/predictions";
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
@@ -50,11 +51,13 @@ export default function RoomLayout() {
 	const [showRoomSwitcher, setShowRoomSwitcher] = useState(false);
 	const [showInvite, setShowInvite] = useState(false);
 	const [showNotifications, setShowNotifications] = useState(false);
+	const [showSeriesPicker, setShowSeriesPicker] = useState(false);
 	const roomActions = useMemo<RoomActions>(
 		() => ({
 			openRoomSwitcher: () => setShowRoomSwitcher(true),
 			openInvite: () => setShowInvite(true),
 			openNotifications: () => setShowNotifications(true),
+			openSeriesPicker: () => setShowSeriesPicker(true),
 		}),
 		[],
 	);
@@ -149,6 +152,11 @@ export default function RoomLayout() {
 				open={showNotifications}
 				onOpenChange={setShowNotifications}
 			/>
+			<RoomSeriesPicker
+				room={room}
+				open={showSeriesPicker}
+				onOpenChange={setShowSeriesPicker}
+			/>
 
 			{showHowToPlay ? (
 				<Suspense fallback={null}>
@@ -174,6 +182,24 @@ function RoomNotificationsDialog({
 		<RoomPreferencesDialog
 			roomId={room.id}
 			isStaff={can.resolve}
+			open={open}
+			onOpenChange={onOpenChange}
+		/>
+	);
+}
+
+// Which series the whole room view follows; organizers can also start one.
+function RoomSeriesPicker({
+	room,
+	open,
+	onOpenChange,
+}: Readonly<{ room: Room; open: boolean; onOpenChange: (open: boolean) => void }>) {
+	const { can } = useRoomRole(room);
+	return (
+		<SeriesPickerDrawer
+			roomId={room.id}
+			roomCode={room.code}
+			isOrganizer={can.organize}
 			open={open}
 			onOpenChange={onOpenChange}
 		/>

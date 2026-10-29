@@ -36,6 +36,10 @@ export function WalletPopover({ wallet }: Readonly<Props>) {
 			<PopoverContent align='end' className='w-64'>
 				<p className='text-xs text-muted-foreground'>Your points in</p>
 				<p className='font-semibold truncate'>{wallet.title}</p>
+				<p className='mt-1 text-xs text-muted-foreground'>
+					Everyone starts with the same points. The top balance when the
+					series ends wins it.
+				</p>
 				<dl className='mt-3 flex flex-col gap-2 text-sm'>
 					{rows.map(([label, value, tone]) => (
 						<div key={label} className='flex justify-between gap-3'>

@@ -1,6 +1,8 @@
 export { RequireRoomMember } from "./RequireRoomMember";
 export { RoomBottomNavigation } from "./RoomBottomNavigation";
 export { RoomMenuDrawer } from "./RoomMenuDrawer";
+export { RoomInviteShare } from "./RoomInviteShare";
+export { RoomNextSteps } from "./RoomNextSteps";
 export { InviteSheet } from "./InviteSheet";
 export { RoomPrefetcher } from "./RoomPrefetcher";
 export { RoomCardsList } from "./RoomCardsList";

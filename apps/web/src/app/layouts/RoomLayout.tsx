@@ -10,11 +10,15 @@ import {
 	useRoom,
 	Room,
 	RoomPrefetcher,
+	RoomInviteShare,
 	RoomSwitcherDrawer,
 	useRoomRealtime,
+	useRoomRole,
 } from "@/features/rooms";
+import { RoomPreferencesDialog } from "@/features/preferences";
+import { RoomActionsContext, type RoomActions } from "@/shared/lib/roomActions";
 import { RoomHeader } from "@/features/predictions";
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { usePlayer, useSetLastVisitedRoom } from "@/features/home";
 import { usePreferences, useMarkHowToPlaySeen } from "@/features/preferences";
 import { Loading } from "@/shared/ui";
@@ -44,6 +48,16 @@ export default function RoomLayout() {
 	const { mutate: setLastVisitedRoom } = useSetLastVisitedRoom();
 	const [showHowToPlay, setShowHowToPlay] = useState(false);
 	const [showRoomSwitcher, setShowRoomSwitcher] = useState(false);
+	const [showInvite, setShowInvite] = useState(false);
+	const [showNotifications, setShowNotifications] = useState(false);
+	const roomActions = useMemo<RoomActions>(
+		() => ({
+			openRoomSwitcher: () => setShowRoomSwitcher(true),
+			openInvite: () => setShowInvite(true),
+			openNotifications: () => setShowNotifications(true),
+		}),
+		[],
+	);
 
 	useEffect(() => {
 		if (!isPlayerLoading && !player) {
@@ -103,6 +117,7 @@ export default function RoomLayout() {
 	};
 
 	return (
+		<RoomActionsContext.Provider value={roomActions}>
 		<div className='min-h-dvh flex flex-col'>
 			<RoomHeader
 				room={room}
@@ -124,6 +139,17 @@ export default function RoomLayout() {
 				/>
 			) : null}
 
+			<RoomInviteShare
+				room={room}
+				open={showInvite}
+				onOpenChange={setShowInvite}
+			/>
+			<RoomNotificationsDialog
+				room={room}
+				open={showNotifications}
+				onOpenChange={setShowNotifications}
+			/>
+
 			{showHowToPlay ? (
 				<Suspense fallback={null}>
 					<HowToPlayModal
@@ -133,6 +159,24 @@ export default function RoomLayout() {
 				</Suspense>
 			) : null}
 		</div>
+		</RoomActionsContext.Provider>
+	);
+}
+
+// This room's notification settings; staff also see result reminders.
+function RoomNotificationsDialog({
+	room,
+	open,
+	onOpenChange,
+}: Readonly<{ room: Room; open: boolean; onOpenChange: (open: boolean) => void }>) {
+	const { can } = useRoomRole(room);
+	return (
+		<RoomPreferencesDialog
+			roomId={room.id}
+			isStaff={can.resolve}
+			open={open}
+			onOpenChange={onOpenChange}
+		/>
 	);
 }
 

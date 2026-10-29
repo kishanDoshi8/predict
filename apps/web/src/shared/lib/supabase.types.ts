@@ -1570,6 +1570,10 @@ export type Database = {
         Args: { p_player_id: string; p_room_id: string }
         Returns: Json
       }
+      delete_my_push_subscription: {
+        Args: { p_endpoint: string }
+        Returns: undefined
+      }
       get_room_member_style: {
         Args: { p_player_id: string; p_room_id: string }
         Returns: Json

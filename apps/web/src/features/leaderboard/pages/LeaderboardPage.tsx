@@ -8,6 +8,7 @@ import {
 	OverallStandingsList,
 	TopThreePodium,
 	type PodiumEntry,
+	RankingRuleHint,
 } from "@/features/leaderboard";
 import {
 	SeriesScopeToggle,
@@ -16,6 +17,7 @@ import {
 	useCurrentSeries,
 } from "@/features/series";
 import { formatSignedPoints } from "@/shared/lib/utils";
+import { InfoHint } from "@/shared/ui";
 import React, { Suspense, lazy } from "react";
 
 const PlayerProfileDialog = lazy(() =>
@@ -87,7 +89,16 @@ export function LeaderboardPage() {
 							? "All series"
 							: (currentSeries?.title ?? "Standings")}
 					</h2>
-					<p className='text-sm text-muted-foreground'>{subtitle}</p>
+					<p className='flex items-center gap-1 text-sm text-muted-foreground'>
+						{subtitle}
+						{scope === "series" && currentSeries?.status === "active" ? (
+							<InfoHint label='How ranking works'>
+								<RankingRuleHint
+									requiredBets={leaderboard[0]?.required_bets ?? 0}
+								/>
+							</InfoHint>
+						) : null}
+					</p>
 				</div>
 				{scope === "series" && currentSeries?.status === "active" ? (
 					<ShareWeeklyButton

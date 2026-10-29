@@ -12,7 +12,10 @@ import {
 } from "@/shared/ui";
 import { useNotificationPermission } from "@/shared/hooks/useNotificationPermission";
 import { PreferenceSettings, RoomPreferenceOverrides } from "@/shared/lib/api";
-import { registerForPushNotifications } from "@/shared/lib/pushNotifications";
+import {
+	needsHomeScreenInstall,
+	registerForPushNotifications,
+} from "@/shared/lib/pushNotifications";
 import {
 	usePreferences,
 	useResetRoomPreferences,
@@ -99,6 +102,7 @@ export function RoomPreferencesDialog({
 	const [isBlockedDialogOpen, setIsBlockedDialogOpen] = useState(false);
 	const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 	const { permission, requestPermission } = useNotificationPermission();
+	const needsInstall = needsHomeScreenInstall();
 	const { data: preferences, isPending: isPreferencesPending } =
 		usePreferences(roomId);
 	const { mutate: updateGlobal, isPending: isUpdatingGlobal } =
@@ -174,15 +178,55 @@ export function RoomPreferencesDialog({
 
 		try {
 			setIsRequestingPermission(true);
-			const nextPermission = await requestPermission();
-			if (nextPermission === "granted") {
-				await registerForPushNotifications(nextPermission);
+			const nextPermission = needsInstall
+				? permission
+				: await requestPermission();
+			if (nextPermission === "denied") {
+				setIsBlockedDialogOpen(true);
+				return;
+			}
+			await saveThisDevice(nextPermission);
+		} finally {
+			setIsRequestingPermission(false);
+		}
+	};
+
+	// Saves this device for pushes and says plainly whether it worked.
+	const saveThisDevice = async (nextPermission: NotificationPermission) => {
+		try {
+			const result = await registerForPushNotifications(nextPermission);
+			if (result === "subscribed") {
 				toast.success("Notifications are on for this device.", {
 					position: "top-center",
 				});
-			} else if (nextPermission === "denied") {
-				setIsBlockedDialogOpen(true);
+			} else if (result === "needs-install") {
+				toast.info("Add Verdict to your Home Screen first.", {
+					description: "On iPhone and iPad, notifications only work from the installed app.",
+					duration: 8000,
+					position: "top-center",
+				});
+			} else if (result === "unsupported") {
+				toast.error("This browser can't receive notifications.", {
+					position: "top-center",
+				});
+			} else if (result === "misconfigured") {
+				toast.error("Notifications aren't set up on this server yet.", {
+					position: "top-center",
+				});
 			}
+		} catch (error) {
+			toast.error("Couldn't turn on notifications for this device.", {
+				description: getErrorMessage(error),
+				duration: 6000,
+				position: "top-center",
+			});
+		}
+	};
+
+	const handleResync = async () => {
+		setIsRequestingPermission(true);
+		try {
+			await saveThisDevice(permission);
 		} finally {
 			setIsRequestingPermission(false);
 		}
@@ -200,7 +244,16 @@ export function RoomPreferencesDialog({
 					</DialogDescription>
 				</DialogHeader>
 
-				{permission !== "granted" ? (
+				{needsInstall ? (
+					<div className='flex items-start gap-2 rounded-md border border-accent/40 bg-accent/10 p-3 text-sm'>
+						<BellOffIcon className='size-4 mt-0.5 shrink-0' />
+						<p>
+							On iPhone and iPad, notifications only work from the
+							installed app. Tap Share, then Add to Home Screen, and
+							open Verdict from there.
+						</p>
+					</div>
+				) : permission !== "granted" ? (
 					<div className='flex items-center justify-between gap-3 rounded-md border border-accent/40 bg-accent/10 p-3'>
 						<div className='flex items-start gap-2 text-sm'>
 							<BellOffIcon className='size-4 mt-0.5 shrink-0' />
@@ -218,7 +271,21 @@ export function RoomPreferencesDialog({
 							{permission === "denied" ? "How to fix" : "Turn on"}
 						</Button>
 					</div>
-				) : null}
+				) : (
+					<div className='flex items-center justify-between gap-3 rounded-md border border-border/60 p-3 text-sm'>
+						<p className='text-muted-foreground'>
+							Notifications are allowed on this device.
+						</p>
+						<Button
+							size='sm'
+							variant='outline'
+							onClick={() => void handleResync()}
+							disabled={isRequestingPermission}
+						>
+							Re-sync device
+						</Button>
+					</div>
+				)}
 
 				{!preferences || isPreferencesPending ? (
 					// Same scroll area, headings and toggle rows, so the

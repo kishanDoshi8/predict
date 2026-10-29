@@ -36,7 +36,7 @@ export function WalletPopover({ wallet }: Readonly<Props>) {
 			<PopoverContent align='end' className='w-64'>
 				<p className='text-xs text-muted-foreground'>Your points in</p>
 				<p className='font-semibold truncate'>{wallet.title}</p>
-				<dl className='mt-3 flex flex-col gap-2 text-sm'>
+				<div className='mt-3 flex flex-col gap-2 text-sm'>
 					{rows.map(([label, value, tone]) => (
 						<div key={label} className='flex justify-between gap-3'>
 							<dt className='text-muted-foreground'>{label}</dt>
@@ -47,7 +47,7 @@ export function WalletPopover({ wallet }: Readonly<Props>) {
 							</dd>
 						</div>
 					))}
-				</dl>
+				</div>
 				{wallet.status === "active" && wallet.weekly_topup > 0 ? (
 					<p className='mt-3 rounded-md bg-accent/10 px-2 py-1.5 text-xs'>
 						+{wallet.weekly_topup.toLocaleString()} every Monday if

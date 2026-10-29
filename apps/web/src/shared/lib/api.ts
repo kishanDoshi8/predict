@@ -89,6 +89,8 @@ export type SeriesWallet = {
   granted: number
   net_profit: number
   started_at: string | null
+  // Has earned next Monday's top-up by betting this week.
+  bet_this_week?: boolean
 }
 
 export type RoomSeriesCollection = {

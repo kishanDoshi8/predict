@@ -13,7 +13,6 @@ import type { MouseEvent } from "react";
 import { useAppNavigation } from "@/shared/lib/navigation";
 import { useState } from "react";
 import {
-	SeriesPickerDrawer,
 	WalletPopover,
 	useCurrentSeries,
 	useSeriesWallet,
@@ -39,9 +38,8 @@ function RoomHeader({
 	// The whole room view follows one series: points, Home, Standings, History.
 	const { currentSeries, currentSeriesId } = useCurrentSeries(room.id);
 	const { wallet } = useSeriesWallet(room.id, currentSeriesId);
-	const [isSeriesPickerOpen, setIsSeriesPickerOpen] = useState(false);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
-	const { openRoomSwitcher } = useRoomActions();
+	const { openRoomSwitcher, openSeriesPicker } = useRoomActions();
 	const { pathname } = useLocation();
 
 	const { can } = useRoomRole(room);
@@ -108,7 +106,7 @@ function RoomHeader({
 							</Link>
 							<button
 								type='button'
-								onClick={() => setIsSeriesPickerOpen(true)}
+								onClick={openSeriesPicker}
 								className='mt-0.5 flex items-center gap-1 self-start max-w-full rounded-full border border-border/70 bg-muted/50 py-0.5 pl-2 pr-1.5 text-xs font-medium text-foreground/85 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50'
 								aria-label={`Series: ${currentSeries?.title ?? "none"}. Change series`}
 							>
@@ -168,13 +166,6 @@ function RoomHeader({
 				</Button>
 			</div>
 
-			<SeriesPickerDrawer
-				roomId={room.id}
-				roomCode={room.code}
-				isOrganizer={isOrganizer}
-				open={isSeriesPickerOpen}
-				onOpenChange={setIsSeriesPickerOpen}
-			/>
 			<RoomMenuDrawer
 				room={room}
 				open={isMenuOpen}

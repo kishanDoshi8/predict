@@ -38,6 +38,7 @@ import { Link } from "react-router-dom";
 import React from "react";
 import { usePlayer } from "@/features/home";
 import { useCurrentSeries } from "@/features/series";
+import { useRoomActions } from "@/shared/lib/roomActions";
 
 const PREDICTION_CARD_SHELL =
 	"text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm relative overflow-hidden border-border bg-linear-to-br from-card to-primary/5 p-5 mb-4";
@@ -428,7 +429,10 @@ function InPlayPredictions({
 }: Readonly<InPlayPredictionsProps> = {}) {
 	const { room } = useRoomContext();
 	// Home follows the series picked in the room header.
-	const { currentSeries, currentSeriesId } = useCurrentSeries(room.id);
+	const { currentSeries, currentSeriesId, seriesOptions } = useCurrentSeries(
+		room.id,
+	);
+	const { openSeriesPicker } = useRoomActions();
 	const {
 		data: queriedPredictions = [],
 		isPending: isQueriedPredictionLoading,
@@ -464,11 +468,37 @@ function InPlayPredictions({
 		);
 	}
 	let defaultEmptyMessage = "No predictions yet. The host will start one soon!";
+	const isSeriesFinished =
+		currentSeries?.status === "completed" ||
+		currentSeries?.status === "archived";
+	const otherLiveSeries = seriesOptions.find(
+		(series) => series.status === "active" && series.id !== currentSeriesId,
+	);
 	if (!currentSeries) {
 		defaultEmptyMessage = isOrganizer
 			? "Start a series to open the first predictions."
 			: "No series yet. Your host will start one soon.";
+	} else if (isSeriesFinished) {
+		defaultEmptyMessage = `${currentSeries.title} has finished.`;
+	} else if (currentSeries.status === "draft") {
+		defaultEmptyMessage = "This series hasn't started yet.";
 	}
+	// A finished series points to its final standings, and to the live one.
+	const finishedSeriesActions = isSeriesFinished ? (
+		<div className='flex flex-wrap justify-center gap-2 pb-2'>
+			<Button size='sm' variant='outline' className='text-foreground' asChild>
+				<Link to={`/rooms/${room.code}/leaderboard`}>
+					<TrophyIcon />
+					Final standings
+				</Link>
+			</Button>
+			{otherLiveSeries ? (
+				<Button size='sm' variant='linear' onClick={openSeriesPicker}>
+					Switch series
+				</Button>
+			) : null}
+		</div>
+	) : null;
 	const predictions = predictionsOverride ?? queriedPredictions;
 	const isPredictionLoading =
 		predictionsOverride === undefined ? isQueriedPredictionLoading : false;
@@ -535,13 +565,14 @@ function InPlayPredictions({
 						{emptyMessage ?? defaultEmptyMessage}
 					</p>
 					{predictionsOverride === undefined ? (
-						newPredictionAction ? (
+						finishedSeriesActions ??
+						(newPredictionAction ? (
 							<div className='flex justify-center pb-2'>
 								{newPredictionAction}
 							</div>
 						) : (
 							<RoomNextSteps className='pb-2' />
-						)
+						))
 					) : null}
 				</div>
 			</CarouselItem>

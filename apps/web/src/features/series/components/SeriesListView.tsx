@@ -15,6 +15,8 @@ type SeriesListViewProps = {
 	activeSeries: Series[];
 	completedSeries: Series[];
 	roomCode: string;
+	// The series the room view follows, marked on its tile.
+	currentSeriesId: string | null;
 	isOrganizer: boolean;
 	onCreateNew: () => void;
 };
@@ -24,6 +26,7 @@ export function SeriesListView({
 	activeSeries,
 	completedSeries,
 	roomCode,
+	currentSeriesId,
 	isOrganizer,
 	onCreateNew,
 }: Readonly<SeriesListViewProps>) {
@@ -76,6 +79,7 @@ export function SeriesListView({
 										<SeriesTile
 											series={series}
 											roomCode={roomCode}
+											isCurrent={series.id === currentSeriesId}
 										/>
 									</Reveal>
 								))}
@@ -99,6 +103,7 @@ export function SeriesListView({
 										<SeriesTile
 											series={series}
 											roomCode={roomCode}
+											isCurrent={series.id === currentSeriesId}
 										/>
 									</Reveal>
 								))}

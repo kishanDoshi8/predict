@@ -37,6 +37,16 @@ begin
       sw.granted,
       sw.balance - sw.granted as net_profit,
       s.started_at,
+      -- Earns next Monday's top-up (see private.pay_series_topups).
+      exists (
+        select 1
+        from public.bets b
+        join public.predictions p on p.id = b.prediction_id
+        where p.series_id = s.id
+          and b.player_id = v_player_id
+          and greatest(b.placed_at, b.updated_at)
+            >= date_trunc('week', now() at time zone 'UTC') at time zone 'UTC'
+      ) as bet_this_week,
       case s.status when 'active' then 0 else 1 end as status_order
     from public.series_wallets sw
     join public.series s on s.id = sw.series_id

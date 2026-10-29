@@ -24,6 +24,8 @@ export function WalletPopover({ wallet }: Readonly<Props>) {
 		["Starting points", wallet.starting_stack.toLocaleString()],
 	];
 
+	const topup = topupStatus(wallet);
+
 	return (
 		<Popover>
 			<PopoverTrigger
@@ -48,13 +50,42 @@ export function WalletPopover({ wallet }: Readonly<Props>) {
 						</div>
 					))}
 				</div>
-				{wallet.status === "active" && wallet.weekly_topup > 0 ? (
-					<p className='mt-3 rounded-md bg-accent/10 px-2 py-1.5 text-xs'>
-						+{wallet.weekly_topup.toLocaleString()} every Monday if
-						you bet that week.
+				{topup ? (
+					<p
+						className={cn(
+							"mt-3 rounded-md px-2 py-1.5 text-xs",
+							topup.tone,
+						)}
+					>
+						{topup.message}
 					</p>
 				) : null}
 			</PopoverContent>
 		</Popover>
 	);
 }
+
+// Where the player stands for next Monday's top-up (private.pay_series_topups):
+// it goes to anyone who bet in the series this week, or who has run out.
+function topupStatus(wallet: SeriesWallet) {
+	if (wallet.status !== "active" || wallet.weekly_topup <= 0) return null;
+	const amount = `+${wallet.weekly_topup.toLocaleString()}`;
+
+	if (wallet.bet_this_week) {
+		return {
+			message: `${amount} lands Monday. You've bet this week.`,
+			tone: "bg-win/10 text-win",
+		};
+	}
+	if (wallet.available <= 0) {
+		return {
+			message: `${amount} on Monday to get you back in.`,
+			tone: "bg-muted text-foreground",
+		};
+	}
+	return {
+		message: `Place a bet before Monday to get ${amount}.`,
+		tone: "bg-accent/10 text-foreground",
+	};
+}
+

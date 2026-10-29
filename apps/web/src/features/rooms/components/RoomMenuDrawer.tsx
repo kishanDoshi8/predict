@@ -35,22 +35,18 @@ type Props = {
 	onOpenChange: (open: boolean) => void;
 };
 
-export function RoomMenuDrawer({
-	room,
-	open,
-	onOpenChange,
-}: Readonly<Props>) {
+export function RoomMenuDrawer({ room, open, onOpenChange }: Readonly<Props>) {
 	const navigate = useNavigate();
 	const { user, hasGoogleIdentity, linkGoogle, signOut } = useAuth();
 	const [isInviteSheetOpen, setIsInviteSheetOpen] = useState(false);
-	const { openInvite, openNotifications, openRoomSwitcher } = useRoomActions();
+	const { openInvite, openNotifications, openRoomSwitcher } =
+		useRoomActions();
 	const { can } = useRoomRole(room);
 	const { data: manageQueue } = useManageQueue(room.id, can.resolve && open);
 	const close = (then: () => void) => () => {
 		onOpenChange(false);
 		then();
 	};
-
 
 	const handleCopyCode = async () => {
 		if (await copyToClipboard(room.code)) {
@@ -95,16 +91,16 @@ export function RoomMenuDrawer({
 			onClick: close(openInvite),
 		},
 		{
-			label: "Switch room",
-			detail: "Your other rooms, or join a new one",
-			icon: LayoutGridIcon,
-			onClick: close(openRoomSwitcher),
-		},
-		{
 			label: "Copy room code",
 			detail: room.code,
 			icon: CopyIcon,
 			onClick: close(() => void handleCopyCode()),
+		},
+		{
+			label: "Switch room",
+			detail: "Your other rooms, or join a new one",
+			icon: LayoutGridIcon,
+			onClick: close(openRoomSwitcher),
 		},
 		// {
 		// 	label: "All series and past champions",
@@ -130,7 +126,9 @@ export function RoomMenuDrawer({
 								? `${toResolveCount} ${toResolveCount === 1 ? "result" : "results"} to reveal`
 								: "Nothing waiting on a result",
 						icon: FlagIcon,
-						onClick: close(() => navigate(`/rooms/${room.code}/manage`)),
+						onClick: close(() =>
+							navigate(`/rooms/${room.code}/manage`),
+						),
 					},
 				]
 			: []),
@@ -145,7 +143,9 @@ export function RoomMenuDrawer({
 						label: "Room settings",
 						detail: "Name, open predictions limit, result reminders",
 						icon: SettingsIcon,
-						onClick: close(() => navigate(`/rooms/${room.code}/settings`)),
+						onClick: close(() =>
+							navigate(`/rooms/${room.code}/settings`),
+						),
 					},
 				]
 			: []),
@@ -219,7 +219,10 @@ export function RoomMenuDrawer({
 							)}
 						</ul>
 						<MenuSection title='Room' items={roomSectionItems} />
-						<MenuSection title='Settings' items={settingsSectionItems} />
+						<MenuSection
+							title='Settings'
+							items={settingsSectionItems}
+						/>
 						<section className='space-y-2'>
 							<p className='px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
 								Account

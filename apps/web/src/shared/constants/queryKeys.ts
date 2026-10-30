@@ -100,6 +100,8 @@ export const roomKeys = {
     [...roomKeys.detail(roomId), "memberProfile", playerId, "milestones"] as const,
   roomMemberStyle: (roomId: string, playerId: string) =>
     [...roomKeys.detail(roomId), "memberProfile", playerId, "style"] as const,
+  seriesSuggestions: (roomId: string) =>
+    [...roomKeys.detail(roomId), "seriesSuggestions"] as const,
 };
 
 export const localStorageKeys = {

@@ -18,6 +18,7 @@ import SeriesPage from "@/features/series/pages/SeriesPage";
 import { PredictionPage } from "@/features/predictions/pages/PredictionPage";
 import { LeaderboardPage } from "@/features/leaderboard/pages/LeaderboardPage";
 
+const UpNextPage = lazy(() => import("@/features/series/pages/UpNextPage"));
 const LoginPage = lazy(() =>
 	import("@/features/auth/pages/LoginPage").then((module) => ({
 		default: module.LoginPage,
@@ -187,6 +188,17 @@ export const router = createBrowserRouter([
 													header: {
 														leftAction: "back",
 														title: "New series",
+														parent: "series",
+													},
+												},
+											},
+											{
+												path: "series/next",
+												element: withSuspense(<UpNextPage />),
+												handle: {
+													header: {
+														leftAction: "back",
+														title: "Up next",
 														parent: "series",
 													},
 												},

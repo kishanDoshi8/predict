@@ -77,6 +77,8 @@ export default function UpNextPage() {
 							setTitle(event.target.value.slice(0, TITLE_MAX_LENGTH))
 						}
 						placeholder='e.g. Champions League'
+						// Nothing on the board yet: the first thing to do is suggest.
+						autoFocus={!isPending && suggestions.length === 0}
 						aria-label='Suggest a series'
 						maxLength={TITLE_MAX_LENGTH}
 					/>

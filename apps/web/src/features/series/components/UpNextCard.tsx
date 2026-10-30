@@ -1,6 +1,6 @@
 import { useSeriesSuggestions, useToggleSuggestionVote } from "@/features/series/hooks/suggestions";
-import { Skeleton } from "@/shared/ui";
-import { ChevronRightIcon, LightbulbIcon } from "lucide-react";
+import { Button, Skeleton } from "@/shared/ui";
+import { ChevronRightIcon, LightbulbIcon, PlusIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { UpNextVoteButton } from "./UpNextVoteButton";
 
@@ -42,9 +42,17 @@ export function UpNextCard({ roomId, roomCode }: Readonly<Props>) {
 			{isPending ? (
 				<Skeleton aria-hidden='true' className='mt-3 h-12 rounded-lg' />
 			) : top.length === 0 ? (
-				<p className='mt-3 text-sm text-muted-foreground'>
-					No ideas yet. Suggest a league, tour or event to play next.
-				</p>
+				<div className='mt-3 flex flex-col gap-2'>
+					<p className='text-sm text-muted-foreground'>
+						No ideas yet. Suggest a league, tour or event to play next.
+					</p>
+					<Button variant='outline' className='w-full text-foreground' asChild>
+						<Link to={pageLink}>
+							<LightbulbIcon />
+							Suggest the first idea
+						</Link>
+					</Button>
+				</div>
 			) : (
 				<ul className='mt-3 flex flex-col gap-2'>
 					{top.map((suggestion) => (
@@ -63,6 +71,15 @@ export function UpNextCard({ roomId, roomCode }: Readonly<Props>) {
 							+{suggestions.length - PREVIEW_COUNT} more ideas
 						</li>
 					) : null}
+					<li>
+						<Link
+							to={pageLink}
+							className='flex items-center gap-1.5 text-sm font-medium text-accent'
+						>
+							<PlusIcon className='size-4' />
+							Suggest an idea
+						</Link>
+					</li>
 				</ul>
 			)}
 		</section>

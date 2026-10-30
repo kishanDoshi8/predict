@@ -1278,6 +1278,63 @@ export async function getRoomMemberStyle(roomId: string, playerId: string) {
 }
 // #endregion Leaderboard
 
+// #region Home: results and weekly recap
+export type UnseenResult = {
+  prediction_id: string
+  title: string
+  status: 'revealed' | 'no_result'
+  resolved_at: string | null
+  my_pick: string
+  winning_label: string | null
+  amount: number
+  payout: number
+  // Points won or lost; 0 for a refund.
+  net: number
+}
+
+export type MyWeeklyRecap = {
+  week_key: string
+  rank: number | null
+  // Places moved since the Monday before; positive is up.
+  rank_change: number | null
+  balance: number
+  balance_change: number
+  newly_ranked: boolean
+}
+
+export async function getMyUnseenResults(roomId: string, seriesId: string) {
+  const { data, error } = await untypedSupabase.rpc('get_my_unseen_results', {
+    p_room_id: roomId,
+    p_series_id: seriesId,
+  })
+  return assertOk(data, error) as UnseenResult[]
+}
+
+export async function markResultsSeen(predictionIds: string[]) {
+  const { error } = await untypedSupabase.rpc('mark_results_seen', {
+    p_prediction_ids: predictionIds,
+  })
+  if (error) throw error
+}
+
+export async function getMyWeeklyRecap(roomId: string, seriesId: string) {
+  const { data, error } = await untypedSupabase.rpc('get_my_weekly_recap', {
+    p_room_id: roomId,
+    p_series_id: seriesId,
+  })
+  if (error) throw error
+  return (data ?? null) as MyWeeklyRecap | null
+}
+
+export async function dismissWeeklyRecap(seriesId: string, weekKey: string) {
+  const { error } = await untypedSupabase.rpc('dismiss_weekly_recap', {
+    p_series_id: seriesId,
+    p_week_key: weekKey,
+  })
+  if (error) throw error
+}
+// #endregion Home
+
 // #region Series suggestions ("Up next")
 export type SeriesSuggestion = {
   id: string

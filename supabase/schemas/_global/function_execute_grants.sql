@@ -80,3 +80,7 @@ grant execute on function public.suggest_series(uuid, text) to authenticated;
 grant execute on function public.toggle_series_suggestion_vote(uuid) to authenticated;
 grant execute on function public.remove_series_suggestion(uuid) to authenticated;
 grant execute on function public.mark_series_suggestion_played(uuid, uuid) to authenticated;
+grant execute on function public.get_my_unseen_results(uuid, uuid) to authenticated;
+grant execute on function public.mark_results_seen(uuid[]) to authenticated;
+grant execute on function public.get_my_weekly_recap(uuid, uuid) to authenticated;
+grant execute on function public.dismiss_weekly_recap(uuid, text) to authenticated;

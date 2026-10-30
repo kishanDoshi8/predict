@@ -27,7 +27,7 @@ export function UpNextCard({ roomId, roomCode }: Readonly<Props>) {
 						Up next
 					</h3>
 					<p className='text-sm text-muted-foreground'>
-						What should we play next?
+						What should we play next? Tap ▲ to vote.
 					</p>
 				</div>
 				<Link

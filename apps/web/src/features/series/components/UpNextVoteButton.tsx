@@ -25,7 +25,13 @@ export function UpNextVoteButton({ suggestion, onToggle, disabled }: Readonly<Pr
 			)}
 		>
 			<ChevronUpIcon className='size-4' />
-			<span className='text-sm font-semibold'>{suggestion.vote_count}</span>
+			<span className='text-sm font-semibold leading-tight'>
+				{suggestion.vote_count}
+			</span>
+			{/* Says what the button does, so it reads as a vote and not a count. */}
+			<span className='text-[10px] font-medium leading-tight'>
+				{suggestion.voted_by_me ? "voted" : "vote"}
+			</span>
 		</button>
 	);
 }

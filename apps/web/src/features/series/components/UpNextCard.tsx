@@ -1,4 +1,7 @@
-import { useSeriesSuggestions, useToggleSuggestionVote } from "@/features/series/hooks/suggestions";
+import {
+	useSeriesSuggestions,
+	useToggleSuggestionVote,
+} from "@/features/series/hooks/suggestions";
 import { Button, Skeleton } from "@/shared/ui";
 import { ChevronRightIcon, LightbulbIcon, PlusIcon } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -30,13 +33,13 @@ export function UpNextCard({ roomId, roomCode }: Readonly<Props>) {
 						What should we play next?
 					</p>
 				</div>
-				<Link
+				{/* <Link
 					to={pageLink}
 					className='flex shrink-0 items-center gap-0.5 text-sm font-medium text-accent'
 				>
 					{suggestions.length > 0 ? "Suggest & vote" : "Suggest"}
 					<ChevronRightIcon className='size-4' />
-				</Link>
+				</Link> */}
 			</div>
 
 			{isPending ? (
@@ -44,9 +47,14 @@ export function UpNextCard({ roomId, roomCode }: Readonly<Props>) {
 			) : top.length === 0 ? (
 				<div className='mt-3 flex flex-col gap-2'>
 					<p className='text-sm text-muted-foreground'>
-						No ideas yet. Suggest a league, tour or event to play next.
+						No ideas yet. Suggest a league, tour or event to play
+						next.
 					</p>
-					<Button variant='outline' className='w-full text-foreground' asChild>
+					<Button
+						variant='outline'
+						className='w-full text-foreground'
+						asChild
+					>
 						<Link to={pageLink}>
 							<LightbulbIcon />
 							Suggest the first idea
@@ -56,7 +64,10 @@ export function UpNextCard({ roomId, roomCode }: Readonly<Props>) {
 			) : (
 				<ul className='mt-3 flex flex-col gap-2'>
 					{top.map((suggestion) => (
-						<li key={suggestion.id} className='flex items-center gap-3'>
+						<li
+							key={suggestion.id}
+							className='flex items-center gap-3'
+						>
 							<UpNextVoteButton
 								suggestion={suggestion}
 								onToggle={() => toggleVote(suggestion.id)}
@@ -76,8 +87,9 @@ export function UpNextCard({ roomId, roomCode }: Readonly<Props>) {
 							to={pageLink}
 							className='flex items-center gap-1.5 text-sm font-medium text-accent'
 						>
-							<PlusIcon className='size-4' />
-							Suggest an idea
+							{/* <PlusIcon className='size-4' /> */}
+							Suggest & vote
+							<ChevronRightIcon className='size-4' />
 						</Link>
 					</li>
 				</ul>

@@ -3,7 +3,7 @@ import {
 	useToggleSuggestionVote,
 } from "@/features/series/hooks/suggestions";
 import { Button, Skeleton } from "@/shared/ui";
-import { ChevronRightIcon, LightbulbIcon, PlusIcon } from "lucide-react";
+import { ChevronRightIcon, LightbulbIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { UpNextVoteButton } from "./UpNextVoteButton";
 

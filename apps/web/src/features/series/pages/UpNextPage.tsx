@@ -64,8 +64,8 @@ export default function UpNextPage() {
 			<div>
 				<h2 className='text-lg font-semibold'>What should we play next?</h2>
 				<p className='text-sm text-muted-foreground'>
-					Suggest a league, tour or event, and vote for the ones you'd
-					play.
+					Suggest a league, tour or event. Tap ▲ on any idea to vote for it,
+					and tap again to take your vote back.
 				</p>
 			</div>
 

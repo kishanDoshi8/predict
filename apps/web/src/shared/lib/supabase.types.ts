@@ -1185,6 +1185,105 @@ export type Database = {
           },
         ]
       }
+      series_suggestion_votes: {
+        Row: {
+          created_at: string
+          player_id: string
+          suggestion_id: string
+        }
+        Insert: {
+          created_at?: string
+          player_id: string
+          suggestion_id: string
+        }
+        Update: {
+          created_at?: string
+          player_id?: string
+          suggestion_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "series_suggestion_votes_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_suggestion_votes_suggestion_id_fkey"
+            columns: ["suggestion_id"]
+            isOneToOne: false
+            referencedRelation: "series_suggestions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      series_suggestions: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          room_id: string
+          series_id: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          room_id: string
+          series_id?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          room_id?: string
+          series_id?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "series_suggestions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_suggestions_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "player_rooms_by_activity"
+            referencedColumns: ["room_id"]
+          },
+          {
+            foreignKeyName: "series_suggestions_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_suggestions_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_suggestions_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series_with_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       series_wallets: {
         Row: {
           balance: number
@@ -1638,6 +1737,7 @@ export type Database = {
         Args: { p_room_id: string; p_series_id: string }
         Returns: Json
       }
+      get_series_suggestions: { Args: { p_room_id: string }; Returns: Json }
       get_series_weekly_recap: {
         Args: { p_room_id: string; p_series_id: string }
         Returns: Json
@@ -1680,6 +1780,10 @@ export type Database = {
         Args: { p_room_id: string }
         Returns: undefined
       }
+      mark_series_suggestion_played: {
+        Args: { p_series_id: string; p_suggestion_id: string }
+        Returns: undefined
+      }
       place_bet: {
         Args: { p_amount: number; p_option_id: string; p_prediction_id: string }
         Returns: Json
@@ -1689,6 +1793,10 @@ export type Database = {
         Returns: undefined
       }
       register_player: { Args: { p_username: string }; Returns: Json }
+      remove_series_suggestion: {
+        Args: { p_suggestion_id: string }
+        Returns: undefined
+      }
       reset_room_preferences: { Args: { p_room_id: string }; Returns: Json }
       resolve_duels_for_prediction: {
         Args: { p_prediction_id: string }
@@ -1708,6 +1816,14 @@ export type Database = {
       set_member_role: {
         Args: { p_player_id: string; p_role: string; p_room_id: string }
         Returns: Json
+      }
+      suggest_series: {
+        Args: { p_room_id: string; p_title: string }
+        Returns: Json
+      }
+      toggle_series_suggestion_vote: {
+        Args: { p_suggestion_id: string }
+        Returns: boolean
       }
       transfer_ownership: {
         Args: { p_player_id: string; p_room_id: string }

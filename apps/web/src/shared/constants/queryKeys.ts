@@ -100,6 +100,10 @@ export const roomKeys = {
     [...roomKeys.detail(roomId), "memberProfile", playerId, "milestones"] as const,
   roomMemberStyle: (roomId: string, playerId: string) =>
     [...roomKeys.detail(roomId), "memberProfile", playerId, "style"] as const,
+  unseenResults: (roomId: string, seriesId: string) =>
+    [...roomKeys.detail(roomId), "unseenResults", seriesId] as const,
+  myWeeklyRecap: (roomId: string, seriesId: string) =>
+    [...roomKeys.detail(roomId), "myWeeklyRecap", seriesId] as const,
   seriesSuggestions: (roomId: string) =>
     [...roomKeys.detail(roomId), "seriesSuggestions"] as const,
 };

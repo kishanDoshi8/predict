@@ -9,7 +9,11 @@ type Props = {
 };
 
 // Back an idea, or take the vote back. Filled once you've backed it.
-export function UpNextVoteButton({ suggestion, onToggle, disabled }: Readonly<Props>) {
+export function UpNextVoteButton({
+	suggestion,
+	onToggle,
+	disabled,
+}: Readonly<Props>) {
 	return (
 		<button
 			type='button'

@@ -1277,3 +1277,54 @@ export async function getRoomMemberStyle(roomId: string, playerId: string) {
   return assertOk(data, error) as { titles: StyleTitle[] }
 }
 // #endregion Leaderboard
+
+// #region Series suggestions ("Up next")
+export type SeriesSuggestion = {
+  id: string
+  title: string
+  created_at: string
+  created_by_username: string
+  created_by_me: boolean
+  vote_count: number
+  voted_by_me: boolean
+  // Who backed it, for organizers only.
+  voters: string[] | null
+}
+
+export async function getSeriesSuggestions(roomId: string) {
+  const { data, error } = await untypedSupabase.rpc('get_series_suggestions', {
+    p_room_id: roomId,
+  })
+  return assertOk(data, error) as SeriesSuggestion[]
+}
+
+export async function suggestSeries(roomId: string, title: string) {
+  const { data, error } = await untypedSupabase.rpc('suggest_series', {
+    p_room_id: roomId,
+    p_title: title,
+  })
+  return assertOk(data, error) as { id: string; existing: boolean }
+}
+
+export async function toggleSeriesSuggestionVote(suggestionId: string) {
+  const { data, error } = await untypedSupabase.rpc('toggle_series_suggestion_vote', {
+    p_suggestion_id: suggestionId,
+  })
+  return assertOk(data, error) as boolean
+}
+
+export async function removeSeriesSuggestion(suggestionId: string) {
+  const { error } = await untypedSupabase.rpc('remove_series_suggestion', {
+    p_suggestion_id: suggestionId,
+  })
+  if (error) throw error
+}
+
+export async function markSeriesSuggestionPlayed(suggestionId: string, seriesId: string) {
+  const { error } = await untypedSupabase.rpc('mark_series_suggestion_played', {
+    p_suggestion_id: suggestionId,
+    p_series_id: seriesId,
+  })
+  if (error) throw error
+}
+// #endregion Series suggestions

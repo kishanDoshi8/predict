@@ -9,11 +9,13 @@ import {
 import type { Series } from "@/features/series/types/series";
 import { Button, Reveal, SkeletonList } from "@/shared/ui";
 import { PlusIcon } from "lucide-react";
+import { UpNextCard } from "@/features/series/components/UpNextCard";
 
 type SeriesListViewProps = {
 	isPending: boolean;
 	activeSeries: Series[];
 	completedSeries: Series[];
+	roomId: string;
 	roomCode: string;
 	// The series the room view follows, marked on its tile.
 	currentSeriesId: string | null;
@@ -25,6 +27,7 @@ export function SeriesListView({
 	isPending,
 	activeSeries,
 	completedSeries,
+	roomId,
 	roomCode,
 	currentSeriesId,
 	isOrganizer,
@@ -51,6 +54,8 @@ export function SeriesListView({
 					Browse active and completed runs.
 				</p>
 			</div>
+
+			<UpNextCard roomId={roomId} roomCode={roomCode} />
 
 			{isPending ? (
 				<section aria-hidden='true' className='space-y-3'>

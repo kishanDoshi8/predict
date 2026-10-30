@@ -292,6 +292,7 @@ export default function SeriesPage() {
 				isPending={isPending}
 				activeSeries={activeSeries}
 				completedSeries={completedSeries}
+				roomId={room.id}
 				roomCode={room.code}
 				currentSeriesId={currentSeriesId}
 				isOrganizer={isOrganizer}

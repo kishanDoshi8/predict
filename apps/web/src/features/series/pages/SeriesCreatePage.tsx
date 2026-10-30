@@ -1,7 +1,8 @@
 import { useRoomContext } from "@/app/layouts/RoomLayout";
 import { useAppNavigation } from "@/shared/lib/navigation";
 import { useRoomRole } from "@/features/rooms";
-import { useCreateSeries } from "@/features/series";
+import { useCreateSeries, useMarkSuggestionPlayed } from "@/features/series";
+import { useLocation } from "react-router-dom";
 import {
 	parseExpectedGames,
 	SeriesGamesField,
@@ -48,7 +49,17 @@ export default function SeriesCreatePage() {
 	const { back } = useAppNavigation();
 	const { mutate: createSeries, isPending } = useCreateSeries(room.id);
 
-	const [form, setForm] = useState<FormState>(DEFAULT_FORM);
+	// Opened from an "Up next" idea: start from its title, and take it off
+	// the board once the series exists.
+	const fromIdea = (useLocation().state ?? null) as {
+		suggestionId?: string;
+		title?: string;
+	} | null;
+	const { mutate: markPlayed } = useMarkSuggestionPlayed(room.id);
+	const [form, setForm] = useState<FormState>({
+		...DEFAULT_FORM,
+		title: fromIdea?.title ?? "",
+	});
 
 	const isOrganizer = useRoomRole(room).can.organize;
 
@@ -121,7 +132,13 @@ export default function SeriesCreatePage() {
 				minBetsToRank: Number(form.minBetsToRank),
 			},
 			{
-				onSuccess: () => {
+				onSuccess: (series) => {
+					if (fromIdea?.suggestionId) {
+						markPlayed({
+							suggestionId: fromIdea.suggestionId,
+							seriesId: series.id,
+						});
+					}
 					toast("Series created.");
 					back(`/rooms/${room.code}/series`);
 				},

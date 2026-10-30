@@ -75,3 +75,8 @@ grant execute on function public.update_room_preferences(uuid, boolean, boolean,
 grant execute on function public.update_series(uuid, text, text, integer, integer, integer, integer) to authenticated;
 grant execute on function public.upsert_user_push_subscription(jsonb) to authenticated;
 grant execute on function public.delete_my_push_subscription(text) to authenticated;
+grant execute on function public.get_series_suggestions(uuid) to authenticated;
+grant execute on function public.suggest_series(uuid, text) to authenticated;
+grant execute on function public.toggle_series_suggestion_vote(uuid) to authenticated;
+grant execute on function public.remove_series_suggestion(uuid) to authenticated;
+grant execute on function public.mark_series_suggestion_played(uuid, uuid) to authenticated;

@@ -3,7 +3,7 @@ import {
 	useToggleSuggestionVote,
 } from "@/features/series/hooks/suggestions";
 import { Button, Skeleton } from "@/shared/ui";
-import { ChevronRightIcon, LightbulbIcon } from "lucide-react";
+import { ChevronRightIcon, ChevronUpIcon, LightbulbIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { UpNextVoteButton } from "./UpNextVoteButton";
 
@@ -30,7 +30,8 @@ export function UpNextCard({ roomId, roomCode }: Readonly<Props>) {
 						Up next
 					</h3>
 					<p className='text-sm text-muted-foreground'>
-						What should we play next? Tap ▲ to vote.
+						What should we play next? Tap{" "}
+						<ChevronUpIcon className={`inline size-5`} /> to vote.
 					</p>
 				</div>
 				{/* <Link

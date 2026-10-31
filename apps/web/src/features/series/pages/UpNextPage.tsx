@@ -9,7 +9,7 @@ import {
 import { UpNextVoteButton } from "@/features/series/components/UpNextVoteButton";
 import type { SeriesSuggestion } from "@/shared/lib/api";
 import { Button, Input, Reveal, Skeleton, SkeletonList } from "@/shared/ui";
-import { PlusIcon, RocketIcon, Trash2Icon } from "lucide-react";
+import { ChevronUpIcon, PlusIcon, RocketIcon, Trash2Icon } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -21,7 +21,9 @@ export default function UpNextPage() {
 	const { room } = useRoomContext();
 	const isOrganizer = useRoomRole(room).can.organize;
 	const { data: suggestions = [], isPending } = useSeriesSuggestions(room.id);
-	const { mutate: suggest, isPending: isSuggesting } = useSuggestSeries(room.id);
+	const { mutate: suggest, isPending: isSuggesting } = useSuggestSeries(
+		room.id,
+	);
 	const { mutate: toggleVote } = useToggleSuggestionVote(room.id);
 	const { mutate: remove } = useRemoveSuggestion(room.id);
 	const [title, setTitle] = useState("");
@@ -62,10 +64,13 @@ export default function UpNextPage() {
 	return (
 		<div className='mx-auto w-full max-w-md space-y-5 p-4'>
 			<div>
-				<h2 className='text-lg font-semibold'>What should we play next?</h2>
+				<h2 className='text-lg font-semibold'>
+					What should we play next?
+				</h2>
 				<p className='text-sm text-muted-foreground'>
-					Suggest a league, tour or event. Tap ▲ on any idea to vote for it,
-					and tap again to take your vote back.
+					Suggest a league, tour or event. Tap{" "}
+					<ChevronUpIcon className={`inline size-5`} /> on any idea to
+					vote for it, and tap again to take your vote back.
 				</p>
 			</div>
 
@@ -74,7 +79,9 @@ export default function UpNextPage() {
 					<Input
 						value={title}
 						onChange={(event) =>
-							setTitle(event.target.value.slice(0, TITLE_MAX_LENGTH))
+							setTitle(
+								event.target.value.slice(0, TITLE_MAX_LENGTH),
+							)
 						}
 						placeholder='e.g. Champions League'
 						// Nothing on the board yet: the first thing to do is suggest.
@@ -120,7 +127,9 @@ export default function UpNextPage() {
 								onToggle={() => toggleVote(suggestion.id)}
 							/>
 							<div className='min-w-0 flex-1'>
-								<p className='font-medium break-words'>{suggestion.title}</p>
+								<p className='font-medium break-words'>
+									{suggestion.title}
+								</p>
 								<p className='text-xs text-muted-foreground'>
 									Suggested by{" "}
 									{suggestion.created_by_me
